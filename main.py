@@ -102,8 +102,8 @@ def main():
     # print final stats
     print("\n" + ("🏁 " * 40) + "\n")
     contracts_count = len(list(contracts))
-    print(f"👯‍♂️ Identical files: {no_diff_count} / {contracts_count}")
-    print(f"🤷‍♀️ Code not found: {code_not_found_count} / {contracts_count}")
+    print(f"🧬 Identical files: {no_diff_count} / {contracts_count}")
+    print(f"🔭 Code not found: {code_not_found_count} / {contracts_count}")
 
 
 def load_env(variable_name, required=True):
