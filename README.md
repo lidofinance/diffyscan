@@ -12,8 +12,6 @@ export GITHUB_TOKEN=<your-github-token>
 Set your Etherscan token to fetch verified source code,
 ```bash
 export ETHERSCAN_TOKEN=<your-etherscan-token>
-export CONTRACT_ADDRESS=
-export REPO_LINK=
 ```
 
 Specify a contract address to diff the source code,
