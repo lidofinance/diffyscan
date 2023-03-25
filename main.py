@@ -12,11 +12,15 @@ def main():
     # loading environment variables
     github_token = load_env("GITHUB_TOKEN")
     etherscan_token = load_env("ETHERSCAN_TOKEN")
+    etherscan_network = load_env("ETHERSCAN_NETWORK", required=False)
     contract_address = load_env("CONTRACT_ADDRESS")
     repo_link = load_env("REPO_LINK")
 
-    # fetching contract code from Etherscan 
-    response = requests.get(f"https://api.etherscan.io/api?module=contract&action=getsourcecode&address={contract_address}&apikey={etherscan_token}")
+    # fetching contract code from Etherscan
+    etherscan_subdomain = "-" + etherscan_network if etherscan_network else ""
+    etherscan_link = f"https://api{etherscan_subdomain}.etherscan.io/api?module=contract&action=getsourcecode&address={contract_address}&apikey={etherscan_token}"
+    print(f"🔵 [INFO]: Fetching source code from {etherscan_link}")
+    response = requests.get(etherscan_link)
     if response.status_code != 200:
         print("🔴 [ERROR]: Request to api.etherscan.io failed!")
         sys.exit()
@@ -46,7 +50,7 @@ def main():
         print("Contract path:", contract_path)
 
         # constructing github link to fetch from
-        github_link = f"https://api.github.com/repos/{user_slash_repo}/contents/{contract_path}" + ("?ref" + ref if ref else "")
+        github_link = f"https://api.github.com/repos/{user_slash_repo}/contents/{contract_path}" + ("?ref=" + ref if ref else "")
 
         if "@aragon" in contract_path:
 
@@ -56,7 +60,7 @@ def main():
                 aragon_ref_provided = True
 
             contract_path = contract_path.replace("@aragon/os/", "")
-            github_link = f"https://api.github.com/repos/aragon/aragonOS/contents/{contract_path}" + ("?ref" + aragon_ref if aragon_ref else "")
+            github_link = f"https://api.github.com/repos/aragon/aragonOS/contents/{contract_path}" + ("?ref=" + aragon_ref if aragon_ref else "")
 
         print(f"🔵 [INFO]: Fetching source code from {github_link}")
 
@@ -102,11 +106,14 @@ def main():
     print(f"🤷‍♀️ Code not found: {code_not_found_count} / {contracts_count}")
 
 
-def load_env(variable_name):
+def load_env(variable_name, required=True):
     value = os.getenv(variable_name)
     if not value:
-        print(f"🔴 [ERROR]: `{variable_name}` unset!")
-        sys.exit()
+        if required:
+            print(f"🔴 [ERROR]: `{variable_name}` unset!")
+            sys.exit()
+        else:
+            print(f"🟠 [WARNING]: Proceeding without `{variable_name}`!")
 
     return value
 
