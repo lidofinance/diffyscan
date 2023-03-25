@@ -32,15 +32,26 @@ def main():
     # parsing github link to get user repo and ref (commit or branch)
     (user_slash_repo, ref) = parse_repo_link(repo_link)
 
+    aragon_ref = None
+    aragon_ref_provided = False
+
+    no_diff_count = 0
+    code_not_found_count = 0
     for contract_path, code in contracts:
-        print("* " * 30)
+        print("\n" + ("🤖 " * 40) + "\n")
         print("Contract path:", contract_path)
 
         github_link = f"https://api.github.com/repos/{user_slash_repo}/contents/{contract_path}" + ("?ref" + ref if ref else "")
 
         if "@aragon" in contract_path:
+
+            if not aragon_ref_provided:
+                print("🔵 [INFO]: Looks like the contract uses Aragon deps.")
+                aragon_ref = input("🟡 [PROMPT]: Please specify Aragon ref (using default if none provided): ")
+                aragon_ref_provided = True
+
             contract_path = contract_path.replace("@aragon/os/", "")
-            github_link = f"https://api.github.com/repos/aragon/aragonOS/contents/{contract_path}" + ("?ref" + ref if ref else "")
+            github_link = f"https://api.github.com/repos/aragon/aragonOS/contents/{contract_path}" + ("?ref" + aragon_ref if aragon_ref else "")
 
         print(f"🔵 [INFO]: Fetching source code from {github_link}")
 
@@ -48,14 +59,13 @@ def main():
         github_data = github_response.json()
         contract_name = github_data.get("name")
         if not contract_name:
+            code_not_found_count += 1
             print(f"🟠 [WARNING]: Failed to find {contract_path} in the repo!")
             continue
 
         encoded_source_code = github_data.get("content")
         if encoded_source_code:
             github_file_content = base64.b64decode(encoded_source_code).decode()
-
-        time.sleep(1)
 
         github_code_lines = github_file_content.splitlines()
         etherscan_code_lines = code['content'].splitlines()
@@ -69,7 +79,15 @@ def main():
                 f.write(diff_html)
             print(f"🟠 [WARNING]: Diffs found in {contract_name}! More details in {filename}")
         else:
+            no_diff_count += 1
             print(f"🟢 [SUCCESS]: No diffs found in {contract_name}!")
+
+        time.sleep(1)
+    
+    print("\n" + ("🏁 " * 40) + "\n")
+    contracts_count = len(list(contracts))
+    print(f"👯‍♂️ Identical files: {no_diff_count} / {contracts_count}")
+    print(f"🤷‍♀️ Code not found: {code_not_found_count} / {contracts_count}")
 
 
 def load_env(variable_name):
