@@ -28,3 +28,8 @@ Start the script
 ```bash
 python3 main.py
 ```
+
+
+## Screenshots
+
+![](assets/diffy.png)
