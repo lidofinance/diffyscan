@@ -32,15 +32,20 @@ def main():
     # parsing github link to get user repo and ref (commit or branch)
     (user_slash_repo, ref) = parse_repo_link(repo_link)
 
+    # aragon commit or branch, if aragon deps are used
     aragon_ref = None
     aragon_ref_provided = False
 
+    # todo: add openzeppelin deps
+
+    # keeping track for final stats
     no_diff_count = 0
     code_not_found_count = 0
     for contract_path, code in contracts:
         print("\n" + ("🤖 " * 40) + "\n")
         print("Contract path:", contract_path)
 
+        # constructing github link to fetch from
         github_link = f"https://api.github.com/repos/{user_slash_repo}/contents/{contract_path}" + ("?ref" + ref if ref else "")
 
         if "@aragon" in contract_path:
@@ -55,6 +60,7 @@ def main():
 
         print(f"🔵 [INFO]: Fetching source code from {github_link}")
 
+        # fetching code from github
         github_response = requests.get(github_link, headers={"Authorization": f"token {github_token}"})
         github_data = github_response.json()
         contract_name = github_data.get("name")
@@ -63,14 +69,18 @@ def main():
             print(f"🟠 [WARNING]: Failed to find {contract_path} in the repo!")
             continue
 
+        # decode base64 to string
         encoded_source_code = github_data.get("content")
-        if encoded_source_code:
-            github_file_content = base64.b64decode(encoded_source_code).decode()
+        github_file_content = base64.b64decode(encoded_source_code).decode()
 
+        # split code by lines for differ
         github_code_lines = github_file_content.splitlines()
         etherscan_code_lines = code['content'].splitlines()
 
+        # get diffs
         diffs = difflib.unified_diff(github_code_lines, etherscan_code_lines)
+
+        # if diffs are present, output to diff view html
         if len(list(diffs)):
             diff_html = difflib.HtmlDiff().make_file(github_code_lines, etherscan_code_lines)
             filename = f"diffs/{contract_name}.html"
@@ -82,8 +92,10 @@ def main():
             no_diff_count += 1
             print(f"🟢 [SUCCESS]: No diffs found in {contract_name}!")
 
+        # sleep for 1 second to avoid rate limiting
         time.sleep(1)
     
+    # print final stats
     print("\n" + ("🏁 " * 40) + "\n")
     contracts_count = len(list(contracts))
     print(f"👯‍♂️ Identical files: {no_diff_count} / {contracts_count}")
