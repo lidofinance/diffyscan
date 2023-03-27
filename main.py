@@ -8,9 +8,7 @@ import os
 import re
 from urllib.parse import urlparse
 
-import logger 
-
-
+import logger
 
 
 def main():
@@ -27,7 +25,9 @@ def main():
     logger.divider()
 
     logger.info("Fetching source code from Etherscan...")
-    contract_data = fetch_contract_data_from_etherscan(etherscan_token, etherscan_network, contract_address)
+    contract_data = fetch_contract_data_from_etherscan(
+        etherscan_token, etherscan_network, contract_address
+    )
     logger.okay("Contract found", contract_data["ContractName"])
     source_code_files = json.loads(contract_data["SourceCode"][1:-1])["sources"].items()
     files_count = len(source_code_files)
@@ -43,13 +43,14 @@ def main():
         # parsing github link to get user repo and ref (commit or branch)
         (user_slash_repo, ref) = parse_repo_link(repo_link)
 
-
         split_filepath = filepath.split("/")
         filename = split_filepath[-1]
         logger.info(f"File {index + 1}", filename)
         logger.info("Path", filepath)
 
-        github_file_data = fetch_file_from_github(github_token, user_slash_repo, ref, filepath)
+        github_file_data = fetch_file_from_github(
+            github_token, user_slash_repo, ref, filepath
+        )
 
         if github_file_data.get("message") == "Not Found":
             logger.warn("File not found in the original repo!")
@@ -60,12 +61,18 @@ def main():
                 logger.okay("Found a dependency with similar path")
                 (user_slash_repo, ref) = repo_location
                 path_to_file = re.search("contracts.*", filepath).group(0)
-                github_file_data = fetch_file_from_github(github_token, user_slash_repo, ref, path_to_file)
+                github_file_data = fetch_file_from_github(
+                    github_token, user_slash_repo, ref, path_to_file
+                )
                 if github_file_data.get("message") == "Not Found":
-                    logger.warn(f"File not found in the {dependency_name} repo! Skipping")
+                    logger.warn(
+                        f"File not found in the {dependency_name} repo! Skipping"
+                    )
             else:
                 logger.warn("File not found in the dependencies list!")
-                dependency_repo = logger.prompt(f"Provide a link to {dependency_name} repo")
+                dependency_repo = logger.prompt(
+                    f"Provide a link to {dependency_name} repo"
+                )
 
                 if dependency_repo:
                     repo_location = parse_repo_link(dependency_repo)
@@ -73,9 +80,13 @@ def main():
                     (user_slash_repo, ref) = repo_location
 
                     path_to_file = re.search("contracts.*", filepath).group(0)
-                    github_file_data = fetch_file_from_github(github_token, user_slash_repo, ref, path_to_file)
+                    github_file_data = fetch_file_from_github(
+                        github_token, user_slash_repo, ref, path_to_file
+                    )
                     if github_file_data.get("message") == "Not Found":
-                        logger.warn(f"File not found in the {dependency_name} repo! Skipping")
+                        logger.warn(
+                            f"File not found in the {dependency_name} repo! Skipping"
+                        )
                         continue
                 else:
                     logger.warn("Invalid link. Skipping this file")
@@ -84,7 +95,9 @@ def main():
 
         logger.okay(f"File found in {user_slash_repo}!")
 
-        github_file = base64.b64decode(github_file_data["content"]).decode().splitlines()
+        github_file = (
+            base64.b64decode(github_file_data["content"]).decode().splitlines()
+        )
         etherscan_file = source["content"].splitlines()
 
         diffs = difflib.unified_diff(github_file, etherscan_file)
@@ -103,11 +116,11 @@ def main():
 
         time.sleep(1)
 
-    
     # print final stats
     logger.divider()
-    print(f"🧬 Identical files: {identical_files_count} / {files_count}")
-    print(f"🔭 Code not found: {not_found_on_github_count} / {files_count}")
+    logger.info("🧬 Identical files", f"{identical_files_count} / {files_count}")
+    logger.info("🔭 Code not found", f"{not_found_on_github_count} / {files_count}")
+    logger.okay("Done")
 
 
 def load_env(variable_name, default_value=None, masked=False):
@@ -137,7 +150,7 @@ def parse_repo_link(repo_link):
 def mask_text(text, mask_start=3, mask_end=3):
     text_length = len(text)
     mask = "*" * (text_length - mask_start - mask_end)
-    return text[:mask_start] + mask + text[text_length-mask_end:]
+    return text[:mask_start] + mask + text[text_length - mask_end :]
 
 
 def fetch(url, headers={}):
@@ -149,7 +162,7 @@ def fetch(url, headers={}):
         logger.error(f"Failed")
         sys.exit()
 
-    return  response.json()
+    return response.json()
 
 
 def fetch_contract_data_from_etherscan(token, network, contract_address):
@@ -164,11 +177,12 @@ def fetch_contract_data_from_etherscan(token, network, contract_address):
 
 
 def fetch_file_from_github(github_token, user_slash_repo, ref, filepath):
-    github_api_url = f"https://api.github.com/repos/{user_slash_repo}/contents/{filepath}" + ("?ref=" + ref if ref else "")
-    print(github_api_url)
+    github_api_url = (
+        f"https://api.github.com/repos/{user_slash_repo}/contents/{filepath}"
+        + ("?ref=" + ref if ref else "")
+    )
     return fetch(github_api_url, headers={"Authorization": f"token {github_token}"})
 
 
 if __name__ == "__main__":
     main()
-
