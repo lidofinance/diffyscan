@@ -33,3 +33,7 @@ python3 main.py
 ## Screenshots
 
 ![](assets/diffy.png)
+
+## Todos
+- add support for vyper
+- automatic dependency diffing
