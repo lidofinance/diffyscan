@@ -1,15 +1,15 @@
-CYAN = '\033[96m'
-PURPLE = '\033[95m'
-DARKCYAN = '\033[36m'
-BLUE = '\033[94m'
-GREEN = '\033[92m'
-YELLOW = '\033[93m'
-RED = '\033[91m'
+CYAN = "\033[96m"
+PURPLE = "\033[95m"
+DARKCYAN = "\033[36m"
+BLUE = "\033[94m"
+GREEN = "\033[92m"
+YELLOW = "\033[93m"
+RED = "\033[91m"
 
-BOLD = '\033[1m'
-UNDERLINE = '\033[4m'
+BOLD = "\033[1m"
+UNDERLINE = "\033[4m"
 
-END = '\033[0m'
+END = "\033[0m"
 
 
 def highlight(text, color=BOLD):
@@ -17,12 +17,13 @@ def highlight(text, color=BOLD):
 
 
 def prompt(text):
-    question = highlight(" ❔ [PROMPT]: ", CYAN) + text + " "
+    question = highlight(" ❔ [PROMPT] ", CYAN) + text + " "
     answer = input(question)
     return answer
 
+
 def yes_no(text):
-    question = highlight(" ❔ [YES/NO]: ", CYAN) + text + " "
+    question = highlight(" ❔ [YES/NO] ", CYAN) + text + " "
     answer = input(question)
     return answer.lower() in ["y", "yes"]
 
@@ -71,4 +72,5 @@ def greet():
 
 
 def divider():
-    print("\n" + " 🍥 " * 20 + "\n")
+    line = (highlight(" -", RED) + highlight(" +", GREEN)) * 20
+    print("\n" + line + "\n")
