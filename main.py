@@ -166,7 +166,7 @@ def fetch(url, headers={}):
 
 
 def fetch_contract_data_from_etherscan(token, network, contract_address):
-    etherscan_subdomain = "-" + network if network else ""
+    etherscan_subdomain = "-" + network if network != "mainnet" else ""
     etherscan_link = f"https://api{etherscan_subdomain}.etherscan.io/api?module=contract&action=getsourcecode&address={contract_address}&apikey={token}"
     data = fetch(etherscan_link)
     if data["message"] == "NOTOK":
