@@ -41,6 +41,14 @@ socks = ["PySocks (>=1.5.6,!=1.5.7)"]
 use_chardet_on_py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
+name = "termtables"
+version = "0.2.4"
+description = "Pretty tables in the terminal"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[[package]]
 name = "urllib3"
 version = "1.26.15"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
@@ -56,11 +64,12 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "9f0b74e10a33e9c4151c3b57e7387d92eaefc29f30d14a35f69aa8bd65179106"
+content-hash = "a4148e3a12cc2ee977ee972e91356a0acbe832a28eb6cee2149b6f984b7883f9"
 
 [metadata.files]
 certifi = []
 charset-normalizer = []
 idna = []
 requests = []
+termtables = []
 urllib3 = []

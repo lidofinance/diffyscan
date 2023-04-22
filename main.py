@@ -1,187 +1,116 @@
-import sys
-import requests
-import json
-import base64
-import time
 import difflib
-import os
-import re
-from urllib.parse import urlparse
+import time
 
-import logger
+import termtables
+
+from utils.common import load_config, load_env
+from utils.constants import CONTRACTS_DIR, DIFFS_DIR, DIGEST_DIR
+from utils.etherscan import get_contract_from_etherscan
+from utils.github import get_file_from_github
+from utils.helpers import create_dirs, remove_directory
+from utils.logger import GREEN, RED, YELLOW, logger
 
 
 def main():
-    logger.greet()
+    start_time = time.time()
+
+    logger.info("Welcome to Diffyscan!")
     logger.divider()
 
-    logger.info("Loading environment variables...")
-    github_token = load_env("GITHUB_TOKEN", masked=True)
-    etherscan_token = load_env("ETHERSCAN_TOKEN", masked=True)
-    etherscan_network = load_env("ETHERSCAN_NETWORK", "mainnet")
-    contract_address = load_env("CONTRACT_ADDRESS")
-    repo_link = load_env("REPO_LINK")
-    logger.okay("Environment variables loaded!")
+    logger.info("Loading API tokens...")
+    etherscan_api_token = load_env("ETHERSCAN_API_TOKEN", masked=True)
+    github_api_token = load_env("GITHUB_API_TOKEN", masked=True)
+
+    logger.divider()
+
+    logger.info("Removing artifacts from the previous run...")
+    remove_directory(DIGEST_DIR)
+
+    logger.info("Loading config...")
+    config = load_config()
+
+    logger.okay("Contract", config["contract"])
+    logger.okay("Network", config["network"])
+    logger.okay("Repo", config["github_repo"])
+
     logger.divider()
 
     logger.info("Fetching source code from Etherscan...")
-    contract_data = fetch_contract_data_from_etherscan(
-        etherscan_token, etherscan_network, contract_address
+    contract_name, source_files = get_contract_from_etherscan(
+        token=etherscan_api_token,
+        network=config["network"],
+        contract=config["contract"],
     )
-    logger.okay("Contract found", contract_data["ContractName"])
-    source_code_files = json.loads(contract_data["SourceCode"][1:-1])["sources"].items()
-    files_count = len(source_code_files)
-    logger.info(f"Files bundled", files_count)
 
-    identical_files_count = 0
-    not_found_on_github_count = 0
+    files_count = len(source_files)
+    logger.okay("Contract", contract_name)
+    logger.okay("Files", files_count)
 
-    dependencies = {}
+    logger.divider()
+    logger.info("Diffing...")
 
-    for index, (filepath, source) in enumerate(source_code_files):
-        logger.divider()
-        # parsing github link to get user repo and ref (commit or branch)
-        (user_slash_repo, ref) = parse_repo_link(repo_link)
+    report = []
 
+    for index, (filepath, source_code) in enumerate(source_files):
+        file_number = index + 1
         split_filepath = filepath.split("/")
+        origin = split_filepath[0]
         filename = split_filepath[-1]
-        logger.info(f"File {index + 1}", filename)
-        logger.info("Path", filepath)
 
-        github_file_data = fetch_file_from_github(
-            github_token, user_slash_repo, ref, filepath
-        )
+        logger.update_info(f"File {file_number} / { files_count}", filename)
 
-        if github_file_data.get("message") == "Not Found":
-            logger.warn("File not found in the original repo!")
-            logger.info("Looking through dependencies...")
-            dependency_name = split_filepath[0]
-            repo_location = dependencies.get(dependency_name)
-            if repo_location:
-                logger.okay("Found a dependency with similar path")
-                (user_slash_repo, ref) = repo_location
-                path_to_file = re.search("contracts.*", filepath).group(0)
-                github_file_data = fetch_file_from_github(
-                    github_token, user_slash_repo, ref, path_to_file
-                )
-                if github_file_data.get("message") == "Not Found":
-                    logger.warn(
-                        f"File not found in the {dependency_name} repo! Skipping"
-                    )
-            else:
-                logger.warn("File not found in the dependencies list!")
-                dependency_repo = logger.prompt(
-                    f"Provide a link to {dependency_name} repo"
-                )
+        repo = None
 
-                if dependency_repo:
-                    repo_location = parse_repo_link(dependency_repo)
-                    dependencies[dependency_name] = repo_location
-                    (user_slash_repo, ref) = repo_location
+        if origin == CONTRACTS_DIR:
+            repo = config["github_repo"]
+        elif origin in config["dependencies"].keys():
+            repo = config["dependencies"].get(origin)
 
-                    path_to_file = re.search("contracts.*", filepath).group(0)
-                    github_file_data = fetch_file_from_github(
-                        github_token, user_slash_repo, ref, path_to_file
-                    )
-                    if github_file_data.get("message") == "Not Found":
-                        logger.warn(
-                            f"File not found in the {dependency_name} repo! Skipping"
-                        )
-                        continue
-                else:
-                    logger.warn("Invalid link. Skipping this file")
-                    not_found_on_github_count += 1
-                    continue
+        diff_report_filename = None
+        diffs_count = None
 
-        logger.okay(f"File found in {user_slash_repo}!")
+        if repo:
+            github_file = get_file_from_github(github_api_token, repo, filepath)
 
-        github_file = (
-            base64.b64decode(github_file_data["content"]).decode().splitlines()
-        )
-        etherscan_file = source["content"].splitlines()
+            github_lines = github_file.splitlines()
+            etherscan_lines = source_code["content"].splitlines()
 
-        diffs = difflib.unified_diff(github_file, etherscan_file)
+            diff_html = difflib.HtmlDiff().make_file(github_lines, etherscan_lines)
+            diff_report_filename = f"{DIFFS_DIR}/{filename}.html"
 
-        # if diffs are present, output to diff view html
-        if len(list(diffs)):
-            diff_html = difflib.HtmlDiff().make_file(github_file, etherscan_file)
-            diff_report_filename = f"diffs/{filename}.html"
-            os.makedirs(os.path.dirname(diff_report_filename), exist_ok=True)
+            create_dirs(diff_report_filename)
             with open(diff_report_filename, "w") as f:
                 f.write(diff_html)
-            logger.warn(f"Diffs in {filename}! Report", diff_report_filename)
-        else:
-            identical_files_count += 1
-            logger.okay(f"No diffs in {filename}!")
 
-        time.sleep(1)
+            diffs = difflib.unified_diff(github_lines, etherscan_lines)
+            diffs_count = len(list(diffs))
 
-    # print final stats
+        file_found = bool(repo)
+
+        report_data = [
+            file_number,
+            filename,
+            file_found,
+            diffs_count,
+            origin,
+            diff_report_filename,
+        ]
+
+        report.append(report_data)
+
+    execution_time = time.time() - start_time
+
+    logger.okay(f"Done in {round(execution_time, 3)}s ✨" + " " * 100)
+
     logger.divider()
-    logger.info("🧬 Identical files", f"{identical_files_count} / {files_count}")
-    logger.info("🔭 Code not found", f"{not_found_on_github_count} / {files_count}")
-    logger.okay("Done")
 
+    files_found = len([row for row in report if row[2]])
+    logger.info(f"Files found: {files_found} / {files_count}")
 
-def load_env(variable_name, default_value=None, masked=False):
-    value = os.getenv(variable_name)
-    if not value:
-        if default_value:
-            logger.warn(f"{variable_name} not found! Using default", default_value)
-            value = default_value
-        else:
-            logger.error(f"{variable_name} not found! Quitting...")
-            sys.exit()
+    identical_files = len([row for row in report if row[3] == 0])
+    logger.info(f"Identical files: {identical_files} / {files_found}")
 
-    printable_value = mask_text(value) if masked else value
-
-    logger.okay(f"{variable_name}", printable_value)
-    return value
-
-
-def parse_repo_link(repo_link):
-    parse_result = urlparse(repo_link)
-    repo_location = [item.strip("/") for item in parse_result[2].split("tree")]
-    user_slash_repo = repo_location[0]
-    ref = repo_location[1] if len(repo_location) > 1 else None
-    return (user_slash_repo, ref)
-
-
-def mask_text(text, mask_start=3, mask_end=3):
-    text_length = len(text)
-    mask = "*" * (text_length - mask_start - mask_end)
-    return text[:mask_start] + mask + text[text_length - mask_end :]
-
-
-def fetch(url, headers={}):
-    response = requests.get(url, headers=headers)
-
-    hostname = urlparse(url)[1]
-    logger.info("GET", hostname)
-    if response.ok and response.status_code != 200:
-        logger.error(f"Failed")
-        sys.exit()
-
-    return response.json()
-
-
-def fetch_contract_data_from_etherscan(token, network, contract_address):
-    etherscan_subdomain = "-" + network if network != "mainnet" else ""
-    etherscan_link = f"https://api{etherscan_subdomain}.etherscan.io/api?module=contract&action=getsourcecode&address={contract_address}&apikey={token}"
-    data = fetch(etherscan_link)
-    if data["message"] == "NOTOK":
-        logger.error("Failed", data["result"])
-        sys.exit()
-
-    return data["result"][0]
-
-
-def fetch_file_from_github(github_token, user_slash_repo, ref, filepath):
-    github_api_url = (
-        f"https://api.github.com/repos/{user_slash_repo}/contents/{filepath}"
-        + ("?ref=" + ref if ref else "")
-    )
-    return fetch(github_api_url, headers={"Authorization": f"token {github_token}"})
+    logger.report_table(report)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,7 @@
-import os
-
+from logging import WARN
+import termtables
+from utils.constants import LOGS_PATH
+from utils.helpers import create_dirs
 
 CYAN = "\033[96m"
 PURPLE = "\033[95m"
@@ -19,89 +21,120 @@ class Logger:
     def __init__(self, log_file):
         self.log_file = log_file
 
-    def file_log(self, text):
-        os.makedirs(os.path.dirname(self.log_file), exist_ok=True)
+    # log to file
+    def log(self, text):
+        create_dirs(self.log_file)
         with open(self.log_file, mode="a") as logs:
             logs.write(text + "\n")
 
-    def highlight(self, text, color=BOLD):
-        return f"{color}{text}{END}"
-
-    def prompt(self, text):
-        question = self.highlight("🟡 [PROMPT]", CYAN) + text + " "
-        answer = input(question)
-
-        self.file_log("[PROMPT] " + text)
-        self.file_log("[ANSWER] " + answer)
-
-        return answer
-
-    def yes_no(self, text):
-        question = self.highlight("🟡 [Y/N]", CYAN) + text + " "
-        answer = input(question)
-
-        self.file_log("[Y/N] " + text)
-        self.file_log("[ANSWER] " + answer)
-
-        return answer.lower() in ["y", "yes"]
+    # print to std out
+    def stdout(self, text, overwrite=False):
+        end_char = "\r" if overwrite else "\n"
+        print(text, end=end_char, flush=overwrite)
 
     def info(self, text, value=None):
-        file_log_text = "🔵 [INFO] " + text
-        std_out_text = self.highlight(" 🔵 [INFO] ", BLUE) + text
+        log_text = "🔵 [INFO] " + text
+        stdout_text = self.hl(" 🔵 [INFO] ", BLUE) + text
 
         if value is not None:
-            file_log_text += ": " + str(value)
-            std_out_text += ": " + self.highlight(value, BOLD)
+            log_text = self.cln(log_text, value)
+            stdout_text = self.cln(stdout_text, self.hl(value, BOLD))
 
-        self.file_log(file_log_text)
+        self.log(log_text)
+        self.stdout(stdout_text)
 
-        print(std_out_text)
+    def update_info(self, text, value=None):
+        log_text = "🔵 [INFO] " + text
+        stdout_text = self.hl(" 🔵 [INFO] ", BLUE) + text
+
+        if value is not None:
+            log_text = self.cln(log_text, value)
+            stdout_text = self.cln(stdout_text, self.hl(value, BOLD))
+
+        self.log(log_text)
+        self.stdout(stdout_text, overwrite=True)
 
     def okay(self, text, value=None):
-        file_log_text = "🟢 [OKAY] " + text
-        std_out_text = self.highlight(" 🟢 [OKAY] ", GREEN) + text
+        log_text = "🟢 [OKAY] " + text
+        stdout_text = self.hl(" 🟢 [OKAY] ", GREEN) + text
 
         if value is not None:
-            file_log_text += ": " + str(value)
-            std_out_text += ": " + self.highlight(value, BOLD)
+            log_text += ": " + str(value)
+            stdout_text += ": " + self.hl(value, BOLD)
 
-        self.file_log(file_log_text)
-        print(std_out_text)
+        self.log(log_text)
+        self.stdout(stdout_text)
 
     def warn(self, text, value=None):
-        file_log_text = "🟠 [WARN] " + text
-        std_out_text = self.highlight(" 🟠 [WARN] ", YELLOW) + text
+        log_text = "🟠 [WARN] " + text
+        stdout_text = self.hl(" 🟠 [WARN] ", YELLOW) + text
 
         if value is not None:
-            file_log_text += ": " + str(value)
-            std_out_text += ": " + self.highlight(value, BOLD)
+            log_text += ": " + str(value)
+            stdout_text += ": " + self.hl(value, BOLD)
 
-        self.file_log(file_log_text)
-        print(std_out_text)
+        self.log(log_text)
+        self.stdout(stdout_text)
 
     def error(self, text, value=None):
-        file_log_text = "🔴 [ERROR] " + text
-        std_out_text = self.highlight(" 🔴 [ERROR] ", RED) + text
+        log_text = "🔴 [ERROR] " + text
+        stdout_text = self.hl(" 🔴 [ERROR] ", RED) + text
 
         if value is not None:
-            file_log_text += ": " + str(value)
-            std_out_text += ": " + self.highlight(value, BOLD)
+            log_text += ": " + str(value)
+            stdout_text += ": " + self.hl(value, BOLD)
 
-        self.file_log(file_log_text)
-        print(std_out_text)
+        self.log(log_text)
+        self.stdout(stdout_text)
 
-    def greet(self):
-        text = "  🎭  🎭  🎭  🎭\n"
-        text += self.highlight("🎭  DiffyScan   🎭\n", GREEN)
-        text += "  🎭  🎭  🎭  🎭"
-        print(text)
+    def report_table(self, table):
+        log_table = termtables.to_string(
+            table,
+            header=["#", "Filename", "Found", "Diffs", "Origin", "Report"],
+            style=termtables.styles.rounded_double,
+        )
+        self.log(log_table)
 
-    def divider(
-        self,
-    ):
-        self.file_log(" - +" * 20)
-        line = (self.highlight(" -", RED) + self.highlight(" +", GREEN)) * 20
-        print("\n" + line + "\n")
+        stdout_table = [self.color_row(row) for row in table]
+        table_colored_string = termtables.to_string(
+            stdout_table,
+            header=["#", "Filename", "Found", "Diffs", "Origin", "Report"],
+            style=termtables.styles.rounded_double,
+        )
+
+        self.stdout(table_colored_string)
+
+    def color_row(self, row):
+        hlcolor = GREEN
+
+        file_found = row[2]
+        diffs_found = row[3] != None and row[3] > 0
+
+        if not file_found:
+            hlcolor = YELLOW
+        elif diffs_found:
+            hlcolor = RED
+
+        return [self.hl(cell, hlcolor) for cell in row]
+
+    def hl(self, text, color=BOLD):
+        return f"{color}{text}{END}"
+
+    def hlgreen(self, text):
+        return self.hl(text, GREEN)
+
+    def hlblue(self, text):
+        return self.hl(text, BLUE)
+
+    def hlred(self, text):
+        return self.hl(text, RED)
+
+    def cln(self, text1, text2):
+        return f"{text1}: {text2}"
+
+    def divider(self):
+        self.log(" - +" * 20)
+        self.stdout((self.hlred(" -") + self.hlgreen(" +")) * 20)
 
 
-logger = Logger("digest/logs.txt")
+logger = Logger(LOGS_PATH)

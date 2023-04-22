@@ -1,0 +1,5 @@
+DIGEST_DIR = "digest"
+DIFFS_DIR = DIGEST_DIR + "/diffs"
+LOGS_PATH = DIGEST_DIR + "/logs.txt"
+CONFIG_PATH = "config.json"
+CONTRACTS_DIR = "contracts"
