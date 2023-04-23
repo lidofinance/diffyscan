@@ -52,7 +52,7 @@ class Logger:
             stdout_text = self.cln(stdout_text, self.hl(value, BOLD))
 
         self.log(log_text)
-        self.stdout(stdout_text, overwrite=True)
+        self.stdout(stdout_text + (" " * 100), overwrite=True)
 
     def okay(self, text, value=None):
         log_text = "🟢 [OKAY] " + text
