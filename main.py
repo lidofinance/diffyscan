@@ -8,6 +8,7 @@ from utils.github import get_file_from_github
 from utils.helpers import create_dirs, remove_directory
 from utils.logger import logger
 
+
 def run_diff(config, contract, etherscan_api_token, github_api_token):
     start_time = time.time()
     logger.divider()
@@ -102,6 +103,7 @@ def run_diff(config, contract, etherscan_api_token, github_api_token):
 
     logger.report_table(report)
 
+
 def main():
     logger.info("Welcome to Diffyscan!")
     logger.divider()
@@ -119,7 +121,7 @@ def main():
     logger.info("Loading config...")
     config = load_config()
 
-    if (contract_address is not None):
+    if contract_address is not None:
         run_diff(config, contract_address, etherscan_api_token, github_api_token)
     else:
         for contract in config["contracts"]:
