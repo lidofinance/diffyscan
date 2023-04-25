@@ -28,6 +28,7 @@ def run_diff(config, contract, etherscan_api_token, github_api_token):
     logger.okay("Contract", contract_name)
     logger.okay("Files", files_count)
 
+    input("Press Enter to proceed...")
     logger.divider()
     logger.info("Diffing...")
 
