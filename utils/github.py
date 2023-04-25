@@ -1,6 +1,5 @@
 import base64
 import re
-import sys
 from utils.common import fetch, parse_repo_link
 from utils.logger import logger
 

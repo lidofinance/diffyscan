@@ -50,7 +50,9 @@ def fetch(url, headers={}):
     response = requests.get(url, headers=headers)
 
     if not response.ok and response.status_code != 200:
-        logger.error(f"Request failed", url)
+        logger.error("Request failed", url)
+        logger.error("Status", response.status_code)
+        logger.error("Response", response.text)
         sys.exit()
 
     return response.json()

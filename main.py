@@ -1,14 +1,12 @@
 import difflib
 import time
 
-import termtables
-
 from utils.common import add_dependency_to_config, load_config, load_env
 from utils.constants import CONTRACTS_DIR, DIFFS_DIR, DIGEST_DIR
 from utils.etherscan import get_contract_from_etherscan
 from utils.github import get_file_from_github
 from utils.helpers import create_dirs, remove_directory
-from utils.logger import GREEN, RED, YELLOW, logger
+from utils.logger import logger
 
 
 def main():

@@ -13,6 +13,8 @@ def get_contract_from_etherscan(token, network, contract):
 
     if response["message"] == "NOTOK":
         logger.error("Failed", response["result"])
+        logger.error("Status", response.status_code)
+        logger.error("Response", response.text)
         sys.exit()
 
     data = response["result"][0]
