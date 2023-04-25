@@ -8,29 +8,10 @@ from utils.github import get_file_from_github
 from utils.helpers import create_dirs, remove_directory
 from utils.logger import logger
 
-
-def main():
+def run_diff(config, contract, etherscan_api_token, github_api_token):
     start_time = time.time()
-
-    logger.info("Welcome to Diffyscan!")
     logger.divider()
-
-    logger.info("Loading API tokens...")
-    etherscan_api_token = load_env("ETHERSCAN_API_TOKEN", masked=True)
-    github_api_token = load_env("GITHUB_API_TOKEN", masked=True)
-    contract_address = load_env("CONTRACT_ADDRESS", required=False)
-
-    logger.divider()
-
-    logger.info("Removing artifacts from the previous run...")
-    remove_directory(DIGEST_DIR)
-
-    logger.info("Loading config...")
-    config = load_config()
-
-    contract_address = contract_address or config["contract"]
-
-    logger.okay("Contract", contract_address)
+    logger.okay("Contract", contract)
     logger.okay("Network", config["network"])
     logger.okay("Repo", config["github_repo"])
 
@@ -40,7 +21,7 @@ def main():
     contract_name, source_files = get_contract_from_etherscan(
         token=etherscan_api_token,
         network=config["network"],
-        contract=contract_address,
+        contract=contract,
     )
 
     files_count = len(source_files)
@@ -119,6 +100,29 @@ def main():
     logger.info(f"Identical files: {identical_files} / {files_found}")
 
     logger.report_table(report)
+
+def main():
+    logger.info("Welcome to Diffyscan!")
+    logger.divider()
+
+    logger.info("Loading API tokens...")
+    etherscan_api_token = load_env("ETHERSCAN_API_TOKEN", masked=True)
+    github_api_token = load_env("GITHUB_API_TOKEN", masked=True)
+    contract_address = load_env("CONTRACT_ADDRESS", required=False)
+
+    logger.divider()
+
+    logger.info("Removing artifacts from the previous run...")
+    remove_directory(DIGEST_DIR)
+
+    logger.info("Loading config...")
+    config = load_config()
+
+    if (contract_address is not None):
+        run_diff(config, contract_address, etherscan_api_token, github_api_token)
+    else:
+        for contract in config["contracts"]:
+            run_diff(config, contract, etherscan_api_token, github_api_token)
 
 
 if __name__ == "__main__":
