@@ -1,4 +1,3 @@
-import difflib
 import json
 import os
 import sys
@@ -11,10 +10,10 @@ from utils.logger import logger
 from utils.types import Config
 
 
-def load_env(variable_name, masked=False):
+def load_env(variable_name, required=True, masked=False):
     value = os.getenv(variable_name)
 
-    if not value:
+    if required and not value:
         logger.error("Env not found", variable_name)
         sys.exit()
 

@@ -20,6 +20,7 @@ def main():
     logger.info("Loading API tokens...")
     etherscan_api_token = load_env("ETHERSCAN_API_TOKEN", masked=True)
     github_api_token = load_env("GITHUB_API_TOKEN", masked=True)
+    contract_address = load_env("CONTRACT_ADDRESS", required=False)
 
     logger.divider()
 
@@ -29,7 +30,9 @@ def main():
     logger.info("Loading config...")
     config = load_config()
 
-    logger.okay("Contract", config["contract"])
+    contract_address = contract_address or config["contract"]
+
+    logger.okay("Contract", contract_address)
     logger.okay("Network", config["network"])
     logger.okay("Repo", config["github_repo"])
 
@@ -39,7 +42,7 @@ def main():
     contract_name, source_files = get_contract_from_etherscan(
         token=etherscan_api_token,
         network=config["network"],
-        contract=config["contract"],
+        contract=contract_address,
     )
 
     files_count = len(source_files)
