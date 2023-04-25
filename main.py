@@ -1,7 +1,7 @@
 import difflib
 import time
 
-from utils.common import add_dependency_to_config, load_config, load_env
+from utils.common import load_config, load_env
 from utils.constants import CONTRACTS_DIR, DIFFS_DIR, DIGEST_DIR
 from utils.etherscan import get_contract_from_etherscan
 from utils.github import get_file_from_github
@@ -65,13 +65,14 @@ def main():
         if origin == CONTRACTS_DIR:
             repo = config["github_repo"]
         elif (
-            origin in config["dependencies"].keys()
+            "dependencies" in config
+            and origin in config["dependencies"].keys()
             and config["dependencies"].get(origin) != ""
         ):
             repo = config["dependencies"].get(origin)
         else:
-            add_dependency_to_config(origin)
-            logger.log(f"Dependency not found: {origin}")
+            logger.warn(f"No file in github repo for: {filepath}")
+            logger.divider()
 
         diff_report_filename = None
         diffs_count = None

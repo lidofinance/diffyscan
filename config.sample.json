@@ -1,0 +1,10 @@
+{
+    "contract": "0x47EbaB13B806773ec2A2d16873e2dF770D130b50",
+    "network": "mainnet",
+    "github_repo": "https://github.com/lidofinance/lido-dao/tree/master",
+    "dependencies": {
+        "@aragon": "https://github.com/aragon/aragonOS/tree/f3ae59b00f73984e562df00129c925339cd069ff",
+        "openzeppelin-solidity": "https://github.com/OpenZeppelin/openzeppelin-contracts/tree/06e265b38d3e9daeaa7b33f9035c700d6bc0c6a0",
+        "solidity-bytes-utils": "https://github.com/GNSPS/solidity-bytes-utils/tree/9776282d181839fbb4b18f2cf218e316d6df871c"
+    }
+}

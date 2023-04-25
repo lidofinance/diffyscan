@@ -30,17 +30,6 @@ def load_config() -> Config:
         return json.load(config_file)
 
 
-def add_dependency_to_config(dependency):
-    config_path = get_config_path()
-
-    with open(config_path, mode="r") as config_file:
-        config = json.load(config_file)
-
-    with open(config_path, mode="w") as config_file:
-        config["dependencies"][dependency] = ""
-        config_file.write(json.dumps(config))
-
-
 def get_config_path() -> str:
     return CONFIG_PATH
 
