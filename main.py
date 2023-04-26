@@ -129,7 +129,7 @@ def main():
 
     if contract_address is not None:
         if contract_name is None:
-            logger.error("Contract name isn't set for address", f"{contract_address}")
+            logger.error("Please set the 'CONTRACT_NAME' env var for address", f"{contract_address}")
             sys.exit(1)
 
         logger.info(f"Running diff for a single contract {contract_name} deployed at {contract_address}...")
