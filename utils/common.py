@@ -15,7 +15,7 @@ def load_env(variable_name, required=True, masked=False):
 
     if required and not value:
         logger.error("Env not found", variable_name)
-        sys.exit()
+        sys.exit(1)
 
     printable_value = mask_text(value) if masked else value
 

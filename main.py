@@ -1,4 +1,5 @@
 import difflib
+import sys
 import time
 
 from utils.common import load_config, load_env
@@ -9,28 +10,10 @@ from utils.helpers import create_dirs, remove_directory
 from utils.logger import logger
 
 
-def main():
+def run_diff(config, name, address, etherscan_api_token, github_api_token):
     start_time = time.time()
-
-    logger.info("Welcome to Diffyscan!")
     logger.divider()
-
-    logger.info("Loading API tokens...")
-    etherscan_api_token = load_env("ETHERSCAN_API_TOKEN", masked=True)
-    github_api_token = load_env("GITHUB_API_TOKEN", masked=True)
-    contract_address = load_env("CONTRACT_ADDRESS", required=False)
-
-    logger.divider()
-
-    logger.info("Removing artifacts from the previous run...")
-    remove_directory(DIGEST_DIR)
-
-    logger.info("Loading config...")
-    config = load_config()
-
-    contract_address = contract_address or config["contract"]
-
-    logger.okay("Contract", contract_address)
+    logger.okay("Contract", address)
     logger.okay("Network", config["network"])
     logger.okay("Repo", config["github_repo"])
 
@@ -40,13 +23,18 @@ def main():
     contract_name, source_files = get_contract_from_etherscan(
         token=etherscan_api_token,
         network=config["network"],
-        contract=contract_address,
+        contract=address,
     )
+
+    if (contract_name != name):
+        logger.error("Contract name in config does not match with etherscan", f"{address}: {name} != {contract_name}")
+        sys.exit(1)
 
     files_count = len(source_files)
     logger.okay("Contract", contract_name)
     logger.okay("Files", files_count)
 
+    input("Press Enter to proceed...")
     logger.divider()
     logger.info("Diffing...")
 
@@ -119,6 +107,34 @@ def main():
     logger.info(f"Identical files: {identical_files} / {files_found}")
 
     logger.report_table(report)
+
+
+def main():
+    logger.info("Welcome to Diffyscan!")
+    logger.divider()
+
+    logger.info("Loading API tokens...")
+    etherscan_api_token = load_env("ETHERSCAN_API_TOKEN", masked=True)
+    github_api_token = load_env("GITHUB_API_TOKEN", masked=True)
+    contract_address = load_env("CONTRACT_ADDRESS", required=False)
+    contract_name = load_env("CONTRACT_NAME", required=False)
+
+    logger.divider()
+
+    logger.info("Removing artifacts from the previous run...")
+    remove_directory(DIGEST_DIR)
+
+    logger.info("Loading config...")
+    config = load_config()
+
+    if contract_address is not None:
+        logger.info(f"Running diff for a single contract {contract_name} ...")
+        run_diff(config, contract_name, contract_address, etherscan_api_token, github_api_token)
+    else:
+        contracts = config["contracts"]
+        logger.info(f"Running diff for contracts from config {contracts}...")
+        for name, address in config["contracts"].items():
+            run_diff(config, name, address, etherscan_api_token, github_api_token)
 
 
 if __name__ == "__main__":
