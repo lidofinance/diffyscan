@@ -9,8 +9,8 @@ Diff your Ethereum smart contracts code from GitHub against Etherscan verified s
 
 ## Prerequisites
 This project was developed using these dependencies with their exact versions listed below:
-- Python ^3.10
-- Poetry ^1.4
+- Python 3.10
+- Poetry 1.4
 
 Other versions may work as well but were not tested at all.
 
@@ -30,14 +30,14 @@ alternatively, you could proceed with `pipx`:
 pipx install poetry~=1.4
 ```
 
-2. Install Python dependencies
-```shell
-poetry install
-```
-
-3. Activate poetry virtual environment,
+2. Activate poetry virtual environment,
 ```shell
 poetry shell
+```
+
+3. Install Python dependencies
+```shell
+poetry install
 ```
 
 ## Usage
