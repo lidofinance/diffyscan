@@ -15,12 +15,12 @@ def get_contract_from_etherscan(token, network, contract):
         logger.error("Failed", response["result"])
         logger.error("Status", response.status_code)
         logger.error("Response", response.text)
-        sys.exit()
+        sys.exit(1)
 
     data = response["result"][0]
     if not data["ContractName"]:
         logger.error("Contract not found", contract)
-        sys.exit()
+        sys.exit(1)
 
     contract_name = data["ContractName"]
     source_files = json.loads(data["SourceCode"][1:-1])["sources"].items()
