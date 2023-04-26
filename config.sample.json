@@ -1,10 +1,10 @@
 {
-    "contracts": [
-        "0x47EbaB13B806773ec2A2d16873e2dF770D130b50",
-        "0x1430194905301504e8830ce4B0b0df7187E84AbD",
-        "0x710B3303fB508a84F10793c1106e32bE873C24cd",
-        "0x388C818CA8B9251b393131C08a736A67ccB19297"
-    ],
+    "contracts": {
+        "Lido": "0x47EbaB13B806773ec2A2d16873e2dF770D130b50",
+        "LidoOracle": "0x1430194905301504e8830ce4B0b0df7187E84AbD",
+        "DepositSecurityModule":"0x710B3303fB508a84F10793c1106e32bE873C24cd",
+        "LidoExecutionLayerRewardsVault": "0x388C818CA8B9251b393131C08a736A67ccB19297"
+    },
     "network": "mainnet",
     "github_repo": "https://github.com/lidofinance/lido-dao/tree/master",
     "dependencies": {
