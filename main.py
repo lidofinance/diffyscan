@@ -27,7 +27,7 @@ def run_diff(config, name, address, etherscan_api_token, github_api_token):
     )
 
     if (contract_name != name):
-        logger.error("Contract name in config does not match with etherscan", f"{address}: {name} != {contract_name}")
+        logger.error("Contract name in config does not match with Etherscan", f"{address}: {name} != {contract_name}")
         sys.exit(1)
 
     files_count = len(source_files)
@@ -59,7 +59,7 @@ def run_diff(config, name, address, etherscan_api_token, github_api_token):
         ):
             repo = config["dependencies"].get(origin)
         else:
-            logger.warn(f"No file in github repo for: {filepath}")
+            logger.warn(f"No file in GitHub repo for: {filepath}")
             logger.divider()
 
         diff_report_filename = None
@@ -114,7 +114,7 @@ def main():
     logger.divider()
 
     logger.info("Loading API tokens...")
-    etherscan_api_token = load_env("ETHERSCAN_API_TOKEN", masked=True)
+    etherscan_api_token = load_env("ETHERSCAN_TOKEN", masked=True)
     github_api_token = load_env("GITHUB_API_TOKEN", masked=True)
     contract_address = load_env("CONTRACT_ADDRESS", required=False)
     contract_name = load_env("CONTRACT_NAME", required=False)
@@ -128,7 +128,11 @@ def main():
     config = load_config()
 
     if contract_address is not None:
-        logger.info(f"Running diff for a single contract {contract_name} ...")
+        if contract_name is None:
+            logger.error("Please set the 'CONTRACT_NAME' env var for address", f"{contract_address}")
+            sys.exit(1)
+
+        logger.info(f"Running diff for a single contract {contract_name} deployed at {contract_address}...")
         run_diff(config, contract_name, contract_address, etherscan_api_token, github_api_token)
     else:
         contracts = config["contracts"]

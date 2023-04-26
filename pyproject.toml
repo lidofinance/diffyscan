@@ -1,8 +1,13 @@
 [tool.poetry]
 name = "etherscan-github-diff-checker"
 version = "0.1.0"
-description = ""
+description = "Diff your Ethereum smart contracts code from GitHub against Etherscan verified source code."
 authors = ["Azat Serikov <azatsdev@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/lidofinance/diffyscan"
+
+keywords = ["ethereum", "diff", "sources"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
