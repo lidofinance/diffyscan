@@ -122,8 +122,11 @@ def main():
     config = load_config()
 
     if contract_address is not None:
+        logger.info("Running diff for a single contract...")
         run_diff(config, contract_address, etherscan_api_token, github_api_token)
     else:
+        contracts = config["contracts"]
+        logger.info(f"Running diff for contracts from config {contracts}...")
         for contract in config["contracts"]:
             run_diff(config, contract, etherscan_api_token, github_api_token)
 
