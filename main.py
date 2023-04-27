@@ -5,7 +5,7 @@ import time
 from utils.common import load_config, load_env
 from utils.constants import CONTRACTS_DIR, DIFFS_DIR, DIGEST_DIR
 from utils.etherscan import get_contract_from_etherscan
-from utils.github import get_file_from_github
+from utils.github import get_file_from_github, is_local_file, resolve_dep
 from utils.helpers import create_dirs, remove_directory
 from utils.logger import logger
 
@@ -26,8 +26,11 @@ def run_diff(config, name, address, etherscan_api_token, github_api_token):
         contract=address,
     )
 
-    if (contract_name != name):
-        logger.error("Contract name in config does not match with Etherscan", f"{address}: {name} != {contract_name}")
+    if contract_name != name:
+        logger.error(
+            "Contract name in config does not match with Etherscan",
+            f"{address}: {name} != {contract_name}",
+        )
         sys.exit(1)
 
     files_count = len(source_files)
@@ -50,17 +53,10 @@ def run_diff(config, name, address, etherscan_api_token, github_api_token):
 
         repo = None
 
-        if origin == CONTRACTS_DIR:
+        if is_local_file(filepath):
             repo = config["github_repo"]
-        elif (
-            "dependencies" in config
-            and origin in config["dependencies"].keys()
-            and config["dependencies"].get(origin) != ""
-        ):
-            repo = config["dependencies"].get(origin)
         else:
-            logger.warn(f"No file in GitHub repo for: {filepath}")
-            logger.divider()
+            repo = resolve_dep(filepath, config)
 
         diff_report_filename = None
         diffs_count = None
@@ -129,11 +125,22 @@ def main():
 
     if contract_address is not None:
         if contract_name is None:
-            logger.error("Please set the 'CONTRACT_NAME' env var for address", f"{contract_address}")
+            logger.error(
+                "Please set the 'CONTRACT_NAME' env var for address",
+                f"{contract_address}",
+            )
             sys.exit(1)
 
-        logger.info(f"Running diff for a single contract {contract_name} deployed at {contract_address}...")
-        run_diff(config, contract_name, contract_address, etherscan_api_token, github_api_token)
+        logger.info(
+            f"Running diff for a single contract {contract_name} deployed at {contract_address}..."
+        )
+        run_diff(
+            config,
+            contract_name,
+            contract_address,
+            etherscan_api_token,
+            github_api_token,
+        )
     else:
         contracts = config["contracts"]
         logger.info(f"Running diff for contracts from config {contracts}...")
