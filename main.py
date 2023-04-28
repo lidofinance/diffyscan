@@ -75,6 +75,9 @@ def run_diff(config, name, address, etherscan_api_token, github_api_token):
 
             diffs = difflib.unified_diff(github_lines, etherscan_lines)
             diffs_count = len(list(diffs))
+        else:
+            logger.error("File not found", filename)
+            sys.exit()
 
         file_found = bool(repo)
 
