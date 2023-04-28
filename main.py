@@ -3,15 +3,14 @@ import sys
 import time
 
 from utils.common import load_config, load_env
-from utils.constants import CONTRACTS_DIR, DIFFS_DIR, DIGEST_DIR
+from utils.constants import DIFFS_DIR, START_TIME
 from utils.etherscan import get_contract_from_etherscan
 from utils.github import get_file_from_github, is_local_file, resolve_dep
-from utils.helpers import create_dirs, remove_directory
+from utils.helpers import create_dirs
 from utils.logger import logger
 
 
 def run_diff(config, name, address, etherscan_api_token, github_api_token):
-    start_time = time.time()
     logger.divider()
     logger.okay("Contract", address)
     logger.okay("Network", config["network"])
@@ -90,10 +89,6 @@ def run_diff(config, name, address, etherscan_api_token, github_api_token):
 
         report.append(report_data)
 
-    execution_time = time.time() - start_time
-
-    logger.okay(f"Done in {round(execution_time, 3)}s ✨" + " " * 100)
-
     logger.divider()
 
     files_found = len([row for row in report if row[2]])
@@ -116,9 +111,6 @@ def main():
     contract_name = load_env("CONTRACT_NAME", required=False)
 
     logger.divider()
-
-    logger.info("Removing artifacts from the previous run...")
-    remove_directory(DIGEST_DIR)
 
     logger.info("Loading config...")
     config = load_config()
@@ -146,6 +138,10 @@ def main():
         logger.info(f"Running diff for contracts from config {contracts}...")
         for name, address in config["contracts"].items():
             run_diff(config, name, address, etherscan_api_token, github_api_token)
+
+    execution_time = time.time() - START_TIME
+
+    logger.okay(f"Done in {round(execution_time, 3)}s ✨" + " " * 100)
 
 
 if __name__ == "__main__":
