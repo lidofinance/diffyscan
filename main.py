@@ -1,4 +1,5 @@
 import difflib
+from os import name
 import sys
 import time
 
@@ -140,7 +141,7 @@ def main():
     else:
         contracts = config["contracts"]
         logger.info(f"Running diff for contracts from config {contracts}...")
-        for name, address in config["contracts"].items():
+        for address, name in config["contracts"].items():
             run_diff(config, name, address, etherscan_api_token, github_api_token)
 
     execution_time = time.time() - START_TIME
