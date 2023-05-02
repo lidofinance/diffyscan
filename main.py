@@ -61,26 +61,24 @@ def run_diff(config, name, address, etherscan_api_token, github_api_token):
         diff_report_filename = None
         diffs_count = None
 
-        if repo:
-            github_file = get_file_from_github(
-                github_api_token, repo, filepath, dep_name
-            )
-
-            github_lines = github_file.splitlines()
-            etherscan_lines = source_code["content"].splitlines()
-
-            diff_html = difflib.HtmlDiff().make_file(github_lines, etherscan_lines)
-            diff_report_filename = f"{DIFFS_DIR}/{filename}.html"
-
-            create_dirs(diff_report_filename)
-            with open(diff_report_filename, "w") as f:
-                f.write(diff_html)
-
-            diffs = difflib.unified_diff(github_lines, etherscan_lines)
-            diffs_count = len(list(diffs))
-        else:
+        if not repo:
             logger.error("File not found", filename)
             sys.exit()
+
+        github_file = get_file_from_github(github_api_token, repo, filepath, dep_name)
+
+        github_lines = github_file.splitlines()
+        etherscan_lines = source_code["content"].splitlines()
+
+        diff_html = difflib.HtmlDiff().make_file(github_lines, etherscan_lines)
+        diff_report_filename = f"{DIFFS_DIR}/{filename}.html"
+
+        create_dirs(diff_report_filename)
+        with open(diff_report_filename, "w") as f:
+            f.write(diff_html)
+
+        diffs = difflib.unified_diff(github_lines, etherscan_lines)
+        diffs_count = len(list(diffs))
 
         file_found = bool(repo)
 
