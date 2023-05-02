@@ -19,7 +19,7 @@ def get_contract_from_etherscan(token, network, contract):
 
     data = response["result"][0]
     if not data["ContractName"]:
-        logger.error("Contract not found", contract)
+        logger.error("Not a contract or source code is not verified", contract)
         sys.exit(1)
 
     contract_name = data["ContractName"]
