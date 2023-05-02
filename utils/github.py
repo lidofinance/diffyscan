@@ -30,7 +30,7 @@ def get_file_from_github(github_api_token, dependency_repo, filepath, dep_name):
 
 def construct_filepath(filepath, dep_name):
     # return the same thing if the file is in the local repo
-    if is_local_file(filepath):
+    if is_local_file(filepath) and dep_name is None:
         return filepath
 
     dep_name_and_slash_length = len(dep_name) + 1
