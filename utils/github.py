@@ -49,8 +49,7 @@ def resolve_dep(filepath, config):
     dep_names = sorted(list(config["dependencies"].keys()), key=len, reverse=True)
 
     for dep_name in dep_names:
-        dep_name_length = len(dep_name)
-        if f"{dep_name}/" == filepath[: dep_name_length + 1]:
+        if filepath.startswith(f"{dep_name}/"):
             return config["dependencies"][dep_name]
 
 
