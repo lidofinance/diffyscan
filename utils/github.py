@@ -46,11 +46,12 @@ def construct_filepath(filepath):
 def resolve_dep(filepath, config):
     # find the dependency that matches the filepath
     # e.g. "@openzeppelin/contracts-v4.4" in "@openzeppelin/contracts-v4.4/utils/structs/EnumerableSet.sol"
-    dep_names = config["dependencies"].keys()
-    match = next((dn for dn in iter(dep_names) if re.search(dn + "/", filepath)), None)
+    dep_names = sorted(list(config["dependencies"].keys()), key=len, reverse=True)
 
-    if match:
-        return config["dependencies"][match]
+    for dep_name in dep_names:
+        dep_name_length = len(dep_name)
+        if f"{dep_name}/" == filepath[: dep_name_length + 1]:
+            return config["dependencies"][dep_name]
 
 
 def is_local_file(filepath):
