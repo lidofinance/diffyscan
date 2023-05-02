@@ -1,4 +1,3 @@
-from logging import WARN
 import termtables
 from utils.constants import LOGS_PATH
 from utils.helpers import create_dirs

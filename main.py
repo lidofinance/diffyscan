@@ -3,15 +3,14 @@ import sys
 import time
 
 from utils.common import load_config, load_env
-from utils.constants import CONTRACTS_DIR, DIFFS_DIR, DIGEST_DIR
+from utils.constants import DIFFS_DIR, START_TIME
 from utils.etherscan import get_contract_from_etherscan
-from utils.github import get_file_from_github
-from utils.helpers import create_dirs, remove_directory
+from utils.github import get_file_from_github, is_local_file, resolve_dep
+from utils.helpers import create_dirs
 from utils.logger import logger
 
 
 def run_diff(config, name, address, etherscan_api_token, github_api_token):
-    start_time = time.time()
     logger.divider()
     logger.okay("Contract", address)
     logger.okay("Network", config["network"])
@@ -26,8 +25,11 @@ def run_diff(config, name, address, etherscan_api_token, github_api_token):
         contract=address,
     )
 
-    if (contract_name != name):
-        logger.error("Contract name in config does not match with Etherscan", f"{address}: {name} != {contract_name}")
+    if contract_name != name:
+        logger.error(
+            "Contract name in config does not match with Etherscan",
+            f"{address}: {name} != {contract_name}",
+        )
         sys.exit(1)
 
     files_count = len(source_files)
@@ -49,37 +51,34 @@ def run_diff(config, name, address, etherscan_api_token, github_api_token):
         logger.update_info(f"File {file_number} / { files_count}", filename)
 
         repo = None
+        dep_name = None
 
-        if origin == CONTRACTS_DIR:
+        if is_local_file(filepath):
             repo = config["github_repo"]
-        elif (
-            "dependencies" in config
-            and origin in config["dependencies"].keys()
-            and config["dependencies"].get(origin) != ""
-        ):
-            repo = config["dependencies"].get(origin)
         else:
-            logger.warn(f"No file in GitHub repo for: {filepath}")
-            logger.divider()
+            (repo, dep_name) = resolve_dep(filepath, config)
 
         diff_report_filename = None
         diffs_count = None
 
-        if repo:
-            github_file = get_file_from_github(github_api_token, repo, filepath)
+        if not repo:
+            logger.error("File not found", filename)
+            sys.exit()
 
-            github_lines = github_file.splitlines()
-            etherscan_lines = source_code["content"].splitlines()
+        github_file = get_file_from_github(github_api_token, repo, filepath, dep_name)
 
-            diff_html = difflib.HtmlDiff().make_file(github_lines, etherscan_lines)
-            diff_report_filename = f"{DIFFS_DIR}/{filename}.html"
+        github_lines = github_file.splitlines()
+        etherscan_lines = source_code["content"].splitlines()
 
-            create_dirs(diff_report_filename)
-            with open(diff_report_filename, "w") as f:
-                f.write(diff_html)
+        diff_html = difflib.HtmlDiff().make_file(github_lines, etherscan_lines)
+        diff_report_filename = f"{DIFFS_DIR}/{filename}.html"
 
-            diffs = difflib.unified_diff(github_lines, etherscan_lines)
-            diffs_count = len(list(diffs))
+        create_dirs(diff_report_filename)
+        with open(diff_report_filename, "w") as f:
+            f.write(diff_html)
+
+        diffs = difflib.unified_diff(github_lines, etherscan_lines)
+        diffs_count = len(list(diffs))
 
         file_found = bool(repo)
 
@@ -93,10 +92,6 @@ def run_diff(config, name, address, etherscan_api_token, github_api_token):
         ]
 
         report.append(report_data)
-
-    execution_time = time.time() - start_time
-
-    logger.okay(f"Done in {round(execution_time, 3)}s ✨" + " " * 100)
 
     logger.divider()
 
@@ -121,24 +116,36 @@ def main():
 
     logger.divider()
 
-    logger.info("Removing artifacts from the previous run...")
-    remove_directory(DIGEST_DIR)
-
     logger.info("Loading config...")
     config = load_config()
 
     if contract_address is not None:
         if contract_name is None:
-            logger.error("Please set the 'CONTRACT_NAME' env var for address", f"{contract_address}")
+            logger.error(
+                "Please set the 'CONTRACT_NAME' env var for address",
+                f"{contract_address}",
+            )
             sys.exit(1)
 
-        logger.info(f"Running diff for a single contract {contract_name} deployed at {contract_address}...")
-        run_diff(config, contract_name, contract_address, etherscan_api_token, github_api_token)
+        logger.info(
+            f"Running diff for a single contract {contract_name} deployed at {contract_address}..."
+        )
+        run_diff(
+            config,
+            contract_name,
+            contract_address,
+            etherscan_api_token,
+            github_api_token,
+        )
     else:
         contracts = config["contracts"]
         logger.info(f"Running diff for contracts from config {contracts}...")
         for name, address in config["contracts"].items():
             run_diff(config, name, address, etherscan_api_token, github_api_token)
+
+    execution_time = time.time() - START_TIME
+
+    logger.okay(f"Done in {round(execution_time, 3)}s ✨" + " " * 100)
 
 
 if __name__ == "__main__":

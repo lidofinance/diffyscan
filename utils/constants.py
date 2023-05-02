@@ -1,5 +1,9 @@
+import time
+
 DIGEST_DIR = "digest"
-DIFFS_DIR = DIGEST_DIR + "/diffs"
-LOGS_PATH = DIGEST_DIR + "/logs.txt"
+START_TIME = time.time()
+START_TIME_INT = int(START_TIME)
+DIFFS_DIR = f"{DIGEST_DIR}/{START_TIME_INT}/diffs"
+LOGS_PATH = f"{DIGEST_DIR}/{START_TIME_INT}/logs.txt"
 CONFIG_PATH = "config.json"
 CONTRACTS_DIR = "contracts"
