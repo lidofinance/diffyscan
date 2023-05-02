@@ -51,17 +51,20 @@ def run_diff(config, name, address, etherscan_api_token, github_api_token):
         logger.update_info(f"File {file_number} / { files_count}", filename)
 
         repo = None
+        dep_name = None
 
         if is_local_file(filepath):
             repo = config["github_repo"]
         else:
-            repo = resolve_dep(filepath, config)
+            (repo, dep_name) = resolve_dep(filepath, config)
 
         diff_report_filename = None
         diffs_count = None
 
         if repo:
-            github_file = get_file_from_github(github_api_token, repo, filepath)
+            github_file = get_file_from_github(
+                github_api_token, repo, filepath, dep_name
+            )
 
             github_lines = github_file.splitlines()
             etherscan_lines = source_code["content"].splitlines()
