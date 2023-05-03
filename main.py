@@ -71,7 +71,7 @@ def run_diff(config, name, address, etherscan_api_token, github_api_token):
         etherscan_lines = source_code["content"].splitlines()
 
         diff_html = difflib.HtmlDiff().make_file(github_lines, etherscan_lines)
-        diff_report_filename = f"{DIFFS_DIR}/{filename}.html"
+        diff_report_filename = f"{DIFFS_DIR}/{address}/{filename}.html"
 
         create_dirs(diff_report_filename)
         with open(diff_report_filename, "w") as f:
@@ -140,7 +140,7 @@ def main():
     else:
         contracts = config["contracts"]
         logger.info(f"Running diff for contracts from config {contracts}...")
-        for name, address in config["contracts"].items():
+        for address, name in config["contracts"].items():
             run_diff(config, name, address, etherscan_api_token, github_api_token)
 
     execution_time = time.time() - START_TIME
