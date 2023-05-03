@@ -1,5 +1,4 @@
 import difflib
-from os import name
 import sys
 import time
 
