@@ -13,7 +13,7 @@ from utils.logger import logger
 def run_diff(config, name, address, etherscan_api_token, github_api_token):
     logger.divider()
     logger.okay("Contract", address)
-    logger.okay("Network", config["network"])
+    logger.okay("Indexer Host", config["indexer_host"])
     logger.okay("Repo", config["github_repo"])
 
     logger.divider()
@@ -21,7 +21,7 @@ def run_diff(config, name, address, etherscan_api_token, github_api_token):
     logger.info("Fetching source code from Etherscan...")
     contract_name, source_files = get_contract_from_etherscan(
         token=etherscan_api_token,
-        network=config["network"],
+        indexer_host=config["indexer_host"],
         contract=address,
     )
 
