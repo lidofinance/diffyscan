@@ -37,12 +37,26 @@ def construct_filepath(filepath, dep_name):
     dep_name_and_slash_length = len(dep_name) + 1
     filepath_without_dep_name = filepath[dep_name_and_slash_length:]
 
+    return fixed_filepath(filepath, filepath_without_dep_name)
+
+
+def fixed_filepath(filepath, filepath_without_dep_name):
+    # returns correct filepath for some repos that don't follow standart folder structure.
+     
+    if filepath.startswith("@aragon/apps-agent"):
+        return f"apps/agent/{filepath_without_dep_name}"
+
+    if filepath.startswith("@aragon/apps-vault"):
+        return f"apps/vault/{filepath_without_dep_name}"
+
+    if filepath.startswith("@aragon/apps-finance"):
+        return f"apps/finance/{filepath_without_dep_name}"
+
     return (
         filepath_without_dep_name
-        if filepath_without_dep_name.startswith("contracts")
+        if filepath_without_dep_name.startswith("contracts") or filepath.startswith("@aragon/apps-lido")
         else f"contracts/{filepath_without_dep_name}"
     )
-
 
 def resolve_dep(filepath, config):
     # find the dependency that matches the filepath
