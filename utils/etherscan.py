@@ -5,9 +5,8 @@ from utils.common import fetch
 from utils.logger import logger
 
 
-def get_contract_from_etherscan(token, network, contract):
-    etherscan_api_subdomain = "" if network == "mainnet" else f"-{network}"
-    etherscan_link = f"https://api{etherscan_api_subdomain}.etherscan.io/api?module=contract&action=getsourcecode&address={contract}&apikey={token}"
+def get_contract_from_etherscan(token, etherscan_hostname, contract):
+    etherscan_link = f"https://{etherscan_hostname}/api?module=contract&action=getsourcecode&address={contract}&apikey={token}"
 
     response = fetch(etherscan_link)
 
