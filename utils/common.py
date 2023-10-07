@@ -19,7 +19,10 @@ def load_env(variable_name, required=True, masked=False):
 
     printable_value = mask_text(value) if masked else value
 
-    logger.okay(f"{variable_name}", printable_value)
+    if not printable_value:
+        logger.info(f"{variable_name} var is not set")
+    else:
+        logger.okay(f"{variable_name}", printable_value)
     return value
 
 
@@ -57,5 +60,4 @@ def parse_repo_link(repo_link):
     parse_result = urlparse(repo_link)
     repo_location = [item.strip("/") for item in parse_result[2].split("tree")]
     user_slash_repo = repo_location[0]
-    ref = repo_location[1] if len(repo_location) > 1 else None
-    return (user_slash_repo, ref)
+    return user_slash_repo

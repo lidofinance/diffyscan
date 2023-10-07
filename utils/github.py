@@ -1,20 +1,22 @@
 import base64
-import re
 from utils.common import fetch, parse_repo_link
-from utils.constants import CONTRACTS_DIR
 from utils.logger import logger
 
+def _get_file_from_github(
+        github_api_token,
+        url,
+        path_to_file,
+        repo_prefix,
+        commit
+    ):
 
-def get_file_from_github(github_api_token, dependency_repo, filepath, dep_name):
-    user_slash_repo, ref = parse_repo_link(dependency_repo)
-    path_to_file = construct_filepath(filepath, dep_name)
+    user_slash_repo = parse_repo_link(url)
 
     github_api_url = (
-        f"https://api.github.com/repos/{user_slash_repo}/contents/{path_to_file}"
+        f"https://api.github.com/repos/{user_slash_repo}/contents/{repo_prefix}/{path_to_file}"
     )
 
-    if ref:
-        github_api_url += "?ref=" + ref
+    github_api_url += "?ref=" + commit
 
     github_data = fetch(
         github_api_url, headers={"Authorization": f"token {github_api_token}"}
@@ -27,21 +29,46 @@ def get_file_from_github(github_api_token, dependency_repo, filepath, dep_name):
 
     return base64.b64decode(file_content).decode()
 
+def get_file_from_github(github_api_token, dependency_repo, filepath, dep_name):
+    path_to_file = construct_filepath(filepath, dep_name)
+
+    if dependency_repo.get("0"):
+        for k in range(len(dependency_repo.keys())):
+            k_str = str(k)
+            start_string = dependency_repo[k_str].get("startswith")
+            if not start_string:
+                logger.error("dependencies with multiple repos must contain 'startswith' key")
+            if not path_to_file.startswith(start_string):
+                continue
+            path_to_file = path_to_file[len(start_string):]
+
+            return _get_file_from_github(
+                github_api_token,
+                dependency_repo[k_str]["url"],
+                path_to_file,
+                dependency_repo[k_str]['repo_prefix'],
+                dependency_repo[k_str]["commit"]
+            )
+
+        logger.error("unable to find a proper dependency url")
+    else:
+        return _get_file_from_github(
+            github_api_token,
+            dependency_repo["url"],
+            path_to_file,
+            dependency_repo['repo_prefix'],
+            dependency_repo["commit"]
+        )
 
 def construct_filepath(filepath, dep_name):
     # return the same thing if the file is in the local repo
-    if is_local_file(filepath):
-        assert not dep_name, "file is local but dep is present"
+    if dep_name is None:
         return filepath
 
     dep_name_and_slash_length = len(dep_name) + 1
     filepath_without_dep_name = filepath[dep_name_and_slash_length:]
 
-    return (
-        filepath_without_dep_name
-        if filepath_without_dep_name.startswith("contracts")
-        else f"contracts/{filepath_without_dep_name}"
-    )
+    return filepath_without_dep_name
 
 
 def resolve_dep(filepath, config):
@@ -54,7 +81,3 @@ def resolve_dep(filepath, config):
             return (config["dependencies"][dep_name], dep_name)
 
     return (None, None)
-
-
-def is_local_file(filepath):
-    return filepath.split("/")[0] == CONTRACTS_DIR
