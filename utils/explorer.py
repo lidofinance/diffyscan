@@ -26,10 +26,10 @@ def _get_contract_from_etherscan(token, etherscan_hostname, contract):
 
     return (contract_name, source_files)
 
-def _get_contract_from_zksync(token, etherscan_hostname, contract):
-    etherscan_link = f"https://{etherscan_hostname}/contract_verification/info/{contract}"
+def _get_contract_from_zksync(token, zksync_explorer_hostname, contract):
+    zksync_explorer_link = f"https://{zksync_explorer_hostname}/contract_verification/info/{contract}"
 
-    response = fetch(etherscan_link)
+    response = fetch(zksync_explorer_link)
 
     if not response.get("verifiedAt"):
         logger.error("Status", response.status_code)
