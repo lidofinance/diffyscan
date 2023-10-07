@@ -1,0 +1,43 @@
+{
+    "contracts": {
+        "0x3aad916d98a9a19b56336fb44eb734c7acabf069": "ProxyAdmin",
+        "0xfEF1a26853D2a4133017849f5738eaE92fb8117e": "TransparentUpgradeableProxy",
+        "0xA6f68f512F9C96348f7d5c9192782279a93d1C3B": "ZkSyncBridgeExecutor",
+        "0xaA040F9b7e1f1cEe8704e6D076ffD63410Acfd1E": "OssifiableProxy",
+        "0xFC0FDE38a8051c184202b379330B8b2BB04ef17c": "L2ERC20Bridge",
+        "0x948947F2f05864032Fb340E574D0F13C6BA7bE74": "TransparentUpgradeableProxy",
+        "0xece0c449f94a4869d090153b8419bae1488fe667": "ERC20BridgedUpgradeable"
+    },
+    "explorer_hostname": "zksync2-testnet-explorer.zksync.dev",
+    "github_repo": {
+        "url": "https://github.com/txfusion/lido-l2",
+        "commit": "58fe118e1b1e6a0aa7b327e67041aaaa2fe88dbb",
+        "repo_prefix": "zksync"
+    },
+    "dependencies": {
+        "@openzeppelin/contracts": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+            "commit": "d4fb3a89f9d0a39c7ee6f2601d33ffbf30085322",
+            "repo_prefix": "contracts"
+        },
+        "@openzeppelin/contracts-upgradeable": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable",
+            "commit": "f6febd79e2a3a17e26969dd0d450c6ebd64bf459",
+            "repo_prefix": "contracts"
+        },
+        "@matterlabs/zksync-contracts": {
+            "0": {
+                "startswith": "l1/contracts/",
+                "url": "https://github.com/matter-labs/era-contracts",
+                "commit": "3a4506522aaef81485d8abb96f5a6394bd2ba69e",
+                "repo_prefix": "zksync/contracts"
+            },
+            "1": {
+                "startswith": "l2/system-contracts/",
+                "url": "https://github.com/matter-labs/era-system-contracts",
+                "commit": "3e954a629ad8e01616174bde2218241b360fda0a",
+                "repo_prefix": "contracts"
+            }
+        }
+    }
+}
