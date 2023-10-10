@@ -16,7 +16,7 @@ def run_diff(config, name, address, explorer_api_token, github_api_token):
     logger.okay("Blockchain explorer Hostname", config["explorer_hostname"])
     logger.okay("Repo", config["github_repo"]["url"])
     logger.okay("Repo commit", config["github_repo"]["commit"])
-    logger.okay("Repo prefix", config["github_repo"]["relative_root"])
+    logger.okay("Repo relative root", config["github_repo"]["relative_root"])
 
     logger.divider()
 
