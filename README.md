@@ -58,7 +58,7 @@ Set your Github token to query API without strict rate limiting,
 export GITHUB_API_TOKEN=<your-github-token>
 ```
 
-Create a config file
+Create a config file named `config.json`,
 
 ```json
 {
@@ -82,10 +82,10 @@ Create a config file
 }
 ```
 
-ℹ️ See more examples inside the [config_samples](./config_samples/) dir.
-
 Start the script
 
 ```bash
 python3 main.py
 ```
+
+ℹ️ See more config examples inside the [config_samples](./config_samples/) dir.
