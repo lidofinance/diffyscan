@@ -62,14 +62,22 @@ Create a config file
 
 ```json
 {
-    "contracts": { "0x...", "0x..." },
-    "explorer_hostname": "api-goerli.etherscan.io",
+    "contracts": {
+        "0x28FAB2059C713A7F9D8c86Db49f9bb0e96Af1ef8": "OssifiableProxy",
+        "0xDba5Ad530425bb1b14EECD76F1b4a517780de537": "LidoLocator",
+    },
+    "explorer_hostname": "api-holesky.etherscan.io",
     "github_repo": "https://github.com/lidofinance/lido-dao",
     "dependencies": {
         "@aragon/apps-agent": {
             "url": "https://github.com/lidofinance/aragon-apps/",
             "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
             "relative_root": "apps/agent"
+        }
+        "@openzeppelin/contracts-v4.4": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+            "commit": "6bd6b76d1156e20e45d1016f355d154141c7e5b9",
+            "relative_root": "contracts"
         }
     }
 }
