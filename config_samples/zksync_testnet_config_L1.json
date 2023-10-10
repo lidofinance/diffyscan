@@ -22,13 +22,10 @@
             "commit": "f6febd79e2a3a17e26969dd0d450c6ebd64bf459",
             "repo_prefix": "contracts"
         },
-        "@matterlabs/zksync-contracts": {
-            "0": {
-                "startswith": "l1/contracts/",
-                "url": "https://github.com/matter-labs/era-contracts",
-                "commit": "3a4506522aaef81485d8abb96f5a6394bd2ba69e",
-                "repo_prefix": "ethereum/contracts"
-            }
+        "@matterlabs/zksync-contracts/l1/contracts": {
+            "url": "https://github.com/matter-labs/era-contracts",
+            "commit": "3a4506522aaef81485d8abb96f5a6394bd2ba69e",
+            "repo_prefix": "ethereum/contracts"
         }
     }
 }

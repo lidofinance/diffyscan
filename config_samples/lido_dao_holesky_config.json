@@ -35,7 +35,20 @@
         "0xE92329EC7ddB11D25e25b3c21eeBf11f15eB325d": "AppProxyUpgradeable",
         "0xF4aDA7Ff34c508B9Af2dE4160B6078D2b58FD46B": "Agent",
         "0xfd1E42595CeC3E83239bf8dFc535250e7F48E0bC": "AppProxyUpgradeable",
-        "0xF1A087E055EA1C11ec3B540795Bd1A544e6dcbe9": "ACL"
+        "0xF1A087E055EA1C11ec3B540795Bd1A544e6dcbe9": "ACL",
+        "0xC01fC1F2787687Bc656EAc0356ba9Db6e6b7afb7": "OracleDaemonConfig",
+        "0xA37fb4C41e7D30af5172618a863BBB0f9042c604": "AppProxyUpgradeable",
+        "0x8959360c48D601a6817BAf2449E5D00cC543FA3A": "Repo",
+        "0xB3d74c319C0C792522705fFD3097f873eEc71764": "AppProxyUpgradeable",
+        "0x4E8970d148CB38460bE9b6ddaab20aE2A74879AF": "AppProxyUpgradeable",
+        "0x3b03f75Ec541Ca11a223bB58621A3146246E1644": "KernelProxy",
+        "0x34c0cbf9836FD945423bD3d2d72880da9d068E5F": "Kernel",
+        "0xAa8B4F258a4817bfb0058b861447878168ddf7B0": "CallsScript",
+        "0xE1200ae048163B67D69Bc0492bF5FddC3a2899C0": "AppProxyPinned",
+        "0x923B9Cab88E4a1d3de7EE921dEFBF9e2AC6e0791": "EVMScriptRegistry",
+        "0xB576A85c310CC7Af5C106ab26d2942fA3a5ea94A": "AppProxyUpgradeable",
+        "0x3EcF7190312F50043DB0494bA0389135Fc3833F3": "APMRegistry",
+        "0x54eF0022cc769344D0cBCeF12e051281cCBb9fad": "APMRegistryFactory"
     },
     "explorer_hostname": "api-holesky.etherscan.io",
     "github_repo": {
