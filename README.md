@@ -1,7 +1,7 @@
 # Diffyscan
 
 ![python ^3.10](https://img.shields.io/badge/python-^3.10-blue)
-![poetry ^1.4](https://img.shields.io/badge/poetry-^1.4-blue)
+![poetry ^1.4](https://img.shields.io/badge/poetry-^1.6-blue)
 ![license MIT](https://img.shields.io/badge/license-MIT-brightgreen)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
@@ -12,7 +12,7 @@ Diff your Ethereum smart contracts code from GitHub against Blockchain explorer 
 This project was developed using these dependencies with their exact versions listed below:
 
 - Python 3.10
-- Poetry 1.4
+- Poetry 1.6
 
 Other versions may work as well but were not tested at all.
 
@@ -23,13 +23,13 @@ Other versions may work as well but were not tested at all.
 Use the following command to install poetry:
 
 ```shell
-pip install --user poetry~=1.4
+pip install --user poetry~=1.6
 ```
 
 alternatively, you could proceed with `pipx`:
 
 ```shell
-pipx install poetry~=1.4
+pipx install poetry~=1.6
 ```
 
 2. Activate poetry virtual environment,
@@ -62,14 +62,20 @@ Create a config file
 
 ```json
 {
-    "contract": "0x...",
-    "network": "mainnet",
-    "github_repo": "https://github.com/user/repo/tree/ref",
+    "contracts": { "0x...", "0x..." },
+    "explorer_hostname": "api-goerli.etherscan.io",
+    "github_repo": "https://github.com/lidofinance/lido-dao",
     "dependencies": {
-        "dep_name": "https://github.com/user/repo/tree/ref"
+        "@aragon/apps-agent": {
+            "url": "https://github.com/lidofinance/aragon-apps/",
+            "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+            "repo_prefix": "apps/agent"
+        }
     }
 }
 ```
+
+ℹ️ See more examples inside the [config_samples](./config_samples/) dir.
 
 Start the script
 
