@@ -1,0 +1,115 @@
+{
+    "contracts": {
+        "0x28FAB2059C713A7F9D8c86Db49f9bb0e96Af1ef8": "OssifiableProxy",
+        "0xDba5Ad530425bb1b14EECD76F1b4a517780de537": "LidoLocator",
+        "0x3F1c547b21f65e10480dE3ad8E19fAAC46C95034": "AppProxyUpgradeable",
+        "0x59034815464d18134A55EED3702b535D8A32c52b": "Lido",
+        "0x8d09a4502Cc8Cf1547aD300E066060D043f6982D": "WstETH",
+        "0xE154732c5Eab277fd88a9fF6Bdff7805eD97BCB1": "EIP712StETH",
+        "0xd6EbF043D30A7fe46D1Db32BA90a0A51207FE229": "OssifiableProxy",
+        "0x32f236423928c2c138F46351D9E5FD26331B1aa4": "StakingRouter",
+        "0x595F64Ddc3856a3b5Ff4f4CC1d1fb4B46cFd2bAC": "AppProxyUpgradeable",
+        "0xE0270CF2564d81E02284e16539F59C1B5a4718fE": "NodeOperatorsRegistry",
+        "0x045dd46212A178428c088573A7d102B9d89a022A": "DepositSecurityModule",
+        "0xE73a3602b99f1f913e72F8bdcBC235e206794Ac8": "LidoExecutionLayerRewardsVault",
+        "0xc7cc160b58F8Bb0baC94b80847E2CF2800565C50": "OssifiableProxy",
+        "0xFF72B5cdc701E9eE677966B2702c766c38F412a4": "WithdrawalQueueERC721",
+        "0xd517d9d04DA9B47dA23df91261bd3bF435BE964A": "WithdrawalVault",
+        "0x4E46BD7147ccf666E1d73A3A456fC7a68de82eCA": "Burner",
+        "0x4E97A3972ce8511D87F334dA17a2C332542a5246": "OssifiableProxy",
+        "0x6AcA050709469F1f98d8f40f68b1C83B533cd2b2": "AccountingOracle",
+        "0xa067FC95c22D51c3bC35fd4BE37414Ee8cc890d2": "HashConsensus",
+        "0xffDDF7025410412deaa05E3E1cE68FE53208afcb": "OssifiableProxy",
+        "0x210f60EC8A4D020b3e22f15fee2d2364e9b22357": "ValidatorsExitBusOracle",
+        "0xe77Cf1A027d7C10Ee6bb7Ede5E922a181FF40E8f": "HashConsensus",
+        "0xF0d576c7d934bBeCc68FE15F1c5DAF98ea2B78bb": "OracleReportSanityChecker",
+        "0x072f72BE3AcFE2c52715829F2CD9061A6C8fF019": "AppProxyUpgradeable",
+        "0xcE4B3D5bd6259F5dD73253c51b17e5a87bb9Ee64": "LegacyOracle",
+        "0x14ae7daeecdf57034f3E9db8564e46Dba8D97344": "MiniMeToken",
+        "0xdA7d2573Df555002503F29aA4003e398d28cc00f": "AppProxyUpgradeable",
+        "0x994c92228803e8b2D0fb8a610AbCB47412EeF8eF": "Voting",
+        "0xFaa1692c6eea8eeF534e7819749aD93a1420379A": "AppProxyUpgradeable",
+        "0x6f0b994E6827faC1fDb58AF66f365676247bAD71": "TokenManager",
+        "0xf0F281E5d7FBc54EAFcE0dA225CDbde04173AB16": "AppProxyUpgradeable",
+        "0x1a76ED38B14C768e02b96A879d89Db18AC83EC53": "Finance",
+        "0xE92329EC7ddB11D25e25b3c21eeBf11f15eB325d": "AppProxyUpgradeable",
+        "0xF4aDA7Ff34c508B9Af2dE4160B6078D2b58FD46B": "Agent",
+        "0xfd1E42595CeC3E83239bf8dFc535250e7F48E0bC": "AppProxyUpgradeable",
+        "0xF1A087E055EA1C11ec3B540795Bd1A544e6dcbe9": "ACL",
+        "0xC01fC1F2787687Bc656EAc0356ba9Db6e6b7afb7": "OracleDaemonConfig",
+        "0xA37fb4C41e7D30af5172618a863BBB0f9042c604": "AppProxyUpgradeable",
+        "0x8959360c48D601a6817BAf2449E5D00cC543FA3A": "Repo",
+        "0xB3d74c319C0C792522705fFD3097f873eEc71764": "AppProxyUpgradeable",
+        "0x4E8970d148CB38460bE9b6ddaab20aE2A74879AF": "AppProxyUpgradeable",
+        "0x3b03f75Ec541Ca11a223bB58621A3146246E1644": "KernelProxy",
+        "0x34c0cbf9836FD945423bD3d2d72880da9d068E5F": "Kernel",
+        "0xAa8B4F258a4817bfb0058b861447878168ddf7B0": "CallsScript",
+        "0xE1200ae048163B67D69Bc0492bF5FddC3a2899C0": "AppProxyPinned",
+        "0x923B9Cab88E4a1d3de7EE921dEFBF9e2AC6e0791": "EVMScriptRegistry",
+        "0xB576A85c310CC7Af5C106ab26d2942fA3a5ea94A": "AppProxyUpgradeable",
+        "0x3EcF7190312F50043DB0494bA0389135Fc3833F3": "APMRegistry",
+        "0x54eF0022cc769344D0cBCeF12e051281cCBb9fad": "APMRegistryFactory",
+        "0xe7b4567913AaF2bD54A26E742cec22727D8109eA": "AppProxyUpgradeable",
+        "0x0df65b7c78Dc42a872010d031D3601C284D8fE71": "AppProxyUpgradeable",
+        "0xD327b4Fb87fa01599DaD491Aa63B333c44C74472": "AppProxyUpgradeable",
+        "0x2997EA0D07D79038D83Cb04b3BB9A2Bc512E3fDA": "AppProxyUpgradeable"
+    },
+    "explorer_hostname": "api-holesky.etherscan.io",
+    "github_repo": {
+        "url": "https://github.com/lidofinance/lido-dao",
+        "commit": "cadffa46a2b8ed6cfa1127fca2468bae1a82d6bf",
+        "relative_root": ""
+    },
+    "dependencies": {
+        "@aragon/os": {
+            "url": "https://github.com/aragon/aragonOS",
+            "commit": "f3ae59b00f73984e562df00129c925339cd069ff",
+            "relative_root": ""
+        },
+        "@aragon/minime": {
+            "url": "https://github.com/aragon/minime",
+            "commit": "1d5251fc88eee5024ff318d95bc9f4c5de130430",
+            "relative_root": ""
+        },
+        "@aragon/apps-lido": {
+            "url": "https://github.com/lidofinance/aragon-apps/",
+            "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+            "relative_root": ""
+        },
+        "@aragon/apps-finance": {
+            "url": "https://github.com/lidofinance/aragon-apps/",
+            "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+            "relative_root": "apps/finance"
+        },
+        "@aragon/apps-vault": {
+            "url": "https://github.com/lidofinance/aragon-apps/",
+            "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+            "relative_root": "apps/vault"
+        },
+        "@aragon/apps-agent": {
+            "url": "https://github.com/lidofinance/aragon-apps/",
+            "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+            "relative_root": "apps/agent"
+        },
+        "openzeppelin-solidity": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+            "commit": "06e265b38d3e9daeaa7b33f9035c700d6bc0c6a0",
+            "relative_root": ""
+        },
+        "solidity-bytes-utils": {
+            "url": "https://github.com/GNSPS/solidity-bytes-utils",
+            "commit": "9776282d181839fbb4b18f2cf218e316d6df871c",
+            "relative_root": ""
+        },
+        "@openzeppelin/contracts": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+            "commit": "fa64a1ced0b70ab89073d5d0b6e01b0778f7e7d6",
+            "relative_root": "contracts"
+        },
+        "@openzeppelin/contracts-v4.4": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+            "commit": "6bd6b76d1156e20e45d1016f355d154141c7e5b9",
+            "relative_root": "contracts"
+        }
+    }
+}

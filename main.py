@@ -4,30 +4,32 @@ import time
 
 from utils.common import load_config, load_env
 from utils.constants import DIFFS_DIR, START_TIME
-from utils.etherscan import get_contract_from_etherscan
-from utils.github import get_file_from_github, is_local_file, resolve_dep
+from utils.explorer import get_contract_from_explorer
+from utils.github import get_file_from_github, resolve_dep
 from utils.helpers import create_dirs
 from utils.logger import logger
 
 
-def run_diff(config, name, address, etherscan_api_token, github_api_token):
+def run_diff(config, name, address, explorer_api_token, github_api_token):
     logger.divider()
     logger.okay("Contract", address)
-    logger.okay("Etherscan Hostname", config["etherscan_hostname"])
-    logger.okay("Repo", config["github_repo"])
+    logger.okay("Blockchain explorer Hostname", config["explorer_hostname"])
+    logger.okay("Repo", config["github_repo"]["url"])
+    logger.okay("Repo commit", config["github_repo"]["commit"])
+    logger.okay("Repo relative root", config["github_repo"]["relative_root"])
 
     logger.divider()
 
-    logger.info("Fetching source code from Etherscan...")
-    contract_name, source_files = get_contract_from_etherscan(
-        token=etherscan_api_token,
-        etherscan_hostname=config["etherscan_hostname"],
+    logger.info(f"Fetching source code from blockchain explorer {config['explorer_hostname']} ...")
+    contract_name, source_files = get_contract_from_explorer(
+        token=explorer_api_token,
+        explorer_hostname=config["explorer_hostname"],
         contract=address,
     )
 
     if contract_name != name:
         logger.error(
-            "Contract name in config does not match with Etherscan",
+            "Contract name in config does not match with Blockchain explorer",
             f"{address}: {name} != {contract_name}",
         )
         sys.exit(1)
@@ -42,42 +44,41 @@ def run_diff(config, name, address, etherscan_api_token, github_api_token):
 
     report = []
 
-    for index, (filepath, source_code) in enumerate(source_files):
+    for index, (path_to_file, source_code) in enumerate(source_files):
         file_number = index + 1
-        split_filepath = filepath.split("/")
-        origin = split_filepath[0]
-        filename = split_filepath[-1]
+        split_path_to_file = path_to_file.split("/")
+        origin = split_path_to_file[0]
+        filename = split_path_to_file[-1]
 
         logger.update_info(f"File {file_number} / { files_count}", filename)
 
         repo = None
         dep_name = None
 
-        if is_local_file(filepath):
+        (repo, dep_name) = resolve_dep(path_to_file, config)
+        if not dep_name:
             repo = config["github_repo"]
-        else:
-            (repo, dep_name) = resolve_dep(filepath, config)
 
         diff_report_filename = None
         diffs_count = None
 
         if not repo:
-            logger.error("File not found", filename)
+            logger.error("File not found", path_to_file)
             sys.exit()
 
-        github_file = get_file_from_github(github_api_token, repo, filepath, dep_name)
+        github_file = get_file_from_github(github_api_token, repo, path_to_file, dep_name)
 
         github_lines = github_file.splitlines()
-        etherscan_lines = source_code["content"].splitlines()
+        explorer_lines = source_code["content"].splitlines()
 
-        diff_html = difflib.HtmlDiff().make_file(github_lines, etherscan_lines)
+        diff_html = difflib.HtmlDiff().make_file(github_lines, explorer_lines)
         diff_report_filename = f"{DIFFS_DIR}/{address}/{filename}.html"
 
         create_dirs(diff_report_filename)
         with open(diff_report_filename, "w") as f:
             f.write(diff_html)
 
-        diffs = difflib.unified_diff(github_lines, etherscan_lines)
+        diffs = difflib.unified_diff(github_lines, explorer_lines)
         diffs_count = len(list(diffs))
 
         file_found = bool(repo)
@@ -109,8 +110,9 @@ def main():
     logger.divider()
 
     logger.info("Loading API tokens...")
-    etherscan_api_token = load_env("ETHERSCAN_TOKEN", masked=True)
+    explorer_api_token = load_env("ETHERSCAN_TOKEN", masked=True)
     github_api_token = load_env("GITHUB_API_TOKEN", masked=True)
+
     contract_address = load_env("CONTRACT_ADDRESS", required=False)
     contract_name = load_env("CONTRACT_NAME", required=False)
 
@@ -134,14 +136,14 @@ def main():
             config,
             contract_name,
             contract_address,
-            etherscan_api_token,
+            explorer_api_token,
             github_api_token,
         )
     else:
         contracts = config["contracts"]
         logger.info(f"Running diff for contracts from config {contracts}...")
         for address, name in config["contracts"].items():
-            run_diff(config, name, address, etherscan_api_token, github_api_token)
+            run_diff(config, name, address, explorer_api_token, github_api_token)
 
     execution_time = time.time() - START_TIME
 
