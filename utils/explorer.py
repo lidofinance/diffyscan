@@ -42,8 +42,6 @@ def _get_contract_from_zksync(token, zksync_explorer_hostname, contract):
         sys.exit(1)
 
     contract_name = data["contractName"].split(":")[-1]
-    print(contract_name)
-
     source_files = data["sourceCode"]["sources"].items()
 
     return (contract_name, source_files)

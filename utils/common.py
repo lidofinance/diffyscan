@@ -19,10 +19,11 @@ def load_env(variable_name, required=True, masked=False):
 
     printable_value = mask_text(value) if masked else value
 
-    if not printable_value:
-        logger.info(f"{variable_name} var is not set")
-    else:
+    if printable_value:
         logger.okay(f"{variable_name}", printable_value)
+    else:
+        logger.info(f"{variable_name} var is not set")
+
     return value
 
 

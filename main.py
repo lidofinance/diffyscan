@@ -44,18 +44,18 @@ def run_diff(config, name, address, explorer_api_token, github_api_token):
 
     report = []
 
-    for index, (filepath, source_code) in enumerate(source_files):
+    for index, (path_to_file, source_code) in enumerate(source_files):
         file_number = index + 1
-        split_filepath = filepath.split("/")
-        origin = split_filepath[0]
-        filename = split_filepath[-1]
+        split_path_to_file = path_to_file.split("/")
+        origin = split_path_to_file[0]
+        filename = split_path_to_file[-1]
 
         logger.update_info(f"File {file_number} / { files_count}", filename)
 
         repo = None
         dep_name = None
 
-        (repo, dep_name) = resolve_dep(filepath, config)
+        (repo, dep_name) = resolve_dep(path_to_file, config)
         if not dep_name:
             repo = config["github_repo"]
 
@@ -63,10 +63,10 @@ def run_diff(config, name, address, explorer_api_token, github_api_token):
         diffs_count = None
 
         if not repo:
-            logger.error("File not found", filepath)
+            logger.error("File not found", path_to_file)
             sys.exit()
 
-        github_file = get_file_from_github(github_api_token, repo, filepath, dep_name)
+        github_file = get_file_from_github(github_api_token, repo, path_to_file, dep_name)
 
         github_lines = github_file.splitlines()
         explorer_lines = source_code["content"].splitlines()
