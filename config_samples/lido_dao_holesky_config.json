@@ -54,58 +54,58 @@
     "github_repo": {
         "url": "https://github.com/lidofinance/lido-dao",
         "commit": "cadffa46a2b8ed6cfa1127fca2468bae1a82d6bf",
-        "repo_prefix": ""
+        "relative_root": ""
     },
     "dependencies": {
         "@aragon/os": {
             "url": "https://github.com/aragon/aragonOS",
             "commit": "f3ae59b00f73984e562df00129c925339cd069ff",
-            "repo_prefix": ""
+            "relative_root": ""
         },
         "@aragon/minime": {
             "url": "https://github.com/aragon/minime",
             "commit": "1d5251fc88eee5024ff318d95bc9f4c5de130430",
-            "repo_prefix": ""
+            "relative_root": ""
         },
         "@aragon/apps-lido": {
             "url": "https://github.com/lidofinance/aragon-apps/",
             "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
-            "repo_prefix": ""
+            "relative_root": ""
         },
         "@aragon/apps-finance": {
             "url": "https://github.com/lidofinance/aragon-apps/",
             "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
-            "repo_prefix": "apps/finance"
+            "relative_root": "apps/finance"
         },
         "@aragon/apps-vault": {
             "url": "https://github.com/lidofinance/aragon-apps/",
             "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
-            "repo_prefix": "apps/vault"
+            "relative_root": "apps/vault"
         },
         "@aragon/apps-agent": {
             "url": "https://github.com/lidofinance/aragon-apps/",
             "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
-            "repo_prefix": "apps/agent"
+            "relative_root": "apps/agent"
         },
         "openzeppelin-solidity": {
             "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
             "commit": "06e265b38d3e9daeaa7b33f9035c700d6bc0c6a0",
-            "repo_prefix": ""
+            "relative_root": ""
         },
         "solidity-bytes-utils": {
             "url": "https://github.com/GNSPS/solidity-bytes-utils",
             "commit": "9776282d181839fbb4b18f2cf218e316d6df871c",
-            "repo_prefix": ""
+            "relative_root": ""
         },
         "@openzeppelin/contracts": {
             "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
             "commit": "fa64a1ced0b70ab89073d5d0b6e01b0778f7e7d6",
-            "repo_prefix": "contracts"
+            "relative_root": "contracts"
         },
         "@openzeppelin/contracts-v4.4": {
             "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
             "commit": "6bd6b76d1156e20e45d1016f355d154141c7e5b9",
-            "repo_prefix": "contracts"
+            "relative_root": "contracts"
         }
     }
 }

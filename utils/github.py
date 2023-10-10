@@ -8,7 +8,7 @@ def get_file_from_github(github_api_token, dependency_repo, path_to_file, dep_na
     user_slash_repo = parse_repo_link(dependency_repo['url'])
 
     github_api_url = (
-        f"https://api.github.com/repos/{user_slash_repo}/contents/{dependency_repo['repo_prefix']}/{path_to_file}"
+        f"https://api.github.com/repos/{user_slash_repo}/contents/{dependency_repo['relative_root']}/{path_to_file}"
     )
 
     github_api_url += "?ref=" + dependency_repo['commit']

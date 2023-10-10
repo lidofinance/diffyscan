@@ -69,7 +69,7 @@ Create a config file
         "@aragon/apps-agent": {
             "url": "https://github.com/lidofinance/aragon-apps/",
             "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
-            "repo_prefix": "apps/agent"
+            "relative_root": "apps/agent"
         }
     }
 }

@@ -7,13 +7,13 @@
     "github_repo": {
         "url": "https://github.com/lidofinance/lido-l2",
         "commit": "082e7eb59de63bd376b30886568813408d04f00b",
-        "repo_prefix": ""
+        "relative_root": ""
     },
     "dependencies": {
         "@openzeppelin/contracts": {
             "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
             "commit": "d4fb3a89f9d0a39c7ee6f2601d33ffbf30085322",
-            "repo_prefix": "contracts"
+            "relative_root": "contracts"
         }
     }
 }
