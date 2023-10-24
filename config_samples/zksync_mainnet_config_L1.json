@@ -1,14 +1,14 @@
 {
     "contracts": {
-        "0xfDF0c6812f10e803757e4A392df019cAdf2Ae0AA": "OssifiableProxy",
-        "0xBe98f3ac3e9304C50F29c940D5f59673a1Ae4C14": "L1Executor",
-        "0x075b90554C6cE93636B2E63C99EE704f8CC1C2f3": "OssifiableProxy",
-        "0xc3f1A4C13532cc9DDeA36B54d83A427B8D4AaeEe": "L1ERC20Bridge"
+        "0xFf7F4d05e3247374e86A3f7231A2Ed1CA63647F2": "OssifiableProxy",
+        "0x06185d60eD72a91D1367Eb0733B9d20AE7336D3B": "L1Executor",
+        "0x41527B2d03844dB6b0945f25702cB958b6d55989": "OssifiableProxy",
+        "0x9a810469F4a451Ebb7ef53672142053b4971587c": "L1ERC20Bridge"
     },
-    "explorer_hostname": "api-goerli.etherscan.io",
+    "explorer_hostname": "api.etherscan.io",
     "github_repo": {
         "url": "https://github.com/txfusion/lido-l2",
-        "commit": "28d8f7539a57972a83f41a8809fee4c4766009a0",
+        "commit": "fa6a77e694a34dc6f03d57bb8c934941e554ac9d",
         "relative_root": "zksync"
     },
     "dependencies": {

@@ -1,17 +1,17 @@
 {
     "contracts": {
-        "0xe7e7befca267e5967e20d135941535a2396ccdf4": "ProxyAdmin",
-        "0x4097BC99a9B5fB253B938d105111FFcb862Be668": "TransparentUpgradeableProxy",
-        "0x213ec81bB9740c75d2BC186378cf734F9306e7e5": "ZkSyncBridgeExecutor",
-        "0x0E1E4af13Bb95C84275b52b6edE1cb5F8c11Abe7": "OssifiableProxy",
-        "0xfD744ba1867B6e6da437bce3ba44f5898A72B9c3": "L2ERC20Bridge",
-        "0x6750967d6e4712Ae6cF9401a87dc34642339E0Ef": "TransparentUpgradeableProxy",
-        "0x75e79BCe0F5a81b6D0097CCB473D867940A4C2Ca": "ERC20BridgedUpgradeable"
+        "0xbd80e505ecc49bae2cc86094a78fa0e2db28b52a": "ProxyAdmin",
+        "0x139EE25DCad405d2a038E7A67f9ffdbf0f573f3c": "TransparentUpgradeableProxy",
+        "0x13f46b59067f064c634fb17e207ed203916dccc8": "ZkSyncBridgeExecutor",
+        "0xE1D6A50E7101c8f8db77352897Ee3f1AC53f782B": "OssifiableProxy",
+        "0x64Ee90B086c99fD3439354f382Fef25229A01F02": "L2ERC20Bridge",
+        "0x703b52F2b28fEbcB60E1372858AF5b18849FE867": "TransparentUpgradeableProxy",
+        "0xc7a0daa1b8fea68532b6425d0e156088b0d2ab2c": "ERC20BridgedUpgradeable"
     },
-    "explorer_hostname": "zksync2-testnet-explorer.zksync.dev",
+    "explorer_hostname": "zksync2-mainnet-explorer.zksync.io",
     "github_repo": {
         "url": "https://github.com/txfusion/lido-l2",
-        "commit": "28d8f7539a57972a83f41a8809fee4c4766009a0",
+        "commit": "fa6a77e694a34dc6f03d57bb8c934941e554ac9d",
         "relative_root": "zksync"
     },
     "dependencies": {
