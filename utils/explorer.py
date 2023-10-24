@@ -26,6 +26,31 @@ def _get_contract_from_etherscan(token, etherscan_hostname, contract):
 
     return (contract_name, source_files)
 
+def _get_contract_from_mantle(token, mantle_explorer_hostname, contract):
+    etherscan_link = f"https://{mantle_explorer_hostname}/api?module=contract&action=getsourcecode&address={contract}&apikey={token}"
+
+    response = fetch(etherscan_link)
+
+    if response["message"] == "NOTOK":
+        logger.error("Failed", response["result"])
+        logger.error("Status", response.status_code)
+        logger.error("Response", response.text)
+        sys.exit(1)
+
+    data = response["result"][0]
+    if not data["ContractName"]:
+        logger.error("Not a contract or source code is not verified", contract)
+        sys.exit(1)
+
+    source_files = [(data["FileName"], { 'content': data["SourceCode"] })]
+
+    if data.get("AdditionalSources"):
+        for additional_sources in data["AdditionalSources"]:
+            source_files += [(additional_sources["Filename"], { 'content': additional_sources['SourceCode']})]
+
+    contract_name = data["ContractName"]
+    return (contract_name, source_files)
+
 def _get_contract_from_zksync(token, zksync_explorer_hostname, contract):
     zksync_explorer_link = f"https://{zksync_explorer_hostname}/contract_verification/info/{contract}"
 
@@ -49,4 +74,6 @@ def _get_contract_from_zksync(token, zksync_explorer_hostname, contract):
 def get_contract_from_explorer(token, explorer_hostname, contract):
     if explorer_hostname.startswith("zksync"):
         return _get_contract_from_zksync(token, explorer_hostname, contract)
+    if explorer_hostname.endswith("mantle.xyz"):
+        return _get_contract_from_mantle(token, explorer_hostname, contract)
     return _get_contract_from_etherscan(token, explorer_hostname, contract)
