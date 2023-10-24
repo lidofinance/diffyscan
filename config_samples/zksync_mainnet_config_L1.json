@@ -1,0 +1,31 @@
+{
+    "contracts": {
+        "0xFf7F4d05e3247374e86A3f7231A2Ed1CA63647F2": "OssifiableProxy",
+        "0x06185d60eD72a91D1367Eb0733B9d20AE7336D3B": "L1Executor",
+        "0x41527B2d03844dB6b0945f25702cB958b6d55989": "OssifiableProxy",
+        "0x9a810469F4a451Ebb7ef53672142053b4971587c": "L1ERC20Bridge"
+    },
+    "explorer_hostname": "api.etherscan.io",
+    "github_repo": {
+        "url": "https://github.com/txfusion/lido-l2",
+        "commit": "fa6a77e694a34dc6f03d57bb8c934941e554ac9d",
+        "relative_root": "zksync"
+    },
+    "dependencies": {
+        "@openzeppelin/contracts": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+            "commit": "d4fb3a89f9d0a39c7ee6f2601d33ffbf30085322",
+            "relative_root": "contracts"
+        },
+        "@openzeppelin/contracts-upgradeable": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable",
+            "commit": "f6febd79e2a3a17e26969dd0d450c6ebd64bf459",
+            "relative_root": "contracts"
+        },
+        "@matterlabs/zksync-contracts/l1/contracts": {
+            "url": "https://github.com/matter-labs/era-contracts",
+            "commit": "3a4506522aaef81485d8abb96f5a6394bd2ba69e",
+            "relative_root": "ethereum/contracts"
+        }
+    }
+}
