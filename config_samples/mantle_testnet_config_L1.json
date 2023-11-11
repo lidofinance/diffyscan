@@ -1,12 +1,12 @@
 {
     "contracts": {
-        "0x075b90554C6cE93636B2E63C99EE704f8CC1C2f3": "OssifiableProxy",
-        "0xc3f1A4C13532cc9DDeA36B54d83A427B8D4AaeEe": "L1ERC20Bridge"
+        "0xBc6bbb98E73D15cc6a280e96b32Cc73b4f9068E1": "OssifiableProxy",
+        "0x8bed2E40522E21119B8A78A4842767c9bCceC47b": "L1ERC20TokenBridge"
     },
     "explorer_hostname": "api-goerli.etherscan.io",
     "github_repo": {
-        "url": "https://github.com/lidofinance/lido-l2",
-        "commit": "082e7eb59de63bd376b30886568813408d04f00b",
+        "url": "https://github.com/mantlenetworkio/lido-l2",
+        "commit": "cdd513cd3d25699a8757f8e730b443a495d0240e",
         "relative_root": ""
     },
     "dependencies": {
