@@ -6,7 +6,7 @@ from utils.logger import logger
 
 
 def _errorNoSourceCodeAndExit(address):
-    logger.error("Not a contract or source code is not verified", address)
+    logger.error("source code is not verified or an EOA address", address)
     sys.exit(1)
 
 
@@ -32,7 +32,9 @@ def _get_contract_from_etherscan(token, etherscan_hostname, contract):
 
 
 def _get_contract_from_zksync(token, zksync_explorer_hostname, contract):
-    zksync_explorer_link = f"https://{zksync_explorer_hostname}/contract_verification/info/{contract}"
+    zksync_explorer_link = (
+        f"https://{zksync_explorer_hostname}/contract_verification/info/{contract}"
+    )
 
     response = fetch(zksync_explorer_link)
 
@@ -51,8 +53,8 @@ def _get_contract_from_zksync(token, zksync_explorer_hostname, contract):
     return (contract_name, source_files)
 
 
-def _get_contract_from_mantle(token, etherscan_hostname, contract):
-    etherscan_link = f"https://{etherscan_hostname}/api?module=contract&action=getsourcecode&address={contract}"
+def _get_contract_from_mantle(token, mantle_explorer_hostname, contract):
+    etherscan_link = f"https://{mantle_explorer_hostname}/api?module=contract&action=getsourcecode&address={contract}"
 
     response = fetch(etherscan_link)
 
@@ -60,9 +62,9 @@ def _get_contract_from_mantle(token, etherscan_hostname, contract):
     if "ContractName" not in data:
         _errorNoSourceCodeAndExit(contract)
 
-    source_files = [(data["FileName"], { "content": data["SourceCode"] })]
+    source_files = [(data["FileName"], {"content": data["SourceCode"]})]
     for entry in data.get("AdditionalSources", []):
-        source_files.append((entry["Filename"], { "content": entry["SourceCode"] }))
+        source_files.append((entry["Filename"], {"content": entry["SourceCode"]}))
 
     return (data["ContractName"], source_files)
 
