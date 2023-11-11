@@ -1,0 +1,21 @@
+{
+    "contracts": {
+        "0xFCCC4297be972bb2861Da6D78a6fad588dF03ab1": "OssifiableProxy",
+        "0x7Aa9EEEcECD56Bd43Bb66ee1B42dBEB754792C84": "L2ERC20TokenBridge",
+        "0x2C402BE58E5849c5413a79aa3b8aF3136e6C017F": "OssifiableProxy",
+        "0x1008C85f796314c0985639b1a03083Be53eEf5aA": "ERC20BridgedPermit"
+    },
+    "explorer_hostname": "explorer.testnet.mantle.xyz",
+    "github_repo": {
+        "url": "https://github.com/mantlenetworkio/lido-l2",
+        "commit": "cdd513cd3d25699a8757f8e730b443a495d0240e",
+        "relative_root": ""
+    },
+    "dependencies": {
+        "@openzeppelin/contracts": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+            "commit": "d4fb3a89f9d0a39c7ee6f2601d33ffbf30085322",
+            "relative_root": "contracts"
+        }
+    }
+}
