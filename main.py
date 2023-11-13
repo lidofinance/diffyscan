@@ -20,7 +20,9 @@ def run_diff(config, name, address, explorer_api_token, github_api_token):
 
     logger.divider()
 
-    logger.info(f"Fetching source code from blockchain explorer {config['explorer_hostname']} ...")
+    logger.info(
+        f"Fetching source code from blockchain explorer {config['explorer_hostname']} ..."
+    )
     contract_name, source_files = get_contract_from_explorer(
         token=explorer_api_token,
         explorer_hostname=config["explorer_hostname"],
@@ -66,7 +68,14 @@ def run_diff(config, name, address, explorer_api_token, github_api_token):
             logger.error("File not found", path_to_file)
             sys.exit()
 
-        github_file = get_file_from_github(github_api_token, repo, path_to_file, dep_name)
+        file_found = bool(repo)
+
+        github_file = get_file_from_github(
+            github_api_token, repo, path_to_file, dep_name
+        )
+        if not github_file:
+            github_file = "<!-- No file content -->"
+            file_found = False
 
         github_lines = github_file.splitlines()
         explorer_lines = source_code["content"].splitlines()
@@ -80,8 +89,6 @@ def run_diff(config, name, address, explorer_api_token, github_api_token):
 
         diffs = difflib.unified_diff(github_lines, explorer_lines)
         diffs_count = len(list(diffs))
-
-        file_found = bool(repo)
 
         report_data = [
             file_number,

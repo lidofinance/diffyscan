@@ -2,16 +2,15 @@ import base64
 from utils.common import fetch, parse_repo_link
 from utils.logger import logger
 
+
 def get_file_from_github(github_api_token, dependency_repo, path_to_file, dep_name):
     path_to_file = path_to_file_without_dependency(path_to_file, dep_name)
 
-    user_slash_repo = parse_repo_link(dependency_repo['url'])
+    user_slash_repo = parse_repo_link(dependency_repo["url"])
 
-    github_api_url = (
-        f"https://api.github.com/repos/{user_slash_repo}/contents/{dependency_repo['relative_root']}/{path_to_file}"
-    )
+    github_api_url = f"https://api.github.com/repos/{user_slash_repo}/contents/{dependency_repo['relative_root']}/{path_to_file}"
 
-    github_api_url += "?ref=" + dependency_repo['commit']
+    github_api_url += "?ref=" + dependency_repo["commit"]
 
     github_data = fetch(
         github_api_url, headers={"Authorization": f"token {github_api_token}"}
@@ -21,8 +20,10 @@ def get_file_from_github(github_api_token, dependency_repo, path_to_file, dep_na
 
     if not file_content:
         logger.error("No file content")
+        return None
 
     return base64.b64decode(file_content).decode()
+
 
 def path_to_file_without_dependency(path_to_file, dep_name):
     # exclude dependency prefix from path to file
