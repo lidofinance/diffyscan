@@ -1,0 +1,25 @@
+{
+    "contracts": {
+        "0x292A9478A52F0B8b12429c58F79367448aBe0214": "TokenBridge"
+    },
+    "explorer_hostname": "api-goerli.etherscan.io",
+    "github_repo": {
+        "url": "https://github.com/Consensys/linea-contracts",
+        "commit": "f08c1906855198e2dc0413a47dcb38291b7087e5",
+        "relative_root": ""
+    },
+    "dependencies": {
+        "@openzeppelin/contracts": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+            "commit": "e50c24f5839db17f46991478384bfda14acfb830",
+            "relative_root": "contracts",
+            "//": "oz version 4.9.2"
+        },
+        "@openzeppelin/contracts-upgradeable": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable",
+            "commit": "bc95521e34dcd49792065e264a7ad2b5a86f0091",
+            "relative_root": "contracts",
+            "//": "oz version 4.9.2"
+        }
+    }
+}
