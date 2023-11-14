@@ -10,9 +10,7 @@ def _errorNoSourceCodeAndExit(address):
     sys.exit(1)
 
 
-def _get_contract_from_etherscan(
-    token, etherscan_hostname, contract, json_escaped=True
-):
+def _get_contract_from_etherscan(token, etherscan_hostname, contract):
     etherscan_link = f"https://{etherscan_hostname}/api?module=contract&action=getsourcecode&address={contract}&apikey={token}"
 
     response = fetch(etherscan_link)
@@ -28,6 +26,8 @@ def _get_contract_from_etherscan(
         _errorNoSourceCodeAndExit(contract)
 
     contract_name = data["ContractName"]
+
+    json_escaped = data["SourceCode"].startswith("{{")
     source_files = (
         json.loads(data["SourceCode"][1:-1])["sources"].items()
         if json_escaped
@@ -80,8 +80,4 @@ def get_contract_from_explorer(token, explorer_hostname, contract):
         return _get_contract_from_zksync(token, explorer_hostname, contract)
     if explorer_hostname.endswith("mantle.xyz"):
         return _get_contract_from_mantle(token, explorer_hostname, contract)
-    if explorer_hostname.endswith("lineascan.build"):
-        return _get_contract_from_etherscan(
-            token, explorer_hostname, contract, json_escaped=False
-        )
     return _get_contract_from_etherscan(token, explorer_hostname, contract)
