@@ -5,7 +5,7 @@
     "explorer_hostname": "api-goerli.etherscan.io",
     "github_repo": {
         "url": "https://github.com/Consensys/linea-contracts",
-        "commit": "f08c1906855198e2dc0413a47dcb38291b7087e5",
+        "commit": "3cf85529fd4539eb06ba998030c37e47f98c528a",
         "relative_root": ""
     },
     "dependencies": {
