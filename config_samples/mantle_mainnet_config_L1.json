@@ -1,0 +1,19 @@
+{
+    "contracts": {
+        "0x2D001d79E5aF5F65a939781FE228B267a8Ed468B": "OssifiableProxy",
+        "0x6fBBe1Af52D22557D7F161Dc5952E306F4742e23": "L1ERC20TokenBridge"
+    },
+    "explorer_hostname": "api.etherscan.io",
+    "github_repo": {
+        "url": "https://github.com/mantlenetworkio/lido-l2",
+        "commit": "cdd513cd3d25699a8757f8e730b443a495d0240e",
+        "relative_root": ""
+    },
+    "dependencies": {
+        "@openzeppelin/contracts": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+            "commit": "d4fb3a89f9d0a39c7ee6f2601d33ffbf30085322",
+            "relative_root": "contracts"
+        }
+    }
+}
