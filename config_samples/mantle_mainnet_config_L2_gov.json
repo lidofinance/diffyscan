@@ -1,12 +1,11 @@
 {
     "contracts": {
-        "0x2D001d79E5aF5F65a939781FE228B267a8Ed468B": "OssifiableProxy",
-        "0x6fBBe1Af52D22557D7F161Dc5952E306F4742e23": "L1ERC20TokenBridge"
+        "0x3a7b055bf88cdc59d20d0245809c6e6b3c5819dd": "OptimismBridgeExecutor"
     },
-    "explorer_hostname": "api.etherscan.io",
+    "explorer_hostname": "explorer.mantle.xyz",
     "github_repo": {
-        "url": "https://github.com/mantlenetworkio/lido-l2",
-        "commit": "cdd513cd3d25699a8757f8e730b443a495d0240e",
+        "url": "hhttps://github.com/lidofinance/governance-crosschain-bridges",
+        "commit": "8fa25b0080dd3dcc2390313631aea6796a12c9d8",
         "relative_root": ""
     },
     "dependencies": {

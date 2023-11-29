@@ -15,7 +15,8 @@
         "@openzeppelin/contracts": {
             "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
             "commit": "d4fb3a89f9d0a39c7ee6f2601d33ffbf30085322",
-            "relative_root": "contracts"
+            "relative_root": "contracts",
+            "//": "OZ 4.6.0"
         }
     }
 }
