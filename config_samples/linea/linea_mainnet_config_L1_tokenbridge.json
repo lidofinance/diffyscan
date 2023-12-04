@@ -4,8 +4,8 @@
     },
     "explorer_hostname": "api.etherscan.io",
     "github_repo": {
-        "url": "https://github.com/Consensys/linea-contracts",
-        "commit": "3cf85529fd4539eb06ba998030c37e47f98c528a",
+        "url": "https://github.com/Consensys/linea-contracts-fix",
+        "commit": "0949c4096664e613f73ed3ce51c32f97fc56cdef",
         "relative_root": ""
     },
     "dependencies": {
