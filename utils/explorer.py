@@ -13,7 +13,7 @@ def _errorNoSourceCodeAndExit(address):
 def _get_contract_from_etherscan(token, etherscan_hostname, contract):
     etherscan_link = f"https://{etherscan_hostname}/api?module=contract&action=getsourcecode&address={contract}"
     if token is not None:
-        etherscan_link = f"{etherscan_link}?apikey={token}"
+        etherscan_link = f"{etherscan_link}&apikey={token}"
 
     response = fetch(etherscan_link)
 
