@@ -10,13 +10,13 @@ from utils.types import Config
 
 
 def load_env(variable_name, required=True, masked=False):
-    value = os.getenv(variable_name)
+    value = os.getenv(variable_name, default=None)
 
     if required and not value:
         logger.error("Env not found", variable_name)
         sys.exit(1)
 
-    printable_value = mask_text(value) if masked else value
+    printable_value = mask_text(value) if masked and value is not None else str(value)
 
     if printable_value:
         logger.okay(f"{variable_name}", printable_value)

@@ -12,11 +12,7 @@ from utils.helpers import create_dirs
 from utils.logger import logger
 
 
-EXPLORER_API_TOKEN = load_env("ETHERSCAN_TOKEN", masked=True)
 GITHUB_API_TOKEN = load_env("GITHUB_API_TOKEN", masked=True)
-
-CONTRACT_ADDRESS = load_env("CONTRACT_ADDRESS", required=False)
-CONTRACT_NAME = load_env("CONTRACT_NAME", required=False)
 
 g_skip_user_input: bool = False
 
@@ -128,30 +124,14 @@ def run_diff(config, name, address, explorer_api_token, github_api_token):
 def process_config(path: str):
     logger.info(f"Loading config {path}...")
     config = load_config(path)
+    explorer_token = None
+    if "explorer_token_env_var" in config:
+        explorer_token = load_env(config["explorer_token_env_var"], masked=True, required=False)
 
-    if CONTRACT_ADDRESS is not None:
-        if CONTRACT_NAME is None:
-            logger.error(
-                "Please set the 'CONTRACT_NAME' env var for address",
-                f"{CONTRACT_ADDRESS}",
-            )
-            sys.exit(1)
-
-        logger.info(
-            f"Running diff for a single contract {CONTRACT_NAME} deployed at {CONTRACT_ADDRESS}..."
-        )
-        run_diff(
-            config,
-            CONTRACT_NAME,
-            CONTRACT_ADDRESS,
-            EXPLORER_API_TOKEN,
-            GITHUB_API_TOKEN,
-        )
-    else:
-        contracts = config["contracts"]
-        logger.info(f"Running diff for contracts from config {contracts}...")
-        for address, name in config["contracts"].items():
-            run_diff(config, name, address, EXPLORER_API_TOKEN, GITHUB_API_TOKEN)
+    contracts = config["contracts"]
+    logger.info(f"Running diff for contracts from config {contracts}...")
+    for address, name in config["contracts"].items():
+        run_diff(config, name, address, explorer_token, GITHUB_API_TOKEN)
 
 
 def parse_arguments():
