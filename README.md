@@ -88,4 +88,10 @@ Start the script
 python3 main.py
 ```
 
+For brownie based projects start script with flag:
+
+```bash
+python3 main.py --support-brownie
+```
+
 ℹ️ See more config examples inside the [config_samples](./config_samples/) dir.

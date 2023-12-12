@@ -21,6 +21,8 @@ def _get_contract_from_etherscan(token, etherscan_hostname, contract):
         logger.error("Not a contract or source code is not verified", contract)
         sys.exit(1)
 
+    print(123, data["SourceCode"])
+
     contract_name = data["ContractName"]
     source_files = json.loads(data["SourceCode"][1:-1])["sources"].items()
 

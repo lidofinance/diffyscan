@@ -5,12 +5,12 @@ import time
 from utils.common import load_config, load_env
 from utils.constants import DIFFS_DIR, START_TIME
 from utils.explorer import get_contract_from_explorer
-from utils.github import get_file_from_github, resolve_dep
+from utils.github import get_file_from_github, get_file_from_github_recursive, resolve_dep
 from utils.helpers import create_dirs
 from utils.logger import logger
+from utils.arguments import parser
 
-
-def run_diff(config, name, address, explorer_api_token, github_api_token):
+def run_diff(config, name, address, explorer_api_token, github_api_token, recursive_parsing=False):
     logger.divider()
     logger.okay("Contract", address)
     logger.okay("Blockchain explorer Hostname", config["explorer_hostname"])
@@ -66,7 +66,10 @@ def run_diff(config, name, address, explorer_api_token, github_api_token):
             logger.error("File not found", path_to_file)
             sys.exit()
 
-        github_file = get_file_from_github(github_api_token, repo, path_to_file, dep_name)
+        if recursive_parsing:
+            github_file = get_file_from_github_recursive(github_api_token, repo, path_to_file, dep_name)
+        else:
+            github_file = get_file_from_github(github_api_token, repo, path_to_file, dep_name)
 
         github_lines = github_file.splitlines()
         explorer_lines = source_code["content"].splitlines()
@@ -106,6 +109,8 @@ def run_diff(config, name, address, explorer_api_token, github_api_token):
 
 
 def main():
+    args = parser.parse_args()
+
     logger.info("Welcome to Diffyscan!")
     logger.divider()
 
@@ -138,12 +143,20 @@ def main():
             contract_address,
             explorer_api_token,
             github_api_token,
+            recursive_parsing=args.support_brownie,
         )
     else:
         contracts = config["contracts"]
         logger.info(f"Running diff for contracts from config {contracts}...")
         for address, name in config["contracts"].items():
-            run_diff(config, name, address, explorer_api_token, github_api_token)
+            run_diff(
+                config,
+                name,
+                address,
+                explorer_api_token,
+                github_api_token,
+                recursive_parsing=args.support_brownie
+            )
 
     execution_time = time.time() - START_TIME
 

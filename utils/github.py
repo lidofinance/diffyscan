@@ -4,6 +4,28 @@ from utils.logger import logger
 
 def get_file_from_github(github_api_token, dependency_repo, path_to_file, dep_name):
     path_to_file = path_to_file_without_dependency(path_to_file, dep_name)
+
+    user_slash_repo = parse_repo_link(dependency_repo['url'])
+
+    github_api_url = (
+        f"https://api.github.com/repos/{user_slash_repo}/contents/{dependency_repo['relative_root']}/{path_to_file}"
+    )
+
+    github_api_url += "?ref=" + dependency_repo['commit']
+
+    github_data = fetch(
+        github_api_url, headers={"Authorization": f"token {github_api_token}"}
+    )
+
+    file_content = github_data.get("content")
+
+    if not file_content:
+        logger.error("No file content")
+
+    return base64.b64decode(file_content).decode()
+
+def get_file_from_github_recursive(github_api_token, dependency_repo, path_to_file, dep_name):
+    path_to_file = path_to_file_without_dependency(path_to_file, dep_name)
     user_slash_repo = parse_repo_link(dependency_repo['url'])
     
     direct_file_content = _get_direct_file(github_api_token, user_slash_repo, dependency_repo['relative_root'], path_to_file, dependency_repo['commit'])
