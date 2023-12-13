@@ -1,11 +1,10 @@
 {
     "contracts": {
-        "0xa11ba93afbd6d18e26fefdb2c6311da6c9b370d6": "ProxyAdmin",
-        "0x2bfdf4a0d54c93a4baf74f8dcea8a275d8ee97a9": "TokenBridge",
-        "0xc0583e2F5930EDE5Fab9D57bAC4169878730B010": "CustomBridgedToken",
-        "0xF951d7592e03eDB0Bab3D533935e678Ce64Eb927": "ProxyAdmin"
+        "0x051F1D88f0aF5763fB888eC4378b4D8B29ea3319": "TransparentUpgradeableProxy",
+        "0x5b0bb17755fba06028530682e2fd5bc373931768": "ProxyAdmin"
     },
-    "explorer_hostname": "api.lineascan.build",
+    "explorer_hostname": "api.etherscan.io",
+    "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
     "github_repo": {
         "url": "https://github.com/Consensys/linea-contracts-fix",
         "commit": "0949c4096664e613f73ed3ce51c32f97fc56cdef",
@@ -14,15 +13,15 @@
     "dependencies": {
         "@openzeppelin/contracts": {
             "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
-            "commit": "e50c24f5839db17f46991478384bfda14acfb830",
+            "commit": "0a25c1940ca220686588c4af3ec526f725fe2582",
             "relative_root": "contracts",
-            "//": "oz version 4.9.2"
+            "//": "oz version 4.8.3"
         },
         "@openzeppelin/contracts-upgradeable": {
             "url": "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable",
-            "commit": "bc95521e34dcd49792065e264a7ad2b5a86f0091",
+            "commit": "58fa0f81c4036f1a3b616fdffad2fd27e5d5ce21",
             "relative_root": "contracts",
-            "//": "oz version 4.9.2"
+            "//": "oz version 4.8.3"
         }
     }
 }

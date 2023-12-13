@@ -5,19 +5,18 @@ from urllib.parse import urlparse
 
 import requests
 
-from utils.constants import CONFIG_PATH
 from utils.logger import logger
 from utils.types import Config
 
 
 def load_env(variable_name, required=True, masked=False):
-    value = os.getenv(variable_name)
+    value = os.getenv(variable_name, default=None)
 
     if required and not value:
         logger.error("Env not found", variable_name)
         sys.exit(1)
 
-    printable_value = mask_text(value) if masked else value
+    printable_value = mask_text(value) if masked and value is not None else str(value)
 
     if printable_value:
         logger.okay(f"{variable_name}", printable_value)
@@ -27,15 +26,9 @@ def load_env(variable_name, required=True, masked=False):
     return value
 
 
-def load_config() -> Config:
-    config_path = get_config_path()
-
-    with open(config_path, mode="r") as config_file:
+def load_config(path: str) -> Config:
+    with open(path, mode="r") as config_file:
         return json.load(config_file)
-
-
-def get_config_path() -> str:
-    return CONFIG_PATH
 
 
 def fetch(url, headers={}):
