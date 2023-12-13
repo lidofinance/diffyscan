@@ -88,7 +88,9 @@ Start the script
 python3 main.py
 ```
 
-For brownie based projects start script with flag:
+> Note: Brownie verification tooling might rewrite the imports in the source submission. It transforms relative paths to imported contracts into flat paths ('./folder/contract.sol' -> 'contract.sol'), which makes Diffyscan unable to find a contract for verification.
+
+For contracts whose sources were verified by brownie tooling:
 
 ```bash
 python3 main.py --support-brownie
