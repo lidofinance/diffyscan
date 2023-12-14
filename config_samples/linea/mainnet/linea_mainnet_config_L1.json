@@ -1,0 +1,27 @@
+{
+    "contracts": {
+        "0x051F1D88f0aF5763fB888eC4378b4D8B29ea3319": "TransparentUpgradeableProxy",
+        "0x5b0bb17755fba06028530682e2fd5bc373931768": "ProxyAdmin"
+    },
+    "explorer_hostname": "api.etherscan.io",
+    "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+    "github_repo": {
+        "url": "https://github.com/Consensys/linea-contracts-fix",
+        "commit": "0949c4096664e613f73ed3ce51c32f97fc56cdef",
+        "relative_root": ""
+    },
+    "dependencies": {
+        "@openzeppelin/contracts": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+            "commit": "0a25c1940ca220686588c4af3ec526f725fe2582",
+            "relative_root": "contracts",
+            "//": "oz version 4.8.3"
+        },
+        "@openzeppelin/contracts-upgradeable": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable",
+            "commit": "58fa0f81c4036f1a3b616fdffad2fd27e5d5ce21",
+            "relative_root": "contracts",
+            "//": "oz version 4.8.3"
+        }
+    }
+}

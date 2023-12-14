@@ -11,7 +11,9 @@ def _errorNoSourceCodeAndExit(address):
 
 
 def _get_contract_from_etherscan(token, etherscan_hostname, contract):
-    etherscan_link = f"https://{etherscan_hostname}/api?module=contract&action=getsourcecode&address={contract}&apikey={token}"
+    etherscan_link = f"https://{etherscan_hostname}/api?module=contract&action=getsourcecode&address={contract}"
+    if token is not None:
+        etherscan_link = f"{etherscan_link}&apikey={token}"
 
     response = fetch(etherscan_link)
 
@@ -26,12 +28,18 @@ def _get_contract_from_etherscan(token, etherscan_hostname, contract):
         _errorNoSourceCodeAndExit(contract)
 
     contract_name = data["ContractName"]
-    source_files = json.loads(data["SourceCode"][1:-1])["sources"].items()
+
+    json_escaped = data["SourceCode"].startswith("{{")
+    source_files = (
+        json.loads(data["SourceCode"][1:-1])["sources"].items()
+        if json_escaped
+        else json.loads(data["SourceCode"]).items()
+    )
 
     return (contract_name, source_files)
 
 
-def _get_contract_from_zksync(token, zksync_explorer_hostname, contract):
+def _get_contract_from_zksync(zksync_explorer_hostname, contract):
     zksync_explorer_link = (
         f"https://{zksync_explorer_hostname}/contract_verification/info/{contract}"
     )
@@ -53,7 +61,7 @@ def _get_contract_from_zksync(token, zksync_explorer_hostname, contract):
     return (contract_name, source_files)
 
 
-def _get_contract_from_mantle(token, mantle_explorer_hostname, contract):
+def _get_contract_from_mantle(mantle_explorer_hostname, contract):
     etherscan_link = f"https://{mantle_explorer_hostname}/api?module=contract&action=getsourcecode&address={contract}"
 
     response = fetch(etherscan_link)
@@ -71,7 +79,9 @@ def _get_contract_from_mantle(token, mantle_explorer_hostname, contract):
 
 def get_contract_from_explorer(token, explorer_hostname, contract):
     if explorer_hostname.startswith("zksync"):
-        return _get_contract_from_zksync(token, explorer_hostname, contract)
+        return _get_contract_from_zksync(explorer_hostname, contract)
     if explorer_hostname.endswith("mantle.xyz"):
-        return _get_contract_from_mantle(token, explorer_hostname, contract)
+        return _get_contract_from_mantle(explorer_hostname, contract)
+    if explorer_hostname.endswith("lineascan.build"):
+        return _get_contract_from_etherscan(None, explorer_hostname, contract)
     return _get_contract_from_etherscan(token, explorer_hostname, contract)

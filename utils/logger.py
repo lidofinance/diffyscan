@@ -110,7 +110,7 @@ class Logger:
         diffs_found = row[3] != None and row[3] > 0
 
         if not file_found:
-            hlcolor = YELLOW
+            hlcolor = RED
         elif diffs_found:
             hlcolor = RED
 

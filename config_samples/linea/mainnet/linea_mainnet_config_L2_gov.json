@@ -1,0 +1,13 @@
+{
+    "contracts": {
+        "0x74Be82F00CC867614803ffd7f36A2a4aF0405670": "LineaBridgeExecutor"
+    },
+    "explorer_hostname": "api.lineascan.build",
+    "explorer_token_env_var": "LINEA_EXPLORER_TOKEN",
+    "github_repo": {
+        "url": "https://github.com/Consensys/governance-crosschain-bridges",
+        "commit": "315308a2640c696937185732159b130417f29997",
+        "relative_root": ""
+    },
+    "dependencies": {}
+}
