@@ -4,7 +4,7 @@
     },
     "explorer_hostname": "explorer.mantle.xyz",
     "github_repo": {
-        "url": "hhttps://github.com/lidofinance/governance-crosschain-bridges",
+        "url": "https://github.com/lidofinance/governance-crosschain-bridges",
         "commit": "8fa25b0080dd3dcc2390313631aea6796a12c9d8",
         "relative_root": ""
     },
