@@ -6,7 +6,7 @@
     "explorer_hostname": "api.etherscan.io",
     "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
     "github_repo": {
-        "url": "https://github.com/Consensys/linea-contracts-fix",
+        "url": "https://github.com/lidofinance/linea-contracts-fix",
         "commit": "0949c4096664e613f73ed3ce51c32f97fc56cdef",
         "relative_root": ""
     },

@@ -7,7 +7,7 @@
     },
     "explorer_hostname": "explorer.mantle.xyz",
     "github_repo": {
-        "url": "https://github.com/mantlenetworkio/lido-l2",
+        "url": "https://github.com/lidofinance/lido-l2",
         "commit": "cdd513cd3d25699a8757f8e730b443a495d0240e",
         "relative_root": ""
     },

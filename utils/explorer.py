@@ -52,7 +52,7 @@ def _get_contract_from_zksync(zksync_explorer_hostname, contract):
         sys.exit(1)
 
     data = response["request"]
-    if "ContractName" not in data:
+    if "contractName" not in data:
         _errorNoSourceCodeAndExit(contract)
 
     contract_name = data["contractName"].split(":")[-1]

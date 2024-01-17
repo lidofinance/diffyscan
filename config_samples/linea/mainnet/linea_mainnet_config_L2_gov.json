@@ -5,8 +5,8 @@
     "explorer_hostname": "api.lineascan.build",
     "explorer_token_env_var": "LINEA_EXPLORER_TOKEN",
     "github_repo": {
-        "url": "https://github.com/Consensys/governance-crosschain-bridges",
-        "commit": "315308a2640c696937185732159b130417f29997",
+        "url": "https://github.com/lidofinance/governance-crosschain-bridges",
+        "commit": "7d4fd35e92688d7aa56ae2f94872f851bacae50c",
         "relative_root": ""
     },
     "dependencies": {}

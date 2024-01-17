@@ -6,9 +6,10 @@
         "0xc3f1A4C13532cc9DDeA36B54d83A427B8D4AaeEe": "L1ERC20Bridge"
     },
     "explorer_hostname": "api-goerli.etherscan.io",
+    "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
     "github_repo": {
-        "url": "https://github.com/txfusion/lido-l2",
-        "commit": "28d8f7539a57972a83f41a8809fee4c4766009a0",
+        "url": "https://github.com/lidofinance/lido-l2",
+        "commit": "fa6a77e694a34dc6f03d57bb8c934941e554ac9d",
         "relative_root": "zksync"
     },
     "dependencies": {
