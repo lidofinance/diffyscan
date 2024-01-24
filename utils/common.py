@@ -35,6 +35,9 @@ def fetch(url, headers={}):
     logger.log(f"fetch: {url}")
     response = requests.get(url, headers=headers)
 
+    if response.status_code == 404:
+        return None
+
     if not response.ok and response.status_code != 200:
         logger.error("Request failed", url)
         logger.error("Status", response.status_code)

@@ -7,7 +7,7 @@ import os
 from utils.common import load_config, load_env
 from utils.constants import DIFFS_DIR, START_TIME, DEFAULT_CONFIG_PATH
 from utils.explorer import get_contract_from_explorer
-from utils.github import get_file_from_github, resolve_dep
+from utils.github import get_file_from_github, get_file_from_github_recursive, resolve_dep
 from utils.helpers import create_dirs
 from utils.logger import logger
 
@@ -17,7 +17,7 @@ GITHUB_API_TOKEN = load_env("GITHUB_API_TOKEN", masked=True)
 g_skip_user_input: bool = False
 
 
-def run_diff(config, name, address, explorer_api_token, github_api_token):
+def run_diff(config, name, address, explorer_api_token, github_api_token, recursive_parsing=False):
     logger.divider()
     logger.okay("Contract", address)
     logger.okay("Blockchain explorer Hostname", config["explorer_hostname"])
@@ -79,9 +79,11 @@ def run_diff(config, name, address, explorer_api_token, github_api_token):
 
         file_found = bool(repo)
 
-        github_file = get_file_from_github(
-            github_api_token, repo, path_to_file, dep_name
-        )
+        if recursive_parsing:
+            github_file = get_file_from_github_recursive(github_api_token, repo, path_to_file, dep_name)
+        else:
+            github_file = get_file_from_github(github_api_token, repo, path_to_file, dep_name)
+        
         if not github_file:
             github_file = "<!-- No file content -->"
             file_found = False
@@ -121,7 +123,7 @@ def run_diff(config, name, address, explorer_api_token, github_api_token):
     logger.report_table(report)
 
 
-def process_config(path: str):
+def process_config(path: str, recursive_parsing: bool):
     logger.info(f"Loading config {path}...")
     config = load_config(path)
     explorer_token = None
@@ -131,13 +133,18 @@ def process_config(path: str):
     contracts = config["contracts"]
     logger.info(f"Running diff for contracts from config {contracts}...")
     for address, name in config["contracts"].items():
-        run_diff(config, name, address, explorer_token, GITHUB_API_TOKEN)
+        run_diff(config, name, address, explorer_token, GITHUB_API_TOKEN, recursive_parsing)
 
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("path", nargs="?", default=None, help="Path to config or directory with configs")
     parser.add_argument("--yes", "-y", help="If set don't ask for input before validating each contract", action="store_true")
+    parser.add_argument(
+        "--support-brownie",
+        help="Support recursive retrieving for contracts. It may be useful for contracts whose sources have been verified by the brownie tooling, which automatically replaces relative paths to contracts in imports with plain contract names.",
+        action=argparse.BooleanOptionalAction,
+    )
     return parser.parse_args()
 
 
@@ -151,14 +158,14 @@ def main():
     logger.divider()
 
     if args.path is None:
-        process_config(DEFAULT_CONFIG_PATH)
+        process_config(DEFAULT_CONFIG_PATH, args.support_brownie)
     elif os.path.isfile(args.path):
-        process_config(args.path)
+        process_config(args.path, args.support_brownie)
     elif os.path.isdir(args.path):
         for filename in os.listdir(args.path):
             config_path = os.path.join(args.path, filename)
             if os.path.isfile(config_path):
-                process_config(config_path)
+                process_config(config_path, args.support_brownie)
 
     execution_time = time.time() - START_TIME
 
