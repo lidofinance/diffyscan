@@ -10,8 +10,8 @@
     },
     "explorer_hostname": "zksync2-testnet-explorer.zksync.dev",
     "github_repo": {
-        "url": "https://github.com/txfusion/lido-l2",
-        "commit": "28d8f7539a57972a83f41a8809fee4c4766009a0",
+        "url": "https://github.com/lidofinance/lido-l2",
+        "commit": "fa6a77e694a34dc6f03d57bb8c934941e554ac9d",
         "relative_root": "zksync"
     },
     "dependencies": {
