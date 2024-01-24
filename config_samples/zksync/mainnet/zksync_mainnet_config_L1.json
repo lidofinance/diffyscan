@@ -1,14 +1,15 @@
 {
     "contracts": {
-        "0x3f33402FBbaE3e9Cf953e25F8b7D778342E67a77": "OssifiableProxy",
-        "0xFF875a60a99bc7b5B06F295f5b374cC44C969C66": "L1Executor",
-        "0xAd5c2a39eD9A8cB32A92E8510AECAF478222B565": "OssifiableProxy",
-        "0x86B56BfC8c36470edF03adA2Eb3F8b8ca397732a": "L1ERC20Bridge"
+        "0xFf7F4d05e3247374e86A3f7231A2Ed1CA63647F2": "OssifiableProxy",
+        "0x06185d60eD72a91D1367Eb0733B9d20AE7336D3B": "L1Executor",
+        "0x41527B2d03844dB6b0945f25702cB958b6d55989": "OssifiableProxy",
+        "0x9a810469F4a451Ebb7ef53672142053b4971587c": "L1ERC20Bridge"
     },
-    "explorer_hostname": "api-goerli.etherscan.io",
+    "explorer_hostname": "api.etherscan.io",
+    "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
     "github_repo": {
-        "url": "https://github.com/txfusion/lido-l2",
-        "commit": "58fe118e1b1e6a0aa7b327e67041aaaa2fe88dbb",
+        "url": "https://github.com/lidofinance/lido-l2",
+        "commit": "fa6a77e694a34dc6f03d57bb8c934941e554ac9d",
         "relative_root": "zksync"
     },
     "dependencies": {

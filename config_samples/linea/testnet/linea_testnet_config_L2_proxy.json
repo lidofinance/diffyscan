@@ -1,0 +1,20 @@
+{
+    "contracts": {
+        "0x9ceed01e39279a529f44deB9d35E09a04B1E67c8": "TransparentUpgradeableProxy",
+        "0x71062fBC3da2d792285C3d5dabba12A42339e85c": "ProxyAdmin"
+    },
+    "explorer_hostname": "api-testnet.lineascan.build",
+    "github_repo": {
+        "url": "https://github.com/Consensys/linea-contracts",
+        "commit": "3cf85529fd4539eb06ba998030c37e47f98c528a",
+        "relative_root": ""
+    },
+    "dependencies": {
+        "@openzeppelin/contracts": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+            "commit": "0a25c1940ca220686588c4af3ec526f725fe2582",
+            "relative_root": "contracts",
+            "//": "oz version 4.8.3"
+        }
+    }
+}

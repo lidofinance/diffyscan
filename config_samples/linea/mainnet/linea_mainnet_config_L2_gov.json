@@ -1,0 +1,13 @@
+{
+    "contracts": {
+        "0x74Be82F00CC867614803ffd7f36A2a4aF0405670": "LineaBridgeExecutor"
+    },
+    "explorer_hostname": "api.lineascan.build",
+    "explorer_token_env_var": "LINEA_EXPLORER_TOKEN",
+    "github_repo": {
+        "url": "https://github.com/lidofinance/governance-crosschain-bridges",
+        "commit": "7d4fd35e92688d7aa56ae2f94872f851bacae50c",
+        "relative_root": ""
+    },
+    "dependencies": {}
+}
