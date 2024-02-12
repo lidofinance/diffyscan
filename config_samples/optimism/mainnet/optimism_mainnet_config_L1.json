@@ -4,6 +4,7 @@
         "0x29C5c51A031165CE62F964966A6399b81165EFA4": "L1ERC20TokenBridge"
     },
     "explorer_hostname": "api.etherscan.io",
+    "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
     "github_repo": {
         "url": "https://github.com/lidofinance/lido-l2",
         "commit": "082e7eb59de63bd376b30886568813408d04f00b",
