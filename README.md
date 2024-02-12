@@ -49,7 +49,7 @@ poetry install
 Set your Etherscan token to fetch verified source code,
 
 ```bash
-export ETHERSCAN_TOKEN=<your-etherscan-token>
+export ETHERSCAN_EXPLORER_TOKEN=<your-etherscan-token>
 ```
 
 Set your Github token to query API without strict rate limiting,
@@ -67,6 +67,7 @@ Create a config file named `config.json`,
         "0xDba5Ad530425bb1b14EECD76F1b4a517780de537": "LidoLocator"
     },
     "explorer_hostname": "api-holesky.etherscan.io",
+    "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
     "github_repo": {
         "url": "https://github.com/lidofinance/lido-dao",
         "commit": "cadffa46a2b8ed6cfa1127fca2468bae1a82d6bf",
