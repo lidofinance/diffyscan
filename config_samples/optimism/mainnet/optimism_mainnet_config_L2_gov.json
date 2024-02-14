@@ -1,0 +1,20 @@
+{
+    "contracts": {
+        "0xEfa0dB536d2c8089685630fafe88CF7805966FC3": "OptimismBridgeExecutor"
+    },
+    "explorer_hostname": "api-optimistic.etherscan.io",
+    "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+    "github_repo": {
+        "url": "https://github.com/lidofinance/governance-crosschain-bridges",
+        "commit": "8fa25b0080dd3dcc2390313631aea6796a12c9d8",
+        "relative_root": ""
+    },
+    "dependencies": {
+        "@openzeppelin/contracts": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+            "commit": "d4fb3a89f9d0a39c7ee6f2601d33ffbf30085322",
+            "relative_root": "contracts",
+            "//": "OZ 4.6.0"
+        }
+    }
+}
