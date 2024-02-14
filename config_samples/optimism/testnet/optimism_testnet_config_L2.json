@@ -6,7 +6,7 @@
         "0xaB0c6F1015b644c252064155759Cdc90a6CBd50d": "ERC20Bridged"
     },
     "explorer_hostname": "api-sepolia-optimistic.etherscan.io",
-    "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+    "explorer_token_env_var": "OPTISCAN_EXPLORER_TOKEN",
     "github_repo": {
         "url": "https://github.com/lidofinance/lido-l2",
         "commit": "384be204288d04ea8557242cee57d4dc8e521aa4",
