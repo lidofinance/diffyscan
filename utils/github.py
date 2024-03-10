@@ -18,7 +18,11 @@ def get_file_from_github(github_api_token, dependency_repo, path_to_file, dep_na
     github_data = fetch(
         github_api_url, headers={"Authorization": f"token {github_api_token}"}
     )
-    
+
+    if not github_data:
+        logger.error("No github data for", github_api_url)
+        return None
+
     file_content = github_data.get("content")
 
     if not file_content:

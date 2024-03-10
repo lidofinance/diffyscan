@@ -1,0 +1,28 @@
+{
+    "contracts": {
+        "0x6625c6332c9f91f2d27c304e729b86db87a3f504": "TransparentUpgradeableProxy",
+        "0xF4f2066EE72D62e3caF9678459149BA7FCf2262F": "L1LidoGateway",
+        "0xCC2C53556Bc75217cf698721b29071d6f12628A9": "ProxyAdmin"
+    },
+    "explorer_hostname": "api.etherscan.io",
+    "explorer_token_env_var": "ETHERSCAN_TOKEN",
+    "github_repo": {
+        "url": "https://github.com/scroll-tech/scroll",
+        "commit": "69224ebb935d499c055c7859c1c8ade57244249c",
+        "relative_root": "contracts"
+    },
+    "dependencies": {
+        "@openzeppelin/contracts": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+            "commit": "fd81a96f01cc42ef1c9a5399364968d0e07e9e90",
+            "relative_root": "contracts",
+            "//": "version 4.9.3"
+        },
+        "@openzeppelin/contracts-upgradeable": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable",
+            "commit": "3d4c0d5741b131c231e558d7a6213392ab3672a5",
+            "relative_root": "contracts",
+            "//": "version 4.9.3"
+        }
+    }
+}

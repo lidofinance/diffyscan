@@ -1,0 +1,25 @@
+{
+    "contracts": {
+        "0x0c67D8D067E349669dfEAB132A7c03A90594eE09": "ScrollBridgeExecutor"
+    },
+    "explorer_hostname": "api.scrollscan.com",
+    "github_repo": {
+        "url": "https://github.com/scroll-tech/governance-crosschain-bridges",
+        "commit": "d023beed13f9b7f77c062b8fee43476788e48343",
+        "relative_root": ""
+    },
+    "dependencies": {
+        "@openzeppelin/contracts": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+            "commit": "fd81a96f01cc42ef1c9a5399364968d0e07e9e90",
+            "relative_root": "contracts",
+            "//": "version 4.9.3"
+        },
+        "@openzeppelin/contracts-upgradeable": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable",
+            "commit": "3d4c0d5741b131c231e558d7a6213392ab3672a5",
+            "relative_root": "contracts",
+            "//": "version 4.9.3"
+        }
+    }
+}

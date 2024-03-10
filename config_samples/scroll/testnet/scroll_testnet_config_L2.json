@@ -1,0 +1,29 @@
+{
+    "contracts": {
+        "0x635B054A092F6aE61Ce0Fddc397A704F6626510D": "TransparentUpgradeableProxy",
+        "0x906CD1Bfa5C3f7B2FF9BFBB5950ada841ED99E72": "L2LidoGateway",
+        "0x2DAf22Caf40404ad8ff0Ab1E77F9C08Fef3953e2": "TransparentUpgradeableProxy",
+        "0xaed405fc13d66e2f1055f6efe9a5ce736652fa55": "L2WstETHToken",
+        "0xc6cdc2839378d50e03c9737723d96d117b09bda5": "ProxyAdmin"
+    },
+    "explorer_hostname": "api-sepolia.scrollscan.com",
+    "github_repo": {
+        "url": "https://github.com/scroll-tech/scroll",
+        "commit": "69224ebb935d499c055c7859c1c8ade57244249c",
+        "relative_root": "contracts"
+    },
+    "dependencies": {
+        "@openzeppelin/contracts": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+            "commit": "fd81a96f01cc42ef1c9a5399364968d0e07e9e90",
+            "relative_root": "contracts",
+            "//": "version 4.9.3"
+        },
+        "@openzeppelin/contracts-upgradeable": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable",
+            "commit": "3d4c0d5741b131c231e558d7a6213392ab3672a5",
+            "relative_root": "contracts",
+            "//": "version 4.9.3"
+        }
+    }
+}
