@@ -17,7 +17,7 @@ termtables = "^0.2.4"
 [tool.poetry.dev-dependencies]
 
 [tool.poetry.group.dev.dependencies]
-black = "^23.9.1"
+black = "^24.3.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
