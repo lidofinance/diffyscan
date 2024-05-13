@@ -1,0 +1,27 @@
+{
+    "contracts": {
+        "0xAA4aCF50199096EefC7e211021600C57C6CDb472": "OssifiableProxy",
+        "0x461cfAecD0360bAFfC9c690599305f05a1731326": "L1ERC20TokenBridgeMetis"
+    },
+    "explorer_hostname": "api-sepolia.etherscan.io",
+    "explorer_token_env_var": "ETHERSCAN_TOKEN",
+    "github_repo": {
+        "url": "https://github.com/MohammadShahin/lido-l2-metis",
+        "commit": "ba10d253721cb60efceab0cb55033fcf14f6262b",
+        "relative_root": ""
+    },
+    "dependencies": {
+        "@openzeppelin/contracts": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+            "commit": "dc44c9f1a4c3b10af99492eed84f83ed244203f6",
+            "relative_root": "contracts",
+            "//": "version 4.9.6"
+        },
+        "@openzeppelin/contracts-upgradeable": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable",
+            "commit": "2d081f24cac1a867f6f73d512f2022e1fa987854",
+            "relative_root": "contracts",
+            "//": "version 4.9.6"
+        }
+    }
+}
