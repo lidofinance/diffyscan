@@ -3,10 +3,10 @@
     "": "ProxyAdmin",
     "": "TransparentUpgradeableProxy",
     "": "CrossChainController",
-    "": "CCIPAdapterTestnet",
+    "": "CCIPAdapter",
     "": "HyperLaneAdapter",
-    "": "LayerZeroAdapterTestnet",
-    "": "WormholeAdapterTestnet"
+    "": "LayerZeroAdapter",
+    "": "WormholeAdapter"
   },
   "explorer_token_env_var": "ETHERSCAN_API_MAINNET",
   "explorer_hostname": "api.etherscan.io",

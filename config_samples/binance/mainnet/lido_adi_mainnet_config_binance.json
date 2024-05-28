@@ -4,10 +4,10 @@
     "": "TransparentUpgradeableProxy",
     "": "CrossChainController",
     "": "CrossChainExecutor",
-    "": "CCIPAdapterTestnet",
+    "": "CCIPAdapter",
     "": "HyperLaneAdapter",
-    "": "LayerZeroAdapterTestnet",
-    "": "WormholeAdapterTestnet"
+    "": "LayerZeroAdapter",
+    "": "WormholeAdapter"
   },
   "explorer_token_env_var": "ETHERSCAN_API_BINANCE",
   "explorer_hostname": "api.bscscan.com",
