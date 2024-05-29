@@ -61,7 +61,7 @@ export GITHUB_API_TOKEN=<your-github-token>
 Start script with one of the examples provided
 
 ```bash
-python main.py config_samples/lido_dao_sepolia_config.json
+python3 main.py config_samples/lido_dao_sepolia_config.json
 ```
 
 Alternatively, create a new config file named `config.json`,
@@ -92,7 +92,7 @@ Alternatively, create a new config file named `config.json`,
 Start the script
 
 ```bash
-python main.py
+python3 main.py
 ```
 
 > Note: Brownie verification tooling might rewrite the imports in the source submission. It transforms relative paths to imported contracts into flat paths ('./folder/contract.sol' -> 'contract.sol'), which makes Diffyscan unable to find a contract for verification.
@@ -100,7 +100,7 @@ python main.py
 For contracts whose sources were verified by brownie tooling:
 
 ```bash
-python main.py --support-brownie
+python3 main.py --support-brownie
 ```
 
 ℹ️ See more config examples inside the [config_samples](./config_samples/) dir.
