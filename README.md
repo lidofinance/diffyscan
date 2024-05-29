@@ -1,7 +1,7 @@
 # Diffyscan
 
-![python ^3.10](https://img.shields.io/badge/python-^3.10-blue)
-![poetry ^1.4](https://img.shields.io/badge/poetry-^1.6-blue)
+![python >=3.10,<4](https://img.shields.io/badge/python-≥3.10,<4-blue)
+![poetry ^1.8](https://img.shields.io/badge/poetry-^1.8-blue)
 ![license MIT](https://img.shields.io/badge/license-MIT-brightgreen)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
@@ -11,8 +11,8 @@ Diff your Ethereum smart contracts code from GitHub against Blockchain explorer 
 
 This project was developed using these dependencies with their exact versions listed below:
 
-- Python 3.10
-- Poetry 1.6
+- Python 3.12
+- Poetry 1.8
 
 Other versions may work as well but were not tested at all.
 
@@ -23,13 +23,13 @@ Other versions may work as well but were not tested at all.
 Use the following command to install poetry:
 
 ```shell
-pip install --user poetry~=1.6
+pip install --user poetry~=1.8
 ```
 
 alternatively, you could proceed with `pipx`:
 
 ```shell
-pipx install poetry~=1.6
+pipx install poetry~=1.8
 ```
 
 2. Activate poetry virtual environment,
@@ -58,7 +58,13 @@ Set your Github token to query API without strict rate limiting,
 export GITHUB_API_TOKEN=<your-github-token>
 ```
 
-Create a config file named `config.json`,
+Start script with one of the examples provided
+
+```bash
+python3 main.py config_samples/lido_dao_sepolia_config.json
+```
+
+Alternatively, create a new config file named `config.json`,
 
 ```json
 {
