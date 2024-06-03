@@ -1,6 +1,7 @@
 import termtables
-from utils.constants import LOGS_PATH
-from utils.helpers import create_dirs
+
+from .constants import LOGS_PATH
+from .helpers import create_dirs
 
 CYAN = "\033[96m"
 PURPLE = "\033[95m"
@@ -107,7 +108,7 @@ class Logger:
         hlcolor = GREEN
 
         file_found = row[2]
-        diffs_found = row[3] != None and row[3] > 0
+        diffs_found = row[3] is not None and row[3] > 0
 
         if not file_found:
             hlcolor = RED

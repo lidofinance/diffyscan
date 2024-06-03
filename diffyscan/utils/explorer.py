@@ -1,8 +1,8 @@
 import json
 import sys
 
-from utils.common import fetch
-from utils.logger import logger
+from .common import fetch
+from .logger import logger
 
 
 def _errorNoSourceCodeAndExit(address):

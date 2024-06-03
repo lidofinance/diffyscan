@@ -9,11 +9,11 @@ repository = "https://github.com/lidofinance/diffyscan"
 keywords = ["ethereum", "diff", "sources"]
 
 package-mode = true
-packages = [{ include = "main.py"}, { include = "utils" }]
+packages = [{ include = "diffyscan"}]
 exclude = ["config_samples"]
 
 [tool.poetry.scripts]
-diffyscan = "main:main"
+diffyscan = "diffyscan.diffyscan:main"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4"
@@ -30,7 +30,7 @@ style = "semver"
 metadata = false
 
 [tool.poetry-dynamic-versioning.substitution]
-files = ["main.py"]
+files = ["diffyscan/diffyscan.py"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]

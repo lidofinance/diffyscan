@@ -1,6 +1,7 @@
 import base64
-from utils.common import fetch, parse_repo_link
-from utils.logger import logger
+
+from .common import fetch, parse_repo_link
+from .logger import logger
 
 
 def get_file_from_github(github_api_token, dependency_repo, path_to_file, dep_name):

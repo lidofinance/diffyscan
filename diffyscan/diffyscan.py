@@ -4,12 +4,12 @@ import time
 import argparse
 import os
 
-from utils.common import load_config, load_env
-from utils.constants import DIFFS_DIR, START_TIME, DEFAULT_CONFIG_PATH
-from utils.explorer import get_contract_from_explorer
-from utils.github import get_file_from_github, get_file_from_github_recursive, resolve_dep
-from utils.helpers import create_dirs
-from utils.logger import logger
+from .utils.common import load_config, load_env
+from .utils.constants import DIFFS_DIR, START_TIME, DEFAULT_CONFIG_PATH
+from .utils.explorer import get_contract_from_explorer
+from .utils.github import get_file_from_github, get_file_from_github_recursive, resolve_dep
+from .utils.helpers import create_dirs
+from .utils.logger import logger
 
 
 __version__ = "0.0.0"
