@@ -141,7 +141,7 @@ def process_config(path: str, recursive_parsing: bool):
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--version", "-v", action="store_true", help="Display version information")
+    parser.add_argument("--version", "-V", action="store_true", help="Display version information")
     parser.add_argument("path", nargs="?", default=None, help="Path to config or directory with configs")
     parser.add_argument("--yes", "-y", help="If set don't ask for input before validating each contract", action="store_true")
     parser.add_argument(
