@@ -107,7 +107,12 @@ pipx install poetry~=1.8
 poetry shell
 ```
 
-3. Install Python dependencies
+3. Install [poetry-dynamic-versioning](https://github.com/mtkennerly/poetry-dynamic-versioning?tab=readme-ov-file#installation)
+
+- In most cases: `poetry self add "poetry-dynamic-versioning[plugin]"`
+- If you installed Poetry with Pipx: `pipx inject poetry "poetry-dynamic-versioning[plugin]"`
+
+4. Install Python dependencies
 
 ```bash
 poetry install

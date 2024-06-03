@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "diffyscan"
-version = "0.1.0"
+version = "0.0.0"
 description = "Diff your Ethereum smart contracts code from GitHub against Blockchain explorer verified source code."
 authors = ["Azat Serikov <azatsdev@gmail.com>"]
 license = "MIT"
@@ -23,6 +23,15 @@ termtables = "^0.2.4"
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.2"
 
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+style = "semver"
+metadata = false
+
+[tool.poetry-dynamic-versioning.substitution]
+files = ["main.py"]
+
 [build-system]
-requires = ["poetry-core>=1.9.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"
