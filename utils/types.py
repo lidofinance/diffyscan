@@ -1,8 +1,8 @@
-from typing import Dict, TypedDict
+from typing import TypedDict
 
 
 class Config(TypedDict):
-    contract: str
+    contracts: dict[str, str]
     network: str
     github_repo: str
-    dependencies: Dict[str, str]
+    dependencies: dict[str, str]
