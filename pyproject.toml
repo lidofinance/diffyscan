@@ -1,21 +1,24 @@
 [tool.poetry]
-name = "explorer-github-diff-checker"
-version = "0.2.0"
+name = "diffyscan"
+version = "0.1.0"
 description = "Diff your Ethereum smart contracts code from GitHub against Blockchain explorer verified source code."
 authors = ["Azat Serikov <azatsdev@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/lidofinance/diffyscan"
-
 keywords = ["ethereum", "diff", "sources"]
-package-mode = false
+
+package-mode = true
+packages = [{ include = "main.py"}, { include = "utils" }]
+exclude = ["config_samples"]
+
+[tool.poetry.scripts]
+diffyscan = "main:main"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4"
 requests = "^2.32.2"
 termtables = "^0.2.4"
-
-[tool.poetry.dev-dependencies]
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.2"
