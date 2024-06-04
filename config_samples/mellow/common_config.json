@@ -1,0 +1,29 @@
+{
+    "contracts": {
+        "0x0c3E4E9Ab10DfB52c52171F66eb5C7E05708F77F": "Vault",
+        "0x8f06BEB555D57F0D20dB817FF138671451084e24": "Initializer",
+        "0xCA60f449867c9101Ec80F8C611eaB39afE7bD638": "ERC20TvlModule",
+        "0x48f758bd51555765EBeD4FD01c85554bD0B3c03B": "DefaultBondTvlModule",
+        "0x204043f4bda61F719Ad232b4196E1bc4131a3096": "DefaultBondModule",
+        "0x1437DCcA4e1442f20285Fb7C11805E7a965681e2": "ManagedRatiosOracle",
+        "0xA5046e9379B168AFA154504Cf16853B6a7728436": "ChainlinkOracle",
+        "0x3C1418499aa69A08DfBCed4243BBA7EB90dE3D09": "ConstantAggregatorV3",
+        "0x773ae8ca45D5701131CA84C58821a39DdAdC709c": "WStethRatiosAggregatorV3",
+        "0x538459eeA06A06018C70bf9794e1c7b298694828": "DefaultProxyImplementation"
+    },
+    "explorer_hostname": "api.etherscan.io",
+    "explorer_token_env_var": "ETHERSCAN_TOKEN",
+    "github_repo": {
+        "url": "https://github.com/mellow-finance/mellow-lrt",
+        "commit": "efcbc9e5db9d74e39fe52b3f8729abacbc5d1180",
+        "relative_root": ""
+    },
+    "dependencies": {
+        "lib/openzeppelin-contracts/contracts": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+            "commit": "dbb6104ce834628e473d2173bbc9d47f81a9eec3",
+            "relative_root": "contracts",
+            "//": "version 5.0.2"
+        }
+    }
+}
