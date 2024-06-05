@@ -1,25 +1,37 @@
 [tool.poetry]
-name = "explorer-github-diff-checker"
-version = "0.2.0"
+name = "diffyscan"
+version = "0.0.0"
 description = "Diff your Ethereum smart contracts code from GitHub against Blockchain explorer verified source code."
 authors = ["Azat Serikov <azatsdev@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/lidofinance/diffyscan"
-
 keywords = ["ethereum", "diff", "sources"]
-package-mode = false
+
+package-mode = true
+packages = [{ include = "diffyscan"}]
+exclude = ["config_samples"]
+
+[tool.poetry.scripts]
+diffyscan = "diffyscan.diffyscan:main"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4"
 requests = "^2.32.2"
 termtables = "^0.2.4"
 
-[tool.poetry.dev-dependencies]
-
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.2"
 
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+style = "semver"
+metadata = false
+
+[tool.poetry-dynamic-versioning.substitution]
+files = ["diffyscan/diffyscan.py"]
+
 [build-system]
-requires = ["poetry-core>=1.9.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"
