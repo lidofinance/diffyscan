@@ -7,12 +7,16 @@
 
 Diff your Ethereum smart contracts code from GitHub against Blockchain explorer verified source code.
 
+Supports reformatting solidity code by means of prettifier solidity plugin before comparing the sources (option `--prettify`).
+
 ## Prerequisites
 
 This project was developed using these dependencies with their exact versions listed below:
 
 - Python 3.12
 - Poetry 1.8
+- if need `--prettify` option support:
+  - npm
 
 Other versions may work as well but were not tested at all.
 
@@ -44,6 +48,13 @@ poetry shell
 poetry install
 ```
 
+4. If need `--prettify` option
+
+```shell
+npm install
+```
+
+
 ## Usage
 
 Set your Etherscan token to fetch verified source code,
@@ -58,7 +69,7 @@ Set your Github token to query API without strict rate limiting,
 export GITHUB_API_TOKEN=<your-github-token>
 ```
 
-Start script with one of the examples provided
+Start script with one of the examples provided (or entire folder of configs)
 
 ```bash
 python3 main.py config_samples/lido_dao_sepolia_config.json
