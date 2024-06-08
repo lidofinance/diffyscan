@@ -1,9 +1,9 @@
 {
     "contracts": {
-        "0x214d66d110060dA2848038CA0F7573486363cAe4": "VaultConfigurator",
-        "0x0483B89F632596B24426703E540e373083928a6A": "ManagedValidator",
-        "0xcE3A8820265AD186E8C1CeAED16ae97176D020bA": "DefaultBondStrategy",
-        "0x70cD3464A41B6692413a1Ba563b9D53955D5DE0d": "DepositWrapper"
+        "0x84b240E99d4C473b5E3dF1256300E2871412dDfe": "VaultConfigurator",
+        "0x6AB116ac709c89D90Cc1F8cD0323617A9996bA7c": "ManagedValidator",
+        "0xA0ea6d4fe369104eD4cc18951B95C3a43573C0F6": "DefaultBondStrategy",
+        "0x41A1FBEa7Ace3C3a6B66a73e96E5ED07CDB2A34d": "DepositWrapper"
     },
     "explorer_hostname": "api.etherscan.io",
     "explorer_token_env_var": "ETHERSCAN_TOKEN",

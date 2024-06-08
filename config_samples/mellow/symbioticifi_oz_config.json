@@ -1,6 +1,6 @@
 {
     "contracts": {
-        "0x3F95a719260ce6ec9622bC549c9adCff9edf16D9": "TransparentUpgradeableProxy"
+        "0x1BC8FCFbE6Aa17e4A7610F51B888f34583D202Ec": "TransparentUpgradeableProxy"
     },
     "explorer_hostname": "api.etherscan.io",
     "explorer_token_env_var": "ETHERSCAN_TOKEN",

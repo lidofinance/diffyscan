@@ -1,15 +1,15 @@
 {
     "contracts": {
-        "0x0c3E4E9Ab10DfB52c52171F66eb5C7E05708F77F": "Vault",
-        "0x8f06BEB555D57F0D20dB817FF138671451084e24": "Initializer",
-        "0xCA60f449867c9101Ec80F8C611eaB39afE7bD638": "ERC20TvlModule",
-        "0x48f758bd51555765EBeD4FD01c85554bD0B3c03B": "DefaultBondTvlModule",
-        "0x204043f4bda61F719Ad232b4196E1bc4131a3096": "DefaultBondModule",
-        "0x1437DCcA4e1442f20285Fb7C11805E7a965681e2": "ManagedRatiosOracle",
-        "0xA5046e9379B168AFA154504Cf16853B6a7728436": "ChainlinkOracle",
-        "0x3C1418499aa69A08DfBCed4243BBA7EB90dE3D09": "ConstantAggregatorV3",
-        "0x773ae8ca45D5701131CA84C58821a39DdAdC709c": "WStethRatiosAggregatorV3",
-        "0x538459eeA06A06018C70bf9794e1c7b298694828": "DefaultProxyImplementation"
+        "0xaf108ae0AD8700ac41346aCb620e828c03BB8848": "Vault",
+        "0x1EB0e946D7d757d7b085b779a146427e40ABBCf8": "ERC20TvlModule",
+        "0x39c62c6308bed7b0832cafc2bea0c0edc7f2060c": "Initializer",
+        "0x1E1d1eD64e4F5119F60BF38B322Da7ea5A395429": "DefaultBondTvlModule",
+        "0xD8619769fed318714d362BfF01CA98ac938Bdf9b": "DefaultBondModule",
+        "0x955Ff4Cc738cDC009d2903196d1c94C8Cfb4D55d": "ManagedRatiosOracle",
+        "0x1Dc89c28e59d142688D65Bd7b22C4Fd40C2cC06d": "ChainlinkOracle",
+        "0x6A8d8033de46c68956CCeBA28Ba1766437FF840F": "ConstantAggregatorV3",
+        "0x94336dF517036f2Bf5c620a1BC75a73A37b7bb16": "WStethRatiosAggregatorV3",
+        "0x02BB349832c58E892a20178b9696e2b93A3a9b0f": "DefaultProxyImplementation"
     },
     "explorer_hostname": "api.etherscan.io",
     "explorer_token_env_var": "ETHERSCAN_TOKEN",

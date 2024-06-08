@@ -1,8 +1,7 @@
 {
     "contracts": {
-        "0xa77a8D25cEB4B9F38A711850751edAc70d7b91b0": "TransparentUpgradeableProxy",
-        "0xF1504311dB8df3e02D56Ef6a2278188969cC2EDA": "TimelockController",
-        "0x638113B8941327E4B0213Eefcb1319EC664DFD16": "ProxyAdmin"
+        "0xBEEF69Ac7870777598A04B2bd4771c71212E6aBc": "TransparentUpgradeableProxy",
+        "0xed792a3fDEB9044C70c951260AaAe974Fb3dB38F": "ProxyAdmin"
     },
     "explorer_hostname": "api.etherscan.io",
     "explorer_token_env_var": "ETHERSCAN_TOKEN",
