@@ -6,15 +6,16 @@ import os
 import subprocess
 import tempfile
 
-from utils.common import load_config, load_env
-from utils.constants import DIFFS_DIR, START_TIME, DEFAULT_CONFIG_PATH
-from utils.explorer import get_contract_from_explorer
-from utils.github import get_file_from_github, get_file_from_github_recursive, resolve_dep
-from utils.helpers import create_dirs
-from utils.logger import logger
+from .utils.common import load_config, load_env
+from .utils.constants import DIFFS_DIR, START_TIME, DEFAULT_CONFIG_PATH
+from .utils.explorer import get_contract_from_explorer
+from .utils.github import get_file_from_github, get_file_from_github_recursive, resolve_dep
+from .utils.helpers import create_dirs
+from .utils.logger import logger
 
 
-GITHUB_API_TOKEN = load_env("GITHUB_API_TOKEN", masked=True)
+__version__ = "0.0.0"
+
 
 g_skip_user_input: bool = False
 
@@ -147,6 +148,8 @@ def run_diff(config, name, address, explorer_api_token, github_api_token, recurs
 def process_config(path: str, recursive_parsing: bool, unify_formatting: bool):
     logger.info(f"Loading config {path}...")
     config = load_config(path)
+
+    github_api_token = load_env("GITHUB_API_TOKEN", masked=True)
     explorer_token = None
     if "explorer_token_env_var" in config:
         explorer_token = load_env(config["explorer_token_env_var"], masked=True, required=False)
@@ -154,11 +157,12 @@ def process_config(path: str, recursive_parsing: bool, unify_formatting: bool):
     contracts = config["contracts"]
     logger.info(f"Running diff for contracts from config {contracts}...")
     for address, name in config["contracts"].items():
-        run_diff(config, name, address, explorer_token, GITHUB_API_TOKEN, recursive_parsing, unify_formatting)
+        run_diff(config, name, address, explorer_token, github_api_token, recursive_parsing, unify_formatting)
 
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--version", "-V", action="store_true", help="Display version information")
     parser.add_argument("path", nargs="?", default=None, help="Path to config or directory with configs")
     parser.add_argument("--yes", "-y", help="If set don't ask for input before validating each contract", action="store_true")
     parser.add_argument(
@@ -175,6 +179,10 @@ def main():
 
     args = parse_arguments()
     g_skip_user_input = args.yes
+
+    if args.version:
+        print(f"Diffyscan {__version__}")
+        return
 
     logger.info("Welcome to Diffyscan!")
     logger.divider()
