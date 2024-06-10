@@ -15,6 +15,12 @@ Supports reformatting solidity code by means of prettifier solidity plugin befor
 pipx install git+https://github.com/lidofinance/diffyscan
 ```
 
+If need `--prettify` option
+
+```shell
+npm install
+```
+
 ## Usage
 
 Set your Etherscan token to fetch verified source code,
