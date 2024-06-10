@@ -1,15 +1,15 @@
 {
     "contracts": {
-        "0x3492407B9b8e0619d4fF423265F1cA5BE5198dd8": "VaultConfigurator",
-        "0xa064e9D2599b7029Bb5d4896812D339ac1aAa111": "ManagedValidator",
-        "0x6c4Aa164e733292586Fd09b92d86f3e5fa8E0772": "DefaultBondStrategy",
-        "0x9d9d932Ff608F505EAd156E79C87A98Eb0527A1c": "DepositWrapper"
+        "0x214d66d110060dA2848038CA0F7573486363cAe4": "VaultConfigurator",
+        "0x0483B89F632596B24426703E540e373083928a6A": "ManagedValidator",
+        "0xcE3A8820265AD186E8C1CeAED16ae97176D020bA": "DefaultBondStrategy",
+        "0x70cD3464A41B6692413a1Ba563b9D53955D5DE0d": "DepositWrapper"
     },
     "explorer_hostname": "api.etherscan.io",
     "explorer_token_env_var": "ETHERSCAN_TOKEN",
     "github_repo": {
         "url": "https://github.com/mellow-finance/mellow-lrt",
-        "commit": "efcbc9e5db9d74e39fe52b3f8729abacbc5d1180",
+        "commit": "60e9a87eb970be5ee1d4f1f14ccc9919b2b2fbcc",
         "relative_root": ""
     },
     "dependencies": {

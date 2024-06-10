@@ -188,6 +188,9 @@ def main():
             config_path = os.path.join(args.path, filename)
             if os.path.isfile(config_path):
                 process_config(config_path, args.support_brownie, args.prettify)
+    else:
+        logger.error(f"Specified config path {args.path} not found")
+        sys.exit(1)
 
     execution_time = time.time() - START_TIME
 

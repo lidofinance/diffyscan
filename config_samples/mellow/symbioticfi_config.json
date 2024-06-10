@@ -1,6 +1,6 @@
 {
     "contracts": {
-        "0xB56dA788Aa93Ed50F50e0d38641519FfB3C3D1Eb": "DefaultCollateral"
+        "0xC329400492c6ff2438472D4651Ad17389fCb843a": "DefaultCollateral"
     },
     "explorer_hostname": "api.etherscan.io",
     "explorer_token_env_var": "ETHERSCAN_TOKEN",
