@@ -7,10 +7,18 @@
 
 Diff your Ethereum smart contracts code from GitHub against Blockchain explorer verified source code.
 
+Supports reformatting solidity code by means of prettifier solidity plugin before comparing the sources (option `--prettify`).
+
 ## Install
 
 ```bash
 pipx install git+https://github.com/lidofinance/diffyscan
+```
+
+If need `--prettify` option
+
+```shell
+npm install
 ```
 
 ## Usage
@@ -27,7 +35,7 @@ Set your Github token to query API without strict rate limiting,
 export GITHUB_API_TOKEN=<your-github-token>
 ```
 
-Start script with one of the examples provided
+Start script with one of the examples provided (or entire folder of configs)
 
 ```bash
 diffyscan config_samples/lido_dao_sepolia_config.json
@@ -82,6 +90,8 @@ This project was developed using these dependencies with their exact versions li
 
 - Python 3.12
 - Poetry 1.8
+- if need `--prettify` option support:
+  - npm
 
 Other versions may work as well but were not tested at all.
 
@@ -116,4 +126,10 @@ poetry shell
 
 ```bash
 poetry install
+```
+
+5. If need `--prettify` option
+
+```shell
+npm install
 ```

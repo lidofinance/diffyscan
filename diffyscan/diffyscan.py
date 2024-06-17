@@ -3,6 +3,8 @@ import sys
 import time
 import argparse
 import os
+import subprocess
+import tempfile
 
 from .utils.common import load_config, load_env
 from .utils.constants import DIFFS_DIR, START_TIME, DEFAULT_CONFIG_PATH
@@ -17,8 +19,21 @@ __version__ = "0.0.0"
 
 g_skip_user_input: bool = False
 
+def prettify_solidity(solidity_contract_content: str):
+    github_file_name = os.path.join(tempfile.gettempdir(), "9B91E897-EA51-4FCC-8DAF-FCFF135A6963.sol")
+    with open(github_file_name, "w") as fp:
+        fp.write(solidity_contract_content)
+    prettier_return_code = subprocess.call(
+        ["npx", "prettier", "--plugin=prettier-plugin-solidity", "--write", github_file_name],
+        stdout=subprocess.DEVNULL)
+    if prettier_return_code != 0:
+        logger.error("Prettier/npx subprocess failed (see the error above)")
+        sys.exit()
+    with open(github_file_name, "r") as fp:
+        return fp.read()
 
-def run_diff(config, name, address, explorer_api_token, github_api_token, recursive_parsing=False):
+
+def run_diff(config, name, address, explorer_api_token, github_api_token, recursive_parsing=False, prettify=False):
     logger.divider()
     logger.okay("Contract", address)
     logger.okay("Blockchain explorer Hostname", config["explorer_hostname"])
@@ -89,8 +104,14 @@ def run_diff(config, name, address, explorer_api_token, github_api_token, recurs
             github_file = "<!-- No file content -->"
             file_found = False
 
+        explorer_content = source_code["content"]
+
+        if prettify:
+            github_file = prettify_solidity(github_file)
+            explorer_content = prettify_solidity(explorer_content)
+
         github_lines = github_file.splitlines()
-        explorer_lines = source_code["content"].splitlines()
+        explorer_lines = explorer_content.splitlines()
 
         diff_html = difflib.HtmlDiff().make_file(github_lines, explorer_lines)
         diff_report_filename = f"{DIFFS_DIR}/{address}/{filename}.html"
@@ -124,7 +145,7 @@ def run_diff(config, name, address, explorer_api_token, github_api_token, recurs
     logger.report_table(report)
 
 
-def process_config(path: str, recursive_parsing: bool):
+def process_config(path: str, recursive_parsing: bool, unify_formatting: bool):
     logger.info(f"Loading config {path}...")
     config = load_config(path)
 
@@ -136,7 +157,7 @@ def process_config(path: str, recursive_parsing: bool):
     contracts = config["contracts"]
     logger.info(f"Running diff for contracts from config {contracts}...")
     for address, name in config["contracts"].items():
-        run_diff(config, name, address, explorer_token, github_api_token, recursive_parsing)
+        run_diff(config, name, address, explorer_token, github_api_token, recursive_parsing, unify_formatting)
 
 
 def parse_arguments():
@@ -149,6 +170,7 @@ def parse_arguments():
         help="Support recursive retrieving for contracts. It may be useful for contracts whose sources have been verified by the brownie tooling, which automatically replaces relative paths to contracts in imports with plain contract names.",
         action=argparse.BooleanOptionalAction,
     )
+    parser.add_argument("--prettify", "-p", help="Unify formatting by prettier before comparing", action="store_true")
     return parser.parse_args()
 
 
@@ -166,14 +188,17 @@ def main():
     logger.divider()
 
     if args.path is None:
-        process_config(DEFAULT_CONFIG_PATH, args.support_brownie)
+        process_config(DEFAULT_CONFIG_PATH, args.support_brownie, args.prettify)
     elif os.path.isfile(args.path):
-        process_config(args.path, args.support_brownie)
+        process_config(args.path, args.support_brownie, args.prettify)
     elif os.path.isdir(args.path):
         for filename in os.listdir(args.path):
             config_path = os.path.join(args.path, filename)
             if os.path.isfile(config_path):
-                process_config(config_path, args.support_brownie)
+                process_config(config_path, args.support_brownie, args.prettify)
+    else:
+        logger.error(f"Specified config path {args.path} not found")
+        sys.exit(1)
 
     execution_time = time.time() - START_TIME
 

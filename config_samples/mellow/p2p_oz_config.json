@@ -1,0 +1,22 @@
+{
+    "contracts": {
+        "0x7a4EffD87C2f3C55CA251080b1343b605f327E3a": "TransparentUpgradeableProxy",
+        "0x17AC6A90eD880F9cE54bB63DAb071F2BD3FE3772": "ProxyAdmin"
+    },
+    "explorer_hostname": "api.etherscan.io",
+    "explorer_token_env_var": "ETHERSCAN_TOKEN",
+    "github_repo": {
+        "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+        "commit": "dbb6104ce834628e473d2173bbc9d47f81a9eec3",
+        "relative_root": "contracts",
+        "//": "version 5.0.2"
+    },
+    "dependencies": {
+        "lib/openzeppelin-contracts/contracts": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+            "commit": "dbb6104ce834628e473d2173bbc9d47f81a9eec3",
+            "relative_root": "contracts",
+            "//": "version 5.0.2"
+        }
+    }
+}
