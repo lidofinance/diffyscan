@@ -4,6 +4,7 @@
     "0x40C4464fCa8caCd550C33B39d674fC257966022F": "TransparentUpgradeableProxy",
     "0xB7Ba81dd07885ae7BFD18452B36D3404d7EDD8Ee": "CrossChainController",
     "0x8E5175D17f74d1D512de59b2f5d5A5d8177A123d": "CrossChainExecutor",
+    "0x250227c30e3b26525f292f63756e5eB3C425427E": "CrossChainExecutor",
     "0x15AD245133568c2498c7dA0cf2204A03b0e9b98A": "CCIPAdapter",
     "0xCd867B440c726461e5fAbe8d3a050b2f8701C230": "HyperLaneAdapter",
     "0xc934433f4c433Cf80DE6fB65fd70C7a650D8a408": "LayerZeroAdapter",
