@@ -1,0 +1,31 @@
+{
+    "contracts": {
+        "0xC329400492c6ff2438472D4651Ad17389fCb843a": "DefaultCollateral"
+    },
+    "explorer_hostname": "api.etherscan.io",
+    "explorer_token_env_var": "ETHERSCAN_TOKEN",
+    "github_repo": {
+        "url": "https://github.com/symbioticfi/collateral",
+        "commit": "4a38fadd5ee3f0b0422caa5f195a31e626498621",
+        "relative_root": ""
+    },
+    "dependencies": {
+        "lib/openzeppelin-contracts/contracts": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+            "commit": "932fddf69a699a9a80fd2396fd1a2ab91cdda123",
+            "relative_root": "contracts",
+            "//": "version 5.0.0"
+        },
+        "lib/openzeppelin-contracts-upgradeable/contracts": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable",
+            "commit": "625fb3c2b2696f1747ba2e72d1e1113066e6c177",
+            "relative_root": "contracts",
+            "//": "release-v5.0"
+        },
+        "lib/permit2": {
+            "url": "https://github.com/Uniswap/permit2",
+            "commit": "cc56ad0f3439c502c246fc5cfcc3db92bb8b7219",
+            "relative_root": ""
+        }
+    }
+}

@@ -5,8 +5,8 @@ from urllib.parse import urlparse
 
 import requests
 
-from utils.logger import logger
-from utils.types import Config
+from .logger import logger
+from .types import Config
 
 
 def load_env(variable_name, required=True, masked=False):
@@ -32,7 +32,7 @@ def load_config(path: str) -> Config:
 
 
 def fetch(url, headers={}):
-    logger.log(f"fetch: {url}")
+    logger.log(f"Fetch: {url}")
     response = requests.get(url, headers=headers)
 
     if response.status_code == 404:
