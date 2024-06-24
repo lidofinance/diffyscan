@@ -1,47 +1,24 @@
 # Diffyscan
 
-![python ^3.10](https://img.shields.io/badge/python-^3.10-blue)
-![poetry ^1.4](https://img.shields.io/badge/poetry-^1.6-blue)
+![python >=3.10,<4](https://img.shields.io/badge/python-≥3.10,<4-blue)
+![poetry ^1.8](https://img.shields.io/badge/poetry-^1.8-blue)
 ![license MIT](https://img.shields.io/badge/license-MIT-brightgreen)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 Diff your Ethereum smart contracts code from GitHub against Blockchain explorer verified source code.
 
-## Prerequisites
+Supports reformatting solidity code by means of prettifier solidity plugin before comparing the sources (option `--prettify`).
 
-This project was developed using these dependencies with their exact versions listed below:
+## Install
 
-- Python 3.10
-- Poetry 1.6
-
-Other versions may work as well but were not tested at all.
-
-## Setup
-
-1. Install Poetry
-
-Use the following command to install poetry:
-
-```shell
-pip install --user poetry~=1.6
+```bash
+pipx install git+https://github.com/lidofinance/diffyscan
 ```
 
-alternatively, you could proceed with `pipx`:
+If need `--prettify` option
 
 ```shell
-pipx install poetry~=1.6
-```
-
-2. Activate poetry virtual environment,
-
-```shell
-poetry shell
-```
-
-3. Install Python dependencies
-
-```shell
-poetry install
+npm install
 ```
 
 ## Usage
@@ -58,7 +35,13 @@ Set your Github token to query API without strict rate limiting,
 export GITHUB_API_TOKEN=<your-github-token>
 ```
 
-Create a config file named `config.json`,
+Start script with one of the examples provided (or entire folder of configs)
+
+```bash
+diffyscan config_samples/lido_dao_sepolia_config.json
+```
+
+Alternatively, create a new config file named `config.json`,
 
 ```json
 {
@@ -86,7 +69,7 @@ Create a config file named `config.json`,
 Start the script
 
 ```bash
-python3 main.py
+dyffyscan
 ```
 
 > Note: Brownie verification tooling might rewrite the imports in the source submission. It transforms relative paths to imported contracts into flat paths ('./folder/contract.sol' -> 'contract.sol'), which makes Diffyscan unable to find a contract for verification.
@@ -94,7 +77,59 @@ python3 main.py
 For contracts whose sources were verified by brownie tooling:
 
 ```bash
-python3 main.py --support-brownie
+diffyscan --support-brownie
 ```
 
 ℹ️ See more config examples inside the [config_samples](./config_samples/) dir.
+
+## Development setup
+
+### Prerequisites
+
+This project was developed using these dependencies with their exact versions listed below:
+
+- Python 3.12
+- Poetry 1.8
+- if need `--prettify` option support:
+  - npm
+
+Other versions may work as well but were not tested at all.
+
+### Setup
+
+1. Install Poetry
+
+Use the following command to install poetry:
+
+```bash
+pip install --user poetry~=1.8
+```
+
+alternatively, you could proceed with `pipx`:
+
+```bash
+pipx install poetry~=1.8
+```
+
+2. Activate poetry virtual environment,
+
+```bash
+poetry shell
+```
+
+3. Install [poetry-dynamic-versioning](https://github.com/mtkennerly/poetry-dynamic-versioning?tab=readme-ov-file#installation)
+
+- In most cases: `poetry self add "poetry-dynamic-versioning[plugin]"`
+- If you installed Poetry with Pipx: `pipx inject poetry "poetry-dynamic-versioning[plugin]"`
+
+4. Install Python dependencies
+
+```bash
+poetry install
+```
+
+5. If need `--prettify` option
+
+```shell
+npm install
+```

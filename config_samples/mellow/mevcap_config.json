@@ -1,0 +1,23 @@
+{
+    "contracts": {
+        "0x2dEc4fDC225C1f71161Ea481E23D66fEaAAE2391": "VaultConfigurator",
+        "0xD2635fa0635126bAfdD430b9614c0280d37a76CA": "ManagedValidator",
+        "0xc3A149b5Ca3f4A5F17F5d865c14AA9DBb570F10A": "DefaultBondStrategy",
+        "0xdC1741f9bD33DD791942CC9435A90B0983DE8665": "DepositWrapper"
+    },
+    "explorer_hostname": "api.etherscan.io",
+    "explorer_token_env_var": "ETHERSCAN_TOKEN",
+    "github_repo": {
+        "url": "https://github.com/mellow-finance/mellow-lrt",
+        "commit": "60e9a87eb970be5ee1d4f1f14ccc9919b2b2fbcc",
+        "relative_root": ""
+    },
+    "dependencies": {
+        "lib/openzeppelin-contracts/contracts": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+            "commit": "dbb6104ce834628e473d2173bbc9d47f81a9eec3",
+            "relative_root": "contracts",
+            "//": "version 5.0.2"
+        }
+    }
+}
