@@ -1,9 +1,9 @@
 {
     "contracts": {
-        "0xa88689c66391CDBCE7C87E50399dA6818d985Fa7": "OssifiableProxy",
-        "0x07EfA8dC6ccdf603a0894c8264Fc5A9b9cd90D46": "ERC20Bridged",
-        "0xE112a3c47C17581868cDdc1550FBb27fDec3353a": "OssifiableProxy",
-        "0x34D85659944bEE2668b0BF2Cd5E37580a0D98f48": "L2ERC20TokenBridge"
+        "0x2C937931B5d544E3dff1d9D78c80d9772B55837A": "OssifiableProxy",
+        "0x9C7CDB9312ddA72ACc24E4A3bE5aA6afeca2AAFE": "ERC20Bridged",
+        "0x2F3a332eff5f45cEA0486464fa4080fcF52Ea876": "OssifiableProxy",
+        "0x2AD850d0c6b1846F9bBD8144362A586330a96B31": "L2ERC20TokenBridge"
     },
     "explorer_hostname": "sepolia.explorer.mode.network",
     "github_repo": {

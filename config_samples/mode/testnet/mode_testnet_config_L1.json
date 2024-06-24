@@ -1,7 +1,7 @@
 {
     "contracts": {
-        "0x458C50a11bcc7979e5F0581a16cf4A72844E5692": "OssifiableProxy",
-        "0xe45BBeE57A1BF87bf96657f8B791929Db8Ee0C21": "L1ERC20TokenBridge"
+        "0xD847780c8808fc99727001C43E6C17A198b39729": "OssifiableProxy",
+        "0x514aa1d41d840af7572509d75354a8612594eb30": "L1ERC20TokenBridge"
     },
     "explorer_hostname": "api-sepolia.etherscan.io",
     "explorer_token_env_var": "ETHERSCAN_TOKEN",
