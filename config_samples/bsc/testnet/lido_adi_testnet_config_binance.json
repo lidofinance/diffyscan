@@ -1,0 +1,31 @@
+{
+  "contracts": {
+    "0x490E441352635aacA64224c8205636FD9d2e3362": "ProxyAdmin",
+    "0x1FAa7AFD7851e7Cf931053e49CE26D4E262698b6": "TransparentUpgradeableProxy",
+    "0x5EC23B39E6E8eb5BA0c7064a0c08b5e678b02F37": "CrossChainController",
+    "0x69EE990d0AADEfcbbA0F2de94E0F26521ae680ff": "CrossChainExecutor",
+    "0x39B321FC78B96fB184191788dD87e8B7c498bcEa": "CCIPAdapterTestnet",
+    "0xa75A4F7E70a983b7388CcAA1F6C88BebC4AFc0Ef": "HyperLaneAdapter",
+    "0xa950B68BDA44419683c788C5E5845abC8F1863C1": "LayerZeroAdapterTestnet",
+    "0x30dF46cF148Df5eB53eb8B81b0BD5Bc785001E12": "WormholeAdapterTestnet"
+  },
+  "explorer_token_env_var": "ETHERSCAN_API_BINANCE",
+  "explorer_hostname": "api-testnet.bscscan.com",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/aave-delivery-infrastructure",
+    "commit": "41c81975c2ce5b430b283e6f4aab922c3bde1555",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "lib/openzeppelin-contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "e1b3d8c7ee2c97868f4ab107fe8b7e19f0a8db9f",
+      "relative_root": ""
+    },
+    "lib/solidity-utils": {
+      "url": "https://github.com/bgd-labs/solidity-utils",
+      "commit": "56720adb8b751c3742a5f9b8c5bcb8a9446ba941",
+      "relative_root": ""
+    }
+  }
+}

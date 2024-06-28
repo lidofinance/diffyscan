@@ -1,0 +1,30 @@
+{
+  "contracts": {
+    "0xADD673dC6A655AFD6f38fB88301028fA31A6fDeE": "ProxyAdmin",
+    "0x93559892D3C7F66DE4570132d68b69BD3c369A7C": "TransparentUpgradeableProxy",
+    "0x5f456f29238F8d63b3ae69bCEF9e9d4E953f2c63": "CrossChainController",
+    "0x29D4fA5FCC282ba2788A281860770c166F597d5d": "CCIPAdapter",
+    "0x8d374DF3de08b971777Aa091fA68BCE109b3a7F3": "HyperLaneAdapter",
+    "0x742650E0441Be8503682965d601AD0Ba1fB54411": "LayerZeroAdapter",
+    "0xEDc0D2cb2289BBa1587424dd42bDD1ca7eAbDF17": "WormholeAdapter"
+  },
+  "explorer_token_env_var": "ETHERSCAN_API_MAINNET",
+  "explorer_hostname": "api.etherscan.io",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/aave-delivery-infrastructure",
+    "commit": "41c81975c2ce5b430b283e6f4aab922c3bde1555",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "lib/openzeppelin-contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "e1b3d8c7ee2c97868f4ab107fe8b7e19f0a8db9f",
+      "relative_root": ""
+    },
+    "lib/solidity-utils": {
+      "url": "https://github.com/bgd-labs/solidity-utils",
+      "commit": "56720adb8b751c3742a5f9b8c5bcb8a9446ba941",
+      "relative_root": ""
+    }
+  }
+}
