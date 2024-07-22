@@ -77,6 +77,22 @@ def _get_contract_from_mantle(mantle_explorer_hostname, contract):
     return (data["ContractName"], source_files)
 
 
+def _get_contract_from_lisk(lisk_explorer_hostname, contract):
+    lisk_explorer_link = (
+        f"https://{lisk_explorer_hostname}/api/v2/smart-contracts/{contract}"
+    )
+    response = fetch(lisk_explorer_link)
+
+    if "name" not in response:
+        _errorNoSourceCodeAndExit(contract)
+
+    source_files = [(response["file_path"], {"content": response["source_code"]})]
+    for entry in response.get("additional_sources", []):
+        source_files.append((entry["file_path"], {"content": entry["source_code"]}))
+
+    return (response["name"], source_files)
+
+
 def get_contract_from_explorer(token, explorer_hostname, contract):
     if explorer_hostname.startswith("zksync"):
         return _get_contract_from_zksync(explorer_hostname, contract)
@@ -84,4 +100,6 @@ def get_contract_from_explorer(token, explorer_hostname, contract):
         return _get_contract_from_mantle(explorer_hostname, contract)
     if explorer_hostname.endswith("lineascan.build"):
         return _get_contract_from_etherscan(None, explorer_hostname, contract)
+    if explorer_hostname.endswith("lisk.com"):
+        return _get_contract_from_lisk(explorer_hostname, contract)
     return _get_contract_from_etherscan(token, explorer_hostname, contract)
