@@ -111,5 +111,34 @@
             "commit": "6bd6b76d1156e20e45d1016f355d154141c7e5b9",
             "relative_root": "contracts"
         }
+    },
+    "ConstructorArgs": {
+	"OracleReportSanityChecker" : [
+				      "0x28FAB2059C713A7F9D8c86Db49f9bb0e96Af1ef8",
+				      "0x22896Bfc68814BFD855b1a167255eE497006e730",
+				      [
+					1500,
+					500,
+					1000,
+					250,
+					2000,
+					100,
+					100,
+					128,
+					5000000
+				      ],
+				      [
+					[],
+					[],
+					[],
+					[],
+					[],
+					[],
+					[],
+					[],
+					[],
+					[]
+				      ]
+				    ] 
     }
 }

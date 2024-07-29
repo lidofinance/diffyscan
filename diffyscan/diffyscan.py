@@ -6,14 +6,15 @@ import os
 import subprocess
 import tempfile
 import shutil
- 
+
 from utils.common import load_config, load_env
-from utils.constants import DIFFS_DIR, START_TIME, DEFAULT_CONFIG_PATH
+from utils.constants import DIFFS_DIR, START_TIME, DEFAULT_CONFIG_PATH, LOCAL_RPC_URL, REMOTE_RPC_URL
 from utils.explorer import get_contract_from_explorer
 from utils.github import get_file_from_github, get_file_from_github_recursive, resolve_dep
 from utils.helpers import create_dirs
 from utils.logger import logger
 from utils.binary_verifier import *
+from utils.ganache import ganache
 
 __version__ = "0.0.0"
 
@@ -33,13 +34,38 @@ def prettify_solidity(solidity_contract_content: str):
     with open(github_file_name, "r") as fp:
         return fp.read()
 
-def run_binary_diff(contract_address, code):
-    logger.info(f'Started binary checking')
-    bytecode_from_etherscan, immutables = get_bytecode_from_etherscan(code)
-
-    bytecode_from_blockchain = get_bytecode_from_blockchain(contract_address)
+def run_binary_diff(remote_contract_address, contract_source_code, config):
+    logger.info(f'Started binary checking for {remote_contract_address}')
     
-    match(bytecode_from_blockchain, bytecode_from_etherscan, immutables)
+    contract_creation_code, immutables, is_valid_constructor = get_contract_creation_code_from_etherscan(contract_source_code, config, remote_contract_address)
+    
+    if not is_valid_constructor:
+        logger.error(f'Failed to find constructorArgs, binary diff skipped')
+        return
+        
+    deployer_account = get_account(LOCAL_RPC_URL)
+    
+    if (deployer_account is None):
+        logger.error(f'Failed to receive the account, binary diff skipped')
+        return
+    
+    local_contract_address = deploy_contract(LOCAL_RPC_URL, deployer_account, contract_creation_code)
+    
+    if (local_contract_address is None):
+        logger.error(f'Failed to deploy bytecode to {LOCAL_RPC_URL}, binary diff skipped')
+        return
+
+    local_deployed_bytecode = get_bytecode(local_contract_address, LOCAL_RPC_URL)
+    if (local_deployed_bytecode is None):
+        logger.error(f'Failed to receive bytecode from {LOCAL_RPC_URL}')
+        return
+    
+    remote_deployed_bytecode = get_bytecode(remote_contract_address, REMOTE_RPC_URL)
+    if remote_deployed_bytecode is None:
+        logger.error(f'Failed to receive bytecode from {REMOTE_RPC_URL}')
+        return
+      
+    to_match(local_deployed_bytecode, remote_deployed_bytecode, immutables, remote_contract_address)
 
 def run_source_diff(contract_address_from_config, contract_code, config, github_api_token, recursive_parsing=False, prettify=False):
     logger.divider()
@@ -149,13 +175,22 @@ def process_config(path: str, recursive_parsing: bool, unify_formatting: bool, b
     explorer_token = None
     if "explorer_token_env_var" in config:
         explorer_token = load_env(config["explorer_token_env_var"], masked=True, required=False)
-
     contracts = config["contracts"]
-    for contract_address, contract_name in contracts.items():
-        contract_code = get_contract_from_explorer(explorer_token, config["explorer_hostname"], contract_address, contract_name)
-        run_source_diff(contract_address, contract_code, config, github_api_token, recursive_parsing, unify_formatting)
+    
+    try:
         if (binary_check):
-            run_binary_diff(contract_address, contract_code)
+            ganache.start()  
+            
+        for contract_address, contract_name in contracts.items():
+            contract_code = get_contract_from_explorer(explorer_token, config["explorer_hostname"], contract_address, contract_name)
+            run_source_diff(contract_address, contract_code, config, github_api_token, recursive_parsing, unify_formatting)
+            if (binary_check):
+                run_binary_diff(contract_address, contract_code, config)
+    except KeyboardInterrupt:
+        logger.info(f'Keyboard interrupt by user')
+    finally:
+        ganache.stop()
+
     
     if (autoclean):
         builds_dir_path = os.getenv('SOLC_DIR', 'solc')

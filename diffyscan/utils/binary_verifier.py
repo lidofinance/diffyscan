@@ -4,15 +4,11 @@ import json
 import os
 import stat
 
-
 from utils.common import fetch, pull, get_solc_native_platform_from_os
 from utils.helpers import create_dirs
 from utils.logger import logger
-
-RPC_URL = os.getenv('RPC_URL', '')
-if not RPC_URL:
-    raise ValueError('RPC_URL variable is not set')
-
+from utils.encoder import encode_constructor_arguments
+  
 def get_compiler_info(platform, required_compiler_version):
     compilers_list_url = (
       f'https://raw.githubusercontent.com/ethereum/solc-bin/gh-pages/{platform}/list.json'   
@@ -44,7 +40,7 @@ def set_compiler_executable(compiler_path):
     compiler_file_rights = os.stat(compiler_path)
     os.chmod(compiler_path, compiler_file_rights.st_mode | stat.S_IEXEC)
     
-def compile_contract(compiler_path, input_settings):
+def compile_contracts(compiler_path, input_settings):
     process = subprocess.run([compiler_path,'--standard-json'], input=input_settings.encode(), capture_output=True, check=True, timeout=30)
     return json.loads(process.stdout)
 
@@ -55,10 +51,9 @@ def prepare_compiler(platform, build_info, compiler_path):
     check_compiler_checksum(compiler_binary, valid_checksum)
     set_compiler_executable(compiler_path)
 
-def get_target_contract(compilation_result, target_contract_name):
-    contracts = compilation_result['contracts'].values();
+def get_target_compiled_contract(compiled_contracts, target_contract_name):
     contracts_to_check = []
-    for contracts in compilation_result['contracts'].values():
+    for contracts in compiled_contracts:
         for name, contract in contracts.items():
             if name == target_contract_name:
                 contracts_to_check.append(contract)
@@ -66,13 +61,13 @@ def get_target_contract(compilation_result, target_contract_name):
     if len(contracts_to_check) != 1:
         raise ValueError('multiple contracts with the same name')
 
-    logger.info('Contracts were successfully compiled. The target contract is ready for matching')
+    logger.okay('Contracts were successfully compiled. The target contract is ready for matching')
 
     return contracts_to_check[0]
 
-def get_bytecode_from_etherscan(code):
+def get_contract_creation_code_from_etherscan(contract_code, config, remote_contract_address):
     platform = get_solc_native_platform_from_os()
-    build_name = code["compiler"][1:]
+    build_name = contract_code["compiler"][1:]
     build_info = get_compiler_info(platform, build_name)
     compilers_dir_path = os.getenv('SOLC_DIR', 'solc')
     compiler_path = os.path.join(compilers_dir_path, build_info['path'])
@@ -82,41 +77,112 @@ def get_bytecode_from_etherscan(code):
     if not is_compiler_already_prepared:   
       prepare_compiler(platform, build_info, compiler_path)
       
-    input_settings = json.dumps(code["solcInput"])
-    contract_name = code['name']
+    input_settings = json.dumps(contract_code["solcInput"])   
+    compiled_contracts = compile_contracts(compiler_path, input_settings)['contracts'].values()
 
-    compilation_result = compile_contract(compiler_path, input_settings)
+    target_contract_name = contract_code['name']
+    target_compiled_contract = get_target_compiled_contract(compiled_contracts, target_contract_name)
 
-    target_contract = get_target_contract(compilation_result, contract_name)
-  
-    expected_bytecode = target_contract['evm']['deployedBytecode']['object']
-    
+    contract_creation_code = f'0x{target_compiled_contract['evm']['bytecode']['object']}'
     immutables = {}
-    if ('immutableReferences' in target_contract['evm']['deployedBytecode']):
-      immutable_references = target_contract['evm']['deployedBytecode']['immutableReferences']
+    if ('immutableReferences' in target_compiled_contract['evm']['deployedBytecode']):
+      immutable_references = target_compiled_contract['evm']['deployedBytecode']['immutableReferences']
       for refs in immutable_references.values():
           for ref in refs:
               immutables[ref['start']] = ref['length'] 
-    
-    return expected_bytecode, immutables
+    constructor_abi = None
+    try:
+        constructor_abi = [entry["inputs"] for entry in target_compiled_contract['abi'] if entry["type"] == "constructor"][0]
+    except IndexError:
+        logger.info(f'Constructor in ABI not found')
+        return contract_creation_code, immutables, True
+      
+    constructor_calldata = None
 
-def get_bytecode_from_blockchain(contract_address):
-    logger.info(f'Retrieving the bytecode by contract address "{contract_address}" from the blockchain...')
+    if (remote_contract_address in config["ConstructorArgs"]):
+        constructor_args = config["ConstructorArgs"][remote_contract_address]
+        if constructor_args:
+            constructor_calldata = encode_constructor_arguments(constructor_abi, constructor_args)
+            return contract_creation_code+constructor_calldata, immutables, True
+
+    logger.warn(f'Constructor in ABI found, but config not found (contract {target_contract_name})')
+    return contract_creation_code, immutables, True
+
+def get_bytecode(contract_address, rpc_url):
+    logger.info(f'Receiving the bytecode from "{rpc_url}" ...')
 
     payload = json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'eth_getCode', 'params': [contract_address, 'latest']})
-    sources_url_response = pull(RPC_URL, payload)
     
-    sources_url_response_in_json = sources_url_response.json()
-    if 'result' in sources_url_response_in_json:
-      bytecode = sources_url_response_in_json['result']
-    else:
-      raise ValueError(f'Failed to find section "result" in response')
-    
-    logger.okay(f'Bytecode was successfully fetched')
-    
-    return bytecode
+    sources_url_response_in_json = pull(rpc_url, payload).json()
+    if 'result' not in sources_url_response_in_json or sources_url_response_in_json['result'] == '0x':
+        return None
+        
+    logger.okay(f'Bytecode was successfully received')
+    return sources_url_response_in_json['result']
 
+def get_chain_id(rpc_url):
+    payload = json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'eth_chainId', 'params': []})
 
+    response = pull(rpc_url, payload).json()
+    if 'error' in response:
+      logger.error(f'Failed to received chainId: {response['error']['message']}')
+      return 1
+    return int (response['result'],16)
+
+def get_account(rpc_url):
+    logger.info(f'Receiving the account from "{rpc_url}" ...')
+   
+    payload = json.dumps({'id': 42, 'jsonrpc': '2.0', 'method': 'eth_accounts', 'params': []})
+    
+    account_address_response = pull(rpc_url, payload).json()
+    
+    if 'result' not in account_address_response:
+      return None
+
+    logger.okay(f'The account was successfully received')
+
+    return account_address_response['result'][0]
+  
+def deploy_contract(rpc_url, deployer, data): 
+  logger.info(f'Trying to deploy transaction to "{rpc_url}" ...')
+  
+  payload_sendTransaction = json.dumps({
+      "jsonrpc": "2.0",
+      "method": "eth_sendTransaction",
+      "params": [{
+          "from": deployer,
+          "gas": 9000000,
+          "input": data
+      }],
+      "id": 1
+  })
+  response_sendTransaction = pull(rpc_url, payload_sendTransaction).json()
+
+  if 'error' in response_sendTransaction:
+    logger.warn(f'Failed to deploy transaction: {response_sendTransaction['error']['message']}')
+    return None
+  
+  logger.okay(f'Transaction was successfully deployed')
+
+  tx_hash = response_sendTransaction['result']
+  
+  payload_getTransactionReceipt = json.dumps({'id': 1, 'jsonrpc': '2.0', 'method': 'eth_getTransactionReceipt', 'params':[tx_hash]})
+  response_getTransactionReceipt = pull(rpc_url, payload_getTransactionReceipt).json()   
+  
+  if 'result' not in response_getTransactionReceipt or \
+    'contractAddress' not in response_getTransactionReceipt['result'] or \
+    'status' not in response_getTransactionReceipt['result'] :
+      logger.error(f'Failed to received transaction receipt')
+      return None
+
+  if response_getTransactionReceipt['result']['status'] != '0x1':
+    logger.error(f'Failed to received transaction receipt. Transaction has been reverted (status 0x0). Input missmatch?')
+    return None
+  
+  contract_address = response_getTransactionReceipt['result']['contractAddress']
+  
+  return contract_address
+    
           
 OPCODES = {
     0x00: 'STOP', 0x01: 'ADD', 0x02: 'MUL', 0x03: 'SUB', 0x04: 'DIV', 0x05: 'SDIV',
@@ -151,25 +217,9 @@ OPCODES = {
     0xF0: 'CREATE', 0xF1: 'CALL', 0xF2: 'CALLCODE', 0xF3: 'RETURN', 0xF4: 'DELEGATECALL',
     0xF5: 'CREATE2', 0xFA: 'STATICCALL', 0xFD: 'REVERT', 0xFE: 'INVALID', 0xFF: 'SELFDESTRUCT',
 }
-      
-def parse(bytecode):
-    instructions = []
-    buffer = bytearray.fromhex(bytecode[2:] if bytecode.startswith('0x') else bytecode)
-    i = 0
-    while i < len(buffer):
-        opcode = buffer[i]
-        length = 1 + (opcode >= 0x5f and opcode <= 0x7f) * (opcode - 0x5f)
-        instructions.append({
-            'start': i,
-            'length': length,
-            'op': {'name': OPCODES.get(opcode, 'INVALID'), 'code': opcode},
-            'bytecode': buffer[i:i + length].hex()
-        })
-        i += length
-    return instructions
-      
-def match(actualBytecode, expectedBytecode, immutables):
-    logger.info('Comparing actual code with the expected one:')
+           
+def to_match(actualBytecode, expectedBytecode, immutables, remote_contract_address):
+    logger.info('Comparing actual code with the expected one...')
 
     actualInstructions = parse(actualBytecode)
     expectedInstructions = parse(expectedBytecode)
@@ -181,13 +231,13 @@ def match(actualBytecode, expectedBytecode, immutables):
         expected = expectedInstructions[i] if i < len(expectedInstructions) else None
         if not actual and not expected:
             raise ValueError('Invalid instructions data')
-        elif actual.get('bytecode') != expected.get('bytecode'):
+        elif (actual is not None) and (actual.get('bytecode') != expected.get('bytecode')):
             differences.append(i)
 
     if not differences:
-        logger.okay(f'Bytecodes are fully matched')
+        logger.okay(f'Bytecodes are fully matched (contract {remote_contract_address})')
         return
-    logger.warn(f'Bytecodes have differences')
+    logger.warn(f'Bytecodes have differences contract {remote_contract_address})')
 
     nearLinesCount = 3
     checkpoints = {0, *differences}
