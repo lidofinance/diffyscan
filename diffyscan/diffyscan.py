@@ -7,8 +7,8 @@ import subprocess
 import tempfile
 import shutil
 
-from utils.common import load_config, load_env
-from utils.constants import DIFFS_DIR, START_TIME, DEFAULT_CONFIG_PATH, LOCAL_RPC_URL, REMOTE_RPC_URL
+from utils.common import load_config
+from utils.constants import *
 from utils.explorer import get_contract_from_explorer
 from utils.github import get_file_from_github, get_file_from_github_recursive, resolve_dep
 from utils.helpers import create_dirs
@@ -171,10 +171,6 @@ def process_config(path: str, recursive_parsing: bool, unify_formatting: bool, b
     logger.info(f"Loading config {path}...")
     config = load_config(path)
 
-    github_api_token = load_env("GITHUB_API_TOKEN", masked=True)
-    explorer_token = None
-    if "explorer_token_env_var" in config:
-        explorer_token = load_env(config["explorer_token_env_var"], masked=True, required=False)
     contracts = config["contracts"]
     
     try:
@@ -182,8 +178,8 @@ def process_config(path: str, recursive_parsing: bool, unify_formatting: bool, b
             ganache.start()  
             
         for contract_address, contract_name in contracts.items():
-            contract_code = get_contract_from_explorer(explorer_token, config["explorer_hostname"], contract_address, contract_name)
-            run_source_diff(contract_address, contract_code, config, github_api_token, recursive_parsing, unify_formatting)
+            contract_code = get_contract_from_explorer(ETHERSCAN_TOKEN, config["explorer_hostname"], contract_address, contract_name)
+            run_source_diff(contract_address, contract_code, config, GITHUB_API_TOKEN, recursive_parsing, unify_formatting)
             if (binary_check):
                 run_binary_diff(contract_address, contract_code, config)
     except KeyboardInterrupt:
@@ -193,9 +189,8 @@ def process_config(path: str, recursive_parsing: bool, unify_formatting: bool, b
 
     
     if (autoclean):
-        builds_dir_path = os.getenv('SOLC_DIR', 'solc')
-        shutil.rmtree(builds_dir_path)
-        logger.okay(f'{builds_dir_path} deleted')
+        shutil.rmtree(SOLC_DIR)
+        logger.okay(f'{SOLC_DIR} deleted')
 
 def parse_arguments():
     parser = argparse.ArgumentParser()

@@ -8,6 +8,7 @@ from utils.common import fetch, pull, get_solc_native_platform_from_os
 from utils.helpers import create_dirs
 from utils.logger import logger
 from utils.encoder import encode_constructor_arguments
+from utils.constants import SOLC_DIR
   
 def get_compiler_info(platform, required_compiler_version):
     compilers_list_url = (
@@ -69,8 +70,7 @@ def get_contract_creation_code_from_etherscan(contract_code, config, remote_cont
     platform = get_solc_native_platform_from_os()
     build_name = contract_code["compiler"][1:]
     build_info = get_compiler_info(platform, build_name)
-    compilers_dir_path = os.getenv('SOLC_DIR', 'solc')
-    compiler_path = os.path.join(compilers_dir_path, build_info['path'])
+    compiler_path = os.path.join(SOLC_DIR, build_info['path'])
     
     is_compiler_already_prepared = os.path.isfile(compiler_path)
     

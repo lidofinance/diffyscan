@@ -12,10 +12,18 @@ REMOTE_RPC_URL = os.getenv('REMOTE_RPC_URL', '')
 if not REMOTE_RPC_URL:
     raise ValueError('REMOTE_RPC_URL variable is not set')
 
-REMOTE_EXPLORER_NAME = os.getenv('REMOTE_EXPLORER_NAME', '')
-if REMOTE_EXPLORER_NAME == '':
-  raise ValueError('REMOTE_EXPLORER_NAME variable is not set')
+SOLC_DIR = os.getenv('SOLC_DIR', '')
+if SOLC_DIR == '':
+  raise ValueError('SOLC_DIR variable is not set')
   
 LOCAL_RPC_URL = os.getenv('LOCAL_RPC_URL', '')
 if not LOCAL_RPC_URL:
     raise ValueError('LOCAL_RPC_URL variable is not set')
+  
+ETHERSCAN_TOKEN = os.getenv('ETHERSCAN_TOKEN', '')
+if not ETHERSCAN_TOKEN:
+    raise ValueError('ETHERSCAN_TOKEN variable is not set')
+
+GITHUB_API_TOKEN = os.getenv('GITHUB_API_TOKEN', '')
+if not GITHUB_API_TOKEN:
+    raise ValueError('GITHUB_API_TOKEN variable is not set')
