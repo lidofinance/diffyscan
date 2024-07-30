@@ -1,4 +1,4 @@
-from utils.logger import logger
+from .logger import logger
 
 def encode_address(address):
     number = int(address, 16)

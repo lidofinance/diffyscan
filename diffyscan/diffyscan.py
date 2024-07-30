@@ -7,14 +7,14 @@ import subprocess
 import tempfile
 import shutil
 
-from utils.common import load_config, load_env
-from utils.constants import *
-from utils.explorer import get_contract_from_explorer
-from utils.github import get_file_from_github, get_file_from_github_recursive, resolve_dep
-from utils.helpers import create_dirs
-from utils.logger import logger
-from utils.binary_verifier import *
-from utils.ganache import ganache
+from .utils.common import load_config, load_env
+from .utils.constants import *
+from .utils.explorer import get_contract_from_explorer
+from .utils.github import get_file_from_github, get_file_from_github_recursive, resolve_dep
+from .utils.helpers import create_dirs
+from .utils.logger import logger
+from .utils.binary_verifier import *
+from .utils.ganache import ganache
 
 __version__ = "0.0.0"
 

@@ -4,11 +4,11 @@ import json
 import os
 import stat
 
-from utils.common import fetch, pull, get_solc_native_platform_from_os
-from utils.helpers import create_dirs
-from utils.logger import logger
-from utils.encoder import encode_constructor_arguments
-from utils.constants import SOLC_DIR
+from .common import fetch, pull, get_solc_native_platform_from_os
+from .helpers import create_dirs
+from .logger import logger
+from .encoder import encode_constructor_arguments
+from .constants import SOLC_DIR
   
 def get_compiler_info(platform, required_compiler_version):
     compilers_list_url = (

@@ -3,9 +3,9 @@ import subprocess
 import signal
 
 from urllib.parse import urlparse
-from utils.logger import logger
-from utils.constants import LOCAL_RPC_URL, REMOTE_RPC_URL
-from utils.binary_verifier import get_chain_id
+from .logger import logger
+from .constants import LOCAL_RPC_URL, REMOTE_RPC_URL
+from .binary_verifier import get_chain_id
 class Ganache:
   sub_process = None
   
