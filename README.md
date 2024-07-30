@@ -5,7 +5,7 @@
 ![license MIT](https://img.shields.io/badge/license-MIT-brightgreen)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-Diff your Ethereum smart contracts code from GitHub against Blockchain explorer verified source code.
+Diff your Ethereum smart contracts code from GitHub against Blockchain explorer verified source code, deployed bytecode from local node (Ganache) against remote
 
 Supports reformatting solidity code by means of prettifier solidity plugin before comparing the sources (option `--prettify`).
 
@@ -33,6 +33,17 @@ Set your Github token to query API without strict rate limiting,
 
 ```bash
 export GITHUB_API_TOKEN=<your-github-token>
+```
+Set local and remote RPC URLs for matching bytecode from local node againts remote
+
+```bash
+export REMOTE_RPC_URL=<remote-rpc-url> //https://ethereum-sepolia-rpc.publicnode.com
+export LOCAL_RPC_URL=<local-rpc-url> //http://127.0.0.1:7545
+```
+Set absolute or relative path for downloading solc compilers
+
+```bash
+export SOLC_DIR=<solc-path>
 ```
 
 Start script with one of the examples provided (or entire folder of configs)
