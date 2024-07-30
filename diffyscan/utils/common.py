@@ -8,6 +8,23 @@ import requests
 from .logger import logger
 from .types import Config
 
+def load_env(variable_name, required=True, masked=False):
+    value = os.getenv(variable_name, default=None)
+
+    if required and not value:
+        logger.error("Env not found", variable_name)
+        sys.exit(1)
+
+    printable_value = mask_text(value) if masked and value is not None else str(value)
+
+    if printable_value:
+        logger.okay(f"{variable_name}", printable_value)
+    else:
+        logger.info(f"{variable_name} var is not set")
+
+    return value
+
+
 def load_config(path: str) -> Config:
     with open(path, mode="r") as config_file:
         return json.load(config_file)

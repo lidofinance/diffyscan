@@ -20,10 +20,6 @@ LOCAL_RPC_URL = os.getenv('LOCAL_RPC_URL', '')
 if not LOCAL_RPC_URL:
     raise ValueError('LOCAL_RPC_URL variable is not set')
   
-ETHERSCAN_TOKEN = os.getenv('ETHERSCAN_TOKEN', '')
-if not ETHERSCAN_TOKEN:
-    raise ValueError('ETHERSCAN_TOKEN variable is not set')
-
 GITHUB_API_TOKEN = os.getenv('GITHUB_API_TOKEN', '')
 if not GITHUB_API_TOKEN:
     raise ValueError('GITHUB_API_TOKEN variable is not set')
