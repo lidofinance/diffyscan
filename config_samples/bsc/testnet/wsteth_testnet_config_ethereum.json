@@ -1,0 +1,28 @@
+{
+  "contracts": {
+    "0x8B715EAf61A7DdF61C67d5D46687c796D1f47146": "ERC1967Proxy",
+    "0x607b139bfee21b2676ee664a237a70d737b9466e": "NttManager",
+    "0xF2bc73502283fcaC4b047dfE45366d8744daaC5B": "ERC1967Proxy",
+    "0xaf99eeb712511303f8b829707aafc5881a125771": "WormholeTransceiver",
+    "0xf0396a8077eda579f657B5E6F3c3F5e8EE81972b": "TransceiverStructs"
+  },
+  "explorer_token_env_var": "ETHERSCAN_TOKEN",
+  "explorer_hostname": "api-sepolia.etherscan.io",
+  "github_repo": {
+    "url": "https://github.com/wormhole-foundation/example-native-token-transfers",
+    "commit": "0d37b0f4975084492c72ca881c1218d6e1aae9e3",
+    "relative_root": "evm"
+  },
+  "dependencies": {
+    "lib/openzeppelin-contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "0457042d93d9dfd760dbaa06a4d2f1216fdbe297",
+      "relative_root": ""
+    },
+    "lib/wormhole-solidity-sdk": {
+      "url": "https://github.com/wormhole-foundation/wormhole-solidity-sdk",
+      "commit": "b9e129e65d34827d92fceeed8c87d3ecdfc801d0",
+      "relative_root": ""
+    }
+  }
+}

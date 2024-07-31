@@ -1,0 +1,30 @@
+{
+  "contracts": {
+    "0x0b15635fcf5316edfd2a9a0b0dc3700aea4d09e6": "ERC1967Proxy",
+    "0x83bc41aae95b447134e72892ba659d6ea664d496": "WstEthL2Token"
+  },
+  "explorer_token_env_var": "BSCSCAN_TOKEN",
+  "explorer_hostname": "api-testnet.bscscan.com",
+  "github_repo": {
+    "url": "https://github.com/wormhole-foundation/example-wormhole-axelar-wsteth",
+    "commit": "eae15a0dd4a55481c8bf776c250d86bf0529a061",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "lib/openzeppelin-contracts-upgradeable": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable",
+      "commit": "723f8cab09cdae1aca9ec9cc1cfa040c2d4b06c1",
+      "relative_root": ""
+    },
+    "lib/openzeppelin-contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "dbb6104ce834628e473d2173bbc9d47f81a9eec3",
+      "relative_root": ""
+    },
+    "lib/example-native-token-transfers": {
+      "url": "https://github.com/wormhole-foundation/example-native-token-transfers",
+      "commit": "0d37b0f4975084492c72ca881c1218d6e1aae9e3",
+      "relative_root": ""
+    }
+  }
+}
