@@ -8,6 +8,7 @@
 Diff your Ethereum smart contracts code from GitHub against Blockchain explorer verified source code, deployed bytecode from local node (Ganache) against remote
 
 Supports reformatting solidity code by means of prettifier solidity plugin before comparing the sources (option `--prettify`).
+Supports binary matching deployed bytecode from local node (Ganache) against remote (option `--binary-check`)
 
 ## Install
 
@@ -15,7 +16,7 @@ Supports reformatting solidity code by means of prettifier solidity plugin befor
 pipx install git+https://github.com/lidofinance/diffyscan
 ```
 
-If need `--prettify` option
+If need `--prettify`, '--binary-check' options
 
 ```shell
 npm install

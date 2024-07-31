@@ -99,13 +99,13 @@ def get_contract_creation_code_from_etherscan(contract_code, config, remote_cont
       
     constructor_calldata = None
 
-    if (remote_contract_address in config["ConstructorArgs"]):
+    if "ConstructorArgs" in config and remote_contract_address in config["ConstructorArgs"]:
         constructor_args = config["ConstructorArgs"][remote_contract_address]
         if constructor_args:
             constructor_calldata = encode_constructor_arguments(constructor_abi, constructor_args)
             return contract_creation_code+constructor_calldata, immutables, True
 
-    logger.warn(f'Constructor in ABI found, but config not found (contract {target_contract_name})')
+    logger.warn(f"Constructor in ABI found, but config section 'ConstructorArgs' not found (contract {target_contract_name})")
     return contract_creation_code, immutables, True
 
 def get_bytecode(contract_address, rpc_url):
