@@ -5,6 +5,7 @@
   },
   "explorer_token_env_var": "BSCSCAN_TOKEN",
   "explorer_hostname": "api-testnet.bscscan.com",
+  "audit_url": "https://github.com/wormhole-foundation/example-wormhole-axelar-wsteth/blob/main/audits/2024-06-10-cyfrin-audit-2024-06-wormhole-axelar-wsteth-l2token.pdf",
   "github_repo": {
     "url": "https://github.com/wormhole-foundation/example-wormhole-axelar-wsteth",
     "commit": "eae15a0dd4a55481c8bf776c250d86bf0529a061",

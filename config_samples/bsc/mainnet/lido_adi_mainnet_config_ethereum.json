@@ -8,7 +8,7 @@
     "0x742650E0441Be8503682965d601AD0Ba1fB54411": "LayerZeroAdapter",
     "0xEDc0D2cb2289BBa1587424dd42bDD1ca7eAbDF17": "WormholeAdapter"
   },
-  "explorer_token_env_var": "ETHERSCAN_API_MAINNET",
+  "explorer_token_env_var": "ETHERSCAN_TOKEN",
   "explorer_hostname": "api.etherscan.io",
   "github_repo": {
     "url": "https://github.com/lidofinance/aave-delivery-infrastructure",

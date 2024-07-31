@@ -8,6 +8,7 @@
   },
   "explorer_token_env_var": "ETHERSCAN_TOKEN",
   "explorer_hostname": "api.etherscan.io",
+  "audit_url": "https://github.com/wormhole-foundation/wormhole-audits/blob/main/2024-07-23-cyfrin-wormhole-evm-ntt-diff-v1.1.0.pdf",
   "github_repo": {
     "url": "https://github.com/wormhole-foundation/example-native-token-transfers",
     "commit": "0d37b0f4975084492c72ca881c1218d6e1aae9e3",
