@@ -1,0 +1,29 @@
+{
+  "contracts": {
+    "0x6981F5621691CBfE3DdD524dE71076b79F0A0278": "ERC1967Proxy",
+    "0xe82c2a5846cfb6d8683d6b636719e7aa61486838": "NttManager",
+    "0xbe3F7e06872E0dF6CD7FF35B7aa4Bb1446DC9986": "ERC1967Proxy",
+    "0xb948a93827d68a82F6513Ad178964Da487fe2BD9": "WormholeTransceiver",
+    "0xf0396a8077eda579f657B5E6F3c3F5e8EE81972b": "TransceiverStructs"
+  },
+  "explorer_token_env_var": "BSCSCAN_TOKEN",
+  "explorer_hostname": "api.bscscan.com",
+  "audit_url": "https://github.com/wormhole-foundation/wormhole-audits/blob/main/2024-07-23-cyfrin-wormhole-evm-ntt-diff-v1.1.0.pdf",
+  "github_repo": {
+    "url": "https://github.com/wormhole-foundation/example-native-token-transfers",
+    "commit": "0d37b0f4975084492c72ca881c1218d6e1aae9e3",
+    "relative_root": "evm"
+  },
+  "dependencies": {
+    "lib/openzeppelin-contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "0457042d93d9dfd760dbaa06a4d2f1216fdbe297",
+      "relative_root": ""
+    },
+    "lib/wormhole-solidity-sdk": {
+      "url": "https://github.com/wormhole-foundation/wormhole-solidity-sdk",
+      "commit": "b9e129e65d34827d92fceeed8c87d3ecdfc801d0",
+      "relative_root": ""
+    }
+  }
+}
