@@ -10,7 +10,7 @@
     "0xc934433f4c433Cf80DE6fB65fd70C7a650D8a408": "LayerZeroAdapter",
     "0xBb1E43408BbF2C767Ff3Bd5bBC34E183CC1Ef119": "WormholeAdapter"
   },
-  "explorer_token_env_var": "ETHERSCAN_API_BINANCE",
+  "explorer_token_env_var": "BSCSCAN_TOKEN",
   "explorer_hostname": "api.bscscan.com",
   "github_repo": {
     "url": "https://github.com/lidofinance/aave-delivery-infrastructure",

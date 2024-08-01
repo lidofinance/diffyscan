@@ -103,6 +103,27 @@ def _get_contract_from_mantle(mantle_explorer_hostname, contract):
     }
 
 
+def _get_contract_from_mode(mode_explorer_hostname, contract):
+    mode_explorer_link = (
+        f"https://{mode_explorer_hostname}/api/v2/smart-contracts/{contract}"
+    )
+    response = fetch(mode_explorer_link).json()
+
+    if "name" not in response:
+        _errorNoSourceCodeAndExit(contract)
+
+    source_files = {response["file_path"]: {"content": response["source_code"]}}
+
+    for entry in response.get("additional_sources", []):
+        source_files[entry["file_path"]] = {"content": entry["source_code"]}
+
+    return {
+        "name": response["name"],
+        "solcInput": {"language": "Solidity", "sources": source_files},
+        "compiler": response["compiler_version"],
+    }
+
+
 def get_contract_from_explorer(
     token, explorer_hostname, contract_address, contract_name_from_config
 ):
@@ -113,6 +134,8 @@ def get_contract_from_explorer(
         result = _get_contract_from_mantle(explorer_hostname, contract_address)
     elif explorer_hostname.endswith("lineascan.build"):
         result = _get_contract_from_etherscan(None, explorer_hostname, contract_address)
+    elif explorer_hostname.endswith("mode.network"):
+        result = _get_contract_from_mode(explorer_hostname, contract_address)
     else:
         result = _get_contract_from_etherscan(
             token, explorer_hostname, contract_address

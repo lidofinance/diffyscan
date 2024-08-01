@@ -8,7 +8,7 @@
     "0xFA3199330C9F33e5bA2D559574033D9cf3FCb609": "LayerZeroAdapterTestnet",
     "0x82C16B1e054fa94bf60b54A1Aa9FA74c5872899d": "WormholeAdapterTestnet"
   },
-  "explorer_token_env_var": "ETHERSCAN_API_SEPOLIA",
+  "explorer_token_env_var": "ETHERSCAN_TOKEN",
   "explorer_hostname": "api-sepolia.etherscan.io",
   "github_repo": {
     "url": "https://github.com/lidofinance/aave-delivery-infrastructure",
