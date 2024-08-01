@@ -11,9 +11,7 @@ def _errorNoSourceCodeAndExit(address):
 
 
 def _get_contract_from_etherscan(token, etherscan_hostname, contract):
-    etherscan_link = (
-      f"https://{etherscan_hostname}/api?module=contract&action=getsourcecode&address={contract}"
-    )
+    etherscan_link = f"https://{etherscan_hostname}/api?module=contract&action=getsourcecode&address={contract}"
     if token is not None:
         etherscan_link = f"{etherscan_link}&apikey={token}"
 
@@ -26,45 +24,42 @@ def _get_contract_from_etherscan(token, etherscan_hostname, contract):
     if "ContractName" not in result:
         _errorNoSourceCodeAndExit(contract)
 
-    solc_input = result['SourceCode']
+    solc_input = result["SourceCode"]
 
-    if solc_input.startswith('{{'):
+    if solc_input.startswith("{{"):
         return {
-            'name': result['ContractName'],
-            'solcInput': json.loads(solc_input[1:-1]),
-            'compiler': result['CompilerVersion']
+            "name": result["ContractName"],
+            "solcInput": json.loads(solc_input[1:-1]),
+            "compiler": result["CompilerVersion"],
         }
     else:
         return {
-            'name': result['ContractName'],
-            'compiler': result['CompilerVersion'],
-            'solcInput': {
-                'language': 'Solidity',
-                'sources': {
-                    result['ContractName']: {
-                        'content': solc_input
-                    }
-                },
-                'settings': {
-                    'optimizer': {
-                        'enabled': result['OptimizationUsed'] == '1',
-                        'runs': int(result['Runs'])
+            "name": result["ContractName"],
+            "compiler": result["CompilerVersion"],
+            "solcInput": {
+                "language": "Solidity",
+                "sources": {result["ContractName"]: {"content": solc_input}},
+                "settings": {
+                    "optimizer": {
+                        "enabled": result["OptimizationUsed"] == "1",
+                        "runs": int(result["Runs"]),
                     },
-                    'outputSelection': {
-                        '*': {
-                            '*': [
-                                'abi',
-                                'evm.bytecode',
-                                'evm.deployedBytecode',
-                                'evm.methodIdentifiers',
-                                'metadata'
+                    "outputSelection": {
+                        "*": {
+                            "*": [
+                                "abi",
+                                "evm.bytecode",
+                                "evm.deployedBytecode",
+                                "evm.methodIdentifiers",
+                                "metadata",
                             ],
-                            '': ['ast']
+                            "": ["ast"],
                         }
-                    }
-                }
-            }
+                    },
+                },
+            },
         }
+
 
 def _get_contract_from_zksync(zksync_explorer_hostname, contract):
     zksync_explorer_link = (
@@ -83,15 +78,14 @@ def _get_contract_from_zksync(zksync_explorer_hostname, contract):
         _errorNoSourceCodeAndExit(contract)
 
     return {
-        'name': data['ContractName'],
-        'sources': json.loads(data["sourceCode"]["sources"]),
-        'compiler': data["CompilerVersion"]
+        "name": data["ContractName"],
+        "sources": json.loads(data["sourceCode"]["sources"]),
+        "compiler": data["CompilerVersion"],
     }
 
+
 def _get_contract_from_mantle(mantle_explorer_hostname, contract):
-    etherscan_link = (
-      f"https://{mantle_explorer_hostname}/api?module=contract&action=getsourcecode&address={contract}"
-    )
+    etherscan_link = f"https://{mantle_explorer_hostname}/api?module=contract&action=getsourcecode&address={contract}"
     response = fetch(etherscan_link).json
 
     data = response["result"][0]
@@ -103,12 +97,15 @@ def _get_contract_from_mantle(mantle_explorer_hostname, contract):
         source_files.append((entry["Filename"], {"content": entry["SourceCode"]}))
 
     return {
-        'name': data['ContractName'],
-        'sources': json.loads(data["sourceCode"]["sources"]),
-        'compiler': data["CompilerVersion"]
+        "name": data["ContractName"],
+        "sources": json.loads(data["sourceCode"]["sources"]),
+        "compiler": data["CompilerVersion"],
     }
 
-def get_contract_from_explorer(token, explorer_hostname, contract_address, contract_name_from_config):
+
+def get_contract_from_explorer(
+    token, explorer_hostname, contract_address, contract_name_from_config
+):
     result = {}
     if explorer_hostname.startswith("zksync"):
         result = _get_contract_from_zksync(explorer_hostname, contract_address)
@@ -117,12 +114,14 @@ def get_contract_from_explorer(token, explorer_hostname, contract_address, contr
     elif explorer_hostname.endswith("lineascan.build"):
         result = _get_contract_from_etherscan(None, explorer_hostname, contract_address)
     else:
-        result =_get_contract_from_etherscan(token, explorer_hostname, contract_address)
-  
-    contract_name_from_etherscan = result['name']
+        result = _get_contract_from_etherscan(
+            token, explorer_hostname, contract_address
+        )
+
+    contract_name_from_etherscan = result["name"]
     if contract_name_from_etherscan != contract_name_from_config:
-      raise ValueError(
-          f"Contract name in config does not match with Blockchain explorer {contract_address}: {contract_name_from_config} != {contract_name_from_etherscan}",
-      )
-    
+        raise ValueError(
+            f"Contract name in config does not match with Blockchain explorer {contract_address}: {contract_name_from_config} != {contract_name_from_etherscan}",
+        )
+
     return result
