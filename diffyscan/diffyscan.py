@@ -17,7 +17,7 @@ from .utils.github import (
 from .utils.helpers import create_dirs
 from .utils.logger import logger
 from .utils.binary_verifier import *
-from .utils.ganache import ganache
+from .utils.hardhat import hardhat
 
 __version__ = "0.0.0"
 
@@ -48,7 +48,9 @@ def prettify_solidity(solidity_contract_content: str):
         return fp.read()
 
 
-def run_binary_diff(remote_contract_address, contract_source_code, config):
+def run_binary_diff(
+    remote_contract_address, contract_source_code, config, deployer_account
+):
     logger.info(f"Started binary checking for {remote_contract_address}")
 
     contract_creation_code, immutables, is_valid_constructor = (
@@ -61,8 +63,6 @@ def run_binary_diff(remote_contract_address, contract_source_code, config):
         logger.error(f"Failed to find constructorArgs, binary diff skipped")
         return
 
-    deployer_account = get_account(LOCAL_RPC_URL)
-
     if deployer_account is None:
         logger.error(f"Failed to receive the account, binary diff skipped")
         return
@@ -73,7 +73,7 @@ def run_binary_diff(remote_contract_address, contract_source_code, config):
 
     if local_contract_address is None:
         logger.error(
-            f"Failed to deploy bytecode to {LOCAL_RPC_URL}, binary diff skipped"
+            f"Failed to deploy bytecode to {LOCAL_RPC_URL}, binary diff skipped ({remote_contract_address})"
         )
         return
 
@@ -233,7 +233,7 @@ def process_config(
 
     try:
         if binary_check:
-            ganache.start()
+            hardhat.start(config["hardhat_config_path"])
 
         for contract_address, contract_name in contracts.items():
             contract_code = get_contract_from_explorer(
@@ -251,12 +251,15 @@ def process_config(
                 unify_formatting,
             )
             if binary_check:
-                run_binary_diff(contract_address, contract_code, config)
+                deployer_account = get_account(LOCAL_RPC_URL)
+                run_binary_diff(
+                    contract_address, contract_code, config, deployer_account
+                )
     except KeyboardInterrupt:
         logger.info(f"Keyboard interrupt by user")
     finally:
         if binary_check:
-            ganache.stop()
+            hardhat.stop()
             delete_compilers()
 
 

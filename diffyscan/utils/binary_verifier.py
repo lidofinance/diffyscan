@@ -164,7 +164,7 @@ def deploy_contract(rpc_url, deployer, data):
   response_sendTransaction = pull(rpc_url, payload_sendTransaction).json()
 
   if 'error' in response_sendTransaction:
-    logger.warn(f'Failed to deploy transaction: {response_sendTransaction['error']['message']}')
+    logger.error(f'Failed to deploy transaction: {response_sendTransaction['error']['message']}')
     return None
   
   logger.okay(f'Transaction was successfully deployed')

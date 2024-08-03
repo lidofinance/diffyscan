@@ -8,7 +8,7 @@ from .constants import LOCAL_RPC_URL, REMOTE_RPC_URL
 from .binary_verifier import get_chain_id
 
 
-class Ganache:
+class Hardhat:
     sub_process = None
     TIMEOUT_FOR_INIT_SEC = 5
 
@@ -21,15 +21,13 @@ class Ganache:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             return s.connect_ex((parsed_url.hostname, parsed_url.port)) == 0
 
-    def start(self):
+    def start(self, hardhat_path):
         parsed_url = urlparse(LOCAL_RPC_URL)
 
         local_node_command = (
-            f"npx ganache --host {parsed_url.hostname} "
+            f"npx hardhat node --hostname {parsed_url.hostname} "
             f"--port {parsed_url.port} "
-            f"--chain.chainId {get_chain_id (REMOTE_RPC_URL)} "
-            f"--fork.url {REMOTE_RPC_URL} "
-            f"-l 92000000 --hardfork istanbul -d"
+            f"--config {hardhat_path} "
         )
 
         logger.info(f'Trying to start Ganache: "{local_node_command}"')
@@ -67,4 +65,4 @@ class Ganache:
             logger.info(f"Ganache stopped, PID {self.sub_process.pid}")
 
 
-ganache = Ganache()
+hardhat = Hardhat()

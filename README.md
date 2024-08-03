@@ -5,10 +5,10 @@
 ![license MIT](https://img.shields.io/badge/license-MIT-brightgreen)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-Diff your Ethereum smart contracts code from GitHub against Blockchain explorer verified source code, deployed bytecode from local node (Ganache) against remote
+Diff your Ethereum smart contracts code from GitHub against Blockchain explorer verified source code, deployed bytecode from local node (Hardhat) against remote
 
 Supports reformatting solidity code by means of prettifier solidity plugin before comparing the sources (option `--prettify`).
-Supports binary matching deployed bytecode from local node (Ganache) against remote (option `--binary-check`)
+Supports binary matching deployed bytecode from local node (Hardhat) against remote (option `--binary-check`)
 
 ## Install
 
