@@ -5,7 +5,6 @@ import argparse
 import os
 import subprocess
 import tempfile
-import shutil
 
 from .utils.common import load_config, load_env
 from .utils.constants import *
@@ -215,11 +214,7 @@ def run_source_diff(
 
 
 def process_config(
-    path: str,
-    recursive_parsing: bool,
-    unify_formatting: bool,
-    binary_check: bool,
-    autoclean: bool,
+    path: str, recursive_parsing: bool, unify_formatting: bool, binary_check: bool
 ):
     logger.info(f"Loading config {path}...")
     config = load_config(path)
@@ -260,11 +255,9 @@ def process_config(
     except KeyboardInterrupt:
         logger.info(f"Keyboard interrupt by user")
     finally:
-        ganache.stop()
-
-    if autoclean:
-        shutil.rmtree(SOLC_DIR)
-        logger.okay(f"{SOLC_DIR} deleted")
+        if binary_check:
+            ganache.stop()
+            delete_compilers()
 
 
 def parse_arguments():
@@ -294,12 +287,9 @@ def parse_arguments():
     )
     parser.add_argument(
         "--binary-check",
-        "-binary",
+        "-b",
         help="Match contracts by binaries such as verify-bytecode.ts",
-        default=True,
-    )
-    parser.add_argument(
-        "--autoclean", "-clean", help="Autoclean build dir after work", default=True
+        action="store_true",
     )
     return parser.parse_args()
 
@@ -317,30 +307,18 @@ def main():
 
     if args.path is None:
         process_config(
-            DEFAULT_CONFIG_PATH,
-            args.support_brownie,
-            args.prettify,
-            args.binary_check,
-            args.autoclean,
+            DEFAULT_CONFIG_PATH, args.support_brownie, args.prettify, args.binary_check
         )
     elif os.path.isfile(args.path):
         process_config(
-            args.path,
-            args.support_brownie,
-            args.prettify,
-            args.binary_check,
-            args.autoclean,
+            args.path, args.support_brownie, args.prettify, args.binary_check
         )
     elif os.path.isdir(args.path):
         for filename in os.listdir(args.path):
             config_path = os.path.join(args.path, filename)
             if os.path.isfile(config_path):
                 process_config(
-                    config_path,
-                    args.support_brownie,
-                    args.prettify,
-                    args.binary_check,
-                    args.autoclean,
+                    config_path, args.support_brownie, args.prettify, args.binary_check
                 )
     else:
         logger.error(f"Specified config path {args.path} not found")

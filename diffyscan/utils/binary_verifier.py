@@ -3,6 +3,7 @@ import subprocess
 import json
 import os
 import stat
+import shutil
 
 from .common import fetch, pull, get_solc_native_platform_from_os
 from .helpers import create_dirs
@@ -21,6 +22,10 @@ def get_compiler_info(platform, required_compiler_version):
       raise ValueError(f'Required compiler version for "{platform}" is not found')
     
     return required_build_info
+
+def delete_compilers():
+    shutil.rmtree(SOLC_DIR)
+    logger.okay(f"{SOLC_DIR} deleted")
 
 def download_compiler(platform, build_info, destination_path):
     compiler_url = (
