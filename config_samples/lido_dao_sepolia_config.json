@@ -40,7 +40,6 @@
         "0x2dfF8E2c55959f719Faa6dCC4a3B0937bcA71F73": "ACL"
     },
     "explorer_token_env_var": "ETHERSCAN_TOKEN",
-    "hardhat_config_path": "../hardhat_configs/sepolia_hardhat.config.js",
     "explorer_hostname": "api-sepolia.etherscan.io",
     "github_repo": {
         "url": "https://github.com/lidofinance/lido-dao",

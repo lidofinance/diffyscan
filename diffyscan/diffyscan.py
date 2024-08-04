@@ -214,7 +214,11 @@ def run_source_diff(
 
 
 def process_config(
-    path: str, recursive_parsing: bool, unify_formatting: bool, binary_check: bool
+    path: str,
+    hardhat_path: str,
+    recursive_parsing: bool,
+    unify_formatting: bool,
+    binary_check: bool,
 ):
     logger.info(f"Loading config {path}...")
     config = load_config(path)
@@ -233,7 +237,7 @@ def process_config(
 
     try:
         if binary_check:
-            hardhat.start(config["hardhat_config_path"])
+            hardhat.start(hardhat_path)
 
         for contract_address, contract_name in contracts.items():
             contract_code = get_contract_from_explorer(
@@ -272,6 +276,9 @@ def parse_arguments():
         "path", nargs="?", default=None, help="Path to config or directory with configs"
     )
     parser.add_argument(
+        "hardhat_path", nargs="?", default=None, help="Path to Hardhat config"
+    )
+    parser.add_argument(
         "--yes",
         "-y",
         help="If set don't ask for input before validating each contract",
@@ -307,21 +314,37 @@ def main():
         return
     logger.info("Welcome to Diffyscan!")
     logger.divider()
+    if args.hardhat_path is None or not os.path.isfile(
+        os.path.abspath(args.hardhat_path)
+    ):
+        raise ValueError(f"Path to hardhat config not found")
 
     if args.path is None:
         process_config(
-            DEFAULT_CONFIG_PATH, args.support_brownie, args.prettify, args.binary_check
+            DEFAULT_CONFIG_PATH,
+            os.path.abspath(args.hardhat_path),
+            args.support_brownie,
+            args.prettify,
+            args.binary_check,
         )
     elif os.path.isfile(args.path):
         process_config(
-            args.path, args.support_brownie, args.prettify, args.binary_check
+            args.path,
+            args.hardhat_path,
+            args.support_brownie,
+            args.prettify,
+            args.binary_check,
         )
     elif os.path.isdir(args.path):
         for filename in os.listdir(args.path):
             config_path = os.path.join(args.path, filename)
             if os.path.isfile(config_path):
                 process_config(
-                    config_path, args.support_brownie, args.prettify, args.binary_check
+                    config_path,
+                    args.hardhat_path,
+                    args.support_brownie,
+                    args.prettify,
+                    args.binary_check,
                 )
     else:
         logger.error(f"Specified config path {args.path} not found")

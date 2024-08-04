@@ -50,7 +50,7 @@ export SOLC_DIR=<solc-path>
 Start script with one of the examples provided (or entire folder of configs)
 
 ```bash
-diffyscan config_samples/lido_dao_sepolia_config.json
+diffyscan config_samples/lido_dao_sepolia_config.json hardhat_configs/sepolia_hardhat.config.js
 ```
 
 Alternatively, create a new config file named `config.json`,
