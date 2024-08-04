@@ -24,8 +24,9 @@ def get_compiler_info(platform, required_compiler_version):
     return required_build_info
 
 def delete_compilers():
-    shutil.rmtree(SOLC_DIR)
-    logger.okay(f"{SOLC_DIR} deleted")
+    if os.path.exists(SOLC_DIR):
+        shutil.rmtree(SOLC_DIR)
+        logger.okay(f"{SOLC_DIR} deleted")
 
 def download_compiler(platform, build_info, destination_path):
     compiler_url = (
