@@ -238,6 +238,7 @@ def process_config(
     try:
         if binary_check:
             hardhat.start(hardhat_path)
+            deployer_account = get_account(LOCAL_RPC_URL)
 
         for contract_address, contract_name in contracts.items():
             contract_code = get_contract_from_explorer(
@@ -255,7 +256,6 @@ def process_config(
                 unify_formatting,
             )
             if binary_check:
-                deployer_account = get_account(LOCAL_RPC_URL)
                 run_binary_diff(
                     contract_address, contract_code, config, deployer_account
                 )
