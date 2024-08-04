@@ -30,7 +30,7 @@ class Hardhat:
             f"--config {hardhat_path} "
         )
 
-        logger.info(f'Trying to start Ganache: "{local_node_command}"')
+        logger.info(f'Trying to start Hardhat: "{local_node_command}"')
         is_port_used = self.is_port_in_use(parsed_url)
         if is_port_used:
             answer = input(f'Port {parsed_url.port} is busy. Fix it? write "yes": ')
@@ -41,7 +41,7 @@ class Hardhat:
                 if return_code == 0:
                     is_port_used = self.is_port_in_use(parsed_url)
         if is_port_used:
-            raise ValueError(f"Failed to start Ganache: {parsed_url.netloc} is busy")
+            raise ValueError(f"Failed to start Hardhat: {parsed_url.netloc} is busy")
         self.sub_process = subprocess.Popen(
             "exec " + local_node_command,
             shell=True,
@@ -51,18 +51,18 @@ class Hardhat:
         try:
             _, errs = self.sub_process.communicate(timeout=self.TIMEOUT_FOR_INIT_SEC)
             if errs:
-                raise ValueError(f"Failed to start Ganache: {errs.decode()}")
+                raise ValueError(f"Failed to start Hardhat: {errs.decode()}")
         except subprocess.TimeoutExpired:
             is_port_used = self.is_port_in_use(parsed_url)
             if is_port_used:
-                logger.okay(f"Ganache successfully started, PID {self.sub_process.pid}")
+                logger.okay(f"Hardhat successfully started, PID {self.sub_process.pid}")
             else:
-                raise ValueError(f"Failed to start Ganache: something is wrong")
+                raise ValueError(f"Failed to start Hardhat: something is wrong")
 
     def stop(self):
         if self.sub_process is not None and self.sub_process.poll() is None:
             os.kill(self.sub_process.pid, signal.SIGTERM)
-            logger.info(f"Ganache stopped, PID {self.sub_process.pid}")
+            logger.info(f"Hardhat stopped, PID {self.sub_process.pid}")
 
 
 hardhat = Hardhat()
