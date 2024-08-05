@@ -3,7 +3,9 @@ import sys
 
 from .common import fetch
 from .logger import logger
-
+from .compiler import *
+from .constants import SOLC_DIR
+from .encoder import encode_constructor_arguments
 
 def _errorNoSourceCodeAndExit(address):
     logger.error("source code is not verified or an EOA address", address)
@@ -148,3 +150,47 @@ def get_contract_from_explorer(
         )
 
     return result
+
+def get_code_from_explorer(contract_code, constructor_args, contract_address_from_config):
+    platform = get_solc_native_platform_from_os()
+    build_name = contract_code["compiler"][1:]
+    build_info = get_compiler_info(platform, build_name)
+    compiler_path = os.path.join(SOLC_DIR, build_info['path'])
+    
+    is_compiler_already_prepared = os.path.isfile(compiler_path)
+    
+    if not is_compiler_already_prepared:   
+      prepare_compiler(platform, build_info, compiler_path)
+      
+    input_settings = json.dumps(contract_code["solcInput"])   
+    compiled_contracts = compile_contracts(compiler_path, input_settings)['contracts'].values()
+
+    target_contract_name = contract_code['name']
+    target_compiled_contract = get_target_compiled_contract(compiled_contracts, target_contract_name)
+
+    contract_creation_code = f'0x{target_compiled_contract['evm']['bytecode']['object']}'
+    immutables = {}
+    if ('immutableReferences' in target_compiled_contract['evm']['deployedBytecode']):
+      immutable_references = target_compiled_contract['evm']['deployedBytecode']['immutableReferences']
+      for refs in immutable_references.values():
+          for ref in refs:
+              immutables[ref['start']] = ref['length'] 
+    constructor_abi = None
+    try:
+        constructor_abi = [entry["inputs"] for entry in target_compiled_contract['abi'] if entry["type"] == "constructor"][0]
+    except IndexError:
+        logger.info(f'Constructor in ABI not found')
+        return contract_creation_code, immutables
+      
+    if contract_address_from_config not in constructor_args:
+        raise ValueError(f"Failed to find constructorArgs")  
+      
+    constructor_calldata = None
+
+    if constructor_args is not None and contract_address_from_config in constructor_args:
+        constructor_args = constructor_args [contract_address_from_config]
+        if constructor_args:
+            constructor_calldata = encode_constructor_arguments(constructor_abi, constructor_args)
+            return contract_creation_code+constructor_calldata, immutables
+
+    return contract_creation_code, immutables, False

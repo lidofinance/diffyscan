@@ -4,7 +4,6 @@ import sys
 import subprocess
 import tempfile
 import requests
-import platform
 
 from urllib.parse import urlparse
 
@@ -79,16 +78,6 @@ def parse_repo_link(repo_link):
     repo_location = [item.strip("/") for item in parse_result[2].split("tree")]
     user_slash_repo = repo_location[0]
     return user_slash_repo
-
-
-def get_solc_native_platform_from_os():
-    platform_name = sys.platform
-    if platform_name == "linux":
-        return "linux-amd64"
-    elif platform_name == "darwin":
-        return "macosx-amd64" if platform.machine() == "x86_64" else "macosx-arm64"
-    else:
-        raise ValueError(f"Unsupported platform {platform_name}")
 
 
 def prettify_solidity(solidity_contract_content: str):

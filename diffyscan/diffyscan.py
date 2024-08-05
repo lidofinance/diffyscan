@@ -6,7 +6,7 @@ import os
 
 from .utils.common import load_config, load_env, prettify_solidity
 from .utils.constants import *
-from .utils.explorer import get_contract_from_explorer
+from .utils.explorer import get_contract_from_explorer, get_code_from_explorer
 from .utils.github import (
     get_file_from_github,
     get_file_from_github_recursive,
@@ -16,6 +16,7 @@ from .utils.helpers import create_dirs
 from .utils.logger import logger
 from .utils.binary_verifier import *
 from .utils.hardhat import hardhat
+from .utils.node_handler import *
 
 __version__ = "0.0.0"
 
@@ -39,7 +40,7 @@ def run_binary_diff(
     if "ConstructorArgs" not in config:
         raise ValueError(f"Failed to find constructorArgs {address_name})")
 
-    contract_creation_code, immutables = get_contract_creation_code_from_etherscan(
+    contract_creation_code, immutables = get_code_from_explorer(
         contract_source_code,
         config["ConstructorArgs"],
         contract_address_from_config,
@@ -58,7 +59,9 @@ def run_binary_diff(
         )
         return
 
-    local_deployed_bytecode = get_bytecode(local_contract_address, local_RPC_URL)
+    local_deployed_bytecode = get_bytecode_from_node(
+        local_contract_address, local_RPC_URL
+    )
     if local_deployed_bytecode is None:
         skip_or_raise(
             skip_deploy_error,
@@ -67,7 +70,7 @@ def run_binary_diff(
         return
 
     remote_RPC_URL = config["binary_checking"]["remote_RPC_URL"]
-    remote_deployed_bytecode = get_bytecode(
+    remote_deployed_bytecode = get_bytecode_from_node(
         contract_address_from_config, remote_RPC_URL
     )
     if remote_deployed_bytecode is None:
