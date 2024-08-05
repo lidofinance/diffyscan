@@ -41,6 +41,13 @@
     },
     "explorer_token_env_var": "ETHERSCAN_TOKEN",
     "explorer_hostname": "api-sepolia.etherscan.io",
+    "binary_checking": {
+	"use": 1,
+	"skip_deploy_error" : 1,
+	"hardhat_config_name": "sepolia_hardhat.config.js",
+	"local_RPC_URL": "http://127.0.0.1:7545",
+    	"remote_RPC_URL":"https://ethereum-sepolia-rpc.publicnode.com"
+    },
     "github_repo": {
         "url": "https://github.com/lidofinance/lido-dao",
         "commit": "cadffa46a2b8ed6cfa1127fca2468bae1a82d6bf",

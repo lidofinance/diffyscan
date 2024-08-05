@@ -3,10 +3,8 @@ import sys
 import time
 import argparse
 import os
-import subprocess
-import tempfile
 
-from .utils.common import load_config, load_env
+from .utils.common import load_config, load_env, prettify_solidity
 from .utils.constants import *
 from .utils.explorer import get_contract_from_explorer
 from .utils.github import (
@@ -25,74 +23,73 @@ __version__ = "0.0.0"
 g_skip_user_input: bool = False
 
 
-def prettify_solidity(solidity_contract_content: str):
-    github_file_name = os.path.join(
-        tempfile.gettempdir(), "9B91E897-EA51-4FCC-8DAF-FCFF135A6963.sol"
-    )
-    with open(github_file_name, "w") as fp:
-        fp.write(solidity_contract_content)
-    prettier_return_code = subprocess.call(
-        [
-            "npx",
-            "prettier",
-            "--plugin=prettier-plugin-solidity",
-            "--write",
-            github_file_name,
-        ],
-        stdout=subprocess.DEVNULL,
-    )
-    if prettier_return_code != 0:
-        logger.error("Prettier/npx subprocess failed (see the error above)")
-        sys.exit()
-    with open(github_file_name, "r") as fp:
-        return fp.read()
-
-
 def run_binary_diff(
-    remote_contract_address, contract_source_code, config, deployer_account
+    contract_address_from_config,
+    contract_name_from_config,
+    contract_source_code,
+    config,
+    deployer_account,
 ):
-    logger.info(f"Started binary checking for {remote_contract_address}")
-
-    contract_creation_code, immutables, is_valid_constructor = (
-        get_contract_creation_code_from_etherscan(
-            contract_source_code, config, remote_contract_address
-        )
-    )
-
-    if not is_valid_constructor:
-        logger.error(f"Failed to find constructorArgs, binary diff skipped")
-        return
+    address_name = f"({contract_address_from_config} : {contract_name_from_config})"
+    logger.divider()
+    logger.info(f"Started binary checking for {address_name}")
 
     if deployer_account is None:
-        logger.error(f"Failed to receive the account, binary diff skipped")
-        return
+        raise ValueError(f"Failed to receive the account {address_name})")
+    if "ConstructorArgs" not in config:
+        raise ValueError(f"Failed to find constructorArgs {address_name})")
 
-    local_contract_address = deploy_contract(
-        LOCAL_RPC_URL, deployer_account, contract_creation_code
+    contract_creation_code, immutables = get_contract_creation_code_from_etherscan(
+        contract_source_code,
+        config["ConstructorArgs"],
+        contract_address_from_config,
     )
 
+    local_RPC_URL = config["binary_checking"]["local_RPC_URL"]
+    local_contract_address, text_reason = deploy_contract(
+        local_RPC_URL, deployer_account, contract_creation_code
+    )
+
+    skip_deploy_error = config["binary_checking"]["skip_deploy_error"]
     if local_contract_address is None:
-        logger.error(
-            f"Failed to deploy bytecode to {LOCAL_RPC_URL}, binary diff skipped ({remote_contract_address})"
+        skip_or_raise(
+            skip_deploy_error,
+            f"Failed to deploy bytecode to {local_RPC_URL} {address_name} {text_reason}",
         )
         return
 
-    local_deployed_bytecode = get_bytecode(local_contract_address, LOCAL_RPC_URL)
+    local_deployed_bytecode = get_bytecode(local_contract_address, local_RPC_URL)
     if local_deployed_bytecode is None:
-        logger.error(f"Failed to receive bytecode from {LOCAL_RPC_URL}")
+        skip_or_raise(
+            skip_deploy_error,
+            text_error=f"Failed to receive bytecode from {local_RPC_URL} {address_name})",
+        )
         return
 
-    remote_deployed_bytecode = get_bytecode(remote_contract_address, REMOTE_RPC_URL)
+    remote_RPC_URL = config["binary_checking"]["remote_RPC_URL"]
+    remote_deployed_bytecode = get_bytecode(
+        contract_address_from_config, remote_RPC_URL
+    )
     if remote_deployed_bytecode is None:
-        logger.error(f"Failed to receive bytecode from {REMOTE_RPC_URL}")
+        skip_or_raise(
+            skip_deploy_error,
+            f"Failed to receive bytecode from {remote_RPC_URL} {address_name})",
+        )
         return
 
     to_match(
         local_deployed_bytecode,
         remote_deployed_bytecode,
         immutables,
-        remote_contract_address,
+        contract_address_from_config,
     )
+
+
+def skip_or_raise(skip_deploy_error, text_error):
+    if skip_deploy_error:
+        logger.error(text_error)
+    else:
+        raise ValueError(text_error)
 
 
 def run_source_diff(
@@ -213,13 +210,7 @@ def run_source_diff(
     logger.report_table(report)
 
 
-def process_config(
-    path: str,
-    hardhat_path: str,
-    recursive_parsing: bool,
-    unify_formatting: bool,
-    binary_check: bool,
-):
+def process_config(path: str, recursive_parsing: bool, unify_formatting: bool):
     logger.info(f"Loading config {path}...")
     config = load_config(path)
 
@@ -234,11 +225,16 @@ def process_config(
                 raise ValueError(f'Failed to find "ETHERSCAN_EXPLORER_TOKEN" in env')
 
     contracts = config["contracts"]
+    binary_check = (
+        "binary_checking" in config
+        and "use" in config["binary_checking"]
+        and config["binary_checking"]["use"]
+    )
 
     try:
         if binary_check:
-            hardhat.start(hardhat_path)
-            deployer_account = get_account(LOCAL_RPC_URL)
+            hardhat.start(path, config["binary_checking"])
+            deployer_account = get_account(config["binary_checking"]["local_RPC_URL"])
 
         for contract_address, contract_name in contracts.items():
             contract_code = get_contract_from_explorer(
@@ -257,14 +253,17 @@ def process_config(
             )
             if binary_check:
                 run_binary_diff(
-                    contract_address, contract_code, config, deployer_account
+                    contract_address,
+                    contract_name,
+                    contract_code,
+                    config,
+                    deployer_account,
                 )
     except KeyboardInterrupt:
         logger.info(f"Keyboard interrupt by user")
     finally:
         if binary_check:
             hardhat.stop()
-            delete_compilers()
 
 
 def parse_arguments():
@@ -274,9 +273,6 @@ def parse_arguments():
     )
     parser.add_argument(
         "path", nargs="?", default=None, help="Path to config or directory with configs"
-    )
-    parser.add_argument(
-        "hardhat_path", nargs="?", default=None, help="Path to Hardhat config"
     )
     parser.add_argument(
         "--yes",
@@ -295,12 +291,6 @@ def parse_arguments():
         help="Unify formatting by prettier before comparing",
         action="store_true",
     )
-    parser.add_argument(
-        "--binary-check",
-        "-b",
-        help="Match contracts by binaries such as verify-bytecode.ts",
-        action="store_true",
-    )
     return parser.parse_args()
 
 
@@ -314,38 +304,15 @@ def main():
         return
     logger.info("Welcome to Diffyscan!")
     logger.divider()
-    if args.hardhat_path is None or not os.path.isfile(
-        os.path.abspath(args.hardhat_path)
-    ):
-        raise ValueError(f"Path to hardhat config not found")
-
     if args.path is None:
-        process_config(
-            DEFAULT_CONFIG_PATH,
-            os.path.abspath(args.hardhat_path),
-            args.support_brownie,
-            args.prettify,
-            args.binary_check,
-        )
+        process_config(DEFAULT_CONFIG_PATH, args.support_brownie, args.prettify)
     elif os.path.isfile(args.path):
-        process_config(
-            args.path,
-            args.hardhat_path,
-            args.support_brownie,
-            args.prettify,
-            args.binary_check,
-        )
+        process_config(args.path, args.support_brownie, args.prettify)
     elif os.path.isdir(args.path):
         for filename in os.listdir(args.path):
             config_path = os.path.join(args.path, filename)
             if os.path.isfile(config_path):
-                process_config(
-                    config_path,
-                    args.hardhat_path,
-                    args.support_brownie,
-                    args.prettify,
-                    args.binary_check,
-                )
+                process_config(config_path, args.support_brownie, args.prettify)
     else:
         logger.error(f"Specified config path {args.path} not found")
         sys.exit(1)

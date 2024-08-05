@@ -4,8 +4,6 @@ import signal
 
 from urllib.parse import urlparse
 from .logger import logger
-from .constants import LOCAL_RPC_URL, REMOTE_RPC_URL
-from .binary_verifier import get_chain_id
 
 
 class Hardhat:
@@ -21,13 +19,18 @@ class Hardhat:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             return s.connect_ex((parsed_url.hostname, parsed_url.port)) == 0
 
-    def start(self, hardhat_path):
-        parsed_url = urlparse(LOCAL_RPC_URL)
-
+    def start(self, main_config_relative_path: str, binary_config):
+        parsed_url = urlparse(binary_config["local_RPC_URL"])
+        hardhat_config_relative_path = Hardhat.get_config_path(
+            os.path.dirname(main_config_relative_path),
+            "hardhat_configs",
+            binary_config["hardhat_config_name"],
+        )
         local_node_command = (
             f"npx hardhat node --hostname {parsed_url.hostname} "
             f"--port {parsed_url.port} "
-            f"--config {hardhat_path} "
+            f"--config {hardhat_config_relative_path} "
+            f"--fork {binary_config["remote_RPC_URL"]}"
         )
 
         logger.info(f'Trying to start Hardhat: "{local_node_command}"')
@@ -63,6 +66,12 @@ class Hardhat:
         if self.sub_process is not None and self.sub_process.poll() is None:
             os.kill(self.sub_process.pid, signal.SIGTERM)
             logger.info(f"Hardhat stopped, PID {self.sub_process.pid}")
+
+    def get_config_path(from_path: str, to_path: str, filename: str) -> str:
+        parent_directory = os.path.join(from_path, os.pardir)
+        new_directory = os.path.join(parent_directory, to_path)
+        path_to_file = os.path.join(new_directory, filename)
+        return os.path.normpath(path_to_file)
 
 
 hardhat = Hardhat()

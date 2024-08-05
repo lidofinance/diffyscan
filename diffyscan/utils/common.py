@@ -1,9 +1,12 @@
 import json
 import os
 import sys
-from urllib.parse import urlparse
-
+import subprocess
+import tempfile
 import requests
+import platform
+
+from urllib.parse import urlparse
 
 from .logger import logger
 from .types import Config
@@ -31,30 +34,38 @@ def load_config(path: str) -> Config:
         return json.load(config_file)
 
 
-def handle_response(response, url):
-    if response.status_code == 404:
-        return None
-
-    if not response.ok and response.status_code != 200:
-        logger.error("Request failed", url)
-        logger.error("Status", response.status_code)
-        logger.error("Response", response.text)
+def fetch(url, headers=None):
+    logger.log(f"Fetch: {url}")
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as http_err:
+        raise ValueError(f"HTTP error occurred: {http_err}")
+    except requests.exceptions.ConnectionError as conn_err:
+        raise ValueError(f"Connection error occurred: {conn_err}")
+    except requests.exceptions.Timeout as timeout_err:
+        raise ValueError(f"Timeout error occurred: {timeout_err}")
+    except requests.exceptions.RequestException as req_err:
+        raise ValueError(f"An error occurred: {req_err}")
 
     return response
 
 
-def fetch(url, headers={}):
-    logger.log(f"Fetch: {url}")
-    response = requests.get(url, headers=headers)
-
-    return handle_response(response, url)
-
-
-def pull(url, payload={}):
+def pull(url, payload=None, headers=None):
     logger.log(f"Pull: {url}")
-    response = requests.post(url, data=payload)
+    try:
+        response = requests.post(url, data=payload, headers=headers)
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as http_err:
+        raise ValueError(f"HTTP error occurred: {http_err}")
+    except requests.exceptions.ConnectionError as conn_err:
+        raise ValueError(f"Connection error occurred: {conn_err}")
+    except requests.exceptions.Timeout as timeout_err:
+        raise ValueError(f"Timeout error occurred: {timeout_err}")
+    except requests.exceptions.RequestException as req_err:
+        raise ValueError(f"An error occurred: {req_err}")
 
-    return handle_response(response, url)
+    return response
 
 
 def mask_text(text, mask_start=3, mask_end=3):
@@ -75,6 +86,29 @@ def get_solc_native_platform_from_os():
     if platform_name == "linux":
         return "linux-amd64"
     elif platform_name == "darwin":
-        return "macosx-amd64"
+        return "macosx-amd64" if platform.machine() == "x86_64" else "macosx-arm64"
     else:
         raise ValueError(f"Unsupported platform {platform_name}")
+
+
+def prettify_solidity(solidity_contract_content: str):
+    github_file_name = os.path.join(
+        tempfile.gettempdir(), "9B91E897-EA51-4FCC-8DAF-FCFF135A6963.sol"
+    )
+    with open(github_file_name, "w") as fp:
+        fp.write(solidity_contract_content)
+    prettier_return_code = subprocess.call(
+        [
+            "npx",
+            "prettier",
+            "--plugin=prettier-plugin-solidity",
+            "--write",
+            github_file_name,
+        ],
+        stdout=subprocess.DEVNULL,
+    )
+    if prettier_return_code != 0:
+        logger.error("Prettier/npx subprocess failed (see the error above)")
+        sys.exit()
+    with open(github_file_name, "r") as fp:
+        return fp.read()
