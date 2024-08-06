@@ -46,7 +46,7 @@
 	"skip_deploy_error" : 1,
 	"hardhat_config_name": "sepolia_hardhat.config.js",
 	"local_RPC_URL": "http://127.0.0.1:7545",
-    	"remote_RPC_URL":"https://ethereum-sepolia-rpc.publicnode.com"
+    	"remote_RPC_URL":"https://sepolia.drpc.org"
     },
     "github_repo": {
         "url": "https://github.com/lidofinance/lido-dao",
