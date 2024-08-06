@@ -8,7 +8,7 @@
 Diff your Ethereum smart contracts code from GitHub against Blockchain explorer verified source code, deployed bytecode from local node (Hardhat) against remote
 
 Supports reformatting solidity code by means of prettifier solidity plugin before comparing the sources (option `--prettify`).
-Supports binary matching deployed bytecode from local node (Hardhat) against remote (see section 'binary_checking' in lido_dao_sepolia_config.json as example)
+Supports binary checking deployed bytecode from local node (Hardhat) against remote (see section 'binary_checking' in lido_dao_sepolia_config.json as example)
 
 ## Install
 
@@ -16,7 +16,7 @@ Supports binary matching deployed bytecode from local node (Hardhat) against rem
 pipx install git+https://github.com/lidofinance/diffyscan
 ```
 
-If need `--prettify` options
+If need `--prettify` or binary checking options support 
 
 ```shell
 npm install
@@ -35,12 +35,11 @@ Set your Github token to query API without strict rate limiting,
 ```bash
 export GITHUB_API_TOKEN=<your-github-token>
 ```
-Set local and remote RPC URLs for matching bytecode from local node againts remote
 
 Start script with one of the examples provided (or entire folder of configs)
 
 ```bash
-diffyscan config_samples/lido_dao_sepolia_config.json hardhat_configs/sepolia_hardhat.config.js
+diffyscan config_samples/lido_dao_sepolia_config.json
 ```
 
 Alternatively, create a new config file named `config.json`,
@@ -92,7 +91,7 @@ This project was developed using these dependencies with their exact versions li
 
 - Python 3.12
 - Poetry 1.8
-- if need `--prettify` option support:
+- if need `--prettify` or binary checking options support
   - npm
 
 Other versions may work as well but were not tested at all.
@@ -130,7 +129,7 @@ poetry shell
 poetry install
 ```
 
-5. If need `--prettify` option
+5. If need `--prettify` or binary checking options support
 
 ```shell
 npm install
