@@ -183,7 +183,7 @@ def get_code_from_explorer(contract_code, constructor_args, contract_address_fro
         return contract_creation_code, immutables
       
     if contract_address_from_config not in constructor_args:
-        raise ValueError(f"Failed to find constructorArgs")  
+        raise ValueError(f"Failed to find constructor args values {contract_address_from_config}")  
       
     constructor_calldata = None
 

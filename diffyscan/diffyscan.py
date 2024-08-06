@@ -37,12 +37,12 @@ def run_binary_diff(
 
     if deployer_account is None:
         raise ValueError(f"Failed to receive the account {address_name})")
-    if "ConstructorArgs" not in config:
-        raise ValueError(f"Failed to find constructorArgs {address_name})")
+    if "constructor_args" not in config["binary_checking"]:
+        raise ValueError(f"Failed to find 'constructor_args' section {address_name})")
 
     contract_creation_code, immutables = get_code_from_explorer(
         contract_source_code,
-        config["ConstructorArgs"],
+        config["binary_checking"]["constructor_args"],
         contract_address_from_config,
     )
 
@@ -222,10 +222,15 @@ def process_config(path: str, recursive_parsing: bool, unify_formatting: bool):
         explorer_token = load_env(
             config["explorer_token_env_var"], masked=True, required=False
         )
-        if explorer_token is None:
-            explorer_token = os.getenv("ETHERSCAN_EXPLORER_TOKEN", default=None)
-            if explorer_token is None:
-                raise ValueError(f'Failed to find "ETHERSCAN_EXPLORER_TOKEN" in env')
+    if explorer_token is None:
+        logger.warn(
+            f'Failed to find explorer token in config ("explorer_token_env_var")'
+        )
+        explorer_token = os.getenv("ETHERSCAN_EXPLORER_TOKEN", default=None)
+    if explorer_token is None:
+        raise ValueError(
+            f'Failed to find explorer token in env ("ETHERSCAN_EXPLORER_TOKEN")'
+        )
 
     contracts = config["contracts"]
     binary_check = (
@@ -238,6 +243,8 @@ def process_config(path: str, recursive_parsing: bool, unify_formatting: bool):
         if binary_check:
             hardhat.start(path, config["binary_checking"])
             deployer_account = get_account(config["binary_checking"]["local_RPC_URL"])
+        else:
+            logger.warn("Binary checking not activated")
 
         for contract_address, contract_name in contracts.items():
             contract_code = get_contract_from_explorer(
