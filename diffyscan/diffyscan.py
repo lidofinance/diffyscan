@@ -6,7 +6,13 @@ import os
 
 from .utils.common import load_config, load_env, prettify_solidity
 from .utils.constants import *
-from .utils.explorer import get_contract_from_explorer, get_code_from_explorer
+from .utils.explorer import (
+    get_contract_from_explorer,
+    compile_contract_from_explorer,
+    get_constructor_calldata,
+    get_contract_creation_code,
+    get_constructor_args_from_abi,
+)
 from .utils.github import (
     get_file_from_github,
     get_file_from_github_recursive,
@@ -31,31 +37,46 @@ def run_binary_diff(
     config,
     deployer_account,
 ):
-    address_name = f"({contract_address_from_config} : {contract_name_from_config})"
+    address_name = f"{contract_address_from_config} : {contract_name_from_config}"
     logger.divider()
     logger.info(f"Started binary checking for {address_name}")
 
     if deployer_account is None:
-        raise ValueError(f"Failed to receive the account {address_name})")
+        raise ValueError(f"Failed to receive the account)")
     if "constructor_args" not in config["binary_checking"]:
-        raise ValueError(f"Failed to find 'constructor_args' section {address_name})")
+        raise ValueError(f"Failed to find 'constructor_args' section in config)")
 
-    contract_creation_code, immutables = get_code_from_explorer(
-        contract_source_code,
-        config["binary_checking"]["constructor_args"],
-        contract_address_from_config,
+    target_compiled_contract = compile_contract_from_explorer(contract_source_code)
+
+    contract_creation_code, immutables = get_contract_creation_code(
+        target_compiled_contract
     )
+
+    constructor_abi, text_info = get_constructor_args_from_abi(target_compiled_contract)
+    if constructor_abi is None:
+        logger.info(text_info)
+    else:
+        calldata, text_error = get_constructor_calldata(
+            contract_address_from_config,
+            config["binary_checking"]["constructor_args"],
+            constructor_abi,
+        )
+
+        skip_deploy_error = config["binary_checking"]["skip_deploy_error"]
+        if calldata is None:
+            skip_or_raise(skip_deploy_error, text_error)
+            return
+        contract_creation_code += calldata
 
     local_RPC_URL = config["binary_checking"]["local_RPC_URL"]
     local_contract_address, text_reason = deploy_contract(
         local_RPC_URL, deployer_account, contract_creation_code
     )
 
-    skip_deploy_error = config["binary_checking"]["skip_deploy_error"]
     if local_contract_address is None:
         skip_or_raise(
             skip_deploy_error,
-            f"Failed to deploy bytecode to {local_RPC_URL} {address_name} {text_reason}",
+            f"Failed to deploy bytecode to {local_RPC_URL} {text_reason}",
         )
         return
 
@@ -65,7 +86,7 @@ def run_binary_diff(
     if local_deployed_bytecode is None:
         skip_or_raise(
             skip_deploy_error,
-            text_error=f"Failed to receive bytecode from {local_RPC_URL} {address_name})",
+            text_error=f"Failed to receive bytecode from {local_RPC_URL})",
         )
         return
 
@@ -76,7 +97,7 @@ def run_binary_diff(
     if remote_deployed_bytecode is None:
         skip_or_raise(
             skip_deploy_error,
-            f"Failed to receive bytecode from {remote_RPC_URL} {address_name})",
+            f"Failed to receive bytecode from {remote_RPC_URL})",
         )
         return
 
@@ -235,8 +256,8 @@ def process_config(path: str, recursive_parsing: bool, unify_formatting: bool):
     contracts = config["contracts"]
     binary_check = (
         "binary_checking" in config
-        and "use" in config["binary_checking"]
-        and config["binary_checking"]["use"]
+        and "enable" in config["binary_checking"]
+        and config["binary_checking"]["enable"]
     )
 
     try:

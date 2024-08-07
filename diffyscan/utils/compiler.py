@@ -21,8 +21,8 @@ def get_solc_native_platform_from_os():
         raise ValueError(f"Unsupported platform {platform_name}")
 
 
-def get_compiler_info(platform, required_compiler_version):
-    compilers_list_url = f"https://raw.githubusercontent.com/ethereum/solc-bin/gh-pages/{platform}/list.json"
+def get_compiler_info(required_platform, required_compiler_version):
+    compilers_list_url = f"https://raw.githubusercontent.com/ethereum/solc-bin/gh-pages/{required_platform}/list.json"
     available_compilers_list = fetch(compilers_list_url).json()
     required_build_info = next(
         (
@@ -34,13 +34,17 @@ def get_compiler_info(platform, required_compiler_version):
     )
 
     if not required_build_info:
-        raise ValueError(f'Required compiler version for "{platform}" is not found')
+        raise ValueError(
+            f'Required compiler version for "{required_platform}" is not found'
+        )
 
     return required_build_info
 
 
-def download_compiler(platform, build_info, destination_path):
-    compiler_url = f'https://binaries.soliditylang.org/{platform}/{build_info["path"]}'
+def download_compiler(required_platform, build_info, destination_path):
+    compiler_url = (
+        f'https://binaries.soliditylang.org/{required_platform}/{build_info["path"]}'
+    )
     download_compiler_response = fetch(compiler_url)
 
     try:
@@ -66,9 +70,9 @@ def set_compiler_executable(compiler_path):
     os.chmod(compiler_path, compiler_file_rights.st_mode | stat.S_IEXEC)
 
 
-def prepare_compiler(platform, build_info, compiler_path):
+def prepare_compiler(required_platform, build_info, compiler_path):
     create_dirs(compiler_path)
-    compiler_binary = download_compiler(platform, build_info, compiler_path)
+    compiler_binary = download_compiler(required_platform, build_info, compiler_path)
     valid_checksum = build_info["sha256"][2:]
     check_compiler_checksum(compiler_binary, valid_checksum)
     set_compiler_executable(compiler_path)
@@ -102,8 +106,6 @@ def get_target_compiled_contract(compiled_contracts, target_contract_name):
     if len(contracts_to_check) != 1:
         raise ValueError("multiple contracts with the same name")
 
-    logger.okay(
-        "Contracts were successfully compiled. The target contract is ready for matching"
-    )
+    logger.okay(f"Contracts were successfully compiled")
 
     return contracts_to_check[0]

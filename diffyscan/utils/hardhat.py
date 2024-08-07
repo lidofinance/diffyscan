@@ -67,6 +67,7 @@ class Hardhat:
             os.kill(self.sub_process.pid, signal.SIGTERM)
             logger.info(f"Hardhat stopped, PID {self.sub_process.pid}")
 
+    @staticmethod 
     def get_config_path(from_path: str, to_path: str, filename: str) -> str:
         parent_directory = os.path.join(from_path, os.pardir)
         new_directory = os.path.join(parent_directory, to_path)

@@ -114,8 +114,8 @@
         }
     },
     "binary_checking": {
-	"use": 1,
-	"skip_deploy_error" : 1,
+	"enable": true,
+	"skip_deploy_error" : false,
 	"hardhat_config_name": "holesky_hardhat.config.js",
 	"local_RPC_URL": "http://127.0.0.1:7545",
     	"remote_RPC_URL":"https://ethereum-holesky.blockpi.network/v1/rpc/public",

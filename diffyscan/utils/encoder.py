@@ -56,8 +56,6 @@ def to_hex_with_alignment(value):
 def encode_constructor_arguments(constructor_abi, constructor_config_args):
     arg_length = len(constructor_abi)
 
-    logger.info(f"Constructor args types: {[arg['type'] for arg in constructor_abi]}")
-
     constructor_calldata = ""
     compl_data = []
     if arg_length > 0:
