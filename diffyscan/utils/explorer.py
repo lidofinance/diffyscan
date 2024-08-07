@@ -68,7 +68,7 @@ def _get_contract_from_zksync(zksync_explorer_hostname, contract):
         f"https://{zksync_explorer_hostname}/contract_verification/info/{contract}"
     )
 
-    response = fetch(zksync_explorer_link).json
+    response = fetch(zksync_explorer_link).json()
 
     if not response.get("verifiedAt"):
         logger.error("Status", response.status_code)
