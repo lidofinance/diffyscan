@@ -129,7 +129,7 @@ poetry shell
 poetry install
 ```
 
-5. If need `--prettify` or binary checking options support
+5. If need `--prettify` or binary checking options support:
 
 ```shell
 npm install
