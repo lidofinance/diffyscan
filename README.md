@@ -16,7 +16,7 @@ Supports binary checking deployed bytecode from the local node (Hardhat) against
 pipx install git+https://github.com/lidofinance/diffyscan
 ```
 
-If need `--prettify` or binary checking options support 
+If need `--prettify` or binary checking options support:
 
 ```shell
 npm install
