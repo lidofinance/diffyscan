@@ -88,7 +88,7 @@ def _get_contract_from_zksync(zksync_explorer_hostname, contract):
 
 def _get_contract_from_mantle(mantle_explorer_hostname, contract):
     etherscan_link = f"https://{mantle_explorer_hostname}/api?module=contract&action=getsourcecode&address={contract}"
-    response = fetch(etherscan_link).json
+    response = fetch(etherscan_link).json()
 
     data = response["result"][0]
     if "ContractName" not in data:
