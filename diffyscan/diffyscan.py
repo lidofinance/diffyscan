@@ -9,9 +9,7 @@ from .utils.constants import *
 from .utils.explorer import (
     get_contract_from_explorer,
     compile_contract_from_explorer,
-    get_constructor_calldata,
     get_contract_creation_code,
-    get_constructor_args_from_abi,
 )
 from .utils.github import (
     get_file_from_github,
@@ -23,6 +21,7 @@ from .utils.logger import logger
 from .utils.binary_verifier import *
 from .utils.hardhat import hardhat
 from .utils.node_handler import *
+from .utils.calldata import get_calldata
 
 __version__ = "0.0.0"
 
@@ -43,30 +42,24 @@ def run_binary_diff(
 
     if deployer_account is None:
         raise ValueError(f"Failed to receive the account)")
-    if "constructor_args" not in config["binary_checking"]:
-        raise ValueError(f"Failed to find 'constructor_args' section in config)")
 
     target_compiled_contract = compile_contract_from_explorer(contract_source_code)
 
     contract_creation_code, immutables = get_contract_creation_code(
         target_compiled_contract
     )
+    skip_deploy_error = config["binary_checking"]["skip_deploy_error"]
 
-    constructor_abi, text_info = get_constructor_args_from_abi(target_compiled_contract)
-    if constructor_abi is None:
-        logger.info(text_info)
-    else:
-        calldata, text_error = get_constructor_calldata(
-            contract_address_from_config,
-            config["binary_checking"]["constructor_args"],
-            constructor_abi,
-        )
-
-        skip_deploy_error = config["binary_checking"]["skip_deploy_error"]
-        if calldata is None:
-            skip_or_raise(skip_deploy_error, text_error)
-            return
+    calldata, text_error = get_calldata(
+        contract_address_from_config,
+        target_compiled_contract,
+        config["binary_checking"],
+    )
+    if calldata is not None:
         contract_creation_code += calldata
+    elif text_error is not None:
+        skip_or_raise(skip_deploy_error, text_error)
+        return
 
     local_RPC_URL = config["binary_checking"]["local_RPC_URL"]
     local_contract_address, text_reason = deploy_contract(
@@ -105,7 +98,6 @@ def run_binary_diff(
         local_deployed_bytecode,
         remote_deployed_bytecode,
         immutables,
-        contract_address_from_config,
     )
 
 

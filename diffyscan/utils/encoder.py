@@ -43,9 +43,7 @@ def encode_tuple(types, args):
             offset = format((arg_index + args_length) * 32, "064x")
             encoded_offsets += offset
         else:
-            logger.warn(
-                f"Unknown constructor argument type '{arg_type}', use --constructor-calldata instead"
-            )
+            logger.warn(f"Unknown constructor argument type '{arg_type}'")
     return encoded_offsets + encoded_data
 
 

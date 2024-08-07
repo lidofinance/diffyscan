@@ -2,7 +2,7 @@ from .logger import *
 from .constants import OPCODES
 
 
-def to_match(actualBytecode, expectedBytecode, immutables, remote_contract_address):
+def to_match(actualBytecode, expectedBytecode, immutables):
     logger.info("Comparing actual code with the expected one...")
 
     actualInstructions = parse(actualBytecode)
@@ -21,9 +21,9 @@ def to_match(actualBytecode, expectedBytecode, immutables, remote_contract_addre
             differences.append(i)
 
     if not differences:
-        logger.okay(f"Bytecodes are fully matched (contract {remote_contract_address})")
+        logger.okay(f"Bytecodes are fully matched")
         return
-    logger.warn(f"Bytecodes have differences contract {remote_contract_address})")
+    logger.warn(f"Bytecodes have differences")
 
     nearLinesCount = 3
     checkpoints = {0, *differences}

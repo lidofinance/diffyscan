@@ -5,7 +5,6 @@ from .common import fetch
 from .logger import logger
 from .compiler import *
 from .constants import SOLC_DIR
-from .encoder import encode_constructor_arguments
 
 def _errorNoSourceCodeAndExit(address):
     logger.error("source code is not verified or an EOA address", address)
@@ -176,25 +175,3 @@ def get_contract_creation_code(target_compiled_contract):
               immutables[ref['start']] = ref['length'] 
 
     return contract_creation_code_without_calldata, immutables
-
-def get_constructor_args_from_abi(target_compiled_contract):
-    constructor_abi = None
-    try:
-        constructor_abi = [entry["inputs"] for entry in target_compiled_contract['abi'] if entry["type"] == "constructor"][0]
-    except IndexError:
-        return None, f'Constructor in ABI not found, calldata calculation skipped'
-
-    logger.okay(f'Constructor in ABI successfully found: {[arg['type'] for arg in constructor_abi]}')
-    return constructor_abi, ''
-
-def get_constructor_calldata(contract_address_from_config, constructor_args, constructor_abi):    
-    if contract_address_from_config not in constructor_args:
-        return None, f"Failed to find constructor's values in config" 
-      
-    constructor_calldata = None
-
-    if constructor_args is not None and contract_address_from_config in constructor_args:
-        constructor_args = constructor_args [contract_address_from_config]
-        if constructor_args:
-            constructor_calldata = encode_constructor_arguments(constructor_abi, constructor_args)
-            return constructor_calldata, ''
