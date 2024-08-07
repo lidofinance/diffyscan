@@ -91,7 +91,7 @@ This project was developed using these dependencies with their exact versions li
 
 - Python 3.12
 - Poetry 1.8
-- if need `--prettify` or binary checking options support
+- if need `--prettify` or binary checking options support:
   - npm
 
 Other versions may work as well but were not tested at all.
