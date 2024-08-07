@@ -138,3 +138,27 @@ class Logger:
 
 
 logger = Logger(LOGS_PATH)
+
+
+def to_hex(index, padStart=2):
+    return f"{index:0{padStart}X}"
+
+
+def red(text):
+    return f"\u001b[31m{text}\x1b[0m"
+
+
+def bgRed(text):
+    return f"\u001b[37;41m{text}\x1b[0m"
+
+
+def green(text):
+    return f"\u001b[32m{text}\x1b[0m"
+
+
+def bgGreen(text):
+    return f"\u001b[37;42m{text}\x1b[0m"
+
+
+def bgYellow(text):
+    return f"\u001b[37;43m{text}\x1b[0m"

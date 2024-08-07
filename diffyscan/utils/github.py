@@ -18,7 +18,7 @@ def get_file_from_github(github_api_token, dependency_repo, path_to_file, dep_na
 
     github_data = fetch(
         github_api_url, headers={"Authorization": f"token {github_api_token}"}
-    )
+    ).json()
 
     if not github_data:
         logger.error("No github data for", github_api_url)
@@ -66,7 +66,7 @@ def _get_direct_file(
     )
     response = fetch(
         github_api_url, headers={"Authorization": f"token {github_api_token}"}
-    )
+    ).json()
 
     if response is None:
         return None
@@ -98,7 +98,7 @@ def _recursive_search(
     )
     github_data = fetch(
         github_api_url, headers={"Authorization": f"token {github_api_token}"}
-    )
+    ).json()
 
     if github_data and isinstance(github_data, dict) and "content" in github_data:
         return base64.b64decode(github_data["content"]).decode()
@@ -106,7 +106,7 @@ def _recursive_search(
     github_api_url = get_github_api_url(user_slash_repo, relative_path, None, commit)
     github_data = fetch(
         github_api_url, headers={"Authorization": f"token {github_api_token}"}
-    )
+    ).json()
 
     if github_data and isinstance(github_data, list):
         directories = [item["path"] for item in github_data if item["type"] == "dir"]

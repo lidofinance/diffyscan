@@ -5,9 +5,10 @@
 ![license MIT](https://img.shields.io/badge/license-MIT-brightgreen)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-Diff your Ethereum smart contracts code from GitHub against Blockchain explorer verified source code.
+Diff your Ethereum smart contracts code from GitHub against Blockchain explorer verified source code, deployed bytecode from local node (Hardhat) against remote.
 
 Supports reformatting solidity code by means of prettifier solidity plugin before comparing the sources (option `--prettify`).
+Supports binary checking deployed bytecode from the local node (Hardhat) against remote (see section 'binary_checking' in `./config_samples/lido_dao_sepolia_config.json` as an example)
 
 ## Install
 
@@ -15,7 +16,7 @@ Supports reformatting solidity code by means of prettifier solidity plugin befor
 pipx install git+https://github.com/lidofinance/diffyscan
 ```
 
-If need `--prettify` option
+If need `--prettify` or binary checking options support:
 
 ```shell
 npm install
@@ -90,7 +91,7 @@ This project was developed using these dependencies with their exact versions li
 
 - Python 3.12
 - Poetry 1.8
-- if need `--prettify` option support:
+- if need `--prettify` or binary checking options support:
   - npm
 
 Other versions may work as well but were not tested at all.
@@ -128,7 +129,7 @@ poetry shell
 poetry install
 ```
 
-5. If need `--prettify` option
+5. If need `--prettify` or binary checking options support:
 
 ```shell
 npm install
