@@ -132,7 +132,7 @@ poetry shell
 poetry install
 ```
 
-5. If need `--prettify` or binary checking options support:
+5. If deployed bytecode binary comparison or pretifier sources preprocessing are needed:
 
 ```shell
 npm install
