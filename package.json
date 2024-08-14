@@ -6,5 +6,9 @@
   "dependencies": {
     "hardhat": "^2.22.7",
     "kill-port": "^2.0.1"
+  },
+  "packageManager": "npm@10.8.2",
+  "engines": {
+    "node": ">=20.0"
   }
 }
