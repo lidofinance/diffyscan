@@ -92,7 +92,7 @@ def compile_contracts(compiler_path, input_settings):
     except subprocess.CalledProcessError as e:
         raise ValueError(f"Error during compiler subprocess execution: {e}")
     except subprocess.TimeoutExpired as e:
-        raise ValueError(f"Process timed out: {e}")
+        raise ValueError(f"Compiler process timed out: {e}")
     except Exception as e:
         raise ValueError(f"An unexpected error occurred: {e}")
     return json.loads(process.stdout)
