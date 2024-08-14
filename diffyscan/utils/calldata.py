@@ -4,7 +4,7 @@ from .encoder import encode_constructor_arguments
 def get_calldata(contract_address_from_config, target_compiled_contract, binary_config):
     calldata = get_prepared_calldata_from_config(contract_address_from_config, binary_config)
     if calldata is not None:
-          return calldata, ''
+          return calldata, None
     
     calldata, text_error = parse_calldata_from_config(
         contract_address_from_config,
