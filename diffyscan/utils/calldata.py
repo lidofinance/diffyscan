@@ -18,7 +18,7 @@ def get_constructor_abi(target_compiled_contract):
     try:
         constructor_abi = [entry["inputs"] for entry in target_compiled_contract['abi'] if entry["type"] == "constructor"][0]
     except IndexError:
-        logger.okay(f'Constructor in ABI not found, calldata calculation skipped')
+        logger.okay(f'Contract's ABI doesn't have a constructor, calldata calculation skipped')
         return None
 
     logger.okay(f'Constructor in ABI successfully found: {[arg['type'] for arg in constructor_abi]}')
