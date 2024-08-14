@@ -41,7 +41,7 @@ def run_bytecode_diff(
     logger.info(f"Binary bytecode comparion started for {address_name}")
 
     if deployer_account is None:
-        raise ValueError(f"Failed to receive the account)")
+        raise ValueError(f"The deployer account isn't set)")
 
     target_compiled_contract = compile_contract_from_explorer(contract_source_code)
 
