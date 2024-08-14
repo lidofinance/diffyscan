@@ -62,7 +62,7 @@ def pull(url, payload=None, headers=None):
     except requests.exceptions.Timeout as timeout_err:
         raise ValueError(f"Timeout error occurred: {timeout_err}")
     except requests.exceptions.RequestException as req_err:
-        raise ValueError(f"An error occurred: {req_err}")
+        raise ValueError(f"Request exception occurred: {req_err}")
 
     return response
 
