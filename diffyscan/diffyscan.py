@@ -299,7 +299,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--yes",
-        "-y",
+        "-Y",
         help="If set don't ask for input before validating each contract",
         action="store_true",
     )
