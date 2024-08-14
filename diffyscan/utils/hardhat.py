@@ -36,7 +36,7 @@ class Hardhat:
         logger.info(f'Trying to start Hardhat: "{local_node_command}"')
         is_port_used = self.is_port_in_use(parsed_url)
         if is_port_used:
-            answer = input(f'Port {parsed_url.port} is busy. Fix it? write "yes": ')
+            answer = input(f'Port {parsed_url.port} is busy. Kill the app instance occupying the port? write "yes": ')
             if answer.lower() == "yes":
                 return_code = subprocess.call(
                     f"exec npx kill-port {parsed_url.port}", shell=True
