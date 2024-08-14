@@ -2,7 +2,7 @@ from .logger import *
 from .constants import OPCODES
 
 
-def to_match(actualBytecode, expectedBytecode, immutables):
+def match_bytecode(actualBytecode, expectedBytecode, immutables):
     logger.info("Comparing actual code with the expected one...")
 
     actualInstructions = parse(actualBytecode)
