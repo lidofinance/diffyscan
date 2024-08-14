@@ -29,7 +29,7 @@ __version__ = "0.0.0"
 g_skip_user_input: bool = False
 
 
-def run_binary_diff(
+def run_bytecode_diff(
     contract_address_from_config,
     contract_name_from_config,
     contract_source_code,
