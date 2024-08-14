@@ -310,7 +310,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--prettify",
-        "-p",
+        "-P",
         help="Unify formatting by prettier before comparing",
         action="store_true",
     )
