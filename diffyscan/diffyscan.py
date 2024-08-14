@@ -257,7 +257,7 @@ def process_config(path: str, recursive_parsing: bool, unify_formatting: bool):
             hardhat.start(path, config["binary_checking"])
             deployer_account = get_account(config["binary_checking"]["local_RPC_URL"])
         else:
-            logger.warn("Binary checking not activated")
+            logger.warn("Binary bytecode comparison is not activated")
 
         for contract_address, contract_name in contracts.items():
             contract_code = get_contract_from_explorer(
