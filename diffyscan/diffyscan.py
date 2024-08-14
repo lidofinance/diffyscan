@@ -237,7 +237,7 @@ def process_config(path: str, recursive_parsing: bool, unify_formatting: bool):
         )
     if explorer_token is None:
         logger.warn(
-            f'Failed to find explorer token in config ("explorer_token_env_var")'
+            f'Failed to find an explorer token in the config ("explorer_token_env_var")'
         )
         explorer_token = os.getenv("ETHERSCAN_EXPLORER_TOKEN", default=None)
     if explorer_token is None:
