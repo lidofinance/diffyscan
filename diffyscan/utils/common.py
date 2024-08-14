@@ -86,6 +86,7 @@ def prettify_solidity(solidity_contract_content: str):
     )
     with open(github_file_name, "w") as fp:
         fp.write(solidity_contract_content)
+
     prettier_return_code = subprocess.call(
         [
             "npx",
