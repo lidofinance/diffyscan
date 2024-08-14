@@ -2,6 +2,7 @@
 
 ![python >=3.10,<4](https://img.shields.io/badge/python-≥3.10,<4-blue)
 ![poetry ^1.8](https://img.shields.io/badge/poetry-^1.8-blue)
+![NodeJs >=20](https://img.shields.io/badge/NodeJS-≥20-yellow)
 ![license MIT](https://img.shields.io/badge/license-MIT-brightgreen)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
