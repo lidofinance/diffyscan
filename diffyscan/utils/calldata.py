@@ -24,7 +24,7 @@ def get_constructor_abi(target_compiled_contract):
     logger.okay(f'Constructor in ABI successfully found: {[arg['type'] for arg in constructor_abi]}')
     return constructor_abi
 
-def get_prepared_calldata_from_config(contract_address_from_config, binary_config):
+def get_raw_calldata_from_config(contract_address_from_config, binary_config):
     if "constructor_calldata" not in binary_config or contract_address_from_config not in binary_config["constructor_calldata"]:
         return None
     calldata_field = binary_config["constructor_calldata"]
