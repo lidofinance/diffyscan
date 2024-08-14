@@ -20,7 +20,7 @@ Key features:
 pipx install git+https://github.com/lidofinance/diffyscan
 ```
 
-If need `--prettify` or binary checking options support:
+If deployed bytecode binary comparison or pretifier sources preprocessing are needed:
 
 ```shell
 npm install
