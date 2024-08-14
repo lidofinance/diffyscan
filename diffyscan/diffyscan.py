@@ -101,7 +101,7 @@ def run_bytecode_diff(
     )
 
 
-def skip_or_raise(skip_deploy_error, text_error):
+def raise_error_or_log(message: str, raise_exception: bool = True):
     if skip_deploy_error:
         logger.error(text_error)
     else:
