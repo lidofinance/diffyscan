@@ -37,7 +37,7 @@ def get_compiler_info(required_platform, required_compiler_version):
 
     if not required_build_info:
         raise ValueError(
-            f'Required compiler version for "{required_platform}" is not found'
+            f'Required compiler version "{required_compiler_version}" for "{required_platform}" is not found'
         )
 
     return required_build_info
