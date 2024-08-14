@@ -38,7 +38,7 @@ def run_bytecode_diff(
 ):
     address_name = f"{contract_address_from_config} : {contract_name_from_config}"
     logger.divider()
-    logger.info(f"Started binary checking for {address_name}")
+    logger.info(f"Binary bytecode comparion started for {address_name}")
 
     if deployer_account is None:
         raise ValueError(f"Failed to receive the account)")
