@@ -5,7 +5,7 @@
 ![license MIT](https://img.shields.io/badge/license-MIT-brightgreen)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-Diff your Ethereum smart contracts code from GitHub against Blockchain explorer verified source code, deployed bytecode from local node (Hardhat) against remote.
+Diff deployed EVM-compatible smart contract sourcecode and bytecode against the specified GitHub repo commit.
 
 Supports reformatting solidity code by means of prettifier solidity plugin before comparing the sources (option `--prettify`).
 Supports binary checking deployed bytecode from the local node (Hardhat) against remote (see section 'binary_checking' in `./config_samples/lido_dao_sepolia_config.json` as an example)
