@@ -90,7 +90,7 @@ def compile_contracts(compiler_path, input_settings):
             timeout=30,
         )
     except subprocess.CalledProcessError as e:
-        raise ValueError(f"Error during subprocess execution: {e}")
+        raise ValueError(f"Error during compiler subprocess execution: {e}")
     except subprocess.TimeoutExpired as e:
         raise ValueError(f"Process timed out: {e}")
     except Exception as e:
