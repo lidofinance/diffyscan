@@ -1,16 +1,13 @@
 {
     "contracts": {
-        "": "OssifiableProxy",
-        "": "TokenRateOracle",
-
-        "0x1F32b1c2345538c0c6f582fCB022739c4A194Ebb": "OssifiableProxy", // wstETH
-        "": "ERC20BridgedPermit",
-
-        "": "OssifiableProxy", // stETH
-        "": "ERC20RebasableBridgedPermit",
-
+        "0x294ED1f214F4e0ecAE31C3Eae4F04EBB3b36C9d0": "OssifiableProxy",
+        "0x4bF0d419793d8722b8391efaD4c9cE78F460CEd3": "TokenRateOracle",
+        "0x1F32b1c2345538c0c6f582fCB022739c4A194Ebb": "OssifiableProxy",
+        "0xFe57042De76c8D6B1DF0E9E2047329fd3e2B7334": "ERC20BridgedPermit",
+        "0x76A50b8c7349cCDDb7578c6627e79b5d99D24138": "OssifiableProxy",
+        "0xe9b65dA5DcBe92f1b397991C464FF568Dc98D761": "ERC20RebasableBridgedPermit",
         "0x8E01013243a96601a86eb3153F0d9Fa4fbFb6957": "OssifiableProxy",
-        "": "L2ERC20ExtendedTokensBridge"
+        "0x2734602C0CEbbA68662552CacD5553370B283E2E": "L2ERC20ExtendedTokensBridge"
     },
     "explorer_hostname": "api-optimistic.etherscan.io",
     "explorer_token_env_var": "OPTISCAN_EXPLORER_TOKEN",
