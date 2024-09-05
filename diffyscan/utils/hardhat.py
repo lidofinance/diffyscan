@@ -69,10 +69,7 @@ class Hardhat:
 
     @staticmethod 
     def get_config_path(from_path: str, to_path: str, filename: str) -> str:
-        parent_directory = os.path.join(from_path, os.pardir)
-        new_directory = os.path.join(parent_directory, to_path)
-        path_to_file = os.path.join(new_directory, filename)
-        return os.path.normpath(path_to_file)
+        return os.path.normpath(os.path.join(from_path, os.pardir, to_path, filename))
 
 
 hardhat = Hardhat()

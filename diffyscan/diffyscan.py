@@ -58,7 +58,7 @@ def run_bytecode_diff(
     if calldata is not None:
         contract_creation_code += calldata
     elif text_error is not None:
-        skip_or_raise(skip_deploy_error, text_error)
+        raise_error_or_log(skip_deploy_error, text_error)
         return
 
     local_RPC_URL = config["binary_checking"]["local_RPC_URL"]
@@ -67,7 +67,7 @@ def run_bytecode_diff(
     )
 
     if local_contract_address is None:
-        skip_or_raise(
+        raise_error_or_log(
             skip_deploy_error,
             f"Failed to deploy bytecode to {local_RPC_URL} {text_reason}",
         )
@@ -77,7 +77,7 @@ def run_bytecode_diff(
         local_contract_address, local_RPC_URL
     )
     if local_deployed_bytecode is None:
-        skip_or_raise(
+        raise_error_or_log(
             skip_deploy_error,
             text_error=f"Failed to receive bytecode from {local_RPC_URL})",
         )
@@ -88,13 +88,13 @@ def run_bytecode_diff(
         contract_address_from_config, remote_RPC_URL
     )
     if remote_deployed_bytecode is None:
-        skip_or_raise(
+        raise_error_or_log(
             skip_deploy_error,
             f"Failed to receive bytecode from {remote_RPC_URL})",
         )
         return
 
-    to_match(
+    match_bytecode(
         local_deployed_bytecode,
         remote_deployed_bytecode,
         immutables,
@@ -102,10 +102,9 @@ def run_bytecode_diff(
 
 
 def raise_error_or_log(message: str, raise_exception: bool = True):
-    if skip_deploy_error:
-        logger.error(text_error)
-    else:
-        raise ValueError(text_error)
+    if raise_exception:
+        raise ValueError(message)
+    logger.error(message)
 
 
 def run_source_diff(
@@ -275,7 +274,7 @@ def process_config(path: str, recursive_parsing: bool, unify_formatting: bool):
                 unify_formatting,
             )
             if binary_check:
-                run_binary_diff(
+                run_bytecode_diff(
                     contract_address,
                     contract_name,
                     contract_code,
