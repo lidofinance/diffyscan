@@ -248,7 +248,7 @@ def process_config(path: str, recursive_parsing: bool, unify_formatting: bool):
         )
         explorer_token = os.getenv("ETHERSCAN_EXPLORER_TOKEN", default=None)
     if explorer_token is None:
-        raise ValueError(
+        logger.warn(
             f'Failed to find explorer token in env ("ETHERSCAN_EXPLORER_TOKEN")'
         )
     bytecode_comparison_key = "bytecode_comparison"
