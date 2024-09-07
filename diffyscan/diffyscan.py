@@ -233,7 +233,12 @@ def run_source_diff(
     logger.report_table(report)
 
 
-def process_config(path: str, recursive_parsing: bool, unify_formatting: bool):
+def process_config(
+    path: str,
+    recursive_parsing: bool,
+    unify_formatting: bool,
+    skip_binary_comparison: bool,
+):
     logger.info(f"Loading config {path}...")
     config = load_config(path)
 
@@ -251,15 +256,19 @@ def process_config(path: str, recursive_parsing: bool, unify_formatting: bool):
         logger.warn(
             f'Failed to find explorer token in env ("ETHERSCAN_EXPLORER_TOKEN")'
         )
-    bytecode_comparison_key = "bytecode_comparison"
-    if bytecode_comparison_key not in config:
-        raise ValueError(
-            f'Failed to find "{bytecode_comparison_key}" section in config'
-        )
+    if not skip_binary_comparison:
+        bytecode_comparison_key = "bytecode_comparison"
+        if bytecode_comparison_key not in config:
+            raise ValueError(
+                f'Failed to find "{bytecode_comparison_key}" section in config'
+            )
 
     try:
-        hardhat.start(path, config[bytecode_comparison_key])
-        deployer_account = get_account(config[bytecode_comparison_key]["local_RPC_URL"])
+        if not skip_binary_comparison:
+            hardhat.start(path, config[bytecode_comparison_key])
+            deployer_account = get_account(
+                config[bytecode_comparison_key]["local_RPC_URL"]
+            )
 
         for contract_address, contract_name in config["contracts"].items():
             contract_code = get_contract_from_explorer(
@@ -276,17 +285,19 @@ def process_config(path: str, recursive_parsing: bool, unify_formatting: bool):
                 recursive_parsing,
                 unify_formatting,
             )
-            run_bytecode_diff(
-                contract_address,
-                contract_name,
-                contract_code,
-                config[bytecode_comparison_key],
-                deployer_account,
-            )
+            if not skip_binary_comparison:
+                run_bytecode_diff(
+                    contract_address,
+                    contract_name,
+                    contract_code,
+                    config[bytecode_comparison_key],
+                    deployer_account,
+                )
     except KeyboardInterrupt:
         logger.info(f"Keyboard interrupt by user")
     finally:
-        hardhat.stop()
+        if not skip_binary_comparison:
+            hardhat.stop()
 
 
 def parse_arguments():
@@ -314,6 +325,12 @@ def parse_arguments():
         help="Unify formatting by prettier before comparing",
         action="store_true",
     )
+    parser.add_argument(
+        "--skip-binary-comparison",
+        "-B",
+        help="Skip binary bytecode comparison",
+        action="store_true",
+    )
     return parser.parse_args()
 
 
@@ -328,14 +345,26 @@ def main():
     logger.info("Welcome to Diffyscan!")
     logger.divider()
     if args.path is None:
-        process_config(DEFAULT_CONFIG_PATH, args.support_brownie, args.prettify)
+        process_config(
+            DEFAULT_CONFIG_PATH,
+            args.support_brownie,
+            args.prettify,
+            args.skip_binary_comparison,
+        )
     elif os.path.isfile(args.path):
-        process_config(args.path, args.support_brownie, args.prettify)
+        process_config(
+            args.path, args.support_brownie, args.prettify, args.skip_binary_comparison
+        )
     elif os.path.isdir(args.path):
         for filename in os.listdir(args.path):
-            config_path = os.path.join(args.path, filename)
+            config_path = os.path.join(args.path, filename, args.skip_binary_comparison)
             if os.path.isfile(config_path):
-                process_config(config_path, args.support_brownie, args.prettify)
+                process_config(
+                    config_path,
+                    args.support_brownie,
+                    args.prettify,
+                    args.skip_binary_comparison,
+                )
     else:
         logger.error(f"Specified config path {args.path} not found")
         sys.exit(1)
