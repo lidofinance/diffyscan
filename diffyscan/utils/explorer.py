@@ -5,6 +5,7 @@ from .common import fetch
 from .logger import logger
 from .compiler import *
 from .constants import SOLC_DIR
+from .custom_exceptions import ExplorerError
 
 def _errorNoSourceCodeAndExit(address):
     logger.error("source code is not verified or an EOA address", address)
@@ -19,7 +20,7 @@ def _get_contract_from_etherscan(token, etherscan_hostname, contract):
     response = fetch(etherscan_link).json()
 
     if response["message"] == "NOTOK":
-        raise ValueError(response["result"])
+        raise ExplorerError(f'Received bad response: {response["result"]}')
 
     result = response["result"][0]
     if "ContractName" not in result:
@@ -142,7 +143,7 @@ def get_contract_from_explorer(
 
     contract_name_from_etherscan = result["name"]
     if contract_name_from_etherscan != contract_name_from_config:
-        raise ValueError(
+        raise ExplorerError(
             f"Contract name in config does not match with Blockchain explorer {contract_address}: {contract_name_from_config} != {contract_name_from_etherscan}",
         )
 

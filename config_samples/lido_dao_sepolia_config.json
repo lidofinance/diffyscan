@@ -99,7 +99,7 @@
     }
   },
   "bytecode_comparison": {
-    "skip_deploy_error": false,
+    "raise_exception": true,
     "hardhat_config_name": "sepolia_hardhat.config.js",
     "local_RPC_URL": "http://127.0.0.1:7545",
     "remote_RPC_URL": "https://sepolia.drpc.org",

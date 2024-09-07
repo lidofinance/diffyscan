@@ -1,5 +1,6 @@
 from .logger import *
 from .constants import OPCODES
+from .custom_exceptions import BinVerifierError
 
 
 def match_bytecode(actualBytecode, expectedBytecode, immutables):
@@ -14,7 +15,7 @@ def match_bytecode(actualBytecode, expectedBytecode, immutables):
         actual = actualInstructions[i] if i < len(actualInstructions) else None
         expected = expectedInstructions[i] if i < len(expectedInstructions) else None
         if not actual and not expected:
-            raise ValueError("Invalid instructions data")
+            raise BinVerifierError("Invalid instructions data")
         elif (actual is not None) and (
             actual.get("bytecode") != expected.get("bytecode")
         ):
@@ -123,11 +124,15 @@ def match_bytecode(actualBytecode, expectedBytecode, immutables):
             )
             print(f"{to_hex(currInd, 4)} {opcode} {opname} {params}")
         else:
-            raise ValueError("Invalid bytecode difference data")
+            raise BinVerifierError("Invalid bytecode difference data")
     if is_matched:
-        logger.warn(f"Bytecodes have differences only in the immutables")
+        logger.okay(
+            f"Bytecodes have differences only on the immutable reference position"
+        )
     else:
-        logger.error(f"Bytecodes have differences not in the immutables")
+        logger.error(
+            f"Bytecodes have differences not on the immutable reference position"
+        )
     return is_matched
 
 

@@ -4,6 +4,7 @@ import signal
 
 from urllib.parse import urlparse
 from .logger import logger
+from .custom_exceptions import HardhatError
 
 
 class Hardhat:
@@ -44,7 +45,7 @@ class Hardhat:
                 if return_code == 0:
                     is_port_used = self.is_port_in_use(parsed_url)
         if is_port_used:
-            raise ValueError(f"Failed to start Hardhat: {parsed_url.netloc} is busy")
+            raise HardhatError(f"{parsed_url.netloc} is busy")
         self.sub_process = subprocess.Popen(
             "exec " + local_node_command,
             shell=True,
@@ -54,13 +55,13 @@ class Hardhat:
         try:
             _, errs = self.sub_process.communicate(timeout=self.TIMEOUT_FOR_INIT_SEC)
             if errs:
-                raise ValueError(f"Failed to start Hardhat: {errs.decode()}")
+                raise HardhatError(f"{errs.decode()}")
         except subprocess.TimeoutExpired:
             is_port_used = self.is_port_in_use(parsed_url)
             if is_port_used:
                 logger.okay(f"Hardhat successfully started, PID {self.sub_process.pid}")
             else:
-                raise ValueError(f"Failed to start Hardhat: something is wrong")
+                raise HardhatError(f"something is wrong")
 
     def stop(self):
         if self.sub_process is not None and self.sub_process.poll() is None:

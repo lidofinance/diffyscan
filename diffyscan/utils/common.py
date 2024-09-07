@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 
 from .logger import logger
 from .types import Config
+from .custom_exceptions import NodeError
 
 
 def load_env(variable_name, required=True, masked=False):
@@ -39,13 +40,13 @@ def fetch(url, headers=None):
         response = requests.get(url, headers=headers)
         response.raise_for_status()
     except requests.exceptions.HTTPError as http_err:
-        raise ValueError(f"HTTP error occurred: {http_err}")
+        raise NodeError(f"HTTP error occurred: {http_err}")
     except requests.exceptions.ConnectionError as conn_err:
-        raise ValueError(f"Connection error occurred: {conn_err}")
+        raise NodeError(f"Connection error occurred: {conn_err}")
     except requests.exceptions.Timeout as timeout_err:
-        raise ValueError(f"Timeout error occurred: {timeout_err}")
+        raise NodeError(f"Timeout error occurred: {timeout_err}")
     except requests.exceptions.RequestException as req_err:
-        raise ValueError(f"Request exception occurred: {req_err}")
+        raise NodeError(f"Request exception occurred: {req_err}")
 
     return response
 
@@ -56,13 +57,13 @@ def pull(url, payload=None, headers=None):
         response = requests.post(url, data=payload, headers=headers)
         response.raise_for_status()
     except requests.exceptions.HTTPError as http_err:
-        raise ValueError(f"HTTP error occurred: {http_err}")
+        raise NodeError(f"HTTP error occurred: {http_err}")
     except requests.exceptions.ConnectionError as conn_err:
-        raise ValueError(f"Connection error occurred: {conn_err}")
+        raise NodeError(f"Connection error occurred: {conn_err}")
     except requests.exceptions.Timeout as timeout_err:
-        raise ValueError(f"Timeout error occurred: {timeout_err}")
+        raise NodeError(f"Timeout error occurred: {timeout_err}")
     except requests.exceptions.RequestException as req_err:
-        raise ValueError(f"Request exception occurred: {req_err}")
+        raise NodeError(f"Request exception occurred: {req_err}")
 
     return response
 

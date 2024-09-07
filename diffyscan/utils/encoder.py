@@ -1,4 +1,5 @@
 from .logger import logger
+from .custom_exceptions import EncoderError
 
 
 def encode_address(address):
@@ -98,7 +99,7 @@ def encode_constructor_arguments(constructor_abi, constructor_config_args):
                 data2 = encode_bytes(arg_value)
                 compl_data.append(data2)
             else:
-                raise ValueError(f"Unknown constructor argument type: {arg_type}")
+                raise EncoderError(f"Unknown constructor argument type: {arg_type}")
         for data in compl_data:
             constructor_calldata += data
 

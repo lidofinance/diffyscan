@@ -9,6 +9,7 @@ import sys
 from .common import fetch
 from .helpers import create_dirs
 from .logger import logger
+from .custom_exceptions import CompileError
 
 
 def get_solc_native_platform_from_os():
@@ -20,7 +21,7 @@ def get_solc_native_platform_from_os():
     elif platform_name == "win32":
         return "windows-amd64"
     else:
-        raise ValueError(f"Unsupported platform {platform_name}")
+        raise CompileError(f"Unsupported platform {platform_name}")
 
 
 def get_compiler_info(required_platform, required_compiler_version):
@@ -36,7 +37,7 @@ def get_compiler_info(required_platform, required_compiler_version):
     )
 
     if not required_build_info:
-        raise ValueError(
+        raise CompileError(
             f'Required compiler version "{required_compiler_version}" for "{required_platform}" is not found'
         )
 
@@ -53,16 +54,16 @@ def download_compiler(required_platform, build_info, destination_path):
         with open(destination_path, "wb") as compiler_file:
             compiler_file.write(download_compiler_response.content)
     except IOError as e:
-        raise ValueError(f"Error writing to file: {e}")
+        raise CompileError(f"Error writing to file: {e}")
     except Exception as e:
-        raise ValueError(f"An error occurred: {e}")
+        raise CompileError(f"An error occurred: {e}")
     return download_compiler_response.content
 
 
 def check_compiler_checksum(compiler, valid_checksum):
     compiler_checksum = hashlib.sha256(compiler).hexdigest()
     if compiler_checksum != valid_checksum:
-        raise ValueError(
+        raise CompileError(
             f"Compiler checksum mismatch. Expected: {valid_checksum}, Got: {compiler_checksum}"
         )
 
@@ -90,11 +91,11 @@ def compile_contracts(compiler_path, input_settings):
             timeout=30,
         )
     except subprocess.CalledProcessError as e:
-        raise ValueError(f"Error during compiler subprocess execution: {e}")
+        raise CompileError(f"Error during compiler subprocess execution: {e}")
     except subprocess.TimeoutExpired as e:
-        raise ValueError(f"Compiler process timed out: {e}")
+        raise CompileError(f"Compiler process timed out: {e}")
     except Exception as e:
-        raise ValueError(f"An unexpected error occurred: {e}")
+        raise CompileError(f"An unexpected error occurred: {e}")
     return json.loads(process.stdout)
 
 
@@ -106,7 +107,7 @@ def get_target_compiled_contract(compiled_contracts, target_contract_name):
                 contracts_to_check.append(contract)
 
     if len(contracts_to_check) != 1:
-        raise ValueError("multiple contracts with the same name")
+        raise CompileError("multiple contracts with the same name")
 
     logger.okay(f"Contracts were successfully compiled")
 

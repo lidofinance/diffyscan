@@ -22,6 +22,7 @@ from .utils.binary_verifier import *
 from .utils.hardhat import hardhat
 from .utils.node_handler import *
 from .utils.calldata import get_calldata
+import utils.custom_exceptions as custom_exc
 
 __version__ = "0.0.0"
 
@@ -39,80 +40,92 @@ def run_bytecode_diff(
     address_name = f"{contract_address_from_config} : {contract_name_from_config}"
     logger.divider()
     logger.info(f"Binary bytecode comparion started for {address_name}")
+    is_need_raise_exception = binary_config["raise_exception"]
+    try:
+        target_compiled_contract = compile_contract_from_explorer(contract_source_code)
 
-    if deployer_account is None:
-        raise ValueError(f"The deployer account isn't set)")
-
-    target_compiled_contract = compile_contract_from_explorer(contract_source_code)
-
-    contract_creation_code, deployed_bytecode, immutables = parse_compiled_contract(
-        target_compiled_contract
-    )
-
-    remote_RPC_URL = binary_config["remote_RPC_URL"]
-    remote_deployed_bytecode = get_bytecode_from_node(
-        contract_address_from_config, remote_RPC_URL
-    )
-    if remote_deployed_bytecode is None:
-        raise_error_or_log(
-            skip_deploy_error,
-            f"Failed to receive bytecode from {remote_RPC_URL})",
+        contract_creation_code, deployed_bytecode, immutables = parse_compiled_contract(
+            target_compiled_contract
         )
-        return
 
-    if match_bytecode(deployed_bytecode, remote_deployed_bytecode, immutables):
-        return
+        remote_RPC_URL = binary_config["remote_RPC_URL"]
+        remote_deployed_bytecode = get_bytecode_from_node(
+            contract_address_from_config, remote_RPC_URL
+        )
 
-    logger.info(
-        f"Trying to check bytecode via using calldata and deploying into local node"
-    )
+        if match_bytecode(
+            deployed_bytecode,
+            remote_deployed_bytecode,
+            immutables,
+        ):
+            return
 
-    skip_deploy_error = binary_config["skip_deploy_error"]
+        logger.info(
+            f"Trying to check bytecode via using calldata and deploying into local node"
+        )
 
-    calldata, text_error = get_calldata(
-        contract_address_from_config,
-        target_compiled_contract,
-        binary_config,
-    )
-    if calldata is not None:
+        calldata = get_calldata(
+            contract_address_from_config,
+            target_compiled_contract,
+            binary_config,
+        )
+
         contract_creation_code += calldata
-    elif text_error is not None:
-        raise_error_or_log(skip_deploy_error, text_error)
-        return
 
-    local_RPC_URL = binary_config["local_RPC_URL"]
-    local_contract_address, text_reason = deploy_contract(
-        local_RPC_URL, deployer_account, contract_creation_code
-    )
-
-    if local_contract_address is None:
-        raise_error_or_log(
-            skip_deploy_error,
-            f"Failed to deploy bytecode to {local_RPC_URL} {text_reason}",
+        local_contract_address = deploy_contract(
+            binary_config["local_RPC_URL"], deployer_account, contract_creation_code
         )
-        return
 
-    local_deployed_bytecode = get_bytecode_from_node(
-        local_contract_address, local_RPC_URL
-    )
-    if local_deployed_bytecode is None:
-        raise_error_or_log(
-            skip_deploy_error,
-            text_error=f"Failed to receive bytecode from {local_RPC_URL})",
+        local_deployed_bytecode = get_bytecode_from_node(
+            local_contract_address, binary_config["local_RPC_URL"]
         )
-        return
 
-    match_bytecode(
-        local_deployed_bytecode,
-        remote_deployed_bytecode,
-        immutables,
-    )
+        match_bytecode(
+            local_deployed_bytecode,
+            remote_deployed_bytecode,
+            immutables,
+        )
+    except custom_exc.CompileError as compiler_exc:
+        raise_exception_or_log(
+            f"Failed to compile contract. {compiler_exc}",
+            is_need_raise_exception,
+        )
+    except custom_exc.NodeError as node_exc:
+        raise_exception_or_log(
+            f"Failed to receive bytecode from {remote_RPC_URL}. {node_exc}",
+            is_need_raise_exception,
+        )
+    except custom_exc.EncoderError as encoder_exc:
+        raise_exception_or_log(
+            f"Failed to encode calldata arguments. {encoder_exc}",
+            is_need_raise_exception,
+        )
+    except custom_exc.CalldataError as calldata_exc:
+        raise_exception_or_log(
+            f"Failed to get calldata. {calldata_exc}",
+            is_need_raise_exception,
+        )
+    except custom_exc.HardhatError as hardhat_exc:
+        raise_exception_or_log(
+            f"Failed to start Hardhat: {hardhat_exc}",
+            is_need_raise_exception,
+        )
+    except custom_exc.ExplorerError as explorer_exc:
+        raise_exception_or_log(
+            f"Failed to communicate with Blockchain explorer: {explorer_exc}",
+            is_need_raise_exception,
+        )
+    except custom_exc.BinVerifierError as bin_verifier_exc:
+        raise_exception_or_log(
+            f"Failed in binary comparison: {bin_verifier_exc}",
+            is_need_raise_exception,
+        )
 
 
-def raise_error_or_log(message: str, raise_exception: bool = True):
+def raise_exception_or_log(custom_exception: Exception, raise_exception: bool = True):
     if raise_exception:
-        raise ValueError(message)
-    logger.error(message)
+        raise custom_exception()
+    logger.error(str(custom_exception))
 
 
 def run_source_diff(
