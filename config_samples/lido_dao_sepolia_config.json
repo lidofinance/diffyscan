@@ -98,8 +98,7 @@
             "relative_root": "contracts"
         }
     },
-        "binary_checking": {
-	"enable": true,
+        "bytecode_comparison": {
 	"skip_deploy_error" : false,
 	"hardhat_config_name": "sepolia_hardhat.config.js",
 	"local_RPC_URL": "http://127.0.0.1:7545",

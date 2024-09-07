@@ -33,7 +33,7 @@ def run_bytecode_diff(
     contract_address_from_config,
     contract_name_from_config,
     contract_source_code,
-    config,
+    binary_config,
     deployer_account,
 ):
     address_name = f"{contract_address_from_config} : {contract_name_from_config}"
@@ -48,12 +48,12 @@ def run_bytecode_diff(
     contract_creation_code, immutables = get_contract_creation_code(
         target_compiled_contract
     )
-    skip_deploy_error = config["binary_checking"]["skip_deploy_error"]
+    skip_deploy_error = binary_config["skip_deploy_error"]
 
     calldata, text_error = get_calldata(
         contract_address_from_config,
         target_compiled_contract,
-        config["binary_checking"],
+        binary_config,
     )
     if calldata is not None:
         contract_creation_code += calldata
@@ -61,7 +61,7 @@ def run_bytecode_diff(
         raise_error_or_log(skip_deploy_error, text_error)
         return
 
-    local_RPC_URL = config["binary_checking"]["local_RPC_URL"]
+    local_RPC_URL = binary_config["local_RPC_URL"]
     local_contract_address, text_reason = deploy_contract(
         local_RPC_URL, deployer_account, contract_creation_code
     )
@@ -83,7 +83,7 @@ def run_bytecode_diff(
         )
         return
 
-    remote_RPC_URL = config["binary_checking"]["remote_RPC_URL"]
+    remote_RPC_URL = binary_config["remote_RPC_URL"]
     remote_deployed_bytecode = get_bytecode_from_node(
         contract_address_from_config, remote_RPC_URL
     )
@@ -243,22 +243,17 @@ def process_config(path: str, recursive_parsing: bool, unify_formatting: bool):
         raise ValueError(
             f'Failed to find explorer token in env ("ETHERSCAN_EXPLORER_TOKEN")'
         )
-
-    contracts = config["contracts"]
-    binary_check = (
-        "binary_checking" in config
-        and "enable" in config["binary_checking"]
-        and config["binary_checking"]["enable"]
-    )
+    bytecode_comparison_key = "bytecode_comparison"
+    if bytecode_comparison_key not in config:
+        raise ValueError(
+            f'Failed to find "{bytecode_comparison_key}" section in config'
+        )
 
     try:
-        if binary_check:
-            hardhat.start(path, config["binary_checking"])
-            deployer_account = get_account(config["binary_checking"]["local_RPC_URL"])
-        else:
-            logger.warn("Binary bytecode comparison is not activated")
+        hardhat.start(path, config[bytecode_comparison_key])
+        deployer_account = get_account(config[bytecode_comparison_key]["local_RPC_URL"])
 
-        for contract_address, contract_name in contracts.items():
+        for contract_address, contract_name in config["contracts"].items():
             contract_code = get_contract_from_explorer(
                 explorer_token,
                 config["explorer_hostname"],
@@ -273,19 +268,17 @@ def process_config(path: str, recursive_parsing: bool, unify_formatting: bool):
                 recursive_parsing,
                 unify_formatting,
             )
-            if binary_check:
-                run_bytecode_diff(
-                    contract_address,
-                    contract_name,
-                    contract_code,
-                    config,
-                    deployer_account,
-                )
+            run_bytecode_diff(
+                contract_address,
+                contract_name,
+                contract_code,
+                config[bytecode_comparison_key],
+                deployer_account,
+            )
     except KeyboardInterrupt:
         logger.info(f"Keyboard interrupt by user")
     finally:
-        if binary_check:
-            hardhat.stop()
+        hardhat.stop()
 
 
 def parse_arguments():
