@@ -114,7 +114,6 @@
     }
   },
   "bytecode_comparison": {
-    "enable": true,
     "skip_deploy_error": false,
     "hardhat_config_name": "holesky_hardhat.config.js",
     "local_RPC_URL": "http://127.0.0.1:7545",
