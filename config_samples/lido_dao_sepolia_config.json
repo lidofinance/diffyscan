@@ -1,163 +1,300 @@
 {
-    "contracts": {
-        "0x8f6254332f69557A72b0DA2D5F0Bc07d4CA991E7": "OssifiableProxy",
-        "0x604dc1776eEbe7ddCf4cf5429226Ad20a5a294eE": "LidoLocator",
-        "0x3e3FE7dBc6B4C189E7128855dD526361c49b40Af": "AppProxyUpgradeable",
-        "0x3e7e93bA66d26608c2Ffe1630F445D8D29aC6C92": "Lido",
-        "0xB82381A3fBD3FaFA77B3a7bE693342618240067b": "WstETH",
-        "0x9726CA9AEFF4BC8FB8C084BdAbdB71608248E3f8": "EIP712StETH",
-        "0x4F36aAEb18Ab56A4e380241bea6ebF215b9cb12c": "OssifiableProxy",
-        "0x46cF57508B0565decC0419B833C2dAFa50B132e0": "StakingRouter",
-        "0x33d6E15047E8644F8DDf5CD05d202dfE587DA6E3": "AppProxyUpgradeable",
-        "0xC3704E12c34D929e082257B793c8F114b7Bc7546": "NodeOperatorsRegistry",
-        "0x94B1B8e2680882f8652882e7F196169dE3d9a3B2": "LidoExecutionLayerRewardsVault",
-        "0x1583C7b3f4C3B008720E6BcE5726336b0aB25fdd": "OssifiableProxy",
-        "0x0220A1cF6C3a548BE75aEabCdA509CaB08CDe063": "WithdrawalQueueERC721",
-        "0xee386d787Db24AbEe4dcc591F35405E323b70Dad": "WithdrawalVault",
-        "0x61Bb0Ef69262d5EF1cc2873cf61766751D99B699": "Burner",
-        "0xd497Be005638efCf09F6BFC8DAFBBB0BB72cD991": "OssifiableProxy",
-        "0x082d16150BF75BB8F2197eEC1d293DbA96c93638": "AccountingOracle",
-        "0x758D8c3CE794b3Dfe3b3A3482B7eD33de2109D95": "HashConsensus",
-        "0x7637d44c9f2e9cA584a8B5D2EA493012A5cdaEB6": "OssifiableProxy",
-        "0xC40801b88C835a58e54eEE6679D301ba31a4C72b": "ValidatorsExitBusOracle",
-        "0x098a952BD200005382aEb3229e38ae39A7616F56": "HashConsensus",
-        "0xbac2A471443F18aC5C31078b96C5797A78fCc680": "OracleReportSanityChecker",
-        "0x7bC76076b0f3879b4A750450C0Ccf02c6Ca11220": "OracleDaemonConfig",
-        "0x3483c140EF7F2716460198Ff831a8e53F05F1606": "AppProxyUpgradeable",
-        "0x3F3609d02779Ef8C38AA93c4f5E1b9a44169a6Da": "LegacyOracle",
-        "0x6155bD199ECcc79Ff4e8B392f6cBD9c9874E8916": "KernelProxy",
-        "0x1c2807B207f140a1DE0b39E5546eDEf67Af2568c": "Kernel",
-        "0xd06dF83b8ad6D89C86a187fba4Eae918d497BdCB": "MiniMeToken",
-        "0x39A0EbdEE54cB319f4F42141daaBDb6ba25D341A": "AppProxyUpgradeable",
-        "0x9a4384837a49F1CAbfC1daBC4Df268E111864d77": "Voting",
-        "0xC73cd4B2A7c1CBC5BF046eB4A7019365558ABF66": "AppProxyUpgradeable",
-        "0x05766b9Ea781343721261BC35E037223438033c2": "TokenManager",
-        "0x52AD3004Bc993d63931142Dd4f3DD647414048a1": "AppProxyUpgradeable",
-        "0x6a2ae4361D305c2A87F932555A067612578CE499": "Finance",
-        "0x32A0E5828B62AAb932362a4816ae03b860b65e83": "AppProxyUpgradeable",
-        "0xdd4F0f62878022Bc61d5D7FDCFEe66aceadBc234": "Agent",
-        "0x8A1AA86d35b2EE8C9369618E7D7b40000cCD3295": "AppProxyUpgradeable",
-        "0x2dfF8E2c55959f719Faa6dCC4a3B0937bcA71F73": "ACL"
-    },
-    "explorer_token_env_var": "ETHERSCAN_TOKEN",
-    "explorer_hostname": "api-sepolia.etherscan.io",
-    "github_repo": {
-        "url": "https://github.com/lidofinance/lido-dao",
-        "commit": "cadffa46a2b8ed6cfa1127fca2468bae1a82d6bf",
-        "relative_root": ""
-    },
-    "dependencies": {
-        "@aragon/os": {
-            "url": "https://github.com/aragon/aragonOS",
-            "commit": "f3ae59b00f73984e562df00129c925339cd069ff",
-            "relative_root": ""
-        },
-        "@aragon/minime": {
-            "url": "https://github.com/aragon/minime",
-            "commit": "1d5251fc88eee5024ff318d95bc9f4c5de130430",
-            "relative_root": ""
-        },
-        "@aragon/apps-lido": {
-            "url": "https://github.com/lidofinance/aragon-apps/",
-            "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
-            "relative_root": ""
-        },
-        "@aragon/apps-finance": {
-            "url": "https://github.com/lidofinance/aragon-apps/",
-            "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
-            "relative_root": "apps/finance"
-        },
-        "@aragon/apps-vault": {
-            "url": "https://github.com/lidofinance/aragon-apps/",
-            "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
-            "relative_root": "apps/vault"
-        },
-        "@aragon/apps-agent": {
-            "url": "https://github.com/lidofinance/aragon-apps/",
-            "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
-            "relative_root": "apps/agent"
-        },
-        "openzeppelin-solidity": {
-            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
-            "commit": "06e265b38d3e9daeaa7b33f9035c700d6bc0c6a0",
-            "relative_root": ""
-        },
-        "solidity-bytes-utils": {
-            "url": "https://github.com/GNSPS/solidity-bytes-utils",
-            "commit": "9776282d181839fbb4b18f2cf218e316d6df871c",
-            "relative_root": ""
-        },
-        "@openzeppelin/contracts": {
-            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
-            "commit": "fa64a1ced0b70ab89073d5d0b6e01b0778f7e7d6",
-            "relative_root": "contracts"
-        },
-        "@openzeppelin/contracts-v4.4": {
-            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
-            "commit": "6bd6b76d1156e20e45d1016f355d154141c7e5b9",
-            "relative_root": "contracts"
-        }
-    },
-        "bytecode_comparison": {
-	"skip_deploy_error" : false,
-	"hardhat_config_name": "sepolia_hardhat.config.js",
-	"local_RPC_URL": "http://127.0.0.1:7545",
-  "remote_RPC_URL":"https://sepolia.drpc.org",
-  "constructor_calldata": {
-    "0x8f6254332f69557A72b0DA2D5F0Bc07d4CA991E7" : "000000000000000000000000f30a674935479cc6f2254ba65d7534eab8bd6ba20000000000000000000000006885e36bfcb68cb383dfe90023a462c03bcb2ae500000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000"
+  "contracts": {
+    "0x8f6254332f69557A72b0DA2D5F0Bc07d4CA991E7": "OssifiableProxy",
+    "0x604dc1776eEbe7ddCf4cf5429226Ad20a5a294eE": "LidoLocator",
+    "0x3e3FE7dBc6B4C189E7128855dD526361c49b40Af": "AppProxyUpgradeable",
+    "0x3e7e93bA66d26608c2Ffe1630F445D8D29aC6C92": "Lido",
+    "0xB82381A3fBD3FaFA77B3a7bE693342618240067b": "WstETH",
+    "0x9726CA9AEFF4BC8FB8C084BdAbdB71608248E3f8": "EIP712StETH",
+    "0x4F36aAEb18Ab56A4e380241bea6ebF215b9cb12c": "OssifiableProxy",
+    "0x46cF57508B0565decC0419B833C2dAFa50B132e0": "StakingRouter",
+    "0x33d6E15047E8644F8DDf5CD05d202dfE587DA6E3": "AppProxyUpgradeable",
+    "0xC3704E12c34D929e082257B793c8F114b7Bc7546": "NodeOperatorsRegistry",
+    "0x94B1B8e2680882f8652882e7F196169dE3d9a3B2": "LidoExecutionLayerRewardsVault",
+    "0x1583C7b3f4C3B008720E6BcE5726336b0aB25fdd": "OssifiableProxy",
+    "0x0220A1cF6C3a548BE75aEabCdA509CaB08CDe063": "WithdrawalQueueERC721",
+    "0xee386d787Db24AbEe4dcc591F35405E323b70Dad": "WithdrawalVault",
+    "0x61Bb0Ef69262d5EF1cc2873cf61766751D99B699": "Burner",
+    "0xd497Be005638efCf09F6BFC8DAFBBB0BB72cD991": "OssifiableProxy",
+    "0x082d16150BF75BB8F2197eEC1d293DbA96c93638": "AccountingOracle",
+    "0x758D8c3CE794b3Dfe3b3A3482B7eD33de2109D95": "HashConsensus",
+    "0x7637d44c9f2e9cA584a8B5D2EA493012A5cdaEB6": "OssifiableProxy",
+    "0xC40801b88C835a58e54eEE6679D301ba31a4C72b": "ValidatorsExitBusOracle",
+    "0x098a952BD200005382aEb3229e38ae39A7616F56": "HashConsensus",
+    "0xbac2A471443F18aC5C31078b96C5797A78fCc680": "OracleReportSanityChecker",
+    "0x7bC76076b0f3879b4A750450C0Ccf02c6Ca11220": "OracleDaemonConfig",
+    "0x3483c140EF7F2716460198Ff831a8e53F05F1606": "AppProxyUpgradeable",
+    "0x3F3609d02779Ef8C38AA93c4f5E1b9a44169a6Da": "LegacyOracle",
+    "0x6155bD199ECcc79Ff4e8B392f6cBD9c9874E8916": "KernelProxy",
+    "0x1c2807B207f140a1DE0b39E5546eDEf67Af2568c": "Kernel",
+    "0xd06dF83b8ad6D89C86a187fba4Eae918d497BdCB": "MiniMeToken",
+    "0x39A0EbdEE54cB319f4F42141daaBDb6ba25D341A": "AppProxyUpgradeable",
+    "0x9a4384837a49F1CAbfC1daBC4Df268E111864d77": "Voting",
+    "0xC73cd4B2A7c1CBC5BF046eB4A7019365558ABF66": "AppProxyUpgradeable",
+    "0x05766b9Ea781343721261BC35E037223438033c2": "TokenManager",
+    "0x52AD3004Bc993d63931142Dd4f3DD647414048a1": "AppProxyUpgradeable",
+    "0x6a2ae4361D305c2A87F932555A067612578CE499": "Finance",
+    "0x32A0E5828B62AAb932362a4816ae03b860b65e83": "AppProxyUpgradeable",
+    "0xdd4F0f62878022Bc61d5D7FDCFEe66aceadBc234": "Agent",
+    "0x8A1AA86d35b2EE8C9369618E7D7b40000cCD3295": "AppProxyUpgradeable",
+    "0x2dfF8E2c55959f719Faa6dCC4a3B0937bcA71F73": "ACL"
   },
- 	"constructor_args": {
-		"0x8f6254332f69557A72b0DA2D5F0Bc07d4CA991E7" : ["0xf30a674935479cc6f2254ba65d7534eab8bd6ba2","0x6885E36BFcb68CB383DfE90023a462C03BCB2AE5",""],
-		"0x9726CA9AEFF4BC8FB8C084BdAbdB71608248E3f8" : ["0x3e3FE7dBc6B4C189E7128855dD526361c49b40Af"],
-		"0x604dc1776eEbe7ddCf4cf5429226Ad20a5a294eE" : [	
-								["0xd497be005638efcf09f6bfc8dafbbb0bb72cd991",
-								"0x6885e36bfcb68cb383dfe90023a462c03bcb2ae5",
-								"0x94b1b8e2680882f8652882e7f196169de3d9a3b2",
-								"0x3483c140ef7f2716460198ff831a8e53f05f1606",
-								"0x3e3fe7dbc6b4c189e7128855dd526361c49b40af",
-								"0xbac2a471443f18ac5c31078b96c5797a78fcc680",
-								"0x3483c140ef7f2716460198ff831a8e53f05f1606",
-								"0x61bb0ef69262d5ef1cc2873cf61766751d99b699",
-								"0x4f36aaeb18ab56a4e380241bea6ebf215b9cb12c",
-								"0x32a0e5828b62aab932362a4816ae03b860b65e83",
-								"0x7637d44c9f2e9ca584a8b5d2ea493012a5cdaeb6",
-								"0x1583c7b3f4c3b008720e6bce5726336b0ab25fdd",
-								"0xde7318afa67ead6d6bbc8224dfce5ed6e4b86d76",
-								"0x7bc76076b0f3879b4a750450c0ccf02c6ca11220"]
-		],
-		"0xB82381A3fBD3FaFA77B3a7bE693342618240067b" : ["0x3e3FE7dBc6B4C189E7128855dD526361c49b40Af"],
-		"0x46cF57508B0565decC0419B833C2dAFa50B132e0" : ["0x80b5DC88C98E528bF9cb4B7F0f076aC41da24651"],
-		"0x94B1B8e2680882f8652882e7F196169dE3d9a3B2" : ["0x3e3FE7dBc6B4C189E7128855dD526361c49b40Af", "0x32A0E5828B62AAb932362a4816ae03b860b65e83"],
-		"0x0220A1cF6C3a548BE75aEabCdA509CaB08CDe063" : [ "0xB82381A3fBD3FaFA77B3a7bE693342618240067b", "Lido: stETH Withdrawal NFT", "unstETH"],
-		"0xee386d787Db24AbEe4dcc591F35405E323b70Dad" : ["0x3e3FE7dBc6B4C189E7128855dD526361c49b40Af","0x32A0E5828B62AAb932362a4816ae03b860b65e83"],
-		"0x61Bb0Ef69262d5EF1cc2873cf61766751D99B699" : ["0x6885E36BFcb68CB383DfE90023a462C03BCB2AE5", "0x32A0E5828B62AAb932362a4816ae03b860b65e83", "0x3e3FE7dBc6B4C189E7128855dD526361c49b40Af", 0, 0],
-		"0x082d16150BF75BB8F2197eEC1d293DbA96c93638" : ["0x8f6254332f69557A72b0DA2D5F0Bc07d4CA991E7","0x3e3FE7dBc6B4C189E7128855dD526361c49b40Af", "0x3483c140EF7F2716460198Ff831a8e53F05F1606", 12, 1655733600],
-		"0x1c2807B207f140a1DE0b39E5546eDEf67Af2568c" : [1],
-		"0xd06dF83b8ad6D89C86a187fba4Eae918d497BdCB" : ["0x9D381f44d1fbdf8190fA0EcdC028e2Af24DdD3FE","0x0000000000000000000000000000000000000000",0, "TEST Lido DAO Token", 18, "TLDO", 1], 
-		"0x758D8c3CE794b3Dfe3b3A3482B7eD33de2109D95" : [32, 12, 1655733600, 12, 10, "0x6885E36BFcb68CB383DfE90023a462C03BCB2AE5", "0xd497Be005638efCf09F6BFC8DAFBBB0BB72cD991"],
-		"0xC40801b88C835a58e54eEE6679D301ba31a4C72b" : [12, 1655733600, "0x8f6254332f69557A72b0DA2D5F0Bc07d4CA991E7"],
-		"0xbac2A471443F18aC5C31078b96C5797A78fCc680" : [
-								"0x28FAB2059C713A7F9D8c86Db49f9bb0e96Af1ef8",
-								"0x22896Bfc68814BFD855b1a167255eE497006e730",
-								 [1500,500,1000,250,2000,100,100,128,5000000],
-								 [[],[],[],[],[],[],[],[],[],[]]
-		],
-		"0x7bC76076b0f3879b4A750450C0Ccf02c6Ca11220" : ["0x6885E36BFcb68CB383DfE90023a462C03BCB2AE5",""],
-		"0x6155bD199ECcc79Ff4e8B392f6cBD9c9874E8916" : ["0x1c2807B207f140a1DE0b39E5546eDEf67Af2568c"],
-		"0xC73cd4B2A7c1CBC5BF046eB4A7019365558ABF66" : ["0x6155bD199ECcc79Ff4e8B392f6cBD9c9874E8916", "0xcd567bdf93dd0f6acc3bc7f2155f83244d56a65abbfbefb763e015420102c67b", ""],
-		"0x52AD3004Bc993d63931142Dd4f3DD647414048a1" : ["0x6155bD199ECcc79Ff4e8B392f6cBD9c9874E8916","0x5c9918c99c4081ca9459c178381be71d9da40e49e151687da55099c49a4237f1", ""],
-		"0x098a952BD200005382aEb3229e38ae39A7616F56" : [32,12,1655733600, 75, 10, "0x7FAcEF1c7248ed171FDd9ea3B25B4550b38e6133", "0x7637d44c9f2e9cA584a8B5D2EA493012A5cdaEB6"],
-		"0x1583C7b3f4C3B008720E6BcE5726336b0aB25fdd" : ["0x0220A1cF6C3a548BE75aEabCdA509CaB08CDe063", "0x32A0E5828B62AAb932362a4816ae03b860b65e83","0x0"],
-		"0x32A0E5828B62AAb932362a4816ae03b860b65e83" : ["0x6155bD199ECcc79Ff4e8B392f6cBD9c9874E8916","0x701a4fd1f5174d12a0f1d9ad2c88d0ad11ab6aad0ac72b7d9ce621815f8016a9","0"],
-		"0x33d6E15047E8644F8DDf5CD05d202dfE587DA6E3" : ["0x6155bD199ECcc79Ff4e8B392f6cBD9c9874E8916","0x7071f283424072341f856ac9e947e7ec0eb68719f757a7e785979b6b8717579d","0"],
-		"0x3483c140EF7F2716460198Ff831a8e53F05F1606" : ["0x6155bD199ECcc79Ff4e8B392f6cBD9c9874E8916","0x8b47ba2a8454ec799cd91646e7ec47168e91fd139b23f017455f3e5898aaba93", "0"],
-		"0x39A0EbdEE54cB319f4F42141daaBDb6ba25D341A" : ["0x6155bD199ECcc79Ff4e8B392f6cBD9c9874E8916","0x0abcd104777321a82b010357f20887d61247493d89d2e987ff57bcecbde00e1e", "0"],
-		"0x3e3FE7dBc6B4C189E7128855dD526361c49b40Af" : ["0x6155bD199ECcc79Ff4e8B392f6cBD9c9874E8916","0x3ca7c3e38968823ccb4c78ea688df41356f182ae1d159e4ee608d30d68cef320", "0"],
-		"0x4F36aAEb18Ab56A4e380241bea6ebF215b9cb12c" : ["0x46cF57508B0565decC0419B833C2dAFa50B132e0", "0x32A0E5828B62AAb932362a4816ae03b860b65e83", "0"],
-		"0x7637d44c9f2e9cA584a8B5D2EA493012A5cdaEB6" : ["0xC40801b88C835a58e54eEE6679D301ba31a4C72b", "0x32A0E5828B62AAb932362a4816ae03b860b65e83", "0"],
-		"0x8A1AA86d35b2EE8C9369618E7D7b40000cCD3295" : ["0x6155bD199ECcc79Ff4e8B392f6cBD9c9874E8916", "0xe3262375f45a6e2026b7e7b18c2b807434f2508fe1a2a3dfb493c7df8f4aad6a", "0"],
-		"0xd497Be005638efCf09F6BFC8DAFBBB0BB72cD991" : ["0x082d16150BF75BB8F2197eEC1d293DbA96c93638", "0x32A0E5828B62AAb932362a4816ae03b860b65e83", "0"]
-		}
-   	}
+  "explorer_token_env_var": "ETHERSCAN_TOKEN",
+  "explorer_hostname": "api-sepolia.etherscan.io",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/lido-dao",
+    "commit": "cadffa46a2b8ed6cfa1127fca2468bae1a82d6bf",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "@aragon/os": {
+      "url": "https://github.com/aragon/aragonOS",
+      "commit": "f3ae59b00f73984e562df00129c925339cd069ff",
+      "relative_root": ""
+    },
+    "@aragon/minime": {
+      "url": "https://github.com/aragon/minime",
+      "commit": "1d5251fc88eee5024ff318d95bc9f4c5de130430",
+      "relative_root": ""
+    },
+    "@aragon/apps-lido": {
+      "url": "https://github.com/lidofinance/aragon-apps/",
+      "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+      "relative_root": ""
+    },
+    "@aragon/apps-finance": {
+      "url": "https://github.com/lidofinance/aragon-apps/",
+      "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+      "relative_root": "apps/finance"
+    },
+    "@aragon/apps-vault": {
+      "url": "https://github.com/lidofinance/aragon-apps/",
+      "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+      "relative_root": "apps/vault"
+    },
+    "@aragon/apps-agent": {
+      "url": "https://github.com/lidofinance/aragon-apps/",
+      "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+      "relative_root": "apps/agent"
+    },
+    "openzeppelin-solidity": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "06e265b38d3e9daeaa7b33f9035c700d6bc0c6a0",
+      "relative_root": ""
+    },
+    "solidity-bytes-utils": {
+      "url": "https://github.com/GNSPS/solidity-bytes-utils",
+      "commit": "9776282d181839fbb4b18f2cf218e316d6df871c",
+      "relative_root": ""
+    },
+    "@openzeppelin/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "fa64a1ced0b70ab89073d5d0b6e01b0778f7e7d6",
+      "relative_root": "contracts"
+    },
+    "@openzeppelin/contracts-v4.4": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "6bd6b76d1156e20e45d1016f355d154141c7e5b9",
+      "relative_root": "contracts"
+    }
+  },
+  "bytecode_comparison": {
+    "skip_deploy_error": false,
+    "hardhat_config_name": "sepolia_hardhat.config.js",
+    "local_RPC_URL": "http://127.0.0.1:7545",
+    "remote_RPC_URL": "https://sepolia.drpc.org",
+    "constructor_calldata": {
+      "0x8f6254332f69557A72b0DA2D5F0Bc07d4CA991E7": "000000000000000000000000f30a674935479cc6f2254ba65d7534eab8bd6ba20000000000000000000000006885e36bfcb68cb383dfe90023a462c03bcb2ae500000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "constructor_args": {
+      "0x8f6254332f69557A72b0DA2D5F0Bc07d4CA991E7": [
+        "0xf30a674935479cc6f2254ba65d7534eab8bd6ba2",
+        "0x6885E36BFcb68CB383DfE90023a462C03BCB2AE5",
+        ""
+      ],
+      "0x9726CA9AEFF4BC8FB8C084BdAbdB71608248E3f8": [
+        "0x3e3FE7dBc6B4C189E7128855dD526361c49b40Af"
+      ],
+      "0x604dc1776eEbe7ddCf4cf5429226Ad20a5a294eE": [
+        [
+          "0xd497be005638efcf09f6bfc8dafbbb0bb72cd991",
+          "0x6885e36bfcb68cb383dfe90023a462c03bcb2ae5",
+          "0x94b1b8e2680882f8652882e7f196169de3d9a3b2",
+          "0x3483c140ef7f2716460198ff831a8e53f05f1606",
+          "0x3e3fe7dbc6b4c189e7128855dd526361c49b40af",
+          "0xbac2a471443f18ac5c31078b96c5797a78fcc680",
+          "0x3483c140ef7f2716460198ff831a8e53f05f1606",
+          "0x61bb0ef69262d5ef1cc2873cf61766751d99b699",
+          "0x4f36aaeb18ab56a4e380241bea6ebf215b9cb12c",
+          "0x32a0e5828b62aab932362a4816ae03b860b65e83",
+          "0x7637d44c9f2e9ca584a8b5d2ea493012a5cdaeb6",
+          "0x1583c7b3f4c3b008720e6bce5726336b0ab25fdd",
+          "0xde7318afa67ead6d6bbc8224dfce5ed6e4b86d76",
+          "0x7bc76076b0f3879b4a750450c0ccf02c6ca11220"
+        ]
+      ],
+      "0xB82381A3fBD3FaFA77B3a7bE693342618240067b": [
+        "0x3e3FE7dBc6B4C189E7128855dD526361c49b40Af"
+      ],
+      "0x46cF57508B0565decC0419B833C2dAFa50B132e0": [
+        "0x80b5DC88C98E528bF9cb4B7F0f076aC41da24651"
+      ],
+      "0x94B1B8e2680882f8652882e7F196169dE3d9a3B2": [
+        "0x3e3FE7dBc6B4C189E7128855dD526361c49b40Af",
+        "0x32A0E5828B62AAb932362a4816ae03b860b65e83"
+      ],
+      "0x0220A1cF6C3a548BE75aEabCdA509CaB08CDe063": [
+        "0xB82381A3fBD3FaFA77B3a7bE693342618240067b",
+        "Lido: stETH Withdrawal NFT",
+        "unstETH"
+      ],
+      "0xee386d787Db24AbEe4dcc591F35405E323b70Dad": [
+        "0x3e3FE7dBc6B4C189E7128855dD526361c49b40Af",
+        "0x32A0E5828B62AAb932362a4816ae03b860b65e83"
+      ],
+      "0x61Bb0Ef69262d5EF1cc2873cf61766751D99B699": [
+        "0x6885E36BFcb68CB383DfE90023a462C03BCB2AE5",
+        "0x32A0E5828B62AAb932362a4816ae03b860b65e83",
+        "0x3e3FE7dBc6B4C189E7128855dD526361c49b40Af",
+        0,
+        0
+      ],
+      "0x082d16150BF75BB8F2197eEC1d293DbA96c93638": [
+        "0x8f6254332f69557A72b0DA2D5F0Bc07d4CA991E7",
+        "0x3e3FE7dBc6B4C189E7128855dD526361c49b40Af",
+        "0x3483c140EF7F2716460198Ff831a8e53F05F1606",
+        12,
+        1655733600
+      ],
+      "0x1c2807B207f140a1DE0b39E5546eDEf67Af2568c": [
+        1
+      ],
+      "0xd06dF83b8ad6D89C86a187fba4Eae918d497BdCB": [
+        "0x9D381f44d1fbdf8190fA0EcdC028e2Af24DdD3FE",
+        "0x0000000000000000000000000000000000000000",
+        0,
+        "TEST Lido DAO Token",
+        18,
+        "TLDO",
+        1
+      ],
+      "0x758D8c3CE794b3Dfe3b3A3482B7eD33de2109D95": [
+        32,
+        12,
+        1655733600,
+        12,
+        10,
+        "0x6885E36BFcb68CB383DfE90023a462C03BCB2AE5",
+        "0xd497Be005638efCf09F6BFC8DAFBBB0BB72cD991"
+      ],
+      "0xC40801b88C835a58e54eEE6679D301ba31a4C72b": [
+        12,
+        1655733600,
+        "0x8f6254332f69557A72b0DA2D5F0Bc07d4CA991E7"
+      ],
+      "0xbac2A471443F18aC5C31078b96C5797A78fCc680": [
+        "0x28FAB2059C713A7F9D8c86Db49f9bb0e96Af1ef8",
+        "0x22896Bfc68814BFD855b1a167255eE497006e730",
+        [
+          1500,
+          500,
+          1000,
+          250,
+          2000,
+          100,
+          100,
+          128,
+          5000000
+        ],
+        [
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      ],
+      "0x7bC76076b0f3879b4A750450C0Ccf02c6Ca11220": [
+        "0x6885E36BFcb68CB383DfE90023a462C03BCB2AE5",
+        ""
+      ],
+      "0x6155bD199ECcc79Ff4e8B392f6cBD9c9874E8916": [
+        "0x1c2807B207f140a1DE0b39E5546eDEf67Af2568c"
+      ],
+      "0xC73cd4B2A7c1CBC5BF046eB4A7019365558ABF66": [
+        "0x6155bD199ECcc79Ff4e8B392f6cBD9c9874E8916",
+        "0xcd567bdf93dd0f6acc3bc7f2155f83244d56a65abbfbefb763e015420102c67b",
+        ""
+      ],
+      "0x52AD3004Bc993d63931142Dd4f3DD647414048a1": [
+        "0x6155bD199ECcc79Ff4e8B392f6cBD9c9874E8916",
+        "0x5c9918c99c4081ca9459c178381be71d9da40e49e151687da55099c49a4237f1",
+        ""
+      ],
+      "0x098a952BD200005382aEb3229e38ae39A7616F56": [
+        32,
+        12,
+        1655733600,
+        75,
+        10,
+        "0x7FAcEF1c7248ed171FDd9ea3B25B4550b38e6133",
+        "0x7637d44c9f2e9cA584a8B5D2EA493012A5cdaEB6"
+      ],
+      "0x1583C7b3f4C3B008720E6BcE5726336b0aB25fdd": [
+        "0x0220A1cF6C3a548BE75aEabCdA509CaB08CDe063",
+        "0x32A0E5828B62AAb932362a4816ae03b860b65e83",
+        "0x0"
+      ],
+      "0x32A0E5828B62AAb932362a4816ae03b860b65e83": [
+        "0x6155bD199ECcc79Ff4e8B392f6cBD9c9874E8916",
+        "0x701a4fd1f5174d12a0f1d9ad2c88d0ad11ab6aad0ac72b7d9ce621815f8016a9",
+        "0"
+      ],
+      "0x33d6E15047E8644F8DDf5CD05d202dfE587DA6E3": [
+        "0x6155bD199ECcc79Ff4e8B392f6cBD9c9874E8916",
+        "0x7071f283424072341f856ac9e947e7ec0eb68719f757a7e785979b6b8717579d",
+        "0"
+      ],
+      "0x3483c140EF7F2716460198Ff831a8e53F05F1606": [
+        "0x6155bD199ECcc79Ff4e8B392f6cBD9c9874E8916",
+        "0x8b47ba2a8454ec799cd91646e7ec47168e91fd139b23f017455f3e5898aaba93",
+        "0"
+      ],
+      "0x39A0EbdEE54cB319f4F42141daaBDb6ba25D341A": [
+        "0x6155bD199ECcc79Ff4e8B392f6cBD9c9874E8916",
+        "0x0abcd104777321a82b010357f20887d61247493d89d2e987ff57bcecbde00e1e",
+        "0"
+      ],
+      "0x3e3FE7dBc6B4C189E7128855dD526361c49b40Af": [
+        "0x6155bD199ECcc79Ff4e8B392f6cBD9c9874E8916",
+        "0x3ca7c3e38968823ccb4c78ea688df41356f182ae1d159e4ee608d30d68cef320",
+        "0"
+      ],
+      "0x4F36aAEb18Ab56A4e380241bea6ebF215b9cb12c": [
+        "0x46cF57508B0565decC0419B833C2dAFa50B132e0",
+        "0x32A0E5828B62AAb932362a4816ae03b860b65e83",
+        "0"
+      ],
+      "0x7637d44c9f2e9cA584a8B5D2EA493012A5cdaEB6": [
+        "0xC40801b88C835a58e54eEE6679D301ba31a4C72b",
+        "0x32A0E5828B62AAb932362a4816ae03b860b65e83",
+        "0"
+      ],
+      "0x8A1AA86d35b2EE8C9369618E7D7b40000cCD3295": [
+        "0x6155bD199ECcc79Ff4e8B392f6cBD9c9874E8916",
+        "0xe3262375f45a6e2026b7e7b18c2b807434f2508fe1a2a3dfb493c7df8f4aad6a",
+        "0"
+      ],
+      "0xd497Be005638efCf09F6BFC8DAFBBB0BB72cD991": [
+        "0x082d16150BF75BB8F2197eEC1d293DbA96c93638",
+        "0x32A0E5828B62AAb932362a4816ae03b860b65e83",
+        "0"
+      ]
+    }
+  }
 }
-
