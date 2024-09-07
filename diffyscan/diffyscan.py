@@ -9,7 +9,7 @@ from .utils.constants import *
 from .utils.explorer import (
     get_contract_from_explorer,
     compile_contract_from_explorer,
-    get_contract_creation_code,
+    parse_compiled_contract,
 )
 from .utils.github import (
     get_file_from_github,
@@ -45,9 +45,28 @@ def run_bytecode_diff(
 
     target_compiled_contract = compile_contract_from_explorer(contract_source_code)
 
-    contract_creation_code, immutables = get_contract_creation_code(
+    contract_creation_code, deployed_bytecode, immutables = parse_compiled_contract(
         target_compiled_contract
     )
+
+    remote_RPC_URL = binary_config["remote_RPC_URL"]
+    remote_deployed_bytecode = get_bytecode_from_node(
+        contract_address_from_config, remote_RPC_URL
+    )
+    if remote_deployed_bytecode is None:
+        raise_error_or_log(
+            skip_deploy_error,
+            f"Failed to receive bytecode from {remote_RPC_URL})",
+        )
+        return
+
+    if match_bytecode(deployed_bytecode, remote_deployed_bytecode, immutables):
+        return
+
+    logger.info(
+        f"Trying to check bytecode via using calldata and deploying into local node"
+    )
+
     skip_deploy_error = binary_config["skip_deploy_error"]
 
     calldata, text_error = get_calldata(
@@ -80,17 +99,6 @@ def run_bytecode_diff(
         raise_error_or_log(
             skip_deploy_error,
             text_error=f"Failed to receive bytecode from {local_RPC_URL})",
-        )
-        return
-
-    remote_RPC_URL = binary_config["remote_RPC_URL"]
-    remote_deployed_bytecode = get_bytecode_from_node(
-        contract_address_from_config, remote_RPC_URL
-    )
-    if remote_deployed_bytecode is None:
-        raise_error_or_log(
-            skip_deploy_error,
-            f"Failed to receive bytecode from {remote_RPC_URL})",
         )
         return
 

@@ -22,8 +22,7 @@ def match_bytecode(actualBytecode, expectedBytecode, immutables):
 
     if not differences:
         logger.okay(f"Bytecodes are fully matched")
-        return
-    logger.warn(f"Bytecodes have differences")
+        return True
 
     nearLinesCount = 3
     checkpoints = {0, *differences}
@@ -58,6 +57,8 @@ def match_bytecode(actualBytecode, expectedBytecode, immutables):
         f'{green("0000 00 STOP")} - the actual bytecode instruction exists when the expected doesn\'t'
     )
     logger.divider()
+
+    is_matched = True
     for i in range(len(checkpointsArray)):
         currInd = checkpointsArray[i]
         prevInd = checkpointsArray[i - 1] if i > 0 else None
@@ -109,6 +110,8 @@ def match_bytecode(actualBytecode, expectedBytecode, immutables):
 
             paramsLength = len(expected["bytecode"]) // 2 - 1
             isImmutable = immutables.get(expected["start"] + 1) == paramsLength
+            if actualParams != expectedParams and not isImmutable:
+                is_matched = False
             params = (
                 actualParams
                 if actualParams == expectedParams
@@ -121,6 +124,11 @@ def match_bytecode(actualBytecode, expectedBytecode, immutables):
             print(f"{to_hex(currInd, 4)} {opcode} {opname} {params}")
         else:
             raise ValueError("Invalid bytecode difference data")
+    if is_matched:
+        logger.warn(f"Bytecodes have differences only in the immutables")
+    else:
+        logger.error(f"Bytecodes have differences not in the immutables")
+    return is_matched
 
 
 def parse(bytecode):

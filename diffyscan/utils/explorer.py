@@ -165,13 +165,14 @@ def compile_contract_from_explorer(contract_code):
     target_contract_name = contract_code['name']
     return get_target_compiled_contract(compiled_contracts, target_contract_name)
 
-def get_contract_creation_code(target_compiled_contract):
+def parse_compiled_contract(target_compiled_contract):
     contract_creation_code_without_calldata = f'0x{target_compiled_contract['evm']['bytecode']['object']}'
+    deployed_bytecode = f'0x{target_compiled_contract['evm']['deployedBytecode']['object']}'
     immutables = {}
     if ('immutableReferences' in target_compiled_contract['evm']['deployedBytecode']):
-      immutable_references = target_compiled_contract['evm']['deployedBytecode']['immutableReferences']
-      for refs in immutable_references.values():
-          for ref in refs:
-              immutables[ref['start']] = ref['length'] 
-
-    return contract_creation_code_without_calldata, immutables
+        immutable_references = target_compiled_contract['evm']['deployedBytecode']['immutableReferences']
+        for refs in immutable_references.values():
+            for ref in refs:
+                immutables[ref['start']] = ref['length']
+    
+    return contract_creation_code_without_calldata, deployed_bytecode, immutables
