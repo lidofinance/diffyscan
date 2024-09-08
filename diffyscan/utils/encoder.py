@@ -89,7 +89,6 @@ def encode_constructor_arguments(constructor_abi, constructor_config_args):
                         (len(constructor_calldata) // 64 + 1) * 32, "064x"
                     )
                     constructor_calldata += dynamic_type_length
-                    logger.info(f"dynamic_type_length {dynamic_type_length}")
                     compl_data.append(encode_tuple(args_tuple_types, arg_value))
                 else:
                     constructor_calldata += encode_tuple(args_tuple_types, arg_value)
