@@ -1,9 +1,16 @@
 import json
 import sys
+import os
 
 from .common import fetch
 from .logger import logger
-from .compiler import *
+from .compiler import (
+    get_solc_native_platform_from_os,
+    get_compiler_info,
+    prepare_compiler,
+    compile_contracts,
+    get_target_compiled_contract,
+)
 from .constants import SOLC_DIR
 from .custom_exceptions import ExplorerError
 

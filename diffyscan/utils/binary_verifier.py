@@ -1,4 +1,4 @@
-from .logger import *
+from .logger import logger, bgYellow, bgRed, bgGreen, red, green, to_hex
 from .constants import OPCODES
 from .custom_exceptions import BinVerifierError
 
