@@ -4,8 +4,6 @@ from typing import TypedDict
 class BinartConfig(TypedDict):
     raise_exception: bool
     hardhat_config_name: str
-    local_RPC_URL: str
-    remote_RPC_URL: str
     constructor_calldata: set
     constructor_args: set
 

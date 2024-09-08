@@ -39,13 +39,14 @@ def run_bytecode_diff(
     contract_address_from_config,
     contract_name_from_config,
     contract_source_code,
-    binary_config,
+    is_need_raise_exception,
     deployer_account,
+    local_rpc_url,
+    remote_rpc_url,
 ):
     address_name = f"{contract_address_from_config} : {contract_name_from_config}"
     logger.divider()
     logger.info(f"Binary bytecode comparion started for {address_name}")
-    is_need_raise_exception = binary_config["raise_exception"]
     CustomExceptions.ExceptionHandler.initialize(is_need_raise_exception)
     try:
         target_compiled_contract = compile_contract_from_explorer(contract_source_code)
@@ -54,9 +55,8 @@ def run_bytecode_diff(
             target_compiled_contract
         )
 
-        remote_RPC_URL = binary_config["remote_RPC_URL"]
         remote_deployed_bytecode = get_bytecode_from_node(
-            contract_address_from_config, remote_RPC_URL
+            contract_address_from_config, remote_rpc_url
         )
 
         if match_bytecode(
@@ -79,11 +79,11 @@ def run_bytecode_diff(
         contract_creation_code += calldata
 
         local_contract_address = deploy_contract(
-            binary_config["local_RPC_URL"], deployer_account, contract_creation_code
+            local_rpc_url, deployer_account, contract_creation_code
         )
 
         local_deployed_bytecode = get_bytecode_from_node(
-            local_contract_address, binary_config["local_RPC_URL"]
+            local_contract_address, local_rpc_url
         )
 
         match_bytecode(
@@ -236,6 +236,7 @@ def process_config(
         logger.warn(
             f'Failed to find explorer token in env ("ETHERSCAN_EXPLORER_TOKEN")'
         )
+
     if not skip_binary_comparison:
         if "bytecode_comparison" not in config:
             raise ValueError(f'Failed to find "bytecode_comparison" section in config')
@@ -244,12 +245,23 @@ def process_config(
     if not github_api_token:
         raise ValueError("GITHUB_API_TOKEN variable is not set")
 
+    local_rpc_url = os.getenv("LOCAL_RPC_URL", "")
+    if not local_rpc_url:
+        raise ValueError("LOCAL_RPC_URL variable is not set")
+
+    remote_rpc_url = os.getenv("REMOTE_RPC_URL", "")
+    if not remote_rpc_url:
+        raise ValueError("REMOTE_RPC_URL variable is not set")
+
     try:
         if not skip_binary_comparison:
-            hardhat.start(path, config["bytecode_comparison"])
-            deployer_account = get_account(
-                config["bytecode_comparison"]["local_RPC_URL"]
+            hardhat.start(
+                path,
+                config["bytecode_comparison"]["hardhat_config_name"],
+                local_rpc_url,
+                remote_rpc_url,
             )
+            deployer_account = get_account(local_rpc_url)
 
         for contract_address, contract_name in config["contracts"].items():
             contract_code = get_contract_from_explorer(
@@ -271,8 +283,10 @@ def process_config(
                     contract_address,
                     contract_name,
                     contract_code,
-                    config["bytecode_comparison"],
+                    config["bytecode_comparison"]["raise_exception"],
                     deployer_account,
+                    local_rpc_url,
+                    remote_rpc_url,
                 )
     except KeyboardInterrupt:
         logger.info(f"Keyboard interrupt by user")

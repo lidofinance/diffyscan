@@ -116,8 +116,6 @@
   "bytecode_comparison": {
     "raise_exception": true,
     "hardhat_config_name": "holesky_hardhat.config.js",
-    "local_RPC_URL": "http://127.0.0.1:7545",
-    "remote_RPC_URL": "https://ethereum-holesky.blockpi.network/v1/rpc/public",
     "constructor_calldata": {
       "0x28FAB2059C713A7F9D8c86Db49f9bb0e96Af1ef8": "000000000000000000000000ab89ed3d8f31bcf8bb7de53f02084d1e6f043d34000000000000000000000000e92329ec7ddb11d25e25b3c21eebf11f15eb325d00000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000"
     },

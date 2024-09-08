@@ -20,24 +20,32 @@ class Hardhat:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             return s.connect_ex((parsed_url.hostname, parsed_url.port)) == 0
 
-    def start(self, main_config_relative_path: str, binary_config):
-        parsed_url = urlparse(binary_config["local_RPC_URL"])
+    def start(
+        self,
+        main_config_relative_path: str,
+        hardhat_config_name: str,
+        local_rpc_url: str,
+        remote_rpc_url: str,
+    ):
+        parsed_url = urlparse(local_rpc_url)
         hardhat_config_relative_path = Hardhat.get_config_path(
             os.path.dirname(main_config_relative_path),
             "hardhat_configs",
-            binary_config["hardhat_config_name"],
+            hardhat_config_name,
         )
         local_node_command = (
             f"npx hardhat node --hostname {parsed_url.hostname} "
             f"--port {parsed_url.port} "
             f"--config {hardhat_config_relative_path} "
-            f"--fork {binary_config["remote_RPC_URL"]}"
+            f"--fork {remote_rpc_url}"
         )
 
         logger.info(f'Trying to start Hardhat: "{local_node_command}"')
         is_port_used = self.is_port_in_use(parsed_url)
         if is_port_used:
-            answer = input(f'Port {parsed_url.port} is busy. Kill the app instance occupying the port? write "yes": ')
+            answer = input(
+                f'Port {parsed_url.port} is busy. Kill the app instance occupying the port? write "yes": '
+            )
             if answer.lower() == "yes":
                 return_code = subprocess.call(
                     f"exec npx kill-port {parsed_url.port}", shell=True
@@ -68,7 +76,7 @@ class Hardhat:
             os.kill(self.sub_process.pid, signal.SIGTERM)
             logger.info(f"Hardhat stopped, PID {self.sub_process.pid}")
 
-    @staticmethod 
+    @staticmethod
     def get_config_path(from_path: str, to_path: str, filename: str) -> str:
         return os.path.normpath(os.path.join(from_path, os.pardir, to_path, filename))
 
