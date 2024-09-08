@@ -8,7 +8,7 @@ import requests
 from urllib.parse import urlparse
 
 from .logger import logger
-from .types import Config
+from .custom_types import Config
 from .custom_exceptions import NodeError
 
 
