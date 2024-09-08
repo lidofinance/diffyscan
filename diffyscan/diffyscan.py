@@ -39,7 +39,7 @@ def run_bytecode_diff(
     contract_address_from_config,
     contract_name_from_config,
     contract_source_code,
-    is_need_raise_exception,
+    config,
     deployer_account,
     local_rpc_url,
     remote_rpc_url,
@@ -47,7 +47,9 @@ def run_bytecode_diff(
     address_name = f"{contract_address_from_config} : {contract_name_from_config}"
     logger.divider()
     logger.info(f"Binary bytecode comparion started for {address_name}")
-    CustomExceptions.ExceptionHandler.initialize(is_need_raise_exception)
+    CustomExceptions.ExceptionHandler.initialize(
+        config["bytecode_comparison"]["raise_exception"]
+    )
     try:
         target_compiled_contract = compile_contract_from_explorer(contract_source_code)
 
@@ -73,7 +75,7 @@ def run_bytecode_diff(
         calldata = get_calldata(
             contract_address_from_config,
             target_compiled_contract,
-            binary_config,
+            config["bytecode_comparison"],
         )
 
         contract_creation_code += calldata
@@ -283,7 +285,7 @@ def process_config(
                     contract_address,
                     contract_name,
                     contract_code,
-                    config["bytecode_comparison"]["raise_exception"],
+                    config,
                     deployer_account,
                     local_rpc_url,
                     remote_rpc_url,
