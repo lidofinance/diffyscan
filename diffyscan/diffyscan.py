@@ -5,7 +5,13 @@ import argparse
 import os
 
 from .utils.common import load_config, load_env, prettify_solidity
-from .utils.constants import *
+
+from .utils.constants import (
+    DIFFS_DIR,
+    GITHUB_API_TOKEN,
+    DEFAULT_CONFIG_PATH,
+    START_TIME,
+)
 from .utils.explorer import (
     get_contract_from_explorer,
     compile_contract_from_explorer,
@@ -18,9 +24,9 @@ from .utils.github import (
 )
 from .utils.helpers import create_dirs
 from .utils.logger import logger
-from .utils.binary_verifier import *
+from .utils.binary_verifier import match_bytecode
 from .utils.hardhat import hardhat
-from .utils.node_handler import *
+from .utils.node_handler import get_bytecode_from_node, get_account, deploy_contract
 from .utils.calldata import get_calldata
 import utils.custom_exceptions as CustomExceptions
 
@@ -41,6 +47,7 @@ def run_bytecode_diff(
     logger.divider()
     logger.info(f"Binary bytecode comparion started for {address_name}")
     is_need_raise_exception = binary_config["raise_exception"]
+    CustomExceptions.ExceptionHandler.initialize(is_need_raise_exception)
     try:
         target_compiled_contract = compile_contract_from_explorer(contract_source_code)
 
@@ -231,20 +238,14 @@ def process_config(
             f'Failed to find explorer token in env ("ETHERSCAN_EXPLORER_TOKEN")'
         )
     if not skip_binary_comparison:
-        bytecode_comparison_key = "bytecode_comparison"
-        if bytecode_comparison_key not in config:
-            raise ValueError(
-                f'Failed to find "{bytecode_comparison_key}" section in config'
-            )
+        if "bytecode_comparison" not in config:
+            raise ValueError(f'Failed to find "bytecode_comparison" section in config')
 
     try:
         if not skip_binary_comparison:
-            hardhat.start(path, config[bytecode_comparison_key])
+            hardhat.start(path, config["bytecode_comparison"])
             deployer_account = get_account(
-                config[bytecode_comparison_key]["local_RPC_URL"]
-            )
-            CustomExceptions.ExceptionHandler.initialize(
-                config[bytecode_comparison_key]["raise_exception"]
+                config["bytecode_comparison"]["local_RPC_URL"]
             )
 
         for contract_address, contract_name in config["contracts"].items():
@@ -267,7 +268,7 @@ def process_config(
                     contract_address,
                     contract_name,
                     contract_code,
-                    config[bytecode_comparison_key],
+                    config["bytecode_comparison"],
                     deployer_account,
                 )
     except KeyboardInterrupt:
