@@ -27,7 +27,7 @@ from .utils.binary_verifier import match_bytecode
 from .utils.hardhat import hardhat
 from .utils.node_handler import get_bytecode_from_node, get_account, deploy_contract
 from .utils.calldata import get_calldata
-import utils.custom_exceptions as CustomExceptions
+from .utils.custom_exceptions import ExceptionHandler, BaseCustomException
 
 __version__ = "0.0.0"
 
@@ -249,7 +249,7 @@ def process_config(
     if not remote_rpc_url:
         raise ValueError("REMOTE_RPC_URL variable is not set")
 
-    CustomExceptions.ExceptionHandler.initialize(config["raise_exception"])
+    ExceptionHandler.initialize(config["raise_exception"])
 
     try:
         if not skip_binary_comparison:
@@ -287,8 +287,8 @@ def process_config(
                         local_rpc_url,
                         remote_rpc_url,
                     )
-            except CustomExceptions.BaseCustomException as custom_exc:
-                CustomExceptions.ExceptionHandler.raise_exception_or_log(custom_exc)
+            except BaseCustomException as custom_exc:
+                ExceptionHandler.raise_exception_or_log(custom_exc)
     except KeyboardInterrupt:
         logger.info(f"Keyboard interrupt by user")
 
