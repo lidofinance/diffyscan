@@ -11,10 +11,6 @@ DEFAULT_CONFIG_PATH = "config.json"
 
 SOLC_DIR = os.path.join(tempfile.gettempdir(), "solc_builds")
 
-GITHUB_API_TOKEN = os.getenv("GITHUB_API_TOKEN", "")
-if not GITHUB_API_TOKEN:
-    raise ValueError("GITHUB_API_TOKEN variable is not set")
-
 # fmt: off
 OPCODES = {
     0x00: 'STOP', 0x01: 'ADD', 0x02: 'MUL', 0x03: 'SUB', 0x04: 'DIV', 0x05: 'SDIV',

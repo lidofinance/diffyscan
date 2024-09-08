@@ -8,7 +8,6 @@ from .utils.common import load_config, load_env, prettify_solidity
 
 from .utils.constants import (
     DIFFS_DIR,
-    GITHUB_API_TOKEN,
     DEFAULT_CONFIG_PATH,
     START_TIME,
 )
@@ -241,6 +240,10 @@ def process_config(
         if "bytecode_comparison" not in config:
             raise ValueError(f'Failed to find "bytecode_comparison" section in config')
 
+    github_api_token = os.getenv("GITHUB_API_TOKEN", "")
+    if not github_api_token:
+        raise ValueError("GITHUB_API_TOKEN variable is not set")
+
     try:
         if not skip_binary_comparison:
             hardhat.start(path, config["bytecode_comparison"])
@@ -259,7 +262,7 @@ def process_config(
                 contract_address,
                 contract_code,
                 config,
-                GITHUB_API_TOKEN,
+                github_api_token,
                 recursive_parsing,
                 unify_formatting,
             )
