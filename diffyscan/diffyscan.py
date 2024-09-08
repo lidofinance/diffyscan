@@ -22,7 +22,7 @@ from .utils.binary_verifier import *
 from .utils.hardhat import hardhat
 from .utils.node_handler import *
 from .utils.calldata import get_calldata
-import utils.custom_exceptions as custom_exc
+import utils.custom_exceptions as CustomExceptions
 
 __version__ = "0.0.0"
 
@@ -85,47 +85,8 @@ def run_bytecode_diff(
             remote_deployed_bytecode,
             immutables,
         )
-    except custom_exc.CompileError as compiler_exc:
-        raise_exception_or_log(
-            f"Failed to compile contract. {compiler_exc}",
-            is_need_raise_exception,
-        )
-    except custom_exc.NodeError as node_exc:
-        raise_exception_or_log(
-            f"Failed to receive bytecode from {remote_RPC_URL}. {node_exc}",
-            is_need_raise_exception,
-        )
-    except custom_exc.EncoderError as encoder_exc:
-        raise_exception_or_log(
-            f"Failed to encode calldata arguments. {encoder_exc}",
-            is_need_raise_exception,
-        )
-    except custom_exc.CalldataError as calldata_exc:
-        raise_exception_or_log(
-            f"Failed to get calldata. {calldata_exc}",
-            is_need_raise_exception,
-        )
-    except custom_exc.HardhatError as hardhat_exc:
-        raise_exception_or_log(
-            f"Failed to start Hardhat: {hardhat_exc}",
-            is_need_raise_exception,
-        )
-    except custom_exc.ExplorerError as explorer_exc:
-        raise_exception_or_log(
-            f"Failed to communicate with Blockchain explorer: {explorer_exc}",
-            is_need_raise_exception,
-        )
-    except custom_exc.BinVerifierError as bin_verifier_exc:
-        raise_exception_or_log(
-            f"Failed in binary comparison: {bin_verifier_exc}",
-            is_need_raise_exception,
-        )
-
-
-def raise_exception_or_log(custom_exception: Exception, raise_exception: bool = True):
-    if raise_exception:
-        raise custom_exception()
-    logger.error(str(custom_exception))
+    except CustomExceptions.BaseCustomException as custom_exc:
+        CustomExceptions.ExceptionHandler.raise_exception_or_log(custom_exc)
 
 
 def run_source_diff(
@@ -281,6 +242,9 @@ def process_config(
             hardhat.start(path, config[bytecode_comparison_key])
             deployer_account = get_account(
                 config[bytecode_comparison_key]["local_RPC_URL"]
+            )
+            CustomExceptions.ExceptionHandler.initialize(
+                config[bytecode_comparison_key]["raise_exception"]
             )
 
         for contract_address, contract_name in config["contracts"].items():
