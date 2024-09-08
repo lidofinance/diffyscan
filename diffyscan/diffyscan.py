@@ -47,54 +47,48 @@ def run_bytecode_diff(
     address_name = f"{contract_address_from_config} : {contract_name_from_config}"
     logger.divider()
     logger.info(f"Binary bytecode comparion started for {address_name}")
-    CustomExceptions.ExceptionHandler.initialize(
-        config["bytecode_comparison"]["raise_exception"]
+    target_compiled_contract = compile_contract_from_explorer(contract_source_code)
+
+    contract_creation_code, deployed_bytecode, immutables = parse_compiled_contract(
+        target_compiled_contract
     )
-    try:
-        target_compiled_contract = compile_contract_from_explorer(contract_source_code)
 
-        contract_creation_code, deployed_bytecode, immutables = parse_compiled_contract(
-            target_compiled_contract
-        )
+    remote_deployed_bytecode = get_bytecode_from_node(
+        contract_address_from_config, remote_rpc_url
+    )
 
-        remote_deployed_bytecode = get_bytecode_from_node(
-            contract_address_from_config, remote_rpc_url
-        )
+    if match_bytecode(
+        deployed_bytecode,
+        remote_deployed_bytecode,
+        immutables,
+    ):
+        return
 
-        if match_bytecode(
-            deployed_bytecode,
-            remote_deployed_bytecode,
-            immutables,
-        ):
-            return
+    logger.info(
+        f"Trying to check bytecode via using calldata and deploying into local node"
+    )
 
-        logger.info(
-            f"Trying to check bytecode via using calldata and deploying into local node"
-        )
+    calldata = get_calldata(
+        contract_address_from_config,
+        target_compiled_contract,
+        config["bytecode_comparison"],
+    )
 
-        calldata = get_calldata(
-            contract_address_from_config,
-            target_compiled_contract,
-            config["bytecode_comparison"],
-        )
+    contract_creation_code += calldata
 
-        contract_creation_code += calldata
+    local_contract_address = deploy_contract(
+        local_rpc_url, deployer_account, contract_creation_code
+    )
 
-        local_contract_address = deploy_contract(
-            local_rpc_url, deployer_account, contract_creation_code
-        )
+    local_deployed_bytecode = get_bytecode_from_node(
+        local_contract_address, local_rpc_url
+    )
 
-        local_deployed_bytecode = get_bytecode_from_node(
-            local_contract_address, local_rpc_url
-        )
-
-        match_bytecode(
-            local_deployed_bytecode,
-            remote_deployed_bytecode,
-            immutables,
-        )
-    except CustomExceptions.BaseCustomException as custom_exc:
-        CustomExceptions.ExceptionHandler.raise_exception_or_log(custom_exc)
+    match_bytecode(
+        local_deployed_bytecode,
+        remote_deployed_bytecode,
+        immutables,
+    )
 
 
 def run_source_diff(
@@ -255,6 +249,8 @@ def process_config(
     if not remote_rpc_url:
         raise ValueError("REMOTE_RPC_URL variable is not set")
 
+    CustomExceptions.ExceptionHandler.initialize(config["raise_exception"])
+
     try:
         if not skip_binary_comparison:
             hardhat.start(
@@ -266,32 +262,36 @@ def process_config(
             deployer_account = get_account(local_rpc_url)
 
         for contract_address, contract_name in config["contracts"].items():
-            contract_code = get_contract_from_explorer(
-                explorer_token,
-                config["explorer_hostname"],
-                contract_address,
-                contract_name,
-            )
-            run_source_diff(
-                contract_address,
-                contract_code,
-                config,
-                github_api_token,
-                recursive_parsing,
-                unify_formatting,
-            )
-            if not skip_binary_comparison:
-                run_bytecode_diff(
+            try:
+                contract_code = get_contract_from_explorer(
+                    explorer_token,
+                    config["explorer_hostname"],
                     contract_address,
                     contract_name,
+                )
+                run_source_diff(
+                    contract_address,
                     contract_code,
                     config,
-                    deployer_account,
-                    local_rpc_url,
-                    remote_rpc_url,
+                    github_api_token,
+                    recursive_parsing,
+                    unify_formatting,
                 )
+                if not skip_binary_comparison:
+                    run_bytecode_diff(
+                        contract_address,
+                        contract_name,
+                        contract_code,
+                        config,
+                        deployer_account,
+                        local_rpc_url,
+                        remote_rpc_url,
+                    )
+            except CustomExceptions.BaseCustomException as custom_exc:
+                CustomExceptions.ExceptionHandler.raise_exception_or_log(custom_exc)
     except KeyboardInterrupt:
         logger.info(f"Keyboard interrupt by user")
+
     finally:
         if not skip_binary_comparison:
             hardhat.stop()

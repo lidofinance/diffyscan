@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 
 from .logger import logger
 from .custom_types import Config
-from .custom_exceptions import NodeError
+from .custom_exceptions import NodeError, ExplorerError
 
 
 def load_env(variable_name, required=True, masked=False):
@@ -40,13 +40,13 @@ def fetch(url, headers=None):
         response = requests.get(url, headers=headers)
         response.raise_for_status()
     except requests.exceptions.HTTPError as http_err:
-        raise NodeError(f"HTTP error occurred: {http_err}")
+        raise ExplorerError(f"HTTP error occurred: {http_err}")
     except requests.exceptions.ConnectionError as conn_err:
-        raise NodeError(f"Connection error occurred: {conn_err}")
+        raise ExplorerError(f"Connection error occurred: {conn_err}")
     except requests.exceptions.Timeout as timeout_err:
-        raise NodeError(f"Timeout error occurred: {timeout_err}")
+        raise ExplorerError(f"Timeout error occurred: {timeout_err}")
     except requests.exceptions.RequestException as req_err:
-        raise NodeError(f"Request exception occurred: {req_err}")
+        raise ExplorerError(f"Request exception occurred: {req_err}")
 
     return response
 
