@@ -144,7 +144,8 @@ def get_contract_from_explorer(
     contract_name_from_etherscan = result["name"]
     if contract_name_from_etherscan != contract_name_from_config:
         raise ExplorerError(
-            f"Contract name in config does not match with Blockchain explorer {contract_address}: {contract_name_from_config} != {contract_name_from_etherscan}",
+            f"Contract name in config does not match with Blockchain explorer {contract_address}: \
+              {contract_name_from_config} != {contract_name_from_etherscan}",
         )
 
     return result
