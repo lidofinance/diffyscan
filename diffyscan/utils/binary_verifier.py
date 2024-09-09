@@ -1,46 +1,43 @@
 from .logger import logger, bgYellow, bgRed, bgGreen, red, green, to_hex
-from .constants import OPCODES
+from .constants import OPCODES, PUSH0, PUSH32
 from .custom_exceptions import BinVerifierError
 
 
-def match_bytecode(actualBytecode, expectedBytecode, immutables):
+def format_bytecode(bytecode):
+    return "0x" + bytecode[2:] if len(bytecode) > 2 else ""
+
+
+def match_bytecode(actual_bytecode, expected_bytecode, immutables):
     logger.info("Comparing actual code with the expected one...")
 
-    actualInstructions = parse(actualBytecode)
-    expectedInstructions = parse(expectedBytecode)
-    maxInstructionsCount = max(len(actualInstructions), len(expectedInstructions))
+    actual_instructions = parse(actual_bytecode)
+    expected_instructions = parse(expected_bytecode)
+    zipped_instructions = list(zip(actual_instructions, expected_instructions))
+    is_mismatch = lambda pair: pair[0].get("bytecode") != pair[1].get("bytecode")
+    mismatches = [
+        index for index, pair in enumerate(zipped_instructions) if is_mismatch(pair)
+    ]
 
-    differences = []
-    for i in range(maxInstructionsCount):
-        actual = actualInstructions[i] if i < len(actualInstructions) else None
-        expected = expectedInstructions[i] if i < len(expectedInstructions) else None
-        if not actual and not expected:
-            raise BinVerifierError("Invalid instructions data")
-        elif (actual is not None) and (
-            actual.get("bytecode") != expected.get("bytecode")
-        ):
-            differences.append(i)
-
-    if not differences:
+    if not mismatches:
         logger.okay(f"Bytecodes are fully matched")
         return True
 
     nearLinesCount = 3
-    checkpoints = {0, *differences}
+    checkpoints = {0, *mismatches}
 
-    if actualInstructions:
-        checkpoints.add(len(actualInstructions) - 1)
+    if actual_instructions:
+        checkpoints.add(len(actual_instructions) - 1)
 
-    if expectedInstructions:
-        checkpoints.add(len(expectedInstructions) - 1)
+    if expected_instructions:
+        checkpoints.add(len(expected_instructions) - 1)
 
     for ind in list(checkpoints):
-        startIndex = max(0, ind - nearLinesCount)
-        lastIndex = min(ind + nearLinesCount, maxInstructionsCount - 1)
-        for i in range(startIndex, lastIndex + 1):
-            checkpoints.add(i)
+        start_index = max(0, ind - nearLinesCount)
+        end_index = min(ind + nearLinesCount, len(zipped_instructions) - 1)
 
-    checkpointsArray = sorted(list(checkpoints))
+        checkpoints.update(range(start_index, end_index + 1))
+
+    checkpoints = sorted(checkpoints)
 
     logger.divider()
     logger.info(f"0000 00 STOP - both expected and actual bytecode instructions match")
@@ -60,18 +57,18 @@ def match_bytecode(actualBytecode, expectedBytecode, immutables):
     logger.divider()
 
     is_matched = True
-    for i in range(len(checkpointsArray)):
-        currInd = checkpointsArray[i]
-        prevInd = checkpointsArray[i - 1] if i > 0 else None
-        if prevInd and prevInd != currInd - 1:
+    for previous_index, current_index in zip(checkpoints, checkpoints[1:]):
+        if previous_index != current_index - 1:
             print("...")
 
         actual = (
-            actualInstructions[currInd] if currInd < len(actualInstructions) else None
+            actual_instructions[current_index]
+            if current_index < len(actual_instructions)
+            else None
         )
         expected = (
-            expectedInstructions[currInd]
-            if currInd < len(expectedInstructions)
+            expected_instructions[current_index]
+            if current_index < len(expected_instructions)
             else None
         )
 
@@ -79,14 +76,14 @@ def match_bytecode(actualBytecode, expectedBytecode, immutables):
             params = "0x" + expected["bytecode"][2:]
             print(
                 logger.red(
-                    f'{to_hex(currInd, 4)} {to_hex(expected["op"]["code"])} {expected["op"]["name"]} {params}'
+                    f'{to_hex(current_index, 4)} {to_hex(expected["op"]["code"])} {expected["op"]["name"]} {params}'
                 )
             )
         elif actual and not expected:
             params = "0x" + actual["bytecode"][2:]
             print(
                 logger.green(
-                    f'{to_hex(currInd, 4)} {to_hex(actual["op"]["code"])} {actual["op"]["name"]} {params}'
+                    f'{to_hex(current_index, 4)} {to_hex(actual["op"]["code"])} {actual["op"]["name"]} {params}'
                 )
             )
         elif actual and expected:
@@ -102,27 +99,24 @@ def match_bytecode(actualBytecode, expectedBytecode, immutables):
                 if actual["op"]["name"] == expected["op"]["name"]
                 else bgRed(actual["op"]["name"]) + " " + bgGreen(expected["op"]["name"])
             )
-            actualParams = (
-                "0x" + actual["bytecode"][2:] if len(actual["bytecode"]) > 2 else ""
-            )
-            expectedParams = (
-                "0x" + expected["bytecode"][2:] if len(expected["bytecode"]) > 2 else ""
-            )
 
-            paramsLength = len(expected["bytecode"]) // 2 - 1
-            isImmutable = immutables.get(expected["start"] + 1) == paramsLength
-            if actualParams != expectedParams and not isImmutable:
+            actual_params = format_bytecode(actual["bytecode"])
+            expected_params = format_bytecode(expected["bytecode"])
+
+            params_length = len(expected["bytecode"]) // 2 - 1
+            is_immutable = immutables.get(expected["start"] + 1) == params_length
+            if actual_params != expected_params and not is_immutable:
                 is_matched = False
             params = (
-                actualParams
-                if actualParams == expectedParams
+                actual_params
+                if actual_params == expected_params
                 else (
-                    bgYellow(actualParams) + " " + bgGreen(expectedParams)
-                    if isImmutable
-                    else bgRed(actualParams) + " " + bgGreen(expectedParams)
+                    bgYellow(actual_params) + " " + bgGreen(expected_params)
+                    if is_immutable
+                    else bgRed(actual_params) + " " + bgGreen(expected_params)
                 )
             )
-            print(f"{to_hex(currInd, 4)} {opcode} {opname} {params}")
+            print(f"{to_hex(current_index, 4)} {opcode} {opname} {params}")
         else:
             raise BinVerifierError("Invalid bytecode difference data")
     if is_matched:
@@ -142,7 +136,9 @@ def parse(bytecode):
     i = 0
     while i < len(buffer):
         opcode = buffer[i]
-        length = 1 + (opcode - 0x5F if 0x5F <= opcode <= 0x7F else 0)
+        # if opcode not in OPCODES:
+        #     raise BinVerifierError(f"Unknown opcode {hex(opcode)}")
+        length = 1 + (opcode - PUSH0 if PUSH0 <= opcode <= PUSH32 else 0)
         instructions.append(
             {
                 "start": i,

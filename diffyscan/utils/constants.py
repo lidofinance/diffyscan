@@ -46,3 +46,16 @@ OPCODES = {
     0xF5: 'CREATE2', 0xFA: 'STATICCALL', 0xFD: 'REVERT', 0xFE: 'INVALID', 0xFF: 'SELFDESTRUCT',
 }
 # fmt: on
+
+
+def get_key_from_value(dictinary: dict, value: str):
+    keys = [
+        dict_key for dict_key, dict_value in dictinary.items() if dict_value == value
+    ]
+    if keys:
+        return keys[0]
+    return None
+
+
+PUSH0 = get_key_from_value(OPCODES, "PUSH0")
+PUSH32 = get_key_from_value(OPCODES, "PUSH32")
