@@ -1,32 +1,35 @@
-from .logger import logger
 from .custom_exceptions import EncoderError
 
 
-def encode_address(address):
+def to_hex_with_alignment(value: int) -> str:
+    return format(value, "064x")
+
+
+def encode_address(address: str) -> str:
     number = int(address, 16)
-    formatted_address = f"{number:064x}"
-    return formatted_address
+    return to_hex_with_alignment(number)
 
 
-def encode_uint256(number):
-    return format(number, "064x")
-
-
-def encode_bytes32(data):
+def encode_bytes32(data: str) -> str:
     return data.replace("0x", "")
 
 
-def encode_bytes(data):
+def encode_bytes(data: str) -> str:
     bytes_str = data.lstrip("0x")
-    data_length = len(bytes_str) // 2
+    if not bytes_str:
+        return to_hex_with_alignment(0)
+
+    # untested, taken from here:
+    # https://github.com/lidofinance/lido-dao/blob/a9a9ea50b5be7dba33e06d70cc068252ffd01b52/bytecode-verificator/bytecode_verificator.sh#L239
+    count_of_bytes_from_hex = len(bytes_str) // 2
     encoded_length = 0
-    if data_length > 0:
+    if count_of_bytes_from_hex > 0:
         encoded_length = ((len(bytes_str) - 1) // 64 + 1) * 64
     bytes_str += "0" * (encoded_length - len(bytes_str))
-    return format(data_length, "064x") + bytes_str
+    return to_hex_with_alignment(count_of_bytes_from_hex) + bytes_str
 
 
-def encode_tuple(types, args):
+def encode_tuple(types: list, args: list):
     args_length = len(types)
     encoded_offsets = ""
     encoded_data = ""
@@ -36,70 +39,83 @@ def encode_tuple(types, args):
         if arg_type == "address":
             encoded_offsets += encode_address(arg_value)
         elif arg_type == "uint256" or arg_type == "bool" or arg_type == "uint8":
-            encoded_offsets += encode_uint256(arg_value)
+            encoded_offsets += to_hex_with_alignment(arg_value)
         elif arg_type == "bytes32":
             encoded_offsets += encode_bytes32(arg_value)
         elif arg_type == "address[]" and not arg_value:
-            encoded_data += "0" * 64
-            offset = format((arg_index + args_length) * 32, "064x")
+            encoded_data += to_hex_with_alignment(0)
+            offset = to_hex_with_alignment((arg_index + args_length) * 32)
             encoded_offsets += offset
         else:
-            logger.warn(f"Unknown constructor argument type '{arg_type}'")
+            raise EncoderError(
+                f"Unknown constructor argument type '{arg_type}' in tuple"
+            )
     return encoded_offsets + encoded_data
 
 
-def to_hex_with_alignment(value):
-    return format(value, "064x")
+def encode_dynamic_type(arg_value: str, argument_index: int):
+    offset_to_start_of_data_part = to_hex_with_alignment((argument_index + 1) * 32)
+    encoded_value = encode_bytes(arg_value)
+    return offset_to_start_of_data_part, encoded_value
 
 
-def encode_constructor_arguments(constructor_abi, constructor_config_args):
+def encode_string(arg_length: int, compl_data: list, arg_value: str):
+    argument_index = arg_length + len(compl_data)
+    encoded_value = arg_value.encode("utf-8")
+    offset_to_start_of_data_part = to_hex_with_alignment(argument_index * 32)
+    encoded_value_length = to_hex_with_alignment(len(encoded_value))
+    return (
+        offset_to_start_of_data_part,
+        encoded_value_length,
+        encoded_value.hex().ljust(64, "0"),
+    )
+
+
+def encode_constructor_arguments(constructor_abi: list, constructor_config_args: list):
+    # see https://docs.soliditylang.org/en/develop/abi-spec.html#contract-abi-specification
     arg_length = len(constructor_abi)
 
     constructor_calldata = ""
     compl_data = []
-    if arg_length > 0:
-        for argument_index in range(arg_length):
-            arg_type = constructor_abi[argument_index]["type"]
-            arg_value = constructor_config_args[argument_index]
-            if arg_type == "address":
-                constructor_calldata += encode_address(arg_value)
-            elif arg_type == "uint256" or arg_type == "bool" or arg_type == "uint8":
-                constructor_calldata += encode_uint256(arg_value)
-            elif arg_type == "bytes32":
-                constructor_calldata += encode_bytes32(arg_value)
-            elif arg_type == "bytes":
-                data = format((argument_index + 1) * 32, "064x")
-                constructor_calldata += data
-                data2 = encode_bytes(arg_value)
-                compl_data.append(data2)
-            elif arg_type == "string":
-                offset_arg = to_hex_with_alignment((arg_length + len(compl_data)) * 32)
-                constructor_calldata += offset_arg
-                length_arg = to_hex_with_alignment(len(arg_value.encode("utf-8")))
-                hex_text = arg_value.encode("utf-8").hex().ljust(64, "0")
-                compl_data.append(length_arg)
-                compl_data.append(hex_text)
-            elif arg_type == "tuple":
-                args_tuple_types = [
-                    component["type"]
-                    for component in constructor_abi[argument_index]["components"]
-                ]
-                if len(args_tuple_types) and args_tuple_types[0] == "address[]":
-                    dynamic_type_length = format(
-                        (len(constructor_calldata) // 64 + 1) * 32, "064x"
-                    )
-                    constructor_calldata += dynamic_type_length
-                    compl_data.append(encode_tuple(args_tuple_types, arg_value))
-                else:
-                    constructor_calldata += encode_tuple(args_tuple_types, arg_value)
-            elif arg_type.endswith("[]"):
-                data = format((argument_index + 1) * 32, "064x")
-                constructor_calldata += data
-                data2 = encode_bytes(arg_value)
-                compl_data.append(data2)
+    for argument_index in range(arg_length):
+        arg_type = constructor_abi[argument_index]["type"]
+        arg_value = constructor_config_args[argument_index]
+        if arg_type == "address":
+            constructor_calldata += encode_address(arg_value)
+        elif arg_type == "uint256" or arg_type == "bool" or arg_type == "uint8":
+            constructor_calldata += to_hex_with_alignment(arg_value)
+        elif arg_type == "bytes32":
+            constructor_calldata += encode_bytes32(arg_value)
+        elif arg_type == "bytes" or arg_type.endswith("[]"):
+            offset_to_start_of_data_part, encoded_value = encode_dynamic_type(
+                arg_value, argument_index
+            )
+            constructor_calldata += offset_to_start_of_data_part
+            compl_data.append(encoded_value)
+        elif arg_type == "string":
+            offset_to_start_of_data_part, encoded_value_length, encoded_value = (
+                encode_string(arg_length, compl_data, arg_value)
+            )
+            constructor_calldata += offset_to_start_of_data_part
+            compl_data.append(encoded_value_length)
+            compl_data.append(encoded_value)
+        elif arg_type == "tuple":
+            args_tuple_types = [
+                component["type"]
+                for component in constructor_abi[argument_index]["components"]
+            ]
+            if all(arg == "address[]" for arg in args_tuple_types):
+                argument_index = len(constructor_calldata) // 64
+                offset_to_start_of_data_part = to_hex_with_alignment(
+                    (argument_index + 1) * 32
+                )
+                constructor_calldata += offset_to_start_of_data_part
+                compl_data.append(encode_tuple(args_tuple_types, arg_value))
             else:
-                raise EncoderError(f"Unknown constructor argument type: {arg_type}")
-        for data in compl_data:
-            constructor_calldata += data
+                constructor_calldata += encode_tuple(args_tuple_types, arg_value)
+        else:
+            raise EncoderError(f"Unknown constructor argument type: {arg_type}")
+    for offset_to_start_of_data_part in compl_data:
+        constructor_calldata += offset_to_start_of_data_part
 
     return constructor_calldata
