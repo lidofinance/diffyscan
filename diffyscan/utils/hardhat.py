@@ -32,15 +32,24 @@ class Hardhat:
             raise HardhatError(
                 f"Invalid LOCAL_RPC_URL (TCP port not specified): '{local_rpc_url}'"
             )
-        hardhat_config_relative_path = Hardhat.get_config_path(
-            os.path.dirname(main_config_relative_path),
-            "hardhat_configs",
-            hardhat_config_name,
+
+        hardhat_config_path = os.path.join(
+            os.path.dirname(main_config_relative_path), "hardhat_config.js"
         )
+
+        if not os.path.isfile(hardhat_config_path):
+            hardhat_config_path = Hardhat.get_config_path(
+                os.path.dirname(main_config_relative_path),
+                "hardhat_configs",
+                hardhat_config_name,
+            )
+            if not os.path.isfile(hardhat_config_path):
+                raise HardhatError(f"Failed to find any Hardhat config")
+
         local_node_command = (
             f"npx hardhat node --hostname {parsed_url.hostname} "
             f"--port {parsed_url.port} "
-            f"--config {hardhat_config_relative_path} "
+            f"--config {hardhat_config_path} "
             f"--fork {remote_rpc_url}"
         )
 
