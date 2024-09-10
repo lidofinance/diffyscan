@@ -28,6 +28,10 @@ class Hardhat:
         remote_rpc_url: str,
     ):
         parsed_url = urlparse(local_rpc_url)
+        if parsed_url.port == None:
+            raise HardhatError(
+                f"Invalid LOCAL_RPC_URL (TCP port not specified): '{local_rpc_url}'"
+            )
         hardhat_config_relative_path = Hardhat.get_config_path(
             os.path.dirname(main_config_relative_path),
             "hardhat_configs",
