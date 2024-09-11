@@ -22,8 +22,7 @@ class Hardhat:
 
     def start(
         self,
-        main_config_relative_path: str,
-        hardhat_config_name: str,
+        hardhat_config_path: str,
         local_rpc_url: str,
         remote_rpc_url: str,
     ):
@@ -33,18 +32,8 @@ class Hardhat:
                 f"Invalid LOCAL_RPC_URL (TCP port not specified): '{local_rpc_url}'"
             )
 
-        hardhat_config_path = os.path.join(
-            os.path.dirname(main_config_relative_path), "hardhat_config.js"
-        )
-
         if not os.path.isfile(hardhat_config_path):
-            hardhat_config_path = Hardhat.get_config_path(
-                os.path.dirname(main_config_relative_path),
-                "hardhat_configs",
-                hardhat_config_name,
-            )
-            if not os.path.isfile(hardhat_config_path):
-                raise HardhatError(f"Failed to find any Hardhat config")
+            raise HardhatError(f"Failed to find Hardhat config: {hardhat_config_path}")
 
         local_node_command = (
             f"npx hardhat node --hostname {parsed_url.hostname} "
@@ -88,10 +77,6 @@ class Hardhat:
         if self.sub_process is not None and self.sub_process.poll() is None:
             os.kill(self.sub_process.pid, signal.SIGTERM)
             logger.info(f"Hardhat stopped, PID {self.sub_process.pid}")
-
-    @staticmethod
-    def get_config_path(from_path: str, to_path: str, filename: str) -> str:
-        return os.path.normpath(os.path.join(from_path, os.pardir, to_path, filename))
 
 
 hardhat = Hardhat()
