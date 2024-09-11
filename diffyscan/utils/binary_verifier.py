@@ -56,7 +56,7 @@ def match_bytecode(actual_bytecode, expected_bytecode, immutables):
     )
     logger.divider()
 
-    is_matched = True
+    is_matched_with_excluded_immutables = True
     for previous_index, current_index in zip(checkpoints, checkpoints[1:]):
         if previous_index != current_index - 1:
             print("...")
@@ -106,7 +106,7 @@ def match_bytecode(actual_bytecode, expected_bytecode, immutables):
             params_length = len(expected["bytecode"]) // 2 - 1
             is_immutable = immutables.get(expected["start"] + 1) == params_length
             if actual_params != expected_params and not is_immutable:
-                is_matched = False
+                is_matched_with_excluded_immutables = False
             params = (
                 actual_params
                 if actual_params == expected_params
@@ -119,15 +119,15 @@ def match_bytecode(actual_bytecode, expected_bytecode, immutables):
             print(f"{to_hex(current_index, 4)} {opcode} {opname} {params}")
         else:
             raise BinVerifierError("Invalid bytecode difference data")
-    if is_matched:
+    if is_matched_with_excluded_immutables:
         logger.okay(
             f"Bytecodes have differences only on the immutable reference position"
         )
-    else:
-        logger.error(
-            f"Bytecodes have differences not on the immutable reference position"
-        )
-    return is_matched
+        return False
+
+    raise BinVerifierError(
+        f"Bytecodes have differences not on the immutable reference position"
+    )
 
 
 def parse(bytecode):

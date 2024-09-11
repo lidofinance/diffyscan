@@ -46,7 +46,7 @@ def run_bytecode_diff(
 ):
     address_name = f"{contract_address_from_config} : {contract_name_from_config}"
     logger.divider()
-    logger.info(f"Binary bytecode comparion started for {address_name}")
+    logger.info(f"Binary bytecode comparison started for {address_name}")
     target_compiled_contract = compile_contract_from_explorer(contract_source_code)
 
     contract_creation_code, deployed_bytecode, immutables = parse_compiled_contract(
@@ -57,11 +57,13 @@ def run_bytecode_diff(
         contract_address_from_config, remote_rpc_url
     )
 
-    if match_bytecode(
+    is_fully_matched = match_bytecode(
         deployed_bytecode,
         remote_deployed_bytecode,
         immutables,
-    ):
+    )
+
+    if is_fully_matched:
         return
 
     logger.info(
