@@ -258,7 +258,8 @@ def process_config(
     try:
         if not skip_binary_comparison:
             hardhat.start(
-                config["bytecode_comparison"]["hardhat_config_path"],
+                path,
+                config["bytecode_comparison"]["hardhat_config_name"],
                 local_rpc_url,
                 remote_rpc_url,
             )

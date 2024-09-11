@@ -82,7 +82,7 @@ Alternatively, create a new config file named `config.json`,
     },
     "raise_exception": true,
     "bytecode_comparison": {
-        "hardhat_config_path": "../hardhat_configs/holesky_hardhat.config.js",
+        "hardhat_config_name": "holesky_hardhat.config.js",
         "constructor_calldata": {
             "0x28FAB2059C713A7F9D8c86Db49f9bb0e96Af1ef8": "000000000000000000000000ab89ed3d8f31bcf8bb7de53f02084d1e6f043d34000000000000000000000000e92329ec7ddb11d25e25b3c21eebf11f15eb325d00000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000"
         },
@@ -114,7 +114,19 @@ Alternatively, create a new config file named `config.json`,
     }
 }
 ```
-, then insert a correct path to Hardhat config into `hardhat_config_path` config section.
+use `holesky_hardhat.config.js` from `config.json` or create near the diffyscan.py own Hardhat config `hardhat_config.js`: 
+```json
+module.exports = {
+  solidity: "0.8.9",
+  networks: {
+    hardhat: {
+      chainId: 17000,
+      blockGasLimit: 92000000,
+      hardfork: "istanbul",
+    }
+  },
+};
+```
 
 Start the script
 

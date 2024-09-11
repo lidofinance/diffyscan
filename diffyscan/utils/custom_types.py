@@ -2,7 +2,7 @@ from typing import TypedDict
 
 
 class BinartConfig(TypedDict):
-    hardhat_config_path: str
+    hardhat_config_name: str
     constructor_calldata: set
     constructor_args: set
 
