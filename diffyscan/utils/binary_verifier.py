@@ -10,8 +10,15 @@ def format_bytecode(bytecode):
 def match_bytecode(actual_bytecode, expected_bytecode, immutables):
     logger.info("Comparing actual code with the expected one...")
 
-    actual_instructions = parse(actual_bytecode)
-    expected_instructions = parse(expected_bytecode)
+    actual_instructions, unknown_opcodes_first_half = parse(actual_bytecode)
+    expected_instructions, unknown_opcodes_second_half = parse(expected_bytecode)
+
+    unknown_opcodes = (
+        unknown_opcodes_first_half or set() | unknown_opcodes_second_half or set()
+    )
+    if unknown_opcodes:
+        logger.warn(f"Detected unknown opcodes: {unknown_opcodes}")
+
     zipped_instructions = list(zip(actual_instructions, expected_instructions))
     is_mismatch = lambda pair: pair[0].get("bytecode") != pair[1].get("bytecode")
     mismatches = [
@@ -134,10 +141,11 @@ def parse(bytecode):
     buffer = bytes.fromhex(bytecode[2:] if bytecode.startswith("0x") else bytecode)
     instructions = []
     i = 0
+    unknown_opcodes = set()
     while i < len(buffer):
         opcode = buffer[i]
-        # if opcode not in OPCODES:
-        #     raise BinVerifierError(f"Unknown opcode {hex(opcode)}")
+        if opcode not in OPCODES:
+            unknown_opcodes.add(hex(opcode))
         length = 1 + (opcode - PUSH0 if PUSH0 <= opcode <= PUSH32 else 0)
         instructions.append(
             {
@@ -148,4 +156,4 @@ def parse(bytecode):
             }
         )
         i += length
-    return instructions
+    return instructions, unknown_opcodes
