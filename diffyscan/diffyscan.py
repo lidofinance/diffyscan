@@ -9,6 +9,7 @@ from .utils.common import load_config, load_env, prettify_solidity
 from .utils.constants import (
     DIFFS_DIR,
     DEFAULT_CONFIG_PATH,
+    DEFAULT_HARDHAT_CONFIG_PATH,
     START_TIME,
 )
 from .utils.explorer import (
@@ -213,6 +214,7 @@ def run_source_diff(
 
 def process_config(
     path: str,
+    hardhat_config_path: str,
     recursive_parsing: bool,
     unify_formatting: bool,
     skip_binary_comparison: bool,
@@ -258,8 +260,7 @@ def process_config(
     try:
         if not skip_binary_comparison:
             hardhat.start(
-                path,
-                config["bytecode_comparison"]["hardhat_config_name"],
+                hardhat_config_path,
                 local_rpc_url,
                 remote_rpc_url,
             )
@@ -310,6 +311,9 @@ def parse_arguments():
         "path", nargs="?", default=None, help="Path to config or directory with configs"
     )
     parser.add_argument(
+        "hardhat_path", nargs="?", default=None, help="Path to Hardhat config"
+    )
+    parser.add_argument(
         "--yes",
         "-Y",
         help="If set don't ask for input before validating each contract",
@@ -345,16 +349,24 @@ def main():
         return
     logger.info("Welcome to Diffyscan!")
     logger.divider()
+    hardhat_config_path = (
+        DEFAULT_HARDHAT_CONFIG_PATH if args.hardhat_path is None else args.hardhat_path
+    )
     if args.path is None:
         process_config(
             DEFAULT_CONFIG_PATH,
+            hardhat_config_path,
             args.support_brownie,
             args.prettify,
             args.skip_binary_comparison,
         )
     elif os.path.isfile(args.path):
         process_config(
-            args.path, args.support_brownie, args.prettify, args.skip_binary_comparison
+            args.path,
+            hardhat_config_path,
+            args.support_brownie,
+            args.prettify,
+            args.skip_binary_comparison,
         )
     elif os.path.isdir(args.path):
         for filename in os.listdir(args.path):
@@ -362,6 +374,7 @@ def main():
             if os.path.isfile(config_path):
                 process_config(
                     config_path,
+                    hardhat_config_path,
                     args.support_brownie,
                     args.prettify,
                     args.skip_binary_comparison,

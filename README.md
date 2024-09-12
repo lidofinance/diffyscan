@@ -10,10 +10,11 @@ Diff deployed EVM-compatible smart contract sourcecode and bytecode against the 
 
 Key features: 
 - retrieve and diff sources from the GitHub repo against the queried ones from a blockscan service (e.g. Etherscan)
-- compare the bytecode compiled and deployed on the forked network locally against remote (see section 'binary_checking' in `./config_samples/lido_dao_sepolia_config.json` as an example)
+- compare the bytecode compiled and deployed on the forked network locally against remote (see section 'bytecode_comparison' in `./config_samples/lido_dao_sepolia_config.json` as an example)
 - preprocess solidity sourcecode by means of prettifier solidity plugin before comparing the sources (option `--prettify`) if needed.
 - preprocess imports to flat paths for Brownie compatibility (option `--support-brownie`)
 - exclude binary comparison (option `--skip-binary-comparison`)
+- provide own Hardhat config as optional argument
 
 ## Install
 
@@ -58,7 +59,7 @@ Start script with one of the examples provided (or entire folder of configs)
 diffyscan config_samples/lido_dao_sepolia_config.json
 ```
 
-Alternatively, create a new config file named `config.json`,
+Alternatively, create a new config file named `config.json` near the diffyscan.py,
 
 ```json
 {
@@ -114,7 +115,7 @@ Alternatively, create a new config file named `config.json`,
     }
 }
 ```
-use `holesky_hardhat.config.js` from `config.json` or create near the diffyscan.py own Hardhat config `hardhat_config.js`: 
+then create a new Hardhat config file named `hardhat_config.js` near the diffyscan.py
 ```json
 module.exports = {
   solidity: "0.8.9",
