@@ -48,7 +48,7 @@ Set remote RPC URL to validate contract bytecode at remote rpc node,
 export REMOTE_RPC_URL =<remote-rpc-url>
 ```
 
-Set local RPC URL to validate contract bytecode at local rpc node (Hardhat),
+Set local RPC URL to check immutables against the local deployment and provided constructor arguments,
 
 ```bash
 export LOCAL_RPC_URL =<local-rpc-url> (example `http://127.0.0.1:7545`)
