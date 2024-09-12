@@ -113,7 +113,7 @@
       "relative_root": "contracts"
     }
   },
-  "raise_exception": true,
+  "raise_exceptions_on_comparison": true,
   "bytecode_comparison": {
     "hardhat_config_name": "holesky_hardhat_config.js",
     "constructor_calldata": {
