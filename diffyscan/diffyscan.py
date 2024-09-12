@@ -67,9 +67,7 @@ def run_bytecode_diff(
     if is_fully_matched:
         return
 
-    logger.info(
-        f"Trying to check bytecode via using calldata and deploying into local node"
-    )
+    logger.info(f"Automated match hasn't worked out")
 
     calldata = get_calldata(
         contract_address_from_config,
