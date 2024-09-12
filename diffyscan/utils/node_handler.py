@@ -22,7 +22,7 @@ def get_bytecode_from_node(contract_address, rpc_url):
         "result" not in sources_url_response_in_json
         or sources_url_response_in_json["result"] == "0x"
     ):
-        raise NodeError(f"Received bad response")
+        raise NodeError(f"Received bad response: {sources_url_response_in_json}")
 
     logger.okay(f"Bytecode was successfully received")
     return sources_url_response_in_json["result"]
