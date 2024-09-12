@@ -248,8 +248,6 @@ def process_config(
     local_rpc_url = os.getenv("LOCAL_RPC_URL", "")
     if not local_rpc_url:
         raise ValueError("LOCAL_RPC_URL variable is not set")
-    if not local_rpc_url.startswith("http://"):
-        local_rpc_url = "http://" + local_rpc_url
 
     remote_rpc_url = os.getenv("REMOTE_RPC_URL", "")
     if not remote_rpc_url:
