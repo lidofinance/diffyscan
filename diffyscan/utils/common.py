@@ -4,6 +4,7 @@ import sys
 import subprocess
 import tempfile
 import requests
+import uuid
 
 from urllib.parse import urlparse
 
@@ -82,9 +83,7 @@ def parse_repo_link(repo_link):
 
 
 def prettify_solidity(solidity_contract_content: str):
-    github_file_name = os.path.join(
-        tempfile.gettempdir(), "9B91E897-EA51-4FCC-8DAF-FCFF135A6963.sol"
-    )
+    github_file_name = os.path.join(tempfile.gettempdir(), f"{uuid.uuid4()}.sol")
     with open(github_file_name, "w") as fp:
         fp.write(solidity_contract_content)
 
