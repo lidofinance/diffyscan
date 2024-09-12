@@ -73,6 +73,8 @@ def encode_string(arg_length: int, compl_data: list, arg_value: str):
 
 def encode_constructor_arguments(constructor_abi: list, constructor_config_args: list):
     # see https://docs.soliditylang.org/en/develop/abi-spec.html#contract-abi-specification
+    # transferred from here:
+    # https://github.com/lidofinance/lido-dao/blob/master/bytecode-verificator/bytecode_verificator.sh#L369-L405
     arg_length = len(constructor_abi)
 
     constructor_calldata = ""
