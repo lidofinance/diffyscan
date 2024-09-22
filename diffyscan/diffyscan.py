@@ -251,7 +251,7 @@ def process_config(
     if not remote_rpc_url:
         raise ValueError("REMOTE_RPC_URL variable is not set")
 
-    ExceptionHandler.initialize(config["raise_exceptions_on_comparison"])
+    ExceptionHandler.initialize(config["fail_on_comparison_error"])
 
     try:
         if not skip_binary_comparison:

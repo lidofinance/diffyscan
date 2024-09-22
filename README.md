@@ -81,7 +81,7 @@ Alternatively, create a new config file named `config.json` near the diffyscan.p
             "relative_root": "contracts"
         }
     },
-    "raise_exception": true,
+    "fail_on_comparison_error": true,
     "bytecode_comparison": {
         "hardhat_config_name": "holesky_hardhat.config.js",
         "constructor_calldata": {
