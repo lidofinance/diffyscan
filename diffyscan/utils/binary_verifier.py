@@ -1,3 +1,5 @@
+import itertools
+
 from .logger import logger, bgYellow, bgRed, bgGreen, red, green, to_hex
 from .constants import OPCODES, PUSH0, PUSH32
 from .custom_exceptions import BinVerifierError
@@ -19,8 +21,18 @@ def match_bytecode(actual_bytecode, expected_bytecode, immutables):
     if unknown_opcodes:
         logger.warn(f"Detected unknown opcodes: {unknown_opcodes}")
 
-    zipped_instructions = list(zip(actual_instructions, expected_instructions))
-    is_mismatch = lambda pair: pair[0].get("bytecode") != pair[1].get("bytecode")
+    if len(actual_instructions) != len(expected_instructions):
+        logger.warn(f"Codes have a different length")
+
+    zipped_instructions = list(
+        itertools.zip_longest(actual_instructions, expected_instructions)
+    )
+
+    is_mismatch = (
+        lambda pair: pair[0] is None
+        or pair[1] is None
+        or pair[0].get("bytecode") != pair[1].get("bytecode")
+    )
     mismatches = [
         index for index, pair in enumerate(zipped_instructions) if is_mismatch(pair)
     ]
@@ -82,14 +94,14 @@ def match_bytecode(actual_bytecode, expected_bytecode, immutables):
         if not actual and expected:
             params = "0x" + expected["bytecode"][2:]
             print(
-                logger.red(
+                red(
                     f'{to_hex(current_index, 4)} {to_hex(expected["op"]["code"])} {expected["op"]["name"]} {params}'
                 )
             )
         elif actual and not expected:
             params = "0x" + actual["bytecode"][2:]
             print(
-                logger.green(
+                green(
                     f'{to_hex(current_index, 4)} {to_hex(actual["op"]["code"])} {actual["op"]["name"]} {params}'
                 )
             )
