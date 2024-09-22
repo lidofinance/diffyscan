@@ -41,7 +41,8 @@ def match_bytecode(actual_bytecode, expected_bytecode, immutables):
         logger.okay(f"Bytecodes are fully matched")
         return True
 
-    nearLinesCount = 3
+    near_lines_count = 3  # context depth, i.e., the number of lines above and \below to be displayed for each diff
+
     checkpoints = {0, *mismatches}
 
     if actual_instructions:
@@ -51,8 +52,8 @@ def match_bytecode(actual_bytecode, expected_bytecode, immutables):
         checkpoints.add(len(expected_instructions) - 1)
 
     for ind in list(checkpoints):
-        start_index = max(0, ind - nearLinesCount)
-        end_index = min(ind + nearLinesCount, len(zipped_instructions) - 1)
+        start_index = max(0, ind - near_lines_count)
+        end_index = min(ind + near_lines_count, len(zipped_instructions) - 1)
 
         checkpoints.update(range(start_index, end_index + 1))
 
