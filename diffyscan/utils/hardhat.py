@@ -1,6 +1,7 @@
 import os
 import subprocess
 import signal
+import time
 
 from urllib.parse import urlparse
 from .logger import logger
@@ -9,16 +10,8 @@ from .custom_exceptions import HardhatError
 
 class Hardhat:
     sub_process = None
-    TIMEOUT_FOR_INIT_SEC = 5
-
-    def __init__(self):
-        pass
-
-    def is_port_in_use(self, parsed_url) -> bool:
-        import socket
-
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            return s.connect_ex((parsed_url.hostname, parsed_url.port)) == 0
+    TIMEOUT_FOR_CONNECT_SEC = 10
+    ATTEMPTS_FOR_CONNECT = 5
 
     def start(
         self,
@@ -43,7 +36,7 @@ class Hardhat:
         )
 
         logger.info(f'Trying to start Hardhat: "{local_node_command}"')
-        is_port_used = self.is_port_in_use(parsed_url)
+        is_port_used = self._is_port_in_use_(parsed_url)
         if is_port_used:
             answer = input(
                 f'Port {parsed_url.port} is busy. Kill the app instance occupying the port? write "yes": '
@@ -53,7 +46,7 @@ class Hardhat:
                     f"exec npx kill-port {parsed_url.port}", shell=True
                 )
                 if return_code == 0:
-                    is_port_used = self.is_port_in_use(parsed_url)
+                    is_port_used = self._is_port_in_use_(parsed_url)
         if is_port_used:
             raise HardhatError(f"{parsed_url.netloc} is busy")
         self.sub_process = subprocess.Popen(
@@ -63,20 +56,36 @@ class Hardhat:
             stderr=subprocess.PIPE,
         )
         try:
-            _, errs = self.sub_process.communicate(timeout=self.TIMEOUT_FOR_INIT_SEC)
+            _, errs = self.sub_process.communicate(timeout=self.TIMEOUT_FOR_CONNECT_SEC)
             if errs:
                 raise HardhatError(f"{errs.decode()}")
         except subprocess.TimeoutExpired:
-            is_port_used = self.is_port_in_use(parsed_url)
-            if is_port_used:
-                logger.okay(f"Hardhat successfully started, PID {self.sub_process.pid}")
-            else:
-                raise HardhatError(f"something is wrong")
+            self._handle_timeout(parsed_url)
 
     def stop(self):
         if self.sub_process is not None and self.sub_process.poll() is None:
             os.kill(self.sub_process.pid, signal.SIGTERM)
             logger.info(f"Hardhat stopped, PID {self.sub_process.pid}")
+
+    def _is_port_in_use_(self, parsed_url) -> bool:
+        import socket
+
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            return s.connect_ex((parsed_url.hostname, parsed_url.port)) == 0
+
+    def _handle_timeout(self, parsed_url):
+        attempt = 1
+        logger.info("The connection to Hardhat is taking longer than expected")
+
+        while attempt <= self.ATTEMPTS_FOR_CONNECT:
+            logger.info(f"Reconnecting to Hardhat, attempt #{attempt}")
+            if self._is_port_in_use_(parsed_url):
+                logger.okay(f"Hardhat successfully started, PID {self.sub_process.pid}")
+                return
+            attempt += 1
+            time.sleep(self.TIMEOUT_FOR_CONNECT_SEC)
+
+        raise HardhatError("Something is wrong")
 
 
 hardhat = Hardhat()
