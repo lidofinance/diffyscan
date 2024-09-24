@@ -19,8 +19,8 @@ def encode_bytes(data: str) -> str:
     if not bytes_str:
         return to_hex_with_alignment(0)
 
-    # untested, taken from here:
-    # https://github.com/lidofinance/lido-dao/blob/a9a9ea50b5be7dba33e06d70cc068252ffd01b52/bytecode-verificator/bytecode_verificator.sh#L239
+    # Calculate the length of the hex-encoded 32-bytes padded data
+    # since EVM uses 32-byte (256-bit) words
     count_of_bytes_from_hex = len(bytes_str) // 2
     encoded_length = 0
     if count_of_bytes_from_hex > 0:
