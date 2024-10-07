@@ -1,0 +1,78 @@
+{
+  "contracts": {
+    "0xd6EbF043D30A7fe46D1Db32BA90a0A51207FE229": "OssifiableProxy",
+    "0x9b5890E950E3Df487Bb64E0A6743cdE791139152": "StakingRouter",
+
+    "0x808DE3b26Be9438F12E9B45528955EA94C17f217": "DepositSecurityModule",
+
+    "0x11a93807078f8BB880c1BD0ee4C387537de4b4b6": "AppProxyUpgradeable",
+    "0x595F64Ddc3856a3b5Ff4f4CC1d1fb4B46cFd2bAC": "AppProxyUpgradeable",
+    "0x41646708A7EDbe22BD635Cb838Ff9C0CfA99A3bE": "NodeOperatorsRegistry",
+
+    "0x28FAB2059C713A7F9D8c86Db49f9bb0e96Af1ef8": "OssifiableProxy",
+    "0xa19a59aF0680F6D9676ABD77E1Ba7e4c205F55a0": "LidoLocator",
+
+    "0x80D1B1fF6E84134404abA18A628347960c38ccA7": "OracleReportSanityChecker",
+
+    "0x4E97A3972ce8511D87F334dA17a2C332542a5246": "OssifiableProxy",
+    "0x748CE008ac6b15634ceD5a6083796f75695052a2": "AccountingOracle"
+  },
+  "explorer_hostname": "api-holesky.etherscan.io",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/core",
+    "commit": "1ffbb7e49e112fcac678f59bf63ba57a7e522874",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "@aragon/os": {
+      "url": "https://github.com/aragon/aragonOS",
+      "commit": "f3ae59b00f73984e562df00129c925339cd069ff",
+      "relative_root": ""
+    },
+    "@aragon/minime": {
+      "url": "https://github.com/aragon/minime",
+      "commit": "1d5251fc88eee5024ff318d95bc9f4c5de130430",
+      "relative_root": ""
+    },
+    "@aragon/apps-lido": {
+      "url": "https://github.com/lidofinance/aragon-apps/",
+      "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+      "relative_root": ""
+    },
+    "@aragon/apps-finance": {
+      "url": "https://github.com/lidofinance/aragon-apps/",
+      "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+      "relative_root": "apps/finance"
+    },
+    "@aragon/apps-vault": {
+      "url": "https://github.com/lidofinance/aragon-apps/",
+      "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+      "relative_root": "apps/vault"
+    },
+    "@aragon/apps-agent": {
+      "url": "https://github.com/lidofinance/aragon-apps/",
+      "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+      "relative_root": "apps/agent"
+    },
+    "openzeppelin-solidity": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "06e265b38d3e9daeaa7b33f9035c700d6bc0c6a0",
+      "relative_root": ""
+    },
+    "solidity-bytes-utils": {
+      "url": "https://github.com/GNSPS/solidity-bytes-utils",
+      "commit": "9776282d181839fbb4b18f2cf218e316d6df871c",
+      "relative_root": ""
+    },
+    "@openzeppelin/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "fa64a1ced0b70ab89073d5d0b6e01b0778f7e7d6",
+      "relative_root": "contracts"
+    },
+    "@openzeppelin/contracts-v4.4": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "6bd6b76d1156e20e45d1016f355d154141c7e5b9",
+      "relative_root": "contracts"
+    }
+  }
+}
