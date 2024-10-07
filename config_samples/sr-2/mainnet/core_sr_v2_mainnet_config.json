@@ -1,0 +1,73 @@
+{
+  "contracts": {
+    "0xFdDf38947aFB03C621C71b06C9C70bce73f12999": "OssifiableProxy",
+    "": "StakingRouter",
+    "": "DepositSecurityModule",
+    "0xaE7B191A31f627b4eB1d4DaC64eaB9976995b433": "AppProxyUpgradeable",
+    "0x55032650b14df07b85bF18A3a3eC8E0Af2e028d5": "AppProxyUpgradeable",
+    "": "NodeOperatorsRegistry",
+    "0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb": "OssifiableProxy",
+    "": "LidoLocator",
+    "": "OracleReportSanityChecker",
+    "0x852deD011285fe67063a08005c71a85690503Cee": "OssifiableProxy",
+    "": "AccountingOracle"
+  },
+  "explorer_hostname": "api.etherscan.io",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/core",
+    "commit": "1ffbb7e49e112fcac678f59bf63ba57a7e522874",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "@aragon/os": {
+      "url": "https://github.com/aragon/aragonOS",
+      "commit": "f3ae59b00f73984e562df00129c925339cd069ff",
+      "relative_root": ""
+    },
+    "@aragon/minime": {
+      "url": "https://github.com/aragon/minime",
+      "commit": "1d5251fc88eee5024ff318d95bc9f4c5de130430",
+      "relative_root": ""
+    },
+    "@aragon/apps-lido": {
+      "url": "https://github.com/lidofinance/aragon-apps/",
+      "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+      "relative_root": ""
+    },
+    "@aragon/apps-finance": {
+      "url": "https://github.com/lidofinance/aragon-apps/",
+      "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+      "relative_root": "apps/finance"
+    },
+    "@aragon/apps-vault": {
+      "url": "https://github.com/lidofinance/aragon-apps/",
+      "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+      "relative_root": "apps/vault"
+    },
+    "@aragon/apps-agent": {
+      "url": "https://github.com/lidofinance/aragon-apps/",
+      "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+      "relative_root": "apps/agent"
+    },
+    "openzeppelin-solidity": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "06e265b38d3e9daeaa7b33f9035c700d6bc0c6a0",
+      "relative_root": ""
+    },
+    "solidity-bytes-utils": {
+      "url": "https://github.com/GNSPS/solidity-bytes-utils",
+      "commit": "9776282d181839fbb4b18f2cf218e316d6df871c",
+      "relative_root": ""
+    },
+    "@openzeppelin/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "fa64a1ced0b70ab89073d5d0b6e01b0778f7e7d6",
+      "relative_root": "contracts"
+    },
+    "@openzeppelin/contracts-v4.4": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "6bd6b76d1156e20e45d1016f355d154141c7e5b9",
+      "relative_root": "contracts"
+    }
+  }
+}
