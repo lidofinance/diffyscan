@@ -9,11 +9,35 @@ def format_bytecode(bytecode):
     return "0x" + bytecode[2:] if len(bytecode) > 2 else ""
 
 
-def match_bytecode(actual_bytecode, expected_bytecode, immutables):
+def trim_solidity_meta(bytecode: str) -> dict:
+    meta_size = int(bytecode[-4:], 16) * 2 + 4
+
+    if meta_size > len(bytecode):
+        return {"bytecode": bytecode, "metadata": ""}
+
+    return {
+        "bytecode": bytecode[:-meta_size],
+        "metadata": bytecode[-meta_size:],
+    }
+
+
+def deep_match_bytecode(
+    actual_bytecode: str, expected_bytecode: str, immutables: dict
+) -> None:
     logger.info("Comparing actual code with the expected one...")
 
-    actual_instructions, unknown_opcodes_first_half = parse(actual_bytecode)
-    expected_instructions, unknown_opcodes_second_half = parse(expected_bytecode)
+    actual_trimmed_bytecode = trim_solidity_meta(actual_bytecode)
+    expected_trimmed_bytecode = trim_solidity_meta(expected_bytecode)
+
+    if actual_trimmed_bytecode["metadata"] or expected_trimmed_bytecode["metadata"]:
+        logger.info("Metadata has been detected and trimmed")
+
+    actual_instructions, unknown_opcodes_first_half = parse(
+        actual_trimmed_bytecode["bytecode"]
+    )
+    expected_instructions, unknown_opcodes_second_half = parse(
+        expected_trimmed_bytecode["bytecode"]
+    )
 
     unknown_opcodes = (
         unknown_opcodes_first_half or set() | unknown_opcodes_second_half or set()
@@ -36,10 +60,6 @@ def match_bytecode(actual_bytecode, expected_bytecode, immutables):
     mismatches = [
         index for index, pair in enumerate(zipped_instructions) if is_mismatch(pair)
     ]
-
-    if not mismatches:
-        logger.okay(f"Bytecodes are fully matched")
-        return True
 
     near_lines_count = 3  # context depth, i.e., the number of lines above and \below to be displayed for each diff
 
@@ -139,15 +159,13 @@ def match_bytecode(actual_bytecode, expected_bytecode, immutables):
             print(f"{to_hex(current_index, 4)} {opcode} {opname} {params}")
         else:
             raise BinVerifierError("Invalid bytecode difference data")
-    if is_matched_with_excluded_immutables:
-        logger.okay(
-            f"Bytecodes have differences only on the immutable reference position"
-        )
-        return False
 
-    raise BinVerifierError(
-        f"Bytecodes have differences not on the immutable reference position"
-    )
+    if not is_matched_with_excluded_immutables:
+        raise BinVerifierError(
+            f"Bytecodes have differences not on the immutable reference position"
+        )
+
+    logger.okay(f"Bytecodes have differences only on the immutable reference position")
 
 
 def parse(bytecode):

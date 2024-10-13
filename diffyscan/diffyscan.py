@@ -3,6 +3,7 @@ import sys
 import time
 import argparse
 import os
+import traceback
 
 from .utils.common import load_config, load_env, prettify_solidity
 
@@ -24,7 +25,7 @@ from .utils.github import (
 )
 from .utils.helpers import create_dirs
 from .utils.logger import logger
-from .utils.binary_verifier import match_bytecode
+from .utils.binary_verifier import deep_match_bytecode
 from .utils.hardhat import hardhat
 from .utils.node_handler import get_bytecode_from_node, get_account, deploy_contract
 from .utils.calldata import get_calldata
@@ -50,21 +51,18 @@ def run_bytecode_diff(
     logger.info(f"Binary bytecode comparison started for {address_name}")
     target_compiled_contract = compile_contract_from_explorer(contract_source_code)
 
-    contract_creation_code, deployed_bytecode, immutables = parse_compiled_contract(
-        target_compiled_contract
+    contract_creation_code, local_compiled_bytecode, immutables = (
+        parse_compiled_contract(target_compiled_contract)
     )
 
     remote_deployed_bytecode = get_bytecode_from_node(
         contract_address_from_config, remote_rpc_url
     )
 
-    is_fully_matched = match_bytecode(
-        deployed_bytecode,
-        remote_deployed_bytecode,
-        immutables,
-    )
+    is_fully_matched = local_compiled_bytecode == remote_deployed_bytecode
 
     if is_fully_matched:
+        logger.okay(f"Bytecodes are fully matched")
         return
 
     logger.info(f"Automated match hasn't worked out")
@@ -85,7 +83,13 @@ def run_bytecode_diff(
         local_contract_address, local_rpc_url
     )
 
-    match_bytecode(
+    is_fully_matched = local_deployed_bytecode == remote_deployed_bytecode
+
+    if is_fully_matched:
+        logger.okay(f"Bytecodes are fully matched")
+        return
+
+    deep_match_bytecode(
         local_deployed_bytecode,
         remote_deployed_bytecode,
         immutables,
@@ -290,6 +294,7 @@ def process_config(
                     )
             except BaseCustomException as custom_exc:
                 ExceptionHandler.raise_exception_or_log(custom_exc)
+                traceback.print_exc()
     except KeyboardInterrupt:
         logger.info(f"Keyboard interrupt by user")
 

@@ -79,44 +79,47 @@ def encode_constructor_arguments(constructor_abi: list, constructor_config_args:
 
     constructor_calldata = ""
     compl_data = []
-    for argument_index in range(arg_length):
-        arg_type = constructor_abi[argument_index]["type"]
-        arg_value = constructor_config_args[argument_index]
-        if arg_type == "address":
-            constructor_calldata += encode_address(arg_value)
-        elif arg_type == "uint256" or arg_type == "bool" or arg_type == "uint8":
-            constructor_calldata += to_hex_with_alignment(arg_value)
-        elif arg_type == "bytes32":
-            constructor_calldata += encode_bytes32(arg_value)
-        elif arg_type == "bytes" or arg_type.endswith("[]"):
-            offset_to_start_of_data_part, encoded_value = encode_dynamic_type(
-                arg_value, argument_index
-            )
-            constructor_calldata += offset_to_start_of_data_part
-            compl_data.append(encoded_value)
-        elif arg_type == "string":
-            offset_to_start_of_data_part, encoded_value_length, encoded_value = (
-                encode_string(arg_length, compl_data, arg_value)
-            )
-            constructor_calldata += offset_to_start_of_data_part
-            compl_data.append(encoded_value_length)
-            compl_data.append(encoded_value)
-        elif arg_type == "tuple":
-            args_tuple_types = [
-                component["type"]
-                for component in constructor_abi[argument_index]["components"]
-            ]
-            if all(arg == "address[]" for arg in args_tuple_types):
-                argument_index = len(constructor_calldata) // 64
-                offset_to_start_of_data_part = to_hex_with_alignment(
-                    (argument_index + 1) * 32
+    try:
+        for argument_index in range(arg_length):
+            arg_type = constructor_abi[argument_index]["type"]
+            arg_value = constructor_config_args[argument_index]
+            if arg_type == "address":
+                constructor_calldata += encode_address(arg_value)
+            elif arg_type == "uint256" or arg_type == "bool" or arg_type == "uint8":
+                constructor_calldata += to_hex_with_alignment(arg_value)
+            elif arg_type == "bytes32":
+                constructor_calldata += encode_bytes32(arg_value)
+            elif arg_type == "bytes" or arg_type.endswith("[]"):
+                offset_to_start_of_data_part, encoded_value = encode_dynamic_type(
+                    arg_value, argument_index
                 )
                 constructor_calldata += offset_to_start_of_data_part
-                compl_data.append(encode_tuple(args_tuple_types, arg_value))
+                compl_data.append(encoded_value)
+            elif arg_type == "string":
+                offset_to_start_of_data_part, encoded_value_length, encoded_value = (
+                    encode_string(arg_length, compl_data, arg_value)
+                )
+                constructor_calldata += offset_to_start_of_data_part
+                compl_data.append(encoded_value_length)
+                compl_data.append(encoded_value)
+            elif arg_type == "tuple":
+                args_tuple_types = [
+                    component["type"]
+                    for component in constructor_abi[argument_index]["components"]
+                ]
+                if all(arg == "address[]" for arg in args_tuple_types):
+                    argument_index = len(constructor_calldata) // 64
+                    offset_to_start_of_data_part = to_hex_with_alignment(
+                        (argument_index + 1) * 32
+                    )
+                    constructor_calldata += offset_to_start_of_data_part
+                    compl_data.append(encode_tuple(args_tuple_types, arg_value))
+                else:
+                    constructor_calldata += encode_tuple(args_tuple_types, arg_value)
             else:
-                constructor_calldata += encode_tuple(args_tuple_types, arg_value)
-        else:
-            raise EncoderError(f"Unknown constructor argument type: {arg_type}")
+                raise EncoderError(f"Unknown constructor argument type: {arg_type}")
+    except Exception as e:
+        raise EncoderError(e) from None
     for offset_to_start_of_data_part in compl_data:
         constructor_calldata += offset_to_start_of_data_part
 
