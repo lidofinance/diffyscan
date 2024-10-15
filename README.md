@@ -34,6 +34,7 @@ Set your Etherscan token to fetch verified source code,
 
 ```bash
 export ETHERSCAN_EXPLORER_TOKEN=<your-etherscan-token>
+export OPTISCAN_EXPLORER_TOKEN=<your-etherscan-optimism-token>
 ```
 
 Set your Github token to query API without strict rate limiting,
