@@ -2,6 +2,7 @@ import os
 import subprocess
 import signal
 import time
+import socket
 
 from urllib.parse import urlparse
 from .common import mask_text
@@ -73,8 +74,6 @@ class Hardhat:
             logger.info(f"Hardhat stopped, PID {self.sub_process.pid}")
 
     def _is_port_in_use_(self, parsed_url) -> bool:
-        import socket
-
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             return s.connect_ex((parsed_url.hostname, parsed_url.port)) == 0
 
