@@ -4,6 +4,7 @@ import signal
 import time
 
 from urllib.parse import urlparse
+from .common import mask_text
 from .logger import logger
 from .custom_exceptions import HardhatError
 
@@ -28,14 +29,18 @@ class Hardhat:
                 f"Failed to find Hardhat config by path '{hardhat_config_path}'"
             )
 
-        local_node_command = (
+        local_node_command_prefix = (
             f"npx hardhat node --hostname {parsed_url.hostname} "
             f"--port {parsed_url.port} "
             f"--config {hardhat_config_path} "
-            f"--fork {remote_rpc_url}"
         )
 
-        logger.info(f'Trying to start Hardhat: "{local_node_command}"')
+        local_node_command = local_node_command_prefix + f"--fork '{remote_rpc_url}'"
+        local_node_command_masked = (
+            local_node_command_prefix + f"--fork '{mask_text(remote_rpc_url)}'"
+        )
+
+        logger.info(f'Trying to start Hardhat: "{local_node_command_masked}"')
         is_port_used = self._is_port_in_use_(parsed_url)
         if is_port_used:
             answer = input(

@@ -1,12 +1,12 @@
 import json
 
-from .common import pull
+from .common import pull, mask_text
 from .logger import logger
 from .custom_exceptions import NodeError
 
 
 def get_bytecode_from_node(contract_address, rpc_url):
-    logger.info(f'Receiving the bytecode from "{rpc_url}" ...')
+    logger.info(f'Receiving the bytecode from "{mask_text(rpc_url)}" ...')
 
     payload = json.dumps(
         {

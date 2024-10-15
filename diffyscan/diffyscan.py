@@ -219,7 +219,7 @@ def process_config(
     hardhat_config_path: str,
     recursive_parsing: bool,
     unify_formatting: bool,
-    skip_binary_comparison: bool,
+    enable_binary_comparison: bool,
 ):
     logger.info(f"Loading config {path}...")
     config = load_config(path)
@@ -239,26 +239,21 @@ def process_config(
             f'Failed to find explorer token in env ("ETHERSCAN_EXPLORER_TOKEN")'
         )
 
-    if not skip_binary_comparison:
-        if "bytecode_comparison" not in config:
-            raise ValueError(f'Failed to find "bytecode_comparison" section in config')
-
     github_api_token = os.getenv("GITHUB_API_TOKEN", "")
     if not github_api_token:
         raise ValueError("GITHUB_API_TOKEN variable is not set")
 
-    local_rpc_url = os.getenv("LOCAL_RPC_URL", "")
-    if not local_rpc_url:
-        raise ValueError("LOCAL_RPC_URL variable is not set")
+    if enable_binary_comparison:
+        if "bytecode_comparison" not in config:
+            raise ValueError(f'Failed to find "bytecode_comparison" section in config')
 
-    remote_rpc_url = os.getenv("REMOTE_RPC_URL", "")
-    if not remote_rpc_url:
-        raise ValueError("REMOTE_RPC_URL variable is not set")
+        local_rpc_url = load_env("LOCAL_RPC_URL", masked=False, required=True)
+        remote_rpc_url = load_env("REMOTE_RPC_URL", masked=True, required=True)
 
-    ExceptionHandler.initialize(config["fail_on_comparison_error"])
+        ExceptionHandler.initialize(config["fail_on_comparison_error"])
 
     try:
-        if not skip_binary_comparison:
+        if enable_binary_comparison:
             hardhat.start(
                 hardhat_config_path,
                 local_rpc_url,
@@ -282,7 +277,7 @@ def process_config(
                     recursive_parsing,
                     unify_formatting,
                 )
-                if not skip_binary_comparison:
+                if enable_binary_comparison:
                     run_bytecode_diff(
                         contract_address,
                         contract_name,
@@ -299,7 +294,7 @@ def process_config(
         logger.info(f"Keyboard interrupt by user")
 
     finally:
-        if not skip_binary_comparison:
+        if enable_binary_comparison:
             hardhat.stop()
 
 
@@ -332,9 +327,9 @@ def parse_arguments():
         action="store_true",
     )
     parser.add_argument(
-        "--skip-binary-comparison",
+        "--enable-binary-comparison",
         "-B",
-        help="Skip binary bytecode comparison",
+        help="Enable binary bytecode comparison",
         action="store_true",
     )
     return parser.parse_args()
@@ -359,7 +354,7 @@ def main():
             hardhat_config_path,
             args.support_brownie,
             args.prettify,
-            args.skip_binary_comparison,
+            args.enable_binary_comparison,
         )
     elif os.path.isfile(args.path):
         process_config(
@@ -367,18 +362,20 @@ def main():
             hardhat_config_path,
             args.support_brownie,
             args.prettify,
-            args.skip_binary_comparison,
+            args.enable_binary_comparison,
         )
     elif os.path.isdir(args.path):
         for filename in os.listdir(args.path):
-            config_path = os.path.join(args.path, filename, args.skip_binary_comparison)
+            config_path = os.path.join(
+                args.path, filename, args.enable_binary_comparison
+            )
             if os.path.isfile(config_path):
                 process_config(
                     config_path,
                     hardhat_config_path,
                     args.support_brownie,
                     args.prettify,
-                    args.skip_binary_comparison,
+                    args.enable_binary_comparison,
                 )
     else:
         logger.error(f"Specified config path {args.path} not found")

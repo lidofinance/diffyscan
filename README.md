@@ -8,12 +8,12 @@
 
 Diff deployed EVM-compatible smart contract sourcecode and bytecode against the specified GitHub repo commit.
 
-Key features: 
+Key features:
 - retrieve and diff sources from the GitHub repo against the queried ones from a blockscan service (e.g. Etherscan)
 - compare the bytecode compiled and deployed on the forked network locally against remote (see section 'bytecode_comparison' in `./config_samples/lido_dao_sepolia_config.json` as an example)
 - preprocess solidity sourcecode by means of prettifier solidity plugin before comparing the sources (option `--prettify`) if needed.
 - preprocess imports to flat paths for Brownie compatibility (option `--support-brownie`)
-- exclude binary comparison (option `--skip-binary-comparison`)
+- enable binary comparison (option `--enable-binary-comparison`)
 - provide own Hardhat config as optional argument
 
 ## Install

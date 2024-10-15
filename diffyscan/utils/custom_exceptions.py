@@ -14,7 +14,9 @@ class CompileError(BaseCustomException):
 
 class NodeError(BaseCustomException):
     def __init__(self, reason: str):
-        super().__init__(f"Failed to receive bytecode from node: {reason}")
+        super().__init__(
+            f"Failed to receive bytecode from node: {reason}, please check hardhat config and fork chain_id"
+        )
 
 
 class CalldataError(BaseCustomException):
