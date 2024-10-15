@@ -49,13 +49,8 @@ OPCODES = {
 # fmt: on
 
 
-def get_key_from_value(dictinary: dict, value: str):
-    keys = [
-        dict_key for dict_key, dict_value in dictinary.items() if dict_value == value
-    ]
-    if keys:
-        return keys[0]
-    return None
+def get_key_from_value(dictionary: dict, value: str):
+    return next((k for k, v in dictionary.items() if v == value), None)
 
 
 PUSH0 = get_key_from_value(OPCODES, "PUSH0")
