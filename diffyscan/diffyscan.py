@@ -3,39 +3,109 @@ import sys
 import time
 import argparse
 import os
-import subprocess
-import tempfile
+import traceback
 
-from .utils.common import load_config, load_env
-from .utils.constants import DIFFS_DIR, START_TIME, DEFAULT_CONFIG_PATH
-from .utils.explorer import get_contract_from_explorer
-from .utils.github import get_file_from_github, get_file_from_github_recursive, resolve_dep
+from .utils.common import load_config, load_env, prettify_solidity
+
+from .utils.constants import (
+    DIFFS_DIR,
+    DEFAULT_CONFIG_PATH,
+    DEFAULT_HARDHAT_CONFIG_PATH,
+    START_TIME,
+)
+from .utils.explorer import (
+    get_contract_from_explorer,
+    compile_contract_from_explorer,
+    parse_compiled_contract,
+)
+from .utils.github import (
+    get_file_from_github,
+    get_file_from_github_recursive,
+    resolve_dep,
+)
 from .utils.helpers import create_dirs
 from .utils.logger import logger
-
+from .utils.binary_verifier import deep_match_bytecode
+from .utils.hardhat import hardhat
+from .utils.node_handler import get_bytecode_from_node, get_account, deploy_contract
+from .utils.calldata import get_calldata
+from .utils.custom_exceptions import ExceptionHandler, BaseCustomException
 
 __version__ = "0.0.0"
 
 
 g_skip_user_input: bool = False
 
-def prettify_solidity(solidity_contract_content: str):
-    github_file_name = os.path.join(tempfile.gettempdir(), "9B91E897-EA51-4FCC-8DAF-FCFF135A6963.sol")
-    with open(github_file_name, "w") as fp:
-        fp.write(solidity_contract_content)
-    prettier_return_code = subprocess.call(
-        ["npx", "prettier", "--plugin=prettier-plugin-solidity", "--write", github_file_name],
-        stdout=subprocess.DEVNULL)
-    if prettier_return_code != 0:
-        logger.error("Prettier/npx subprocess failed (see the error above)")
-        sys.exit()
-    with open(github_file_name, "r") as fp:
-        return fp.read()
 
-
-def run_diff(config, name, address, explorer_api_token, github_api_token, recursive_parsing=False, prettify=False):
+def run_bytecode_diff(
+    contract_address_from_config,
+    contract_name_from_config,
+    contract_source_code,
+    config,
+    deployer_account,
+    local_rpc_url,
+    remote_rpc_url,
+):
+    address_name = f"{contract_address_from_config} : {contract_name_from_config}"
     logger.divider()
-    logger.okay("Contract", address)
+    logger.info(f"Binary bytecode comparison started for {address_name}")
+    target_compiled_contract = compile_contract_from_explorer(contract_source_code)
+
+    contract_creation_code, local_compiled_bytecode, immutables = (
+        parse_compiled_contract(target_compiled_contract)
+    )
+
+    remote_deployed_bytecode = get_bytecode_from_node(
+        contract_address_from_config, remote_rpc_url
+    )
+
+    is_fully_matched = local_compiled_bytecode == remote_deployed_bytecode
+
+    if is_fully_matched:
+        logger.okay(f"Bytecodes are fully matched")
+        return
+
+    logger.info(f"Automated match hasn't worked out")
+
+    calldata = get_calldata(
+        contract_address_from_config,
+        target_compiled_contract,
+        config["bytecode_comparison"],
+    )
+
+    contract_creation_code += calldata
+
+    local_contract_address = deploy_contract(
+        local_rpc_url, deployer_account, contract_creation_code
+    )
+
+    local_deployed_bytecode = get_bytecode_from_node(
+        local_contract_address, local_rpc_url
+    )
+
+    is_fully_matched = local_deployed_bytecode == remote_deployed_bytecode
+
+    if is_fully_matched:
+        logger.okay(f"Bytecodes are fully matched")
+        return
+
+    deep_match_bytecode(
+        local_deployed_bytecode,
+        remote_deployed_bytecode,
+        immutables,
+    )
+
+
+def run_source_diff(
+    contract_address_from_config,
+    contract_code,
+    config,
+    github_api_token,
+    recursive_parsing=False,
+    prettify=False,
+):
+    logger.divider()
+    logger.okay("Contract", contract_address_from_config)
     logger.okay("Blockchain explorer Hostname", config["explorer_hostname"])
     logger.okay("Repo", config["github_repo"]["url"])
     logger.okay("Repo commit", config["github_repo"]["commit"])
@@ -46,21 +116,14 @@ def run_diff(config, name, address, explorer_api_token, github_api_token, recurs
     logger.info(
         f"Fetching source code from blockchain explorer {config['explorer_hostname']} ..."
     )
-    contract_name, source_files = get_contract_from_explorer(
-        token=explorer_api_token,
-        explorer_hostname=config["explorer_hostname"],
-        contract=address,
+
+    source_files = (
+        contract_code["solcInput"].items()
+        if not "sources" in contract_code["solcInput"]
+        else contract_code["solcInput"]["sources"].items()
     )
-
-    if contract_name != name:
-        logger.error(
-            "Contract name in config does not match with Blockchain explorer",
-            f"{address}: {name} != {contract_name}",
-        )
-        sys.exit(1)
-
     files_count = len(source_files)
-    logger.okay("Contract", contract_name)
+    logger.okay("Contract", contract_code["name"])
     logger.okay("Files", files_count)
 
     if not g_skip_user_input:
@@ -96,9 +159,13 @@ def run_diff(config, name, address, explorer_api_token, github_api_token, recurs
         file_found = bool(repo)
 
         if recursive_parsing:
-            github_file = get_file_from_github_recursive(github_api_token, repo, path_to_file, dep_name)
+            github_file = get_file_from_github_recursive(
+                github_api_token, repo, path_to_file, dep_name
+            )
         else:
-            github_file = get_file_from_github(github_api_token, repo, path_to_file, dep_name)
+            github_file = get_file_from_github(
+                github_api_token, repo, path_to_file, dep_name
+            )
 
         if not github_file:
             github_file = "<!-- No file content -->"
@@ -114,7 +181,9 @@ def run_diff(config, name, address, explorer_api_token, github_api_token, recurs
         explorer_lines = explorer_content.splitlines()
 
         diff_html = difflib.HtmlDiff().make_file(github_lines, explorer_lines)
-        diff_report_filename = f"{DIFFS_DIR}/{address}/{filename}.html"
+        diff_report_filename = (
+            f"{DIFFS_DIR}/{contract_address_from_config}/{filename}.html"
+        )
 
         create_dirs(diff_report_filename)
         with open(diff_report_filename, "w") as f:
@@ -145,32 +214,129 @@ def run_diff(config, name, address, explorer_api_token, github_api_token, recurs
     logger.report_table(report)
 
 
-def process_config(path: str, recursive_parsing: bool, unify_formatting: bool):
+def process_config(
+    path: str,
+    hardhat_config_path: str,
+    recursive_parsing: bool,
+    unify_formatting: bool,
+    skip_binary_comparison: bool,
+):
     logger.info(f"Loading config {path}...")
     config = load_config(path)
 
-    github_api_token = load_env("GITHUB_API_TOKEN", masked=True)
     explorer_token = None
     if "explorer_token_env_var" in config:
-        explorer_token = load_env(config["explorer_token_env_var"], masked=True, required=False)
+        explorer_token = load_env(
+            config["explorer_token_env_var"], masked=True, required=False
+        )
+    if explorer_token is None:
+        logger.warn(
+            f'Failed to find an explorer token in the config ("explorer_token_env_var")'
+        )
+        explorer_token = os.getenv("ETHERSCAN_EXPLORER_TOKEN", default=None)
+    if explorer_token is None:
+        logger.warn(
+            f'Failed to find explorer token in env ("ETHERSCAN_EXPLORER_TOKEN")'
+        )
 
-    contracts = config["contracts"]
-    logger.info(f"Running diff for contracts from config {contracts}...")
-    for address, name in config["contracts"].items():
-        run_diff(config, name, address, explorer_token, github_api_token, recursive_parsing, unify_formatting)
+    if not skip_binary_comparison:
+        if "bytecode_comparison" not in config:
+            raise ValueError(f'Failed to find "bytecode_comparison" section in config')
+
+    github_api_token = os.getenv("GITHUB_API_TOKEN", "")
+    if not github_api_token:
+        raise ValueError("GITHUB_API_TOKEN variable is not set")
+
+    local_rpc_url = os.getenv("LOCAL_RPC_URL", "")
+    if not local_rpc_url:
+        raise ValueError("LOCAL_RPC_URL variable is not set")
+
+    remote_rpc_url = os.getenv("REMOTE_RPC_URL", "")
+    if not remote_rpc_url:
+        raise ValueError("REMOTE_RPC_URL variable is not set")
+
+    ExceptionHandler.initialize(config["fail_on_comparison_error"])
+
+    try:
+        if not skip_binary_comparison:
+            hardhat.start(
+                hardhat_config_path,
+                local_rpc_url,
+                remote_rpc_url,
+            )
+            deployer_account = get_account(local_rpc_url)
+
+        for contract_address, contract_name in config["contracts"].items():
+            try:
+                contract_code = get_contract_from_explorer(
+                    explorer_token,
+                    config["explorer_hostname"],
+                    contract_address,
+                    contract_name,
+                )
+                run_source_diff(
+                    contract_address,
+                    contract_code,
+                    config,
+                    github_api_token,
+                    recursive_parsing,
+                    unify_formatting,
+                )
+                if not skip_binary_comparison:
+                    run_bytecode_diff(
+                        contract_address,
+                        contract_name,
+                        contract_code,
+                        config,
+                        deployer_account,
+                        local_rpc_url,
+                        remote_rpc_url,
+                    )
+            except BaseCustomException as custom_exc:
+                ExceptionHandler.raise_exception_or_log(custom_exc)
+                traceback.print_exc()
+    except KeyboardInterrupt:
+        logger.info(f"Keyboard interrupt by user")
+
+    finally:
+        if not skip_binary_comparison:
+            hardhat.stop()
 
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--version", "-V", action="store_true", help="Display version information")
-    parser.add_argument("path", nargs="?", default=None, help="Path to config or directory with configs")
-    parser.add_argument("--yes", "-y", help="If set don't ask for input before validating each contract", action="store_true")
+    parser.add_argument(
+        "--version", "-V", action="store_true", help="Display version information"
+    )
+    parser.add_argument(
+        "path", nargs="?", default=None, help="Path to config or directory with configs"
+    )
+    parser.add_argument(
+        "hardhat_path", nargs="?", default=None, help="Path to Hardhat config"
+    )
+    parser.add_argument(
+        "--yes",
+        "-Y",
+        help="If set don't ask for input before validating each contract",
+        action="store_true",
+    )
     parser.add_argument(
         "--support-brownie",
         help="Support recursive retrieving for contracts. It may be useful for contracts whose sources have been verified by the brownie tooling, which automatically replaces relative paths to contracts in imports with plain contract names.",
         action=argparse.BooleanOptionalAction,
     )
-    parser.add_argument("--prettify", "-p", help="Unify formatting by prettier before comparing", action="store_true")
+    parser.add_argument(
+        "--prettify",
+        "-P",
+        help="Unify formatting by prettier before comparing",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--skip-binary-comparison",
+        "-B",
+        help="Skip binary bytecode comparison",
+        action="store_true",
+    )
     return parser.parse_args()
 
 
@@ -179,23 +345,41 @@ def main():
 
     args = parse_arguments()
     g_skip_user_input = args.yes
-
     if args.version:
         print(f"Diffyscan {__version__}")
         return
-
     logger.info("Welcome to Diffyscan!")
     logger.divider()
-
+    hardhat_config_path = (
+        DEFAULT_HARDHAT_CONFIG_PATH if args.hardhat_path is None else args.hardhat_path
+    )
     if args.path is None:
-        process_config(DEFAULT_CONFIG_PATH, args.support_brownie, args.prettify)
+        process_config(
+            DEFAULT_CONFIG_PATH,
+            hardhat_config_path,
+            args.support_brownie,
+            args.prettify,
+            args.skip_binary_comparison,
+        )
     elif os.path.isfile(args.path):
-        process_config(args.path, args.support_brownie, args.prettify)
+        process_config(
+            args.path,
+            hardhat_config_path,
+            args.support_brownie,
+            args.prettify,
+            args.skip_binary_comparison,
+        )
     elif os.path.isdir(args.path):
         for filename in os.listdir(args.path):
-            config_path = os.path.join(args.path, filename)
+            config_path = os.path.join(args.path, filename, args.skip_binary_comparison)
             if os.path.isfile(config_path):
-                process_config(config_path, args.support_brownie, args.prettify)
+                process_config(
+                    config_path,
+                    hardhat_config_path,
+                    args.support_brownie,
+                    args.prettify,
+                    args.skip_binary_comparison,
+                )
     else:
         logger.error(f"Specified config path {args.path} not found")
         sys.exit(1)
