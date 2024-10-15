@@ -52,14 +52,15 @@ export REMOTE_RPC_URL =<remote-rpc-url>
 
 Set local RPC URL to check immutables against the local deployment and provided constructor arguments,
 
-````bash
+```bash
 export LOCAL_RPC_URL =<local-rpc-url> (example `http://127.0.0.1:7545`)
+```
 
 Start script with one of the examples provided (or entire folder of configs)
 
 ```bash
 diffyscan config_samples/lido_dao_sepolia_config.json
-````
+```
 
 Alternatively, create a new config file named `config.json` near the diffyscan.py,
 
@@ -115,7 +116,7 @@ Alternatively, create a new config file named `config.json` near the diffyscan.p
 
 then create a new Hardhat config file named `hardhat_config.js` near the diffyscan.py
 
-```json
+```js
 module.exports = {
   solidity: "0.8.9",
   networks: {
@@ -123,7 +124,7 @@ module.exports = {
       chainId: 17000,
       blockGasLimit: 92000000,
       hardfork: "cancun",
-    }
+    },
   },
 };
 ```
