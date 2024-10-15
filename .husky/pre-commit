@@ -1,9 +1,1 @@
-#!/bin/bash
-
-json_files=$(git diff --cached --name-only | grep '\.json$')
-if [ -n "$json_files" ]; then
-for file in $json_files; do
-   jq . "$file" > tmp.$$.json && mv tmp.$$.json "$file"
-   git add "$file"
-done
-fi
+npx lint-staged
