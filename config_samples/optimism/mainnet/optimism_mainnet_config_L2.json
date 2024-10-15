@@ -1,15 +1,19 @@
 {
     "contracts": {
-        "0x8E01013243a96601a86eb3153F0d9Fa4fbFb6957": "OssifiableProxy",
-        "0x23B96aDD54c479C6784Dd504670B5376B808f4C7": "L2ERC20TokenBridge",
+        "0x294ED1f214F4e0ecAE31C3Eae4F04EBB3b36C9d0": "OssifiableProxy",
+        "0x4bF0d419793d8722b8391efaD4c9cE78F460CEd3": "TokenRateOracle",
         "0x1F32b1c2345538c0c6f582fCB022739c4A194Ebb": "OssifiableProxy",
-        "0x92834c37dF982A13bb0f8C3F6608E26F0546538e": "ERC20Bridged"
+        "0xFe57042De76c8D6B1DF0E9E2047329fd3e2B7334": "ERC20BridgedPermit",
+        "0x76A50b8c7349cCDDb7578c6627e79b5d99D24138": "OssifiableProxy",
+        "0xe9b65dA5DcBe92f1b397991C464FF568Dc98D761": "ERC20RebasableBridgedPermit",
+        "0x8E01013243a96601a86eb3153F0d9Fa4fbFb6957": "OssifiableProxy",
+        "0x2734602C0CEbbA68662552CacD5553370B283E2E": "L2ERC20ExtendedTokensBridge"
     },
     "explorer_hostname": "api-optimistic.etherscan.io",
     "explorer_token_env_var": "OPTISCAN_EXPLORER_TOKEN",
     "github_repo": {
-        "url": "https://github.com/lidofinance/lido-l2",
-        "commit": "082e7eb59de63bd376b30886568813408d04f00b",
+        "url": "https://github.com/lidofinance/lido-l2-with-steth",
+        "commit": "8f19e1101a211c8f3d42af7ffcb87ab0ebcf750c",
         "relative_root": ""
     },
     "dependencies": {

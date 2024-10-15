@@ -1,13 +1,15 @@
 {
     "contracts": {
-        "0x76943C0D61395d8F2edF9060e1533529cAe05dE6": "OssifiableProxy",
-        "0x29C5c51A031165CE62F964966A6399b81165EFA4": "L1ERC20TokenBridge"
+      "0xe6793B9e4FbA7DE0ee833F9D02bba7DB5EB27823": "TokenRateNotifier",
+      "0xd54c1c6413caac3477AC14b2a80D5398E3c32FfE": "OpStackTokenRatePusher",
+      "0x76943C0D61395d8F2edF9060e1533529cAe05dE6": "OssifiableProxy",
+      "0x168Cfea1Ad879d7032B3936eF3b0E90790b6B6D4": "L1LidoTokensBridge"  
     },
     "explorer_hostname": "api.etherscan.io",
     "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
     "github_repo": {
-        "url": "https://github.com/lidofinance/lido-l2",
-        "commit": "082e7eb59de63bd376b30886568813408d04f00b",
+        "url": "https://github.com/lidofinance/lido-l2-with-steth",
+        "commit": "8f19e1101a211c8f3d42af7ffcb87ab0ebcf750c",
         "relative_root": ""
     },
     "dependencies": {
