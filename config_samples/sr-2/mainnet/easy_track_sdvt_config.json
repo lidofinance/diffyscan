@@ -1,8 +1,9 @@
 {
   "contracts": {
-    "": "UpdateTargetValidatorLimits"
+    "0x161a4552A625844c822954C5AcBac928ee0f399B": "UpdateTargetValidatorLimits"
   },
   "explorer_hostname": "api.etherscan.io",
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
   "github_repo": {
     "url": "https://github.com/lidofinance/easy-track",
     "commit": "6d63d68f8d01668114dc46e170a24e400976d950",

@@ -1,18 +1,17 @@
 {
   "contracts": {
     "0xFdDf38947aFB03C621C71b06C9C70bce73f12999": "OssifiableProxy",
-    "": "StakingRouter",
-    "": "DepositSecurityModule",
-    "0xaE7B191A31f627b4eB1d4DaC64eaB9976995b433": "AppProxyUpgradeable",
-    "0x55032650b14df07b85bF18A3a3eC8E0Af2e028d5": "AppProxyUpgradeable",
-    "": "NodeOperatorsRegistry",
+    "0x89eDa99C0551d4320b56F82DDE8dF2f8D2eF81aA": "StakingRouter",
+    "0xfFA96D84dEF2EA035c7AB153D8B991128e3d72fD": "DepositSecurityModule",
+    "0x1770044a38402e3CfCa2Fcfa0C84a093c9B42135": "NodeOperatorsRegistry",
     "0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb": "OssifiableProxy",
-    "": "LidoLocator",
-    "": "OracleReportSanityChecker",
+    "0x3ABc4764f0237923d52056CFba7E9AEBf87113D3": "LidoLocator",
+    "0x6232397ebac4f5772e53285B26c47914E9461E75": "OracleReportSanityChecker",
     "0x852deD011285fe67063a08005c71a85690503Cee": "OssifiableProxy",
-    "": "AccountingOracle"
+    "0x0e65898527E77210fB0133D00dd4C0E86Dc29bC7": "AccountingOracle"
   },
   "explorer_hostname": "api.etherscan.io",
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
   "github_repo": {
     "url": "https://github.com/lidofinance/core",
     "commit": "1ffbb7e49e112fcac678f59bf63ba57a7e522874",
