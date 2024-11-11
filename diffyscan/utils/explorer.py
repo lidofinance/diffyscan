@@ -111,11 +111,9 @@ def _get_contract_from_mantle(mantle_explorer_hostname, contract):
     return contract
 
 
-def _get_contract_from_mode(mode_explorer_hostname, contract):
-    mode_explorer_link = (
-        f"https://{mode_explorer_hostname}/api/v2/smart-contracts/{contract}"
-    )
-    response = fetch(mode_explorer_link).json()
+def _get_contract_from_blockscout(explorer_hostname, contract):
+    explorer_link = f"https://{explorer_hostname}/api/v2/smart-contracts/{contract}"
+    response = fetch(explorer_link).json()
 
     if "name" not in response:
         _errorNoSourceCodeAndExit(contract)
@@ -144,7 +142,9 @@ def get_contract_from_explorer(
     elif explorer_hostname.endswith("lineascan.build"):
         result = _get_contract_from_etherscan(None, explorer_hostname, contract_address)
     elif explorer_hostname.endswith("mode.network"):
-        result = _get_contract_from_mode(explorer_hostname, contract_address)
+        result = _get_contract_from_blockscout(explorer_hostname, contract_address)
+    elif explorer_hostname.endswith("blockscout.com"):
+        result = _get_contract_from_blockscout(explorer_hostname, contract_address)
     else:
         result = _get_contract_from_etherscan(
             token, explorer_hostname, contract_address
