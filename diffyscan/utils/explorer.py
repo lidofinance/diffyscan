@@ -14,6 +14,7 @@ from .compiler import (
 from .constants import SOLC_DIR
 from .custom_exceptions import ExplorerError
 
+
 def _errorNoSourceCodeAndExit(address):
     logger.error("source code is not verified or an EOA address", address)
     sys.exit(1)
@@ -35,36 +36,37 @@ def _get_contract_from_etherscan(token, etherscan_hostname, contract):
 
     solc_input = result["SourceCode"]
     contract = {
-            "name": result["ContractName"],
-            "compiler": result["CompilerVersion"],
-        }
+        "name": result["ContractName"],
+        "compiler": result["CompilerVersion"],
+    }
     if solc_input.startswith("{{"):
         contract["solcInput"] = json.loads(solc_input[1:-1])
     else:
         contract["solcInput":] = {
-                "language": "Solidity",
-                "sources": {result["ContractName"]: {"content": solc_input}},
-                "settings": {
-                    "optimizer": {
-                        "enabled": result["OptimizationUsed"] == "1",
-                        "runs": int(result["Runs"]),
-                    },
-                    "outputSelection": {
-                        "*": {
-                            "*": [
-                                "abi",
-                                "evm.bytecode",
-                                "evm.deployedBytecode",
-                                "evm.methodIdentifiers",
-                                "metadata",
-                            ],
-                            "": ["ast"],
-                        }
-                    },
+            "language": "Solidity",
+            "sources": {result["ContractName"]: {"content": solc_input}},
+            "settings": {
+                "optimizer": {
+                    "enabled": result["OptimizationUsed"] == "1",
+                    "runs": int(result["Runs"]),
                 },
-          }
+                "outputSelection": {
+                    "*": {
+                        "*": [
+                            "abi",
+                            "evm.bytecode",
+                            "evm.deployedBytecode",
+                            "evm.methodIdentifiers",
+                            "metadata",
+                        ],
+                        "": ["ast"],
+                    }
+                },
+            },
+        }
     return contract
-  
+
+
 def _get_contract_from_zksync(zksync_explorer_hostname, contract):
     zksync_explorer_link = (
         f"https://{zksync_explorer_hostname}/contract_verification/info/{contract}"
@@ -157,31 +159,41 @@ def get_contract_from_explorer(
 
     return result
 
+
 def compile_contract_from_explorer(contract_code):
     required_platform = get_solc_native_platform_from_os()
     build_name = contract_code["compiler"][1:]
     build_info = get_compiler_info(required_platform, build_name)
-    compiler_path = os.path.join(SOLC_DIR, build_info['path'])
-    
-    is_compiler_already_prepared = os.path.isfile(compiler_path)
-    
-    if not is_compiler_already_prepared:   
-      prepare_compiler(required_platform, build_info, compiler_path)
-      
-    input_settings = json.dumps(contract_code["solcInput"])   
-    compiled_contracts = compile_contracts(compiler_path, input_settings)['contracts'].values()
+    compiler_path = os.path.join(SOLC_DIR, build_info["path"])
 
-    target_contract_name = contract_code['name']
+    is_compiler_already_prepared = os.path.isfile(compiler_path)
+
+    if not is_compiler_already_prepared:
+        prepare_compiler(required_platform, build_info, compiler_path)
+
+    input_settings = json.dumps(contract_code["solcInput"])
+    compiled_contracts = compile_contracts(compiler_path, input_settings)[
+        "contracts"
+    ].values()
+
+    target_contract_name = contract_code["name"]
     return get_target_compiled_contract(compiled_contracts, target_contract_name)
 
+
 def parse_compiled_contract(target_compiled_contract):
-    contract_creation_code_without_calldata = f'0x{target_compiled_contract['evm']['bytecode']['object']}'
-    deployed_bytecode = f'0x{target_compiled_contract['evm']['deployedBytecode']['object']}'
+    bytecode_hex_without_prefix = target_compiled_contract["evm"]["bytecode"]["object"]
+    deployed_bytecode_hex_without_prefix = target_compiled_contract["evm"][
+        "deployedBytecode"
+    ]["object"]
+    contract_creation_code_without_calldata = f"0x{bytecode_hex_without_prefix}"
+    deployed_bytecode = f"0x{deployed_bytecode_hex_without_prefix}"
     immutables = {}
-    if ('immutableReferences' in target_compiled_contract['evm']['deployedBytecode']):
-        immutable_references = target_compiled_contract['evm']['deployedBytecode']['immutableReferences']
+    if "immutableReferences" in target_compiled_contract["evm"]["deployedBytecode"]:
+        immutable_references = target_compiled_contract["evm"]["deployedBytecode"][
+            "immutableReferences"
+        ]
         for refs in immutable_references.values():
             for ref in refs:
-                immutables[ref['start']] = ref['length']
-    
+                immutables[ref["start"]] = ref["length"]
+
     return contract_creation_code_without_calldata, deployed_bytecode, immutables
