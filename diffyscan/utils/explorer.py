@@ -125,7 +125,28 @@ def _get_contract_from_blockscout(explorer_hostname, contract):
 
     contract = {
         "name": response["name"],
-        "solcInput": {"language": "Solidity", "sources": source_files},
+        "solcInput": {
+            "language": "Solidity",
+            "sources": source_files,
+            "settings": {
+                "optimizer": {
+                    "enabled": response["optimization_enabled"] == True,
+                    "runs": int(response["optimization_runs"]),
+                },
+                "outputSelection": {
+                    "*": {
+                        "*": [
+                            "abi",
+                            "evm.bytecode",
+                            "evm.deployedBytecode",
+                            "evm.methodIdentifiers",
+                            "metadata",
+                        ],
+                        "": ["ast"],
+                    }
+                },
+            },
+        },
         "compiler": response["compiler_version"],
     }
     return contract
