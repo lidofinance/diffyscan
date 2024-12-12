@@ -105,7 +105,7 @@ def run_source_diff(
 ):
     logger.divider()
     logger.okay("Contract", contract_address_from_config)
-    logger.okay("Blockchain explorer Hostname", config["explorer_hostname"])
+    logger.okay("Blockchain explorer Hostname", get_explorer_hostname(config))
     logger.okay("Repo", config["github_repo"]["url"])
     logger.okay("Repo commit", config["github_repo"]["commit"])
     logger.okay("Repo relative root", config["github_repo"]["relative_root"])
@@ -113,7 +113,7 @@ def run_source_diff(
     logger.divider()
 
     logger.info(
-        f"Fetching source code from blockchain explorer {config['explorer_hostname']} ..."
+        f"Fetching source code from blockchain explorer {get_explorer_hostname(config)} ..."
     )
 
     source_files = (
@@ -213,6 +213,24 @@ def run_source_diff(
     logger.report_table(report)
 
 
+def get_explorer_hostname(config):
+    explorer_hostname = None
+    if "explorer_hostname_env_var" in config:
+        explorer_hostname = load_env(
+            config["explorer_hostname_env_var"], masked=True, required=False
+        )
+    if explorer_hostname is None:
+        logger.warn(
+            f'Failed to find an explorer hostname env in the config ("explorer_hostname_env_var")'
+        )
+        explorer_hostname = config["explorer_hostname"]
+    if explorer_hostname is None:
+        logger.warn(
+            f'Failed to find explorer hostname in the config ("explorer_hostname")'
+        )
+    return explorer_hostname
+
+
 def process_config(
     path: str,
     hardhat_config_path: str,
@@ -236,21 +254,6 @@ def process_config(
     if explorer_token is None:
         logger.warn(
             f'Failed to find explorer token in env ("ETHERSCAN_EXPLORER_TOKEN")'
-        )
-
-    explorer_hostname = None
-    if "explorer_hostname_env_var" in config:
-        explorer_hostname = load_env(
-            config["explorer_hostname_env_var"], masked=True, required=False
-        )
-    if explorer_hostname is None:
-        logger.warn(
-            f'Failed to find an explorer hostname env in the config ("explorer_hostname_env_var")'
-        )
-        explorer_hostname = config["explorer_hostname"]
-    if explorer_hostname is None:
-        logger.warn(
-            f'Failed to find explorer hostname in the config ("explorer_hostname")'
         )
 
     github_api_token = os.getenv("GITHUB_API_TOKEN", "")
@@ -279,7 +282,7 @@ def process_config(
             try:
                 contract_code = get_contract_from_explorer(
                     explorer_token,
-                    explorer_hostname,
+                    get_explorer_hostname(config),
                     contract_address,
                     contract_name,
                 )
