@@ -279,7 +279,7 @@ def process_config(
             try:
                 contract_code = get_contract_from_explorer(
                     explorer_token,
-                    config["explorer_hostname"],
+                    explorer_hostname,
                     contract_address,
                     contract_name,
                 )
