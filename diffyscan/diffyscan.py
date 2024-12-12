@@ -238,6 +238,21 @@ def process_config(
             f'Failed to find explorer token in env ("ETHERSCAN_EXPLORER_TOKEN")'
         )
 
+    explorer_hostname = None
+    if "explorer_hostname_env_var" in config:
+        explorer_hostname = load_env(
+            config["explorer_hostname_env_var"], masked=True, required=False
+        )
+    if explorer_hostname is None:
+        logger.warn(
+            f'Failed to find an explorer hostname env in the config ("explorer_hostname_env_var")'
+        )
+        explorer_hostname = config["explorer_hostname"]
+    if explorer_hostname is None:
+        logger.warn(
+            f'Failed to find explorer hostname in the config ("explorer_hostname")'
+        )
+
     github_api_token = os.getenv("GITHUB_API_TOKEN", "")
     if not github_api_token:
         raise ValueError("GITHUB_API_TOKEN variable is not set")

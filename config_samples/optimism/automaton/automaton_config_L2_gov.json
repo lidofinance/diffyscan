@@ -2,8 +2,8 @@
   "contracts": {
     "0xf695357C66bA514150Da95b189acb37b46DDe602": "OptimismBridgeExecutor"
   },
-  "explorer_hostname": "unichain-sepolia.blockscout.com",
   "explorer_token_env_var": "OPTISCAN_EXPLORER_TOKEN",
+  "explorer_hostname_env_var": "L2_EXPLORER_API_HOSTNAME",
   "github_repo": {
     "url": "https://github.com/lidofinance/governance-crosschain-bridges",
     "commit": "8fa25b0080dd3dcc2390313631aea6796a12c9d8",

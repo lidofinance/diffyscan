@@ -9,8 +9,8 @@
     "0xdBA2760246f315203F8B716b3a7590F0FFdc704a": "OssifiableProxy",
     "0xD48c69358193a34aC035ea7dfB70daDea1600112": "L2ERC20ExtendedTokensBridge"
   },
-  "explorer_hostname": "unichain-sepolia.blockscout.com",
   "explorer_token_env_var": "OPTISCAN_EXPLORER_TOKEN",
+  "explorer_hostname_env_var": "L2_EXPLORER_API_HOSTNAME",
   "github_repo": {
     "url": "https://github.com/lidofinance/lido-l2-with-steth",
     "commit": "8f19e1101a211c8f3d42af7ffcb87ab0ebcf750c",
