@@ -5,8 +5,8 @@
     "0x10cA9008D7dcea1Bed4d5394F8c58F3113A2814D": "TokenRateNotifier",
     "0x4067B05a6B2f6801Bfb8d4fF417eD32e71c216d9": "OpStackTokenRatePusher"
   },
-  "explorer_hostname": "api-sepolia.etherscan.io",
   "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+  "explorer_hostname_env_var": "L1_EXPLORER_API_HOSTNAME",
   "github_repo": {
     "url": "https://github.com/lidofinance/lido-l2-with-steth",
     "commit": "8f19e1101a211c8f3d42af7ffcb87ab0ebcf750c",
