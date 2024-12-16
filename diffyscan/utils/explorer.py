@@ -64,7 +64,7 @@ def _get_contract_from_etherscan(token, etherscan_hostname, contract):
                 },
           }
     return contract
-  
+
 def _get_contract_from_zksync(zksync_explorer_hostname, contract):
     zksync_explorer_link = (
         f"https://{zksync_explorer_hostname}/contract_verification/info/{contract}"
@@ -109,11 +109,11 @@ def _get_contract_from_mantle(mantle_explorer_hostname, contract):
     return contract
 
 
-def _get_contract_from_mode(mode_explorer_hostname, contract):
-    mode_explorer_link = (
-        f"https://{mode_explorer_hostname}/api/v2/smart-contracts/{contract}"
+def _get_contract_from_blockscout(explorer_hostname, contract):
+    explorer_link = (
+        f"https://{explorer_hostname}/api/v2/smart-contracts/{contract}"
     )
-    response = fetch(mode_explorer_link).json()
+    response = fetch(explorer_link).json()
 
     if "name" not in response:
         _errorNoSourceCodeAndExit(contract)
@@ -142,7 +142,9 @@ def get_contract_from_explorer(
     elif explorer_hostname.endswith("lineascan.build"):
         result = _get_contract_from_etherscan(None, explorer_hostname, contract_address)
     elif explorer_hostname.endswith("mode.network"):
-        result = _get_contract_from_mode(explorer_hostname, contract_address)
+        result = _get_contract_from_blockscout(explorer_hostname, contract_address)
+    elif explorer_hostname.endswith("swellnetwork.io"):
+        result = _get_contract_from_blockscout(explorer_hostname, contract_address)
     else:
         result = _get_contract_from_etherscan(
             token, explorer_hostname, contract_address
@@ -162,13 +164,13 @@ def compile_contract_from_explorer(contract_code):
     build_name = contract_code["compiler"][1:]
     build_info = get_compiler_info(required_platform, build_name)
     compiler_path = os.path.join(SOLC_DIR, build_info['path'])
-    
+
     is_compiler_already_prepared = os.path.isfile(compiler_path)
-    
-    if not is_compiler_already_prepared:   
+
+    if not is_compiler_already_prepared:
       prepare_compiler(required_platform, build_info, compiler_path)
-      
-    input_settings = json.dumps(contract_code["solcInput"])   
+
+    input_settings = json.dumps(contract_code["solcInput"])
     compiled_contracts = compile_contracts(compiler_path, input_settings)['contracts'].values()
 
     target_contract_name = contract_code['name']
@@ -183,5 +185,5 @@ def parse_compiled_contract(target_compiled_contract):
         for refs in immutable_references.values():
             for ref in refs:
                 immutables[ref['start']] = ref['length']
-    
+
     return contract_creation_code_without_calldata, deployed_bytecode, immutables
