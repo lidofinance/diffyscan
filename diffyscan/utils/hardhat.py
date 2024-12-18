@@ -12,7 +12,7 @@ from .custom_exceptions import HardhatError
 
 class Hardhat:
     sub_process = None
-    TIMEOUT_FOR_CONNECT_SEC = 10
+    TIMEOUT_FOR_CONNECT_SEC = 120
     ATTEMPTS_FOR_CONNECT = 5
 
     def start(
