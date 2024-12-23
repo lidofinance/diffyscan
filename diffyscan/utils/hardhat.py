@@ -12,8 +12,8 @@ from .custom_exceptions import HardhatError
 
 class Hardhat:
     sub_process = None
-    HARDHAT_START_TIMEOUT_SEC = 10
-    HARDHAT_STOP_TIMEOUT_SEC = 10
+    HARDHAT_START_TIMEOUT_SEC = 60
+    HARDHAT_STOP_TIMEOUT_SEC = 60
     ATTEMPTS_FOR_CONNECT = 5
 
     def start(
