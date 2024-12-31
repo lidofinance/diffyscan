@@ -4,7 +4,7 @@
         "0xF60eF59b1a37347E33E008DF03a50be19368F44E": "L2LidoGateway",
         "0x8E0f85515ec4412483b68DeA14661A86741cdC0a": "TransparentUpgradeableProxy",
         "0xaF4B5fDFa12656f8A4500055B102185C4b04a06E": "L2WstETHToken",
-        "0x530000000000000000000000000000000000000B": "ProxyAdmin"
+        "0xA66AA05F4b89104D9CEBE6A3f696Ac084cdE0055": "ProxyAdmin"
     },
     "explorer_hostname": "explorer-api-holesky.morphl2.io",
     "github_repo": {
