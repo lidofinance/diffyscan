@@ -1,0 +1,85 @@
+{
+  "contracts": {
+    "0x26DD42A1780e468Eb1Aad94198E6D81af82232bf": "OssifiableProxy",
+    "0xC5a7dD785c194Ee19372Fb74c6A40540f983a811": "TokenRateOracle",
+    "0xdEF300F0324C3Dc981Aa037ac43549FEb22f0901": "OssifiableProxy",
+    "0x6fd4a7E7503B8538Af886A67D71e567A60b16B16": "ERC20BridgedPermit",
+    "0xbE74958c9aef2648c58d1Cd4939Bc751f43BD934": "OssifiableProxy",
+    "0xCF0dd9F490CD9A07182217ffadA336FDc80B92E4": "ERC20RebasableBridgedPermit",
+    "0xd66b0AB31702743291eA7fAD25E7Ab1Bb1Fd1926": "OssifiableProxy",
+    "0xf6b656eB997D270Fe5d036268352EFff503E6a32": "L2ERC20ExtendedTokensBridge"
+  },
+  "explorer_token_env_var": "OPTISCAN_EXPLORER_TOKEN",
+  "explorer_hostname_env_var": "L2_EXPLORER_API_HOSTNAME",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/lido-l2-with-steth",
+    "commit": "8f19e1101a211c8f3d42af7ffcb87ab0ebcf750c",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "d4fb3a89f9d0a39c7ee6f2601d33ffbf30085322",
+      "relative_root": "contracts"
+    }
+  },
+  "fail_on_comparison_error": true,
+  "bytecode_comparison": {
+    "constructor_args": {
+      "0x26DD42A1780e468Eb1Aad94198E6D81af82232bf": [
+        "0xC5a7dD785c194Ee19372Fb74c6A40540f983a811",
+        "0xd96377d45821a80b98788Bacf8E962b6eD7af8a2",
+        "0x"
+      ],
+      "0xC5a7dD785c194Ee19372Fb74c6A40540f983a811": [
+        "0x4200000000000000000000000000000000000007",
+        "0xd66b0AB31702743291eA7fAD25E7Ab1Bb1Fd1926",
+        "0xB30118c5b00DBe2cB3bB89d351F6C64134Bfa7a6",
+        93600,
+        86400,
+        500,
+        86400,
+        3600
+      ],
+      "0xdEF300F0324C3Dc981Aa037ac43549FEb22f0901": [
+        "0x6fd4a7E7503B8538Af886A67D71e567A60b16B16",
+        "0xd96377d45821a80b98788Bacf8E962b6eD7af8a2",
+        "0x"
+      ],
+      "0x6fd4a7E7503B8538Af886A67D71e567A60b16B16": [
+        "Wrapped liquid staked Ether 2.0",
+        "wstETH",
+        "2",
+        18,
+        "0xd66b0AB31702743291eA7fAD25E7Ab1Bb1Fd1926"
+      ],
+      "0xbE74958c9aef2648c58d1Cd4939Bc751f43BD934": [
+        "0xCF0dd9F490CD9A07182217ffadA336FDc80B92E4",
+        "0xd96377d45821a80b98788Bacf8E962b6eD7af8a2",
+        "0x"
+      ],
+      "0xCF0dd9F490CD9A07182217ffadA336FDc80B92E4": [
+        "Liquid staked Ether 2.0",
+        "stETH",
+        "1",
+        18,
+        "0xdEF300F0324C3Dc981Aa037ac43549FEb22f0901",
+        "0x26DD42A1780e468Eb1Aad94198E6D81af82232bf",
+        "0xd66b0AB31702743291eA7fAD25E7Ab1Bb1Fd1926"
+      ],
+      "0xd66b0AB31702743291eA7fAD25E7Ab1Bb1Fd1926": [
+        "0xf6b656eB997D270Fe5d036268352EFff503E6a32",
+        "0xd96377d45821a80b98788Bacf8E962b6eD7af8a2",
+        "0x"
+      ],
+      "0xf6b656eB997D270Fe5d036268352EFff503E6a32": [
+        "0x4200000000000000000000000000000000000007",
+        "0x6Df93265d12abbC959045E330960bB2E2e777fc8",
+        "0xB82381A3fBD3FaFA77B3a7bE693342618240067b",
+        "0x3e3FE7dBc6B4C189E7128855dD526361c49b40Af",
+        "0xdEF300F0324C3Dc981Aa037ac43549FEb22f0901",
+        "0xbE74958c9aef2648c58d1Cd4939Bc751f43BD934"
+      ]
+    }
+  }
+}
