@@ -2,7 +2,7 @@ import json
 import sys
 import os
 
-from .common import fetch
+from .common import fetch, load_env
 from .logger import logger
 from .compiler import (
     get_solc_native_platform_from_os,
@@ -218,3 +218,21 @@ def parse_compiled_contract(target_compiled_contract):
                 immutables[ref["start"]] = ref["length"]
 
     return contract_creation_code_without_calldata, deployed_bytecode, immutables
+
+
+def get_explorer_hostname(config):
+    explorer_hostname = None
+    if "explorer_hostname_env_var" in config:
+        explorer_hostname = load_env(
+            config["explorer_hostname_env_var"], masked=True, required=False
+        )
+    if explorer_hostname is None:
+        logger.warn(
+            f'Failed to find an explorer hostname env in the config ("explorer_hostname_env_var")'
+        )
+        explorer_hostname = config["explorer_hostname"]
+    if explorer_hostname is None:
+        logger.warn(
+            f'Failed to find explorer hostname in the config ("explorer_hostname")'
+        )
+    return explorer_hostname

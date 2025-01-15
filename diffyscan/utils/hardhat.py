@@ -70,7 +70,7 @@ class Hardhat:
 
         start_time = time.time()
         while time.time() - start_time < self.HARDHAT_START_TIMEOUT_SEC:
-            output = self.sub_process.stdout.readline().decode()
+            output = self.sub_process.stdout.readline().decode().capitalize()
             if "WILL BE LOST" in output:
                 logger.info("Hardhat node is ready")
                 break

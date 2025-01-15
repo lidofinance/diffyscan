@@ -16,6 +16,7 @@ from .utils.explorer import (
     get_contract_from_explorer,
     compile_contract_from_explorer,
     parse_compiled_contract,
+    get_explorer_hostname,
 )
 from .utils.github import (
     get_file_from_github,
@@ -103,9 +104,10 @@ def run_source_diff(
     recursive_parsing=False,
     prettify=False,
 ):
+    explorer_hostname = get_explorer_hostname(config)
     logger.divider()
     logger.okay("Contract", contract_address_from_config)
-    logger.okay("Blockchain explorer Hostname", get_explorer_hostname(config))
+    logger.okay("Blockchain explorer Hostname", explorer_hostname)
     logger.okay("Repo", config["github_repo"]["url"])
     logger.okay("Repo commit", config["github_repo"]["commit"])
     logger.okay("Repo relative root", config["github_repo"]["relative_root"])
@@ -113,7 +115,7 @@ def run_source_diff(
     logger.divider()
 
     logger.info(
-        f"Fetching source code from blockchain explorer {get_explorer_hostname(config)} ..."
+        f"Fetching source code from blockchain explorer {explorer_hostname} ..."
     )
 
     source_files = (
@@ -211,24 +213,6 @@ def run_source_diff(
     logger.info(f"Identical files: {identical_files} / {files_found}")
 
     logger.report_table(report)
-
-
-def get_explorer_hostname(config):
-    explorer_hostname = None
-    if "explorer_hostname_env_var" in config:
-        explorer_hostname = load_env(
-            config["explorer_hostname_env_var"], masked=True, required=False
-        )
-    if explorer_hostname is None:
-        logger.warn(
-            f'Failed to find an explorer hostname env in the config ("explorer_hostname_env_var")'
-        )
-        explorer_hostname = config["explorer_hostname"]
-    if explorer_hostname is None:
-        logger.warn(
-            f'Failed to find explorer hostname in the config ("explorer_hostname")'
-        )
-    return explorer_hostname
 
 
 def process_config(

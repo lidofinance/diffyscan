@@ -38,7 +38,7 @@ export ETHERSCAN_EXPLORER_TOKEN=<your-etherscan-token>
 export OPTISCAN_EXPLORER_TOKEN=<your-etherscan-optimism-token>
 ```
 
-Set your Etherscan api to fetch verified source code,
+Set your Etherscan API endpoint URL to fetch verified source code,
 
 ```bash
 export L1_EXPLORER_API_HOSTNAME=<your-l1-explorer-api-hostname>
