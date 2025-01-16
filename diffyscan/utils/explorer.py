@@ -2,7 +2,7 @@ import json
 import sys
 import os
 
-from .common import fetch
+from .common import fetch, load_env
 from .logger import logger
 from .compiler import (
     get_solc_native_platform_from_os,
@@ -13,6 +13,7 @@ from .compiler import (
 )
 from .constants import SOLC_DIR
 from .custom_exceptions import ExplorerError
+
 
 def _errorNoSourceCodeAndExit(address):
     logger.error("source code is not verified or an EOA address", address)
@@ -35,35 +36,36 @@ def _get_contract_from_etherscan(token, etherscan_hostname, contract):
 
     solc_input = result["SourceCode"]
     contract = {
-            "name": result["ContractName"],
-            "compiler": result["CompilerVersion"],
-        }
+        "name": result["ContractName"],
+        "compiler": result["CompilerVersion"],
+    }
     if solc_input.startswith("{{"):
         contract["solcInput"] = json.loads(solc_input[1:-1])
     else:
         contract["solcInput":] = {
-                "language": "Solidity",
-                "sources": {result["ContractName"]: {"content": solc_input}},
-                "settings": {
-                    "optimizer": {
-                        "enabled": result["OptimizationUsed"] == "1",
-                        "runs": int(result["Runs"]),
-                    },
-                    "outputSelection": {
-                        "*": {
-                            "*": [
-                                "abi",
-                                "evm.bytecode",
-                                "evm.deployedBytecode",
-                                "evm.methodIdentifiers",
-                                "metadata",
-                            ],
-                            "": ["ast"],
-                        }
-                    },
+            "language": "Solidity",
+            "sources": {result["ContractName"]: {"content": solc_input}},
+            "settings": {
+                "optimizer": {
+                    "enabled": result["OptimizationUsed"] == "1",
+                    "runs": int(result["Runs"]),
                 },
-          }
+                "outputSelection": {
+                    "*": {
+                        "*": [
+                            "abi",
+                            "evm.bytecode",
+                            "evm.deployedBytecode",
+                            "evm.methodIdentifiers",
+                            "metadata",
+                        ],
+                        "": ["ast"],
+                    }
+                },
+            },
+        }
     return contract
+
 
 def _get_contract_from_zksync(zksync_explorer_hostname, contract):
     zksync_explorer_link = (
@@ -110,9 +112,7 @@ def _get_contract_from_mantle(mantle_explorer_hostname, contract):
 
 
 def _get_contract_from_blockscout(explorer_hostname, contract):
-    explorer_link = (
-        f"https://{explorer_hostname}/api/v2/smart-contracts/{contract}"
-    )
+    explorer_link = f"https://{explorer_hostname}/api/v2/smart-contracts/{contract}"
     response = fetch(explorer_link).json()
 
     if "name" not in response:
@@ -125,7 +125,28 @@ def _get_contract_from_blockscout(explorer_hostname, contract):
 
     contract = {
         "name": response["name"],
-        "solcInput": {"language": "Solidity", "sources": source_files},
+        "solcInput": {
+            "language": "Solidity",
+            "sources": source_files,
+            "settings": {
+                "optimizer": {
+                    "enabled": response["optimization_enabled"] == True,
+                    "runs": int(response["optimization_runs"]),
+                },
+                "outputSelection": {
+                    "*": {
+                        "*": [
+                            "abi",
+                            "evm.bytecode",
+                            "evm.deployedBytecode",
+                            "evm.methodIdentifiers",
+                            "metadata",
+                        ],
+                        "": ["ast"],
+                    }
+                },
+            },
+        },
         "compiler": response["compiler_version"],
     }
     return contract
@@ -141,9 +162,11 @@ def get_contract_from_explorer(
         result = _get_contract_from_mantle(explorer_hostname, contract_address)
     elif explorer_hostname.endswith("lineascan.build"):
         result = _get_contract_from_etherscan(None, explorer_hostname, contract_address)
-    elif explorer_hostname.endswith("mode.network"):
-        result = _get_contract_from_blockscout(explorer_hostname, contract_address)
-    elif explorer_hostname.endswith("swellnetwork.io"):
+    elif (
+        explorer_hostname.endswith("mode.network")
+        or explorer_hostname.endswith("blockscout.com")
+        or explorer_hostname.endswith("swellnetwork.io")
+    ):
         result = _get_contract_from_blockscout(explorer_hostname, contract_address)
     else:
         result = _get_contract_from_etherscan(
@@ -159,31 +182,69 @@ def get_contract_from_explorer(
 
     return result
 
+
 def compile_contract_from_explorer(contract_code):
     required_platform = get_solc_native_platform_from_os()
     build_name = contract_code["compiler"][1:]
     build_info = get_compiler_info(required_platform, build_name)
-    compiler_path = os.path.join(SOLC_DIR, build_info['path'])
+    compiler_path = os.path.join(SOLC_DIR, build_info["path"])
 
     is_compiler_already_prepared = os.path.isfile(compiler_path)
 
     if not is_compiler_already_prepared:
-      prepare_compiler(required_platform, build_info, compiler_path)
+        prepare_compiler(required_platform, build_info, compiler_path)
 
     input_settings = json.dumps(contract_code["solcInput"])
-    compiled_contracts = compile_contracts(compiler_path, input_settings)['contracts'].values()
+    compiled_contracts = compile_contracts(compiler_path, input_settings)[
+        "contracts"
+    ].values()
 
-    target_contract_name = contract_code['name']
+    is_compiler_already_prepared = os.path.isfile(compiler_path)
+
+    if not is_compiler_already_prepared:
+        prepare_compiler(required_platform, build_info, compiler_path)
+
+    input_settings = json.dumps(contract_code["solcInput"])
+    compiled_contracts = compile_contracts(compiler_path, input_settings)[
+        "contracts"
+    ].values()
+
+    target_contract_name = contract_code["name"]
     return get_target_compiled_contract(compiled_contracts, target_contract_name)
 
+
 def parse_compiled_contract(target_compiled_contract):
-    contract_creation_code_without_calldata = '0x' + target_compiled_contract['evm']['bytecode']['object']
-    deployed_bytecode = '0x' + target_compiled_contract['evm']['deployedBytecode']['object']
+    contract_creation_code_without_calldata = (
+        "0x" + target_compiled_contract["evm"]["bytecode"]["object"]
+    )
+    deployed_bytecode = (
+        "0x" + target_compiled_contract["evm"]["deployedBytecode"]["object"]
+    )
     immutables = {}
-    if ('immutableReferences' in target_compiled_contract['evm']['deployedBytecode']):
-        immutable_references = target_compiled_contract['evm']['deployedBytecode']['immutableReferences']
+    if "immutableReferences" in target_compiled_contract["evm"]["deployedBytecode"]:
+        immutable_references = target_compiled_contract["evm"]["deployedBytecode"][
+            "immutableReferences"
+        ]
         for refs in immutable_references.values():
             for ref in refs:
-                immutables[ref['start']] = ref['length']
+                immutables[ref["start"]] = ref["length"]
 
     return contract_creation_code_without_calldata, deployed_bytecode, immutables
+
+
+def get_explorer_hostname(config):
+    explorer_hostname = None
+    if "explorer_hostname_env_var" in config:
+        explorer_hostname = load_env(
+            config["explorer_hostname_env_var"], masked=True, required=False
+        )
+    if explorer_hostname is None:
+        logger.warn(
+            f'Failed to find an explorer hostname env in the config ("explorer_hostname_env_var")'
+        )
+        explorer_hostname = config["explorer_hostname"]
+    if explorer_hostname is None:
+        logger.warn(
+            f'Failed to find explorer hostname in the config ("explorer_hostname")'
+        )
+    return explorer_hostname

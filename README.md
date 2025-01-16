@@ -38,6 +38,13 @@ export ETHERSCAN_EXPLORER_TOKEN=<your-etherscan-token>
 export OPTISCAN_EXPLORER_TOKEN=<your-etherscan-optimism-token>
 ```
 
+Set your Etherscan API endpoint URL to fetch verified source code,
+
+```bash
+export L1_EXPLORER_API_HOSTNAME=<your-l1-explorer-api-hostname>
+export L2_EXPLORER_API_HOSTNAME=<your-l2-explorer-api-hostname>
+```
+
 Set your Github token to query API without strict rate limiting,
 
 ```bash
