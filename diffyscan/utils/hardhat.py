@@ -12,7 +12,8 @@ from .custom_exceptions import HardhatError
 
 class Hardhat:
     sub_process = None
-    TIMEOUT_FOR_CONNECT_SEC = 10
+    HARDHAT_START_TIMEOUT_SEC = 60
+    HARDHAT_STOP_TIMEOUT_SEC = 60
     ATTEMPTS_FOR_CONNECT = 5
 
     def start(
@@ -30,18 +31,23 @@ class Hardhat:
                 f"Failed to find Hardhat config by path '{hardhat_config_path}'"
             )
 
-        local_node_command_prefix = (
-            f"npx hardhat node --hostname {parsed_url.hostname} "
-            f"--port {parsed_url.port} "
-            f"--config {hardhat_config_path} "
+        hardhat_cmd = [
+            "npx",
+            "hardhat",
+            "node",
+            "--hostname",
+            parsed_url.hostname,
+            "--port",
+            str(parsed_url.port),
+            "--config",
+            hardhat_config_path,
+        ]
+        hardhat_cmd_line_masked = " ".join(
+            hardhat_cmd + ["--fork", mask_text(remote_rpc_url)]
         )
+        hardhat_cmd.extend(["--fork", remote_rpc_url])
 
-        local_node_command = local_node_command_prefix + f"--fork '{remote_rpc_url}'"
-        local_node_command_masked = (
-            local_node_command_prefix + f"--fork '{mask_text(remote_rpc_url)}'"
-        )
-
-        logger.info(f'Trying to start Hardhat: "{local_node_command_masked}"')
+        logger.info(f'Trying to start Hardhat: "{hardhat_cmd_line_masked}"')
         is_port_used = self._is_port_in_use_(parsed_url)
         if is_port_used:
             answer = input(
@@ -56,22 +62,43 @@ class Hardhat:
         if is_port_used:
             raise HardhatError(f"{parsed_url.netloc} is busy")
         self.sub_process = subprocess.Popen(
-            "exec " + local_node_command,
-            shell=True,
-            stdout=subprocess.DEVNULL,
+            hardhat_cmd,
+            stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            preexec_fn=os.setsid,
         )
-        try:
-            _, errs = self.sub_process.communicate(timeout=self.TIMEOUT_FOR_CONNECT_SEC)
-            if errs:
-                raise HardhatError(f"{errs.decode()}")
-        except subprocess.TimeoutExpired:
-            self._handle_timeout(parsed_url)
+
+        start_time = time.time()
+        while time.time() - start_time < self.HARDHAT_START_TIMEOUT_SEC:
+            output = self.sub_process.stdout.readline().decode().capitalize()
+            if "WILL BE LOST" in output:
+                logger.info("Hardhat node is ready")
+                break
+        else:
+            raise HardhatError(
+                f"Hardhat node seems to have failed to start in {self.HARDHAT_START_TIMEOUT_SEC}"
+            )
+        time.sleep(5)
 
     def stop(self):
         if self.sub_process is not None and self.sub_process.poll() is None:
-            os.kill(self.sub_process.pid, signal.SIGTERM)
-            logger.info(f"Hardhat stopped, PID {self.sub_process.pid}")
+            os.killpg(os.getpgid(self.sub_process.pid), signal.SIGTERM)
+            try:
+                self.sub_process.communicate(timeout=self.HARDHAT_STOP_TIMEOUT_SEC)
+                time.sleep(1)
+                logger.info(f"Hardhat stopped, PID {self.sub_process.pid}")
+            except subprocess.TimeoutExpired:
+                os.killpg(os.getpgid(self.sub_process.pid), signal.SIGKILL)
+                logger.info(
+                    f"Hardhat process failed to terminate in {self.HARDHAT_STOP_TIMEOUT_SEC} seconds, sent KILL command to PID {self.sub_process.pid}"
+                )
+            try:
+                self.sub_process.communicate(timeout=self.HARDHAT_STOP_TIMEOUT_SEC)
+                logger.info(f"Hardhat got KILLed, PID {self.sub_process.pid}")
+            except subprocess.TimeoutExpired:
+                logger.error(
+                    f"Hardhat process failed to got KILLed in {self.HARDHAT_STOP_TIMEOUT_SEC} seconds, PID {self.sub_process.pid}"
+                )
 
     def _is_port_in_use_(self, parsed_url) -> bool:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:

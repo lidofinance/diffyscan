@@ -1,22 +1,52 @@
 {
-    "contracts": {
-        "0x4Abf633d9c0F4aEebB4C2E3213c7aa1b8505D332": "OssifiableProxy",
-        "0x8375029773953d91CaCfa452b7D24556b9F318AA": "L1LidoTokensBridge",
-        "0x10cA9008D7dcea1Bed4d5394F8c58F3113A2814D": "TokenRateNotifier",
-        "0x4067B05a6B2f6801Bfb8d4fF417eD32e71c216d9": "OpStackTokenRatePusher"
-    },
-    "explorer_hostname": "api-sepolia.etherscan.io",
-    "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
-    "github_repo": {
-        "url": "https://github.com/lidofinance/lido-l2-with-steth",
-        "commit": "8f19e1101a211c8f3d42af7ffcb87ab0ebcf750c",
-        "relative_root": ""
-    },
-    "dependencies": {
-        "@openzeppelin/contracts": {
-            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
-            "commit": "d4fb3a89f9d0a39c7ee6f2601d33ffbf30085322",
-            "relative_root": "contracts"
-        }
+  "contracts": {
+    "0x4Abf633d9c0F4aEebB4C2E3213c7aa1b8505D332": "OssifiableProxy",
+    "0x8375029773953d91CaCfa452b7D24556b9F318AA": "L1LidoTokensBridge",
+    "0x10cA9008D7dcea1Bed4d5394F8c58F3113A2814D": "TokenRateNotifier",
+    "0x4067B05a6B2f6801Bfb8d4fF417eD32e71c216d9": "OpStackTokenRatePusher"
+  },
+  "explorer_hostname": "api-sepolia.etherscan.io",
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/lido-l2-with-steth",
+    "commit": "8f19e1101a211c8f3d42af7ffcb87ab0ebcf750c",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "d4fb3a89f9d0a39c7ee6f2601d33ffbf30085322",
+      "relative_root": "contracts"
     }
+  },
+  "fail_on_comparison_error": true,
+  "bytecode_comparison": {
+    "constructor_args": {
+      "0x4Abf633d9c0F4aEebB4C2E3213c7aa1b8505D332": [
+        "0xd497Be005638efCf09F6BFC8DAFBBB0BB72cD991",
+        "0xd497Be005638efCf09F6BFC8DAFBBB0BB72cD991",
+        "0x"
+      ],
+      "0x8375029773953d91CaCfa452b7D24556b9F318AA": [
+        "0x58Cc85b8D04EA49cC6DBd3CbFFd00B4B8D6cb3ef",
+        "0xdBA2760246f315203F8B716b3a7590F0FFdc704a",
+        "0xB82381A3fBD3FaFA77B3a7bE693342618240067b",
+        "0x3e3FE7dBc6B4C189E7128855dD526361c49b40Af",
+        "0x24B47cd3A74f1799b32B2de11073764Cb1bb318B",
+        "0xf49D208B5C7b10415C7BeAFe9e656F2DF9eDfe3B",
+        "0xd497Be005638efCf09F6BFC8DAFBBB0BB72cD991"
+      ],
+      "0x10cA9008D7dcea1Bed4d5394F8c58F3113A2814D": [
+        "0x8375029773953d91CaCfa452b7D24556b9F318AA",
+        "0x3e3FE7dBc6B4C189E7128855dD526361c49b40Af"
+      ],
+      "0x4067B05a6B2f6801Bfb8d4fF417eD32e71c216d9": [
+        "0x58Cc85b8D04EA49cC6DBd3CbFFd00B4B8D6cb3ef",
+        "0xB82381A3fBD3FaFA77B3a7bE693342618240067b",
+        "0xd497Be005638efCf09F6BFC8DAFBBB0BB72cD991",
+        "0xB34F2747BCd9BCC4107A0ccEb43D5dcdd7Fabf89",
+        300000
+      ]
+    }
+  }
 }

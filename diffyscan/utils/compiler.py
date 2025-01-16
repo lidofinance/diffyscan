@@ -25,7 +25,7 @@ def get_solc_native_platform_from_os():
 
 
 def get_compiler_info(required_platform, required_compiler_version):
-    compilers_list_url = f"https://raw.githubusercontent.com/ethereum/solc-bin/gh-pages/{required_platform}/list.json"
+    compilers_list_url = f"https://raw.githubusercontent.com/ethereum/solc-bin/refs/heads/gh-pages/{required_platform}/list.json"
     available_compilers_list = fetch(compilers_list_url).json()
     required_build_info = next(
         (

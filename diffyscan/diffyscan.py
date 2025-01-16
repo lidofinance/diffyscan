@@ -16,6 +16,7 @@ from .utils.explorer import (
     get_contract_from_explorer,
     compile_contract_from_explorer,
     parse_compiled_contract,
+    get_explorer_hostname,
 )
 from .utils.github import (
     get_file_from_github,
@@ -103,9 +104,10 @@ def run_source_diff(
     recursive_parsing=False,
     prettify=False,
 ):
+    explorer_hostname = get_explorer_hostname(config)
     logger.divider()
     logger.okay("Contract", contract_address_from_config)
-    logger.okay("Blockchain explorer Hostname", config["explorer_hostname"])
+    logger.okay("Blockchain explorer Hostname", explorer_hostname)
     logger.okay("Repo", config["github_repo"]["url"])
     logger.okay("Repo commit", config["github_repo"]["commit"])
     logger.okay("Repo relative root", config["github_repo"]["relative_root"])
@@ -113,7 +115,7 @@ def run_source_diff(
     logger.divider()
 
     logger.info(
-        f"Fetching source code from blockchain explorer {config['explorer_hostname']} ..."
+        f"Fetching source code from blockchain explorer {explorer_hostname} ..."
     )
 
     source_files = (
@@ -264,7 +266,7 @@ def process_config(
             try:
                 contract_code = get_contract_from_explorer(
                     explorer_token,
-                    config["explorer_hostname"],
+                    get_explorer_hostname(config),
                     contract_address,
                     contract_name,
                 )
@@ -306,7 +308,9 @@ def parse_arguments():
         "path", nargs="?", default=None, help="Path to config or directory with configs"
     )
     parser.add_argument(
-        "--hardhat-path", default=DEFAULT_HARDHAT_CONFIG_PATH, help="Path to Hardhat config"
+        "--hardhat-path",
+        default=DEFAULT_HARDHAT_CONFIG_PATH,
+        help="Path to Hardhat config",
     )
     parser.add_argument(
         "--yes",

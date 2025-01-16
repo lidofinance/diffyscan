@@ -85,7 +85,12 @@ def encode_constructor_arguments(constructor_abi: list, constructor_config_args:
             arg_value = constructor_config_args[argument_index]
             if arg_type == "address":
                 constructor_calldata += encode_address(arg_value)
-            elif arg_type == "uint256" or arg_type == "bool" or arg_type == "uint8":
+            elif (
+                arg_type == "uint256"
+                or arg_type == "bool"
+                or arg_type == "uint8"
+                or arg_type == "uint32"
+            ):
                 constructor_calldata += to_hex_with_alignment(arg_value)
             elif arg_type == "bytes32":
                 constructor_calldata += encode_bytes32(arg_value)
