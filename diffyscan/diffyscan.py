@@ -308,7 +308,9 @@ def parse_arguments():
         "path", nargs="?", default=None, help="Path to config or directory with configs"
     )
     parser.add_argument(
-        "hardhat_path", nargs="?", default=None, help="Path to Hardhat config"
+        "--hardhat-path",
+        default=DEFAULT_HARDHAT_CONFIG_PATH,
+        help="Path to Hardhat config",
     )
     parser.add_argument(
         "--yes",
@@ -346,13 +348,10 @@ def main():
         return
     logger.info("Welcome to Diffyscan!")
     logger.divider()
-    hardhat_config_path = (
-        DEFAULT_HARDHAT_CONFIG_PATH if args.hardhat_path is None else args.hardhat_path
-    )
     if args.path is None:
         process_config(
             DEFAULT_CONFIG_PATH,
-            hardhat_config_path,
+            args.hardhat_path,
             args.support_brownie,
             args.prettify,
             args.enable_binary_comparison,
@@ -360,20 +359,18 @@ def main():
     elif os.path.isfile(args.path):
         process_config(
             args.path,
-            hardhat_config_path,
+            args.hardhat_path,
             args.support_brownie,
             args.prettify,
             args.enable_binary_comparison,
         )
     elif os.path.isdir(args.path):
         for filename in os.listdir(args.path):
-            config_path = os.path.join(
-                args.path, filename, args.enable_binary_comparison
-            )
+            config_path = os.path.join(args.path, filename)
             if os.path.isfile(config_path):
                 process_config(
                     config_path,
-                    hardhat_config_path,
+                    args.hardhat_path,
                     args.support_brownie,
                     args.prettify,
                     args.enable_binary_comparison,
