@@ -69,16 +69,20 @@ class Hardhat:
         )
 
         start_time = time.time()
+        full_stdout = ""
         while time.time() - start_time < self.HARDHAT_START_TIMEOUT_SEC:
-            output = self.sub_process.stdout.readline().decode().capitalize()
-            if "WILL BE LOST" in output:
+            output = self.sub_process.stdout.readline().decode()  # .capitalize()
+            full_stdout += output
+
+            if "WILL BE LOST" in output.upper():
                 logger.info("Hardhat node is ready")
                 break
         else:
+            logger.error(full_stdout)
             raise HardhatError(
                 f"Hardhat node seems to have failed to start in {self.HARDHAT_START_TIMEOUT_SEC}"
             )
-        time.sleep(5)
+        time.sleep(1)
 
     def stop(self):
         if self.sub_process is not None and self.sub_process.poll() is None:

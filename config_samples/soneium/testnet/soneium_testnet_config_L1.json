@@ -1,0 +1,47 @@
+{
+  "contracts": {
+    "0x3982e730E1813FA385331e491bb75c42Ab07d780": "OssifiableProxy",
+    "0x84f32114140a3313147291281648AaC037Bbe4B4": "L1LidoTokensBridge",
+    "0xd0E719f172430c2B22fA6252a0217469bCCecBB9": "OpStackTokenRatePusher"
+  },
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+  "explorer_hostname_env_var": "L1_EXPLORER_API_HOSTNAME",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/lido-l2-with-steth",
+    "commit": "8f19e1101a211c8f3d42af7ffcb87ab0ebcf750c",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "d4fb3a89f9d0a39c7ee6f2601d33ffbf30085322",
+      "relative_root": "contracts"
+    }
+  },
+  "fail_on_comparison_error": true,
+  "bytecode_comparison": {
+    "constructor_args": {
+      "0x3982e730E1813FA385331e491bb75c42Ab07d780": [
+        "0x84f32114140a3313147291281648AaC037Bbe4B4",
+        "0x32A0E5828B62AAb932362a4816ae03b860b65e83",
+        "0x"
+      ],
+      "0x84f32114140a3313147291281648AaC037Bbe4B4": [
+        "0x0184245D202724dc28a2b688952Cb56C882c226F",
+        "0xc58bAe09a7A681555D7cE0F71d5b14792aca9825",
+        "0xB82381A3fBD3FaFA77B3a7bE693342618240067b",
+        "0x3e3FE7dBc6B4C189E7128855dD526361c49b40Af",
+        "0xf7489b8d220DCf33bAe6b594C070061E4da9fDa9",
+        "0x4e55E2d4c83df2E0083f1D616AFf007ac420b110",
+        "0xd497Be005638efCf09F6BFC8DAFBBB0BB72cD991"
+      ],
+      "0xd0E719f172430c2B22fA6252a0217469bCCecBB9": [
+        "0x0184245D202724dc28a2b688952Cb56C882c226F",
+        "0xB82381A3fBD3FaFA77B3a7bE693342618240067b",
+        "0xd497Be005638efCf09F6BFC8DAFBBB0BB72cD991",
+        "0xDBD42a02D4DE52A58fe005dE2DD88B3379a50165",
+        300000
+      ]
+    }
+  }
+}
