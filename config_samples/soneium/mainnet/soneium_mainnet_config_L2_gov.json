@@ -1,0 +1,34 @@
+{
+  "contracts": {
+    "0xB0F7894b3740F68eAca6e3792B14d2C2c25eF5D4": "OptimismBridgeExecutor"
+  },
+  "explorer_token_env_var": "OPTISCAN_EXPLORER_TOKEN",
+  "explorer_hostname_env_var": "L2_EXPLORER_API_HOSTNAME",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/governance-crosschain-bridges",
+    "commit": "8fa25b0080dd3dcc2390313631aea6796a12c9d8",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "d4fb3a89f9d0a39c7ee6f2601d33ffbf30085322",
+      "relative_root": "contracts",
+      "//": "OZ 4.6.0"
+    }
+  },
+  "fail_on_comparison_error": true,
+  "bytecode_comparison": {
+    "constructor_args": {
+      "0xB0F7894b3740F68eAca6e3792B14d2C2c25eF5D4": [
+        "0x4200000000000000000000000000000000000007",
+        "0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c",
+        0,
+        86400,
+        0,
+        1,
+        "0x0000000000000000000000000000000000000000"
+      ]
+    }
+  }
+}
