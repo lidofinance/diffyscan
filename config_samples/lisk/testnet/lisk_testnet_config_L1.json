@@ -1,0 +1,20 @@
+{
+  "contracts": {
+    "0xD3f64eB2082cEe7632C12a968dEDF304bCac2deF": "OssifiableProxy",
+    "0x7c8D06196299B1642D192C595281f2d9d7Cf9D31": "L1ERC20TokenBridge"
+  },
+  "explorer_hostname": "api-sepolia.etherscan.io",
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/lido-l2",
+    "commit": "082e7eb59de63bd376b30886568813408d04f00b",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "d4fb3a89f9d0a39c7ee6f2601d33ffbf30085322",
+      "relative_root": "contracts"
+    }
+  }
+}

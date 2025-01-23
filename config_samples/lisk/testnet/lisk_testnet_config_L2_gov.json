@@ -1,0 +1,19 @@
+{
+  "contracts": {
+    "0x48Dce305f4209BD9926072Df3307b70602Bd8107": "OptimismBridgeExecutor"
+  },
+  "explorer_hostname": "sepolia-blockscout.lisk.com",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/governance-crosschain-bridges",
+    "commit": "8fa25b0080dd3dcc2390313631aea6796a12c9d8",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "d4fb3a89f9d0a39c7ee6f2601d33ffbf30085322",
+      "relative_root": "contracts",
+      "//": "OZ 4.6.0"
+    }
+  }
+}
