@@ -1,0 +1,18 @@
+{
+  "contracts": {
+    "0x431a156BEba95803a95452441C1959c4479710e1": "UpdateTargetValidatorLimits"
+  },
+  "explorer_hostname": "api-holesky.etherscan.io",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/easy-track",
+    "commit": "6d63d68f8d01668114dc46e170a24e400976d950",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "@openzeppelin/contracts-v4.3.2": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "0c4de6721d9668d7b5b2c5a9400fd0b2a5e8de90",
+      "relative_root": "contracts"
+    }
+  }
+}
