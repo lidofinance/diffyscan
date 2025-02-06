@@ -17,5 +17,32 @@
       "commit": "d4fb3a89f9d0a39c7ee6f2601d33ffbf30085322",
       "relative_root": "contracts"
     }
+  },
+  "fail_on_comparison_error": true,
+  "bytecode_comparison": {
+    "constructor_args": {
+      "0xb150759C71073Edf7D90d3D053aB5e67ea731Aa2": [
+        "0x4795d8Bbb94676058a6777C2410Ad3ebcc2fB3aF",
+        "0x48Dce305f4209BD9926072Df3307b70602Bd8107",
+        "0x"
+      ],
+      "0x4795d8Bbb94676058a6777C2410Ad3ebcc2fB3aF": [
+        "0x4200000000000000000000000000000000000007",
+        "0xD3f64eB2082cEe7632C12a968dEDF304bCac2deF",
+        "0xB82381A3fBD3FaFA77B3a7bE693342618240067b",
+        "0x03F1259b4986b8ae9040E250f958CEf09DaD8b6C"
+      ],
+      "0x03F1259b4986b8ae9040E250f958CEf09DaD8b6C": [
+        "0xEd84E536E7611B185b84329a31bED71351D82576",
+        "0x48Dce305f4209BD9926072Df3307b70602Bd8107",
+        "0x"
+      ],
+      "0xEd84E536E7611B185b84329a31bED71351D82576": [
+        "Wrapped liquid staked Ether 2.0",
+        "wstETH",
+        18,
+        "0xb150759C71073Edf7D90d3D053aB5e67ea731Aa2"
+      ]
+    }
   }
 }

@@ -16,5 +16,21 @@
       "commit": "d4fb3a89f9d0a39c7ee6f2601d33ffbf30085322",
       "relative_root": "contracts"
     }
+  },
+  "fail_on_comparison_error": true,
+  "bytecode_comparison": {
+    "constructor_args": {
+      "0x9348AF23B01F2B517AFE8f29B3183d2Bb7d69Fcf": [
+        "0xC7315f4FaaB2F700fc6b4704BB801c46ff6327AC",
+        "0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c",
+        "0x"
+      ],
+      "0xC7315f4FaaB2F700fc6b4704BB801c46ff6327AC": [
+        "0x31B72D76FB666844C41EdF08dF0254875Dbb7edB",
+        "0xca498Ee83eD3546321d4DC25e2789B0624F15f68",
+        "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
+        "0x76D8de471F54aAA87784119c60Df1bbFc852C415"
+      ]
+    }
   }
 }
