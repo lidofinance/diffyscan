@@ -1,0 +1,48 @@
+{
+  "contracts": {
+    "0xca498Ee83eD3546321d4DC25e2789B0624F15f68": "OssifiableProxy",
+    "0xE766BE7B76E3F4d06551CB169Dd69B10a58ba91D": "L2ERC20TokenBridge",
+    "0x76D8de471F54aAA87784119c60Df1bbFc852C415": "OssifiableProxy",
+    "0x16B8006b49db9022BF5457BD2de0144a7d0F970b": "ERC20Bridged"
+  },
+  "explorer_hostname": "blockscout.lisk.com",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/lido-l2",
+    "commit": "082e7eb59de63bd376b30886568813408d04f00b",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "d4fb3a89f9d0a39c7ee6f2601d33ffbf30085322",
+      "relative_root": "contracts"
+    }
+  },
+  "fail_on_comparison_error": true,
+  "bytecode_comparison": {
+    "constructor_args": {
+      "0xca498Ee83eD3546321d4DC25e2789B0624F15f68": [
+        "0xE766BE7B76E3F4d06551CB169Dd69B10a58ba91D",
+        "0xfD050cDa025f6378e54ab5fd5Da377D242Ed74d3",
+        "0x"
+      ],
+      "0xE766BE7B76E3F4d06551CB169Dd69B10a58ba91D": [
+        "0x4200000000000000000000000000000000000007",
+        "0x9348AF23B01F2B517AFE8f29B3183d2Bb7d69Fcf",
+        "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
+        "0x76D8de471F54aAA87784119c60Df1bbFc852C415"
+      ],
+      "0x76D8de471F54aAA87784119c60Df1bbFc852C415": [
+        "0x16B8006b49db9022BF5457BD2de0144a7d0F970b",
+        "0xfD050cDa025f6378e54ab5fd5Da377D242Ed74d3",
+        "0x"
+      ],
+      "0x16B8006b49db9022BF5457BD2de0144a7d0F970b": [
+        "Wrapped liquid staked Ether 2.0",
+        "wstETH",
+        18,
+        "0xca498Ee83eD3546321d4DC25e2789B0624F15f68"
+      ]
+    }
+  }
+}

@@ -166,6 +166,7 @@ def get_contract_from_explorer(
         explorer_hostname.endswith("mode.network")
         or explorer_hostname.endswith("blockscout.com")
         or explorer_hostname.endswith("swellnetwork.io")
+        or explorer_hostname.endswith("lisk.com")
     ):
         result = _get_contract_from_blockscout(explorer_hostname, contract_address)
     else:
