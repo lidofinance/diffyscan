@@ -8,7 +8,7 @@
   "explorer_hostname": "sepolia-blockscout.lisk.com",
   "github_repo": {
     "url": "https://github.com/lidofinance/lido-l2",
-    "commit": "c6ffd32fe2cbc3e0b5248f48804291c913275e2e",
+    "commit": "082e7eb59de63bd376b30886568813408d04f00b",
     "relative_root": ""
   },
   "dependencies": {
