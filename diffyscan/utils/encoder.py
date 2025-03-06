@@ -48,10 +48,16 @@ def encode_tuple(types: list, args: list):
         arg_value = args[arg_index]
         if arg_type == "address":
             encoded_offsets += encode_address(arg_value)
-        elif arg_type == "uint256" or arg_type == "bool" or arg_type == "uint8":
+        elif arg_type == "bool":
+            encoded_offsets += to_hex_with_alignment(int(bool(arg_value)))
+        # Handle any integral type: uint, uint8..uint256, int, int8..int256
+        elif re.match(r"^(u?int)(\d*)$", arg_type):
             encoded_offsets += to_hex_with_alignment(arg_value)
-        elif arg_type == "bytes32":
-            encoded_offsets += encode_bytes32(arg_value)
+        # Handle fixed-length bytes (e.g. bytes1..bytes32)
+        elif re.match(r"^bytes(\d+)$", arg_type):
+            match_len = re.match(r"^bytes(\d+)$", arg_type)
+            num_bytes = int(match_len.group(1))
+            encoded_offsets += encode_fixed_bytes(arg_value, num_bytes)
         elif arg_type == "address[]" and not arg_value:
             encoded_data += to_hex_with_alignment(0)
             offset = to_hex_with_alignment((arg_index + args_length) * 32)
