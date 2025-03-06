@@ -1,3 +1,5 @@
+import re
+
 from .custom_exceptions import EncoderError
 
 
@@ -10,8 +12,16 @@ def encode_address(address: str) -> str:
     return to_hex_with_alignment(number)
 
 
-def encode_bytes32(data: str) -> str:
-    return data.replace("0x", "")
+def encode_fixed_bytes(value: str, length: int) -> str:
+    raw_hex = value.lower().replace("0x", "")
+    max_hex_len = length * 2  # each byte is 2 hex chars
+    if len(raw_hex) > max_hex_len:
+        raise EncoderError(
+            f"Provided bytes length exceeds {length} bytes (max {max_hex_len} hex chars)."
+        )
+    # Right-pad with zeros up to fixed length, then left-pad to 64 hex chars total
+    raw_hex = raw_hex.ljust(max_hex_len, "0")  # fill the fixed bytes
+    return raw_hex.ljust(64, "0")  # fill up to 32 bytes in total
 
 
 def encode_bytes(data: str) -> str:
@@ -83,17 +93,19 @@ def encode_constructor_arguments(constructor_abi: list, constructor_config_args:
         for argument_index in range(arg_length):
             arg_type = constructor_abi[argument_index]["type"]
             arg_value = constructor_config_args[argument_index]
+
             if arg_type == "address":
                 constructor_calldata += encode_address(arg_value)
-            elif (
-                arg_type == "uint256"
-                or arg_type == "bool"
-                or arg_type == "uint8"
-                or arg_type == "uint32"
-            ):
+            elif arg_type == "bool":
+                constructor_calldata += to_hex_with_alignment(int(bool(arg_value)))
+            # Handle any integral type: uint, uint8..uint256, int, int8..int256
+            elif re.match(r"^(u?int)(\d*)$", arg_type):
                 constructor_calldata += to_hex_with_alignment(arg_value)
-            elif arg_type == "bytes32":
-                constructor_calldata += encode_bytes32(arg_value)
+            # Handle fixed-length bytes (e.g. bytes1..bytes32)
+            elif re.match(r"^bytes(\d+)$", arg_type):
+                match_len = re.match(r"^bytes(\d+)$", arg_type)
+                num_bytes = int(match_len.group(1))
+                constructor_calldata += encode_fixed_bytes(arg_value, num_bytes)
             elif arg_type == "bytes" or arg_type.endswith("[]"):
                 offset_to_start_of_data_part, encoded_value = encode_dynamic_type(
                     arg_value, argument_index
