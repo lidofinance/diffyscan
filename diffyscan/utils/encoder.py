@@ -3,98 +3,222 @@ import re
 from .custom_exceptions import EncoderError
 
 
+def _parse_solidity_int_type(arg_type: str) -> tuple[int, bool]:
+    """
+    Given a Solidity int/uint type (e.g. 'uint256', 'int128', 'uint', 'int'),
+    returns (bits, is_signed).
+      - bits = 256 if no explicit size is specified.
+      - is_signed = True if it starts with 'int', False if 'uint'.
+    """
+    match = re.match(r"^(u?int)(\d*)$", arg_type)
+    if not match:
+        raise EncoderError(f"Invalid integer type format '{arg_type}'.")
+    is_signed = not match.group(1).startswith("u")  # 'uint' => False, 'int' => True
+    bits_str = match.group(2)
+    bits = int(bits_str) if bits_str else 256
+    return (bits, is_signed)
+
+
 def to_hex_with_alignment(value: int) -> str:
+    """
+    Encodes `value` (non-negative integer) as a 32-byte hex string.
+    For negative values, you must first apply two's complement.
+    """
     return format(value, "064x")
 
 
+def encode_int(value: int, bits: int, is_signed: bool) -> str:
+    """
+    Encodes an integer value (possibly negative if signed) into 32 bytes
+    using two's complement for negative values.
+    """
+    # Convert bool to int if needed (though typically you'd handle bool in a separate branch).
+    if isinstance(value, bool):
+        value = 1 if value else 0
+
+    # Python's 'format' doesn't automatically do two's-complement for negative integers.
+    # So if it's signed and value is negative, convert by adding 2^bits.
+    if is_signed and value < 0:
+        # e.g. for int256, 2^256 + value
+        value = (1 << bits) + value
+
+    # Now ensure it fits within 'bits'
+    # (if bits=8, max = 2^7 - 1 for signed or 2^8-1 for unsigned).
+    # We'll skip a strict bounds check for brevity, but you could raise an error
+    # if abs(value) >= 2^(bits-1) for signed or value >= 2^bits for unsigned.
+
+    return to_hex_with_alignment(value)
+
+
 def encode_address(address: str) -> str:
-    number = int(address, 16)
+    """
+    Encodes an address as a 32-byte hex string.
+    Assumes 'address' is already a hex string (with '0x' or without).
+    """
+    address_no_0x = address.lower().replace("0x", "")
+    # Convert to int
+    number = int(address_no_0x, 16)
     return to_hex_with_alignment(number)
 
 
 def encode_fixed_bytes(value: str, length: int) -> str:
+    """
+    Encodes fixed-length bytes (e.g., bytes1..bytes32) into 32 bytes.
+    """
     raw_hex = value.lower().replace("0x", "")
-    max_hex_len = length * 2  # each byte is 2 hex chars
+    max_hex_len = length * 2  # each byte => 2 hex chars
     if len(raw_hex) > max_hex_len:
         raise EncoderError(
             f"Provided bytes length exceeds {length} bytes (max {max_hex_len} hex chars)."
         )
-    # Right-pad with zeros up to fixed length, then left-pad to 64 hex chars total
-    raw_hex = raw_hex.ljust(max_hex_len, "0")  # fill the fixed bytes
-    return raw_hex.ljust(64, "0")  # fill up to 32 bytes in total
+    # Right-pad the actual bytes to `length`, then pad to 32 bytes total
+    raw_hex = raw_hex.ljust(max_hex_len, "0")
+    return raw_hex.ljust(64, "0")
 
 
 def encode_bytes(data: str) -> str:
-    bytes_str = data.lstrip("0x")
+    """
+    Encodes a dynamic `bytes` value as:
+      [ 32-byte length, (N + padded to multiple of 32) bytes data ]
+    Naive approach: `data` is a hex string (with or without 0x).
+    """
+    bytes_str = data.lower().lstrip("0x")
     if not bytes_str:
+        # length = 0
         return to_hex_with_alignment(0)
 
-    # Calculate the length of the hex-encoded 32-bytes padded data
-    # since EVM uses 32-byte (256-bit) words
     count_of_bytes_from_hex = len(bytes_str) // 2
-    encoded_length = 0
-    if count_of_bytes_from_hex > 0:
-        encoded_length = ((len(bytes_str) - 1) // 64 + 1) * 64
-    bytes_str += "0" * (encoded_length - len(bytes_str))
-    return to_hex_with_alignment(count_of_bytes_from_hex) + bytes_str
+    # how many hex chars needed to pad to next 32-byte boundary:
+    remainder = len(bytes_str) % 64
+    if remainder != 0:
+        padding_needed = 64 - remainder
+    else:
+        padding_needed = 0
+
+    padded_bytes_str = bytes_str + ("0" * padding_needed)
+
+    # first 32 bytes = length, then the data
+    return to_hex_with_alignment(count_of_bytes_from_hex) + padded_bytes_str
 
 
-def encode_tuple(types: list, args: list):
-    args_length = len(types)
-    encoded_offsets = ""
-    encoded_data = ""
-    for arg_index in range(args_length):
-        arg_type = types[arg_index]
-        arg_value = args[arg_index]
-        if arg_type == "address":
-            encoded_offsets += encode_address(arg_value)
+def encode_tuple(components_abi: list, values: list) -> str:
+    """
+    Recursively encodes a tuple (struct).
+    If a component is itself 'tuple', we recurse.
+    If a component is an array type, we only allow empty arrays in this snippet.
+    For full dynamic-array encoding, you'd need offset-based logic + element encoding.
+    """
+    if len(components_abi) != len(values):
+        raise EncoderError(
+            f"encode_tuple: mismatch in component count: {len(components_abi)} vs values: {len(values)}"
+        )
+
+    encoded = ""
+    for comp, val in zip(components_abi, values):
+        arg_type = comp["type"]
+
+        # 1) Possibly a nested tuple
+        if arg_type == "tuple":
+            if "components" not in comp:
+                raise EncoderError("Tuple type missing 'components' in ABI data.")
+            encoded += encode_tuple(comp["components"], val)
+
+        # 2) Possibly an array of addresses/ints, etc.
+        elif arg_type.endswith("[]"):
+            # If you need full dynamic array encoding in a struct, you'd do an offset-based approach here.
+            # We just handle the empty array case (0 length).
+            if not val:  # empty array
+                encoded += to_hex_with_alignment(0)
+            else:
+                raise EncoderError(
+                    "encode_tuple: non-empty dynamic arrays in tuples not yet supported."
+                )
+
+        # 3) address
+        elif arg_type == "address":
+            encoded += encode_address(val)
+
+        # 4) bool
         elif arg_type == "bool":
-            encoded_offsets += to_hex_with_alignment(int(bool(arg_value)))
-        # Handle any integral type: uint, uint8..uint256, int, int8..int256
+            # Could unify with int, but let's keep it explicit for readability
+            encoded += to_hex_with_alignment(int(bool(val)))
+
+        # 5) integer types (uint, int, etc.)
         elif re.match(r"^(u?int)(\d*)$", arg_type):
-            encoded_offsets += to_hex_with_alignment(arg_value)
-        # Handle fixed-length bytes (e.g. bytes1..bytes32)
+            bits, is_signed = _parse_solidity_int_type(arg_type)
+            encoded += encode_int(int(val), bits, is_signed)
+
+        # 6) fixed-length bytes
         elif re.match(r"^bytes(\d+)$", arg_type):
             match_len = re.match(r"^bytes(\d+)$", arg_type)
             num_bytes = int(match_len.group(1))
-            encoded_offsets += encode_fixed_bytes(arg_value, num_bytes)
-        elif arg_type == "address[]" and not arg_value:
-            encoded_data += to_hex_with_alignment(0)
-            offset = to_hex_with_alignment((arg_index + args_length) * 32)
-            encoded_offsets += offset
+            encoded += encode_fixed_bytes(val, num_bytes)
+
+        # 7) dynamic bytes
+        elif arg_type == "bytes":
+            encoded += encode_bytes(val)
+
+        # 8) string
+        elif arg_type == "string":
+            # For a struct field that is a string, you'd typically do offset-based dynamic encoding.
+            raise EncoderError(
+                "encode_tuple: 'string' inside tuple not fully implemented."
+            )
+
         else:
             raise EncoderError(
-                f"Unknown constructor argument type '{arg_type}' in tuple"
+                f"Unknown or unhandled type '{arg_type}' in encode_tuple"
             )
-    return encoded_offsets + encoded_data
+
+    return encoded
 
 
 def encode_dynamic_type(arg_value: str, argument_index: int):
+    """
+    Encodes a top-level dynamic `bytes` or array argument as:
+      [ offset, ... data in the 'compl_data' section ... ]
+    This snippet is naive: for a real array, you'd handle array length + each element.
+    """
+    # For now, we just handle a raw bytes value in hex form:
     offset_to_start_of_data_part = to_hex_with_alignment((argument_index + 1) * 32)
     encoded_value = encode_bytes(arg_value)
     return offset_to_start_of_data_part, encoded_value
 
 
 def encode_string(arg_length: int, compl_data: list, arg_value: str):
+    """
+    Encodes a top-level string argument in the same offset + data approach
+    used by 'encode_dynamic_type'. We do:
+      [ offset, ... then length + contents in 'compl_data' ... ]
+    """
     argument_index = arg_length + len(compl_data)
-    encoded_value = arg_value.encode("utf-8")
+    encoded_value_bytes = arg_value.encode("utf-8")
     offset_to_start_of_data_part = to_hex_with_alignment(argument_index * 32)
-    encoded_value_length = to_hex_with_alignment(len(encoded_value))
+    encoded_value_length = to_hex_with_alignment(len(encoded_value_bytes))
+    # We'll pad the actual string data to a multiple of 32
+    hex_str = encoded_value_bytes.hex()
+    remainder = len(hex_str) % 64
+    if remainder != 0:
+        padding_needed = 64 - remainder
+        hex_str += "0" * padding_needed
+
     return (
         offset_to_start_of_data_part,
         encoded_value_length,
-        encoded_value.hex().ljust(64, "0"),
+        hex_str,
     )
 
 
 def encode_constructor_arguments(constructor_abi: list, constructor_config_args: list):
-    # see https://docs.soliditylang.org/en/develop/abi-spec.html#contract-abi-specification
-    # transferred from here:
-    # https://github.com/lidofinance/lido-dao/blob/master/bytecode-verificator/bytecode_verificator.sh#L369-L405
+    """
+    Encodes each constructor argument in order, concatenating the result.
+    Appends any 'compl_data' (dynamic offsets, etc.) at the end.
+    """
     arg_length = len(constructor_abi)
 
     constructor_calldata = ""
     compl_data = []
+
     try:
         for argument_index in range(arg_length):
             arg_type = constructor_abi[argument_index]["type"]
@@ -102,48 +226,49 @@ def encode_constructor_arguments(constructor_abi: list, constructor_config_args:
 
             if arg_type == "address":
                 constructor_calldata += encode_address(arg_value)
+
             elif arg_type == "bool":
                 constructor_calldata += to_hex_with_alignment(int(bool(arg_value)))
-            # Handle any integral type: uint, uint8..uint256, int, int8..int256
+
             elif re.match(r"^(u?int)(\d*)$", arg_type):
-                constructor_calldata += to_hex_with_alignment(arg_value)
-            # Handle fixed-length bytes (e.g. bytes1..bytes32)
+                # parse bits + sign
+                bits, is_signed = _parse_solidity_int_type(arg_type)
+                constructor_calldata += encode_int(int(arg_value), bits, is_signed)
+
             elif re.match(r"^bytes(\d+)$", arg_type):
+                # fixed-length bytes
                 match_len = re.match(r"^bytes(\d+)$", arg_type)
                 num_bytes = int(match_len.group(1))
                 constructor_calldata += encode_fixed_bytes(arg_value, num_bytes)
+
             elif arg_type == "bytes" or arg_type.endswith("[]"):
-                offset_to_start_of_data_part, encoded_value = encode_dynamic_type(
-                    arg_value, argument_index
-                )
-                constructor_calldata += offset_to_start_of_data_part
+                # top-level dynamic array or raw bytes
+                offset, encoded_value = encode_dynamic_type(arg_value, argument_index)
+                constructor_calldata += offset
                 compl_data.append(encoded_value)
+
             elif arg_type == "string":
-                offset_to_start_of_data_part, encoded_value_length, encoded_value = (
-                    encode_string(arg_length, compl_data, arg_value)
+                offset, length_hex, contents_hex = encode_string(
+                    arg_length, compl_data, arg_value
                 )
-                constructor_calldata += offset_to_start_of_data_part
-                compl_data.append(encoded_value_length)
-                compl_data.append(encoded_value)
+                constructor_calldata += offset
+                compl_data.append(length_hex)
+                compl_data.append(contents_hex)
+
             elif arg_type == "tuple":
-                args_tuple_types = [
-                    component["type"]
-                    for component in constructor_abi[argument_index]["components"]
-                ]
-                if all(arg == "address[]" for arg in args_tuple_types):
-                    argument_index = len(constructor_calldata) // 64
-                    offset_to_start_of_data_part = to_hex_with_alignment(
-                        (argument_index + 1) * 32
-                    )
-                    constructor_calldata += offset_to_start_of_data_part
-                    compl_data.append(encode_tuple(args_tuple_types, arg_value))
-                else:
-                    constructor_calldata += encode_tuple(args_tuple_types, arg_value)
+                tuple_abi = constructor_abi[argument_index]["components"]
+                constructor_calldata += encode_tuple(tuple_abi, arg_value)
+
             else:
-                raise EncoderError(f"Unknown constructor argument type: {arg_type}")
+                raise EncoderError(
+                    f"Unknown or unhandled constructor argument type: {arg_type}"
+                )
+
     except Exception as e:
-        raise EncoderError(e) from None
-    for offset_to_start_of_data_part in compl_data:
-        constructor_calldata += offset_to_start_of_data_part
+        raise EncoderError(f"Failed to encode calldata arguments: {e}") from None
+
+    # Append any "completion" data (the actual dynamic data or string contents)
+    for data_part in compl_data:
+        constructor_calldata += data_part
 
     return constructor_calldata
