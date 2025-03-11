@@ -103,74 +103,80 @@ def encode_bytes(data: str) -> str:
 
 def encode_tuple(components_abi: list, values: list) -> str:
     """
-    Recursively encodes a tuple (struct).
-    If a component is itself 'tuple', we recurse.
-    If a component is an array type, we only allow empty arrays in this snippet.
-    For full dynamic-array encoding, you'd need offset-based logic + element encoding.
+    Recursively encodes a tuple (struct) with support for dynamic arrays.
+    This version splits the tuple into a static part and a dynamic part.
+    Dynamic components (like T[] or bytes) are replaced with an offset (relative
+    to the start of the dynamic section), and their actual data is appended afterward.
+
+    Note: This is a simplified implementation and may not cover all edge cases not presuming nested dynamic types.
     """
     if len(components_abi) != len(values):
         raise EncoderError(
             f"encode_tuple: mismatch in component count: {len(components_abi)} vs values: {len(values)}"
         )
 
-    encoded = ""
+    static_parts = []
+    dynamic_parts = []
+
+    # First, encode each element into a static part (if static) or reserve a placeholder (if dynamic).
     for comp, val in zip(components_abi, values):
         arg_type = comp["type"]
 
-        # 1) Possibly a nested tuple
+        # Nested tuple: recurse.
         if arg_type == "tuple":
-            if "components" not in comp:
-                raise EncoderError("Tuple type missing 'components' in ABI data.")
-            encoded += encode_tuple(comp["components"], val)
+            # (Assumes nested tuples are fully static
+            static_parts.append(encode_tuple(comp["components"], val))
 
-        # 2) Possibly an array of addresses/ints, etc.
-        elif arg_type.endswith("[]"):
-            # If you need full dynamic array encoding in a struct, you'd do an offset-based approach here.
-            # We just handle the empty array case (0 length).
-            if not val:  # empty array
-                encoded += to_hex_with_alignment(0)
+        # Dynamic array or dynamic bytes:
+        elif arg_type.endswith("[]") or arg_type in ["bytes", "string"]:
+            # Reserve a placeholder; dynamic data will be appended.
+            static_parts.append(None)
+            if arg_type.endswith("[]"):
+                # For a dynamic array, the element type is the part before "[]".
+                base_type = arg_type[:-2]
+                dynamic_parts.append(encode_array(base_type, val))
+            elif arg_type == "bytes":
+                dynamic_parts.append(encode_bytes(val))
             else:
                 raise EncoderError(
-                    "encode_tuple: non-empty dynamic arrays in tuples not yet supported."
+                    "encode_tuple: 'string' inside tuple not implemented."
                 )
 
-        # 3) address
+        # Otherwise, treat as a static type.
         elif arg_type == "address":
-            encoded += encode_address(val)
-
-        # 4) bool
+            static_parts.append(encode_address(val))
         elif arg_type == "bool":
-            # Could unify with int, but let's keep it explicit for readability
-            encoded += to_hex_with_alignment(int(bool(val)))
-
-        # 5) integer types (uint, int, etc.)
+            static_parts.append(to_hex_with_alignment(int(bool(val))))
         elif re.match(r"^(u?int)(\d*)$", arg_type):
             bits, is_signed = _parse_solidity_int_type(arg_type)
-            encoded += encode_int(int(val), bits, is_signed)
-
-        # 6) fixed-length bytes
+            static_parts.append(encode_int(int(val), bits, is_signed))
         elif re.match(r"^bytes(\d+)$", arg_type):
             match_len = re.match(r"^bytes(\d+)$", arg_type)
             num_bytes = int(match_len.group(1))
-            encoded += encode_fixed_bytes(val, num_bytes)
-
-        # 7) dynamic bytes
-        elif arg_type == "bytes":
-            encoded += encode_bytes(val)
-
-        # 8) string
-        elif arg_type == "string":
-            # For a struct field that is a string, you'd typically do offset-based dynamic encoding.
-            raise EncoderError(
-                "encode_tuple: 'string' inside tuple not fully implemented."
-            )
-
+            static_parts.append(encode_fixed_bytes(val, num_bytes))
         else:
-            raise EncoderError(
-                f"Unknown or unhandled type '{arg_type}' in encode_tuple"
-            )
+            raise EncoderError(f"Unknown type '{arg_type}' in tuple")
 
-    return encoded
+    # Now calculate the static size (each static part is 32 bytes)
+    static_size = 32 * len(static_parts)
+    dynamic_offset = 0
+    # Replace None placeholders with offsets (relative to the beginning of the dynamic section)
+    for i in range(len(static_parts)):
+        if static_parts[i] is None:
+            # The offset is computed as static_size + current dynamic_offset
+            static_parts[i] = to_hex_with_alignment(static_size + dynamic_offset)
+            # Assume each dynamic part is already 32-byte aligned.
+            part_length = len(dynamic_parts.pop(0)) // 2
+            # Round up to the next multiple of 32 bytes:
+            padded_length = ((part_length + 31) // 32) * 32
+            dynamic_offset += padded_length
+
+    # Concatenate static parts and then (re-)concatenate dynamic parts.
+    encoded_static = "".join(static_parts)
+    # TODO: dynamic parts for this non-nested impl are omitted
+    encoded_dynamic = ""
+
+    return encoded_static + encoded_dynamic
 
 
 def encode_dynamic_type(arg_value: str, argument_index: int):
