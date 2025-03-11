@@ -209,11 +209,53 @@ def encode_string(arg_length: int, compl_data: list, arg_value: str):
     )
 
 
+def encode_array(element_type: str, elements: list) -> str:
+    """
+    Encodes a one-dimensional dynamic array of the given element_type:
+      - (u)intX, bool, address, or a simple type you already handle
+    Returns the concatenated hex string:
+      [ 32-byte array length, each element in 32 bytes (or more if necessary) ]
+    """
+    # 1) Encode array length
+    length_hex = to_hex_with_alignment(len(elements))
+
+    # 2) Encode each element
+    elements_hex = ""
+
+    # The element_type might be 'address', 'uint256', etc.
+    # If it's a nested array, e.g. 'uint256[]', you must do recursion.
+    # For simplicity, let's handle only top-level single array of simple types.
+
+    # If it's e.g. 'uint', parse bits, is_signed
+    uint_int_match = re.match(r"^(u?int)(\d*)$", element_type)
+
+    for elem in elements:
+        if element_type == "address":
+            elements_hex += encode_address(elem)
+
+        elif element_type == "bool":
+            elements_hex += to_hex_with_alignment(int(bool(elem)))
+
+        elif uint_int_match:
+            bits, is_signed = _parse_solidity_int_type(element_type)
+            elements_hex += encode_int(int(elem), bits, is_signed)
+
+        else:
+            # If you have 'bytes32[]' or something else, handle it:
+            bytesN_match = re.match(r"^bytes(\d+)$", element_type)
+            if bytesN_match:
+                num_bytes = int(bytesN_match.group(1))
+                elements_hex += encode_fixed_bytes(elem, num_bytes)
+            else:
+                # If you want advanced features like nested arrays or strings, you'd do it here
+                raise EncoderError(
+                    f"encode_array: unhandled element type '{element_type}'"
+                )
+
+    return length_hex + elements_hex
+
+
 def encode_constructor_arguments(constructor_abi: list, constructor_config_args: list):
-    """
-    Encodes each constructor argument in order, concatenating the result.
-    Appends any 'compl_data' (dynamic offsets, etc.) at the end.
-    """
     arg_length = len(constructor_abi)
 
     constructor_calldata = ""
@@ -231,18 +273,15 @@ def encode_constructor_arguments(constructor_abi: list, constructor_config_args:
                 constructor_calldata += to_hex_with_alignment(int(bool(arg_value)))
 
             elif re.match(r"^(u?int)(\d*)$", arg_type):
-                # parse bits + sign
                 bits, is_signed = _parse_solidity_int_type(arg_type)
                 constructor_calldata += encode_int(int(arg_value), bits, is_signed)
 
             elif re.match(r"^bytes(\d+)$", arg_type):
-                # fixed-length bytes
                 match_len = re.match(r"^bytes(\d+)$", arg_type)
                 num_bytes = int(match_len.group(1))
                 constructor_calldata += encode_fixed_bytes(arg_value, num_bytes)
 
-            elif arg_type == "bytes" or arg_type.endswith("[]"):
-                # top-level dynamic array or raw bytes
+            elif arg_type == "bytes":
                 offset, encoded_value = encode_dynamic_type(arg_value, argument_index)
                 constructor_calldata += offset
                 compl_data.append(encoded_value)
@@ -259,6 +298,18 @@ def encode_constructor_arguments(constructor_abi: list, constructor_config_args:
                 tuple_abi = constructor_abi[argument_index]["components"]
                 constructor_calldata += encode_tuple(tuple_abi, arg_value)
 
+            elif arg_type.endswith("[]"):
+                # The "base type" is everything before the final "[]"
+                element_type = arg_type[:-2]  # e.g. "uint256" or "address"
+
+                # 1) Write the offset for this dynamic array
+                offset_hex = to_hex_with_alignment((argument_index + 1) * 32)
+                constructor_calldata += offset_hex
+
+                # 2) Build the array payload: length + each element
+                array_payload = encode_array(element_type, arg_value)
+                compl_data.append(array_payload)
+
             else:
                 raise EncoderError(
                     f"Unknown or unhandled constructor argument type: {arg_type}"
@@ -267,7 +318,7 @@ def encode_constructor_arguments(constructor_abi: list, constructor_config_args:
     except Exception as e:
         raise EncoderError(f"Failed to encode calldata arguments: {e}") from None
 
-    # Append any "completion" data (the actual dynamic data or string contents)
+    # Finally, append any "completion" data
     for data_part in compl_data:
         constructor_calldata += data_part
 

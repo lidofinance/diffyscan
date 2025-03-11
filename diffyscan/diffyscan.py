@@ -65,7 +65,9 @@ def run_bytecode_diff(
         logger.okay(f"Bytecodes fully match")
         return
 
-    logger.info(f"Automated match hasn't worked out")
+    logger.info(
+        f"Static bytecodes not match, trying local deployment to bind immutables"
+    )
 
     calldata = get_calldata(
         contract_address_from_config,
