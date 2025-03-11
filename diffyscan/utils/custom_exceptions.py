@@ -36,7 +36,7 @@ class HardhatError(BaseCustomException):
 
 class ExplorerError(BaseCustomException):
     def __init__(self, reason: str):
-        super().__init__(f"Failed to communicate with Blockchain explorer: {reason}")
+        super().__init__(f"Failed to communicate with a remote resource: {reason}")
 
 
 class BinVerifierError(BaseCustomException):

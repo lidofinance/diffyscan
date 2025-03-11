@@ -62,10 +62,12 @@ def run_bytecode_diff(
     is_fully_matched = local_compiled_bytecode == remote_deployed_bytecode
 
     if is_fully_matched:
-        logger.okay(f"Bytecodes are fully matched")
+        logger.okay(f"Bytecodes fully match")
         return
 
-    logger.info(f"Automated match hasn't worked out")
+    logger.info(
+        f"Static bytecodes not match, trying local deployment to bind immutables"
+    )
 
     calldata = get_calldata(
         contract_address_from_config,
@@ -86,7 +88,7 @@ def run_bytecode_diff(
     is_fully_matched = local_deployed_bytecode == remote_deployed_bytecode
 
     if is_fully_matched:
-        logger.okay(f"Bytecodes are fully matched")
+        logger.okay(f"Bytecodes fully match")
         return
 
     deep_match_bytecode(

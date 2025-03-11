@@ -239,13 +239,10 @@ def get_explorer_hostname(config):
         explorer_hostname = load_env(
             config["explorer_hostname_env_var"], masked=True, required=False
         )
-    if explorer_hostname is None:
-        logger.warn(
-            f'Failed to find an explorer hostname env in the config ("explorer_hostname_env_var")'
-        )
+    elif "explorer_hostname" in config:
         explorer_hostname = config["explorer_hostname"]
-    if explorer_hostname is None:
+    else:
         logger.warn(
-            f'Failed to find explorer hostname in the config ("explorer_hostname")'
+            f'Failed to find explorer hostname in the config ("explorer_hostname" or "explorer_hostname_env_var")'
         )
     return explorer_hostname
