@@ -1,0 +1,126 @@
+{
+  "contracts": {
+    "<DG_ADMIN_EXECUTOR>": "Executor",
+    "<DUAL_GOVERNANCE>": "DualGovernance",
+    "<TIMELOCK>": "EmergencyProtectedTimelock",
+    "<DG_CONFIG>": "ImmutableDualGovernanceConfigProvider",
+    "<DRY_RUN_EMERGENCY_GOVERNANCE>": "TimelockedGovernance",
+    "<TIEBREAKER_CORE>": "TiebreakerCoreCommittee",
+    "<TIEBREAKER_SUB_1>": "TiebreakerSubCommittee",
+    "<TIEBREAKER_SUB_2>": "TiebreakerSubCommittee",
+    "<TIEBREAKER_SUB_3>": "TiebreakerSubCommittee",
+    "<ESCROW_MASTER_COPY>": "Escrow",
+    "<RESEAL_MANAGER>": "ResealManager",
+    "<DAO_EMERGENCY_GOVERNANCE>": "TimelockedGovernance",
+  },
+  "explorer_hostname": "api-hoodi.etherscan.io",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/dual-governance",
+    "commit": "<AUDITED_COMMIT>",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "lib/openzeppelin-contracts/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "dbb6104ce834628e473d2173bbc9d47f81a9eec3",
+      "relative_root": "contracts"
+    }
+  },
+  "fail_on_comparison_error": false,
+  "bytecode_comparison": {
+    "hardhat_config_name": "hardhat_configs/hoodi.config.js",
+    "constructor_args": {
+      "<DG_ADMIN_EXECUTOR>": [
+        "<DEPLOYER_ADDRESS>"
+      ],
+      "<DUAL_GOVERNANCE>": [
+        [
+          "<TIMELOCK>",
+          "<RESEAL_MANAGER>",
+          "<DG_CONFIG>"
+        ],
+        [
+          "<STETH>",
+          "<WSTETH>",
+          "<WITHDRAWAL_QUEUE>"
+        ],
+        [
+          <MIN_WITHDRAWAL_BATCH_SIZE>,
+          <MIN_TIEBREAKER_ACTIVATION_TIMEOUT>,
+          <MAX_TIEBREAKER_ACTIVATION_TIMEOUT>,
+          <MAX_SEALABLE_WITHDRAWAL_BLOCKERS_COUNT>,
+          <MAX_MIN_ASSETS_LOCK_DURATION>
+        ]
+      ],
+      "<TIMELOCK>": [
+        [
+          <MIN_EXECUTION_DELAY>,
+          <MAX_AFTER_SUBMIT_DELAY>,
+          <MAX_AFTER_SCHEDULE_DELAY>,
+          <MAX_EMERGENCY_MODE_DURATION>,
+          <MAX_EMERGENCY_PROTECTION_DURATION>
+        ],
+        "<DG_ADMIN_EXECUTOR>",
+        <AFTER_SUBMIT_DELAY>,
+        <AFTER_SCHEDULE_DELAY>
+      ],
+      "<DG_CONFIG>": [
+        [
+          <FIRST_SEAL_RAGE_QUIT_SUPPORT>,
+          <SECOND_SEAL_RAGE_QUIT_SUPPORT>,
+          <MIN_ASSETS_LOCK_DURATION>,
+          <VETO_SIGNALLING_MIN_DURATION>,
+          <VETO_SIGNALLING_MAX_DURATION>,
+          <VETO_SIGNALLING_MIN_ACTIVE_DURATION>,
+          <VETO_SIGNALLING_DEACTIVATION_MAX_DURATION>,
+          <VETO_COOLDOWN_DURATION>,
+          <RAGE_QUIT_EXTENSION_PERIOD_DURATION>,
+          <RAGE_QUIT_ETH_WITHDRAWALS_MIN_DELAY>,
+          <RAGE_QUIT_ETH_WITHDRAWALS_MAX_DELAY>,
+          <RAGE_QUIT_ETH_WITHDRAWALS_DELAY_GROWTH>
+        ]
+      ],
+      "<DRY_RUN_EMERGENCY_GOVERNANCE>": [
+        "<DRY_RUN_PROPOSER>",
+        "<TIMELOCK>"
+      ],
+      "<TIEBREAKER_CORE>": [
+        "<DEPLOYER_ADDRESS>",
+        "<DUAL_GOVERNANCE>",
+        "<TIME_LOCK>"
+      ],
+      "<TIEBREAKER_SUB_1>": [
+        [<TIEBREAKER_SUB_1_MEMBERS>
+        ],
+	      <TIEBREAKER_SUB_1_QUORUM>,
+        "<TIEBREAKER_CORE>"
+      ],
+      "<TIEBREAKER_SUB_2>": [
+        [<TIEBREAKER_SUB_2_MEMBERS>
+        ],
+	      <TIEBREAKER_SUB_2_QUORUM>,
+        "<TIEBREAKER_CORE>"
+      ],
+      "<TIEBREAKER_SUB_3>": [
+        [<TIEBREAKER_SUB_3_MEMBERS>
+        ],
+	      <TIEBREAKER_SUB_3_QUORUM>,
+        "<TIEBREAKER_CORE>"
+      ],
+      "<ESCROW_MASTER_COPY>": [
+        "<STETH>",
+        "<WSTETH>",
+        "<WITHDRAWAL_QUEUE>""<DUAL_GOVERNANCE>",
+        <MIN_WITHDRAWAL_BATCH_SIZE>,
+	      <MAX_MIN_ASSETS_LOCK_DURATION>
+      ],
+      "<RESEAL_MANAGER>": [
+        "<TIMELOCK>"
+      ],
+      "<DAO_EMERGENCY_GOVERNANCE>": [
+        "<DAO_VOTING>",
+        "<TIMELOCK>"
+      ]
+    }
+  }
+}

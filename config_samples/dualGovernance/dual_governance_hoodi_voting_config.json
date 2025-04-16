@@ -1,0 +1,52 @@
+{
+  "contracts": {
+    "<DG_LAUNCH_VERIFIER>": "DGLaunchVerifier",
+    "<OMNIBUS_CONTRACT>": "OmnibusHoodi",
+    "<ROLES_VALIDATOR>": "HoodiRolesValidator",
+    "<TIME_CONSTRAINTS>": "TimeConstraints"
+  },
+  "explorer_hostname": "api-hoodi.etherscan.io",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/dual-governance",
+    "commit": "<DEPLOY_COMMIT>",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "lib/openzeppelin-contracts/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "dbb6104ce834628e473d2173bbc9d47f81a9eec3",
+      "relative_root": "contracts"
+    }
+  },
+  "fail_on_comparison_error": false,
+  "bytecode_comparison": {
+    "hardhat_config_name": "hardhat_configs/hoodi.config.js",
+    "constructor_args": {
+      "<DG_LAUNCH_VERIFIER>": [
+        [
+          "<TIMELOCK>",
+          "<DUAL_GOVERNANCE>",
+          "<DAO_EMERGENCY_GOVERNANCE>",
+          "<EMERGENCY_ACTIVATION_COMMITTEE>",
+          "<EMERGENCY_EXECUTION_COMMITTEE>",
+				 <EMERGENCY_PROTECTION_END_DATE>,
+				 <EMERGENCY_MODE_DURATION>,
+          2
+        ]
+      ],
+      "<ROLES_VALIDATOR>": [
+        "<DG_ADMIN_EXECUTOR>",
+        "<RESEAL_MANAGER>"
+      ],
+      "<TIME_CONSTRAINTS>": [],
+      "<OMNIBUS_CONTRACT>": [
+        "<DUAL_GOVERNANCE>",
+        "<DG_ADMIN_EXECUTOR>",
+        "<RESEAL_MANAGER>",
+        "<ROLES_VALIDATOR>",
+        "<DG_LAUNCH_VERIFIER>",
+        "<TIME_CONSTRAINTS>"
+      ]
+    }
+  }
+}
