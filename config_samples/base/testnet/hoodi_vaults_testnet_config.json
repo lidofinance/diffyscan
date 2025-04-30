@@ -1,0 +1,201 @@
+{
+  "contracts": {
+    "0xbE861866E2Ca8f401e2b51b2cFb36A61B0Bf6840": "OssifiableProxy",
+    "0x04d160820C0f2E2C693D9Eb26078189D10A1a3e1": "AppProxyUpgradeable",
+    "0x7d7EcCE45cAc6eF043f34e8049399b4b03044F97": "OssifiableProxy",
+    "0xEC39F7ea18BC1c1bf3C0617fb6110dfC62d1e888": "LidoTemplate",
+    "0x9b322efdB04840052f97649fD0C27B678De88DA2": "MinFirstAllocationStrategy",
+    "0x4d0E05677c1005C4C808cb5e824abE99b2b39497": "UNKNOWN",
+    "0xccb86588b776743CCCB6572D2a6eAFd466012191": "OssifiableProxy",
+    "0x7FC784952EE7e96e9A8C3f271712805fc439dfD7": "OperatorGrid",
+    "0x2c2e8fE09a2449aB93D9eAD68f987D33189E6168": "OracleDaemonConfig",
+    "0x4077619FBAdB002fDC125171c8daf6a149C71166": "OracleReportSanityChecker",
+    "0x4C003D5586B32359Df5f37B42A2E717E24817Ec2": "OssifiableProxy",
+    "0xb92681d60E4314F0f9DEdFcCC3C0A4E156080357": "PredepositGuarantee",
+    "0xf320D34b55E89826631C2bb1b3c5b50932cCaB3C": "OssifiableProxy",
+    "0xad7a77F8eB03ac02dfb913e5A757F543CBb2F76c": "StakingRouter",
+    "0xAF5bf52E784361f4eBBA86f2e918fFDd6A31453A": "UpgradeableBeacon",
+    "0xBf18618d1Ba07cCcA63d3D74f6a9056762Eac3cA": "VaultFactory",
+    "0x7ade83C09A0Aa0FEA45695840067438a9dC96361": "StakingVault",
+    "0xaf41922d0b9677e8CF21D72a318C72a5188dd9f1": "OssifiableProxy",
+    "0x2F09B020505e833a523A87e8A7EA238C40771214": "ValidatorsExitBusOracle",
+    "0xDfA0B34F28b1b6735d2df150a99048139302a80E": "OssifiableProxy",
+    "0xd075E66A593779994dfcA9dd0A9a12aAbC2d3B65": "VaultHub",
+    "0xe41d78740A1009029c44E43618Fe09C8f368851F": "OssifiableProxy",
+    "0x15D5365e4061DA45BA2aeD01ba149d40ddCB1c78": "WithdrawalQueueERC721",
+    "0x79e52DbA27718B1b618FC519A8F05a1386F4A8d2": "WithdrawalsManagerProxy",
+    "0xb37ef8776e07f40cE146b83A5C36C2185755C40D": "WithdrawalVault",
+    "0xDFD55388020a8CEDADCe0B177DF5EF1E11553b43": "WstETH",
+    "0xF19E48C5Ad2F8aBB452F5A6AB9cb104E70495e08": "PinnedBeaconProxy"
+  },
+  "explorer_hostname": "api-hoodi.etherscan.io",
+  "explorer_token_env_var": "ETHERSCAN_TOKEN",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/core",
+    "commit": "v3.0.0-alpha",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "@aragon/apps-agent": {
+      "url": "https://github.com/lidofinance/aragon-apps",
+      "commit": "app-voting-v3.0.0-1",
+      "relative_root": "apps/agent"
+    },
+    "@aragon/apps-finance": {
+      "url": "https://github.com/lidofinance/aragon-apps",
+      "commit": "app-voting-v3.0.0-1",
+      "relative_root": "apps/finance"
+    },
+    "@aragon/apps-lido": {
+      "url": "https://github.com/lidofinance/aragon-apps",
+      "commit": "app-voting-v3.0.0-1",
+      "relative_root": ""
+    },
+    "@aragon/apps-vault": {
+      "url": "https://github.com/lidofinance/aragon-apps",
+      "commit": "app-voting-v3.0.0-1",
+      "relative_root": "apps/vault"
+    },
+    "@aragon/id": {
+      "url": "https://github.com/aragon/aragon-id",
+      "commit": "v2.1.1",
+      "relative_root": ""
+    },
+    "@aragon/minime": {
+      "url": "https://github.com/aragon/minime",
+      "commit": "1d5251fc88eee5024ff318d95bc9f4c5de130430",
+      "relative_root": ""
+    },
+    "@aragon/os": {
+      "url": "https://github.com/aragon/aragonOS",
+      "commit": "v4.4.0",
+      "relative_root": ""
+    },
+    "@openzeppelin/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "v3.4.0",
+      "relative_root": "contracts"
+    },
+    "@openzeppelin/contracts-v4.4": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "v4.4.1",
+      "relative_root": "contracts"
+    },
+    "@openzeppelin/contracts-v5.2": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "v5.2.0",
+      "relative_root": "contracts"
+    },
+    "openzeppelin-solidity": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-solidity",
+      "commit": "v2.0.0",
+      "relative_root": ""
+    }
+  },
+  "fail_on_comparison_error": true,
+  "bytecode_comparison": {
+    "constructor_args": {
+      "0xEC39F7ea18BC1c1bf3C0617fb6110dfC62d1e888": [
+        "0x26EDb7f0f223A25EE390aCCccb577F3a31edDfC5",
+        "0xb1833a044f74d4b37d8230941eBA11368999e057",
+        "0x5A8bF7fe99a69c2b34B540eA09d4a48c6ae78C21",
+        "0x4d0E05677c1005C4C808cb5e824abE99b2b39497",
+        "0xAa3dFDDA2670A3d2A5B9cd6669ce1E4cF99258D9",
+        "0xcA98541C98bCd77123eE74C4a37b8BDfd792C4b6"
+      ],
+      "0xccb86588b776743CCCB6572D2a6eAFd466012191": [
+        "0x7FC784952EE7e96e9A8C3f271712805fc439dfD7",
+        "0x26EDb7f0f223A25EE390aCCccb577F3a31edDfC5",
+        "0x"
+      ],
+      "0x7FC784952EE7e96e9A8C3f271712805fc439dfD7": [
+        "0xbE861866E2Ca8f401e2b51b2cFb36A61B0Bf6840"
+      ],
+      "0x2c2e8fE09a2449aB93D9eAD68f987D33189E6168": [
+        "0x26EDb7f0f223A25EE390aCCccb577F3a31edDfC5",
+        []
+      ],
+      "0x4077619FBAdB002fDC125171c8daf6a149C71166": [
+        "0xbE861866E2Ca8f401e2b51b2cFb36A61B0Bf6840",
+        "0x26EDb7f0f223A25EE390aCCccb577F3a31edDfC5",
+        [9000, 43200, 1000, 600, 8, 24, 128, 750000, 1000, 101, 50]
+      ],
+      "0x4C003D5586B32359Df5f37B42A2E717E24817Ec2": [
+        "0xb92681d60E4314F0f9DEdFcCC3C0A4E156080357",
+        "0x26EDb7f0f223A25EE390aCCccb577F3a31edDfC5",
+        "0x"
+      ],
+      "0xb92681d60E4314F0f9DEdFcCC3C0A4E156080357": [
+        "0x0000000000000000000000000000000000000000000000000096000000000028",
+        "0x0000000000000000000000000000000000000000000000000096000000000028",
+        0
+      ],
+      "0xf320D34b55E89826631C2bb1b3c5b50932cCaB3C": [
+        "0xad7a77F8eB03ac02dfb913e5A757F543CBb2F76c",
+        "0x26EDb7f0f223A25EE390aCCccb577F3a31edDfC5",
+        "0x"
+      ],
+      "0xad7a77F8eB03ac02dfb913e5A757F543CBb2F76c": [
+        "0x00000000219ab540356cBB839Cbe05303d7705Fa"
+      ],
+      "0xAF5bf52E784361f4eBBA86f2e918fFDd6A31453A": [
+        "0x7ade83C09A0Aa0FEA45695840067438a9dC96361",
+        "0x26EDb7f0f223A25EE390aCCccb577F3a31edDfC5"
+      ],
+      "0xBf18618d1Ba07cCcA63d3D74f6a9056762Eac3cA": [
+        "0xbE861866E2Ca8f401e2b51b2cFb36A61B0Bf6840",
+        "0xAF5bf52E784361f4eBBA86f2e918fFDd6A31453A",
+        "0x5667f7477325F85C1b5E324387545C5045A57E2b"
+      ],
+      "0x7ade83C09A0Aa0FEA45695840067438a9dC96361": [
+        "0xDfA0B34F28b1b6735d2df150a99048139302a80E",
+        "0x00000000219ab540356cBB839Cbe05303d7705Fa"
+      ],
+      "0xaf41922d0b9677e8CF21D72a318C72a5188dd9f1": [
+        "0x2F09B020505e833a523A87e8A7EA238C40771214",
+        "0x26EDb7f0f223A25EE390aCCccb577F3a31edDfC5",
+        "0x"
+      ],
+      "0x2F09B020505e833a523A87e8A7EA238C40771214": [
+        12,
+        1742213400,
+        "0xbE861866E2Ca8f401e2b51b2cFb36A61B0Bf6840"
+      ],
+      "0xDfA0B34F28b1b6735d2df150a99048139302a80E": [
+        "0xd075E66A593779994dfcA9dd0A9a12aAbC2d3B65",
+        "0x26EDb7f0f223A25EE390aCCccb577F3a31edDfC5",
+        "0x"
+      ],
+      "0xd075E66A593779994dfcA9dd0A9a12aAbC2d3B65": [
+        "0xbE861866E2Ca8f401e2b51b2cFb36A61B0Bf6840",
+        "0x04d160820C0f2E2C693D9Eb26078189D10A1a3e1",
+        1000
+      ],
+      "0xe41d78740A1009029c44E43618Fe09C8f368851F": [
+        "0x15D5365e4061DA45BA2aeD01ba149d40ddCB1c78",
+        "0x26EDb7f0f223A25EE390aCCccb577F3a31edDfC5",
+        "0x"
+      ],
+      "0x15D5365e4061DA45BA2aeD01ba149d40ddCB1c78": [
+        "0xDFD55388020a8CEDADCe0B177DF5EF1E11553b43",
+        "Lido: stETH Withdrawal NFT",
+        "unstETH"
+      ],
+      "0xb37ef8776e07f40cE146b83A5C36C2185755C40D": [
+        "0x04d160820C0f2E2C693D9Eb26078189D10A1a3e1",
+        "0x2cE254Fd852d6B5023b1B2355ae96A8d752a47cf"
+      ],
+      "0x79e52DbA27718B1b618FC519A8F05a1386F4A8d2": [
+        "0xd401Bf29751aE77cF5A479b22fbAaB30cD027dD6",
+        "0xb37ef8776e07f40cE146b83A5C36C2185755C40D"
+      ],
+      "0xDFD55388020a8CEDADCe0B177DF5EF1E11553b43": [
+        "0x04d160820C0f2E2C693D9Eb26078189D10A1a3e1"
+      ],
+      "0xF19E48C5Ad2F8aBB452F5A6AB9cb104E70495e08": [
+        "0xAF5bf52E784361f4eBBA86f2e918fFDd6A31453A",
+        "0x"
+      ]
+    }
+  }
+}
