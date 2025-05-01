@@ -16,13 +16,15 @@ def get_calldata(contract_address_from_config, target_compiled_contract, binary_
     )
 
     if raw_calldata_exist and calldata_args_exist:
-        raise CalldataError(
-            f"Contract address found in 'constructor_args' and in 'constructor_calldata' in config"
+        logger.warn(
+            "Contract address found in 'constructor_args' and in 'constructor_calldata' in config"
         )
+        return None
     if not raw_calldata_exist and not calldata_args_exist:
-        raise CalldataError(
+        logger.warn(
             "Contract address not found in 'constructor_args' and in 'constructor_calldata' in config"
         )
+        return None
     if raw_calldata_exist:
         return get_raw_calldata_from_config(contract_address_from_config, binary_config)
 
@@ -65,16 +67,15 @@ def parse_calldata_from_config(
     logger.info(f"Trying to parse calldata from config")
     constructor_abi = get_constructor_abi(target_compiled_contract)
     if constructor_abi is None:
-        raise CalldataError("Failed to find ABI constructor in compiled contract")
+        logger.warn("Failed to find ABI constructor in compiled contract")
+        return None
 
     if constructor_args is None:
-        raise CalldataError("Failed to find constructor's args in config")
+        logger.warn("Failed to find constructor's args in config")
+        return None
 
     calldata = encode_constructor_arguments(
         constructor_abi, constructor_args[contract_address_from_config]
     )
-
-    if not calldata:
-        raise CalldataError("Contract calldata is empty")
 
     return calldata
