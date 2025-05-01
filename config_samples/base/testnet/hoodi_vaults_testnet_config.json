@@ -1,11 +1,13 @@
 {
+  "unverified_contracts": {
+    "0x4d0E05677c1005C4C808cb5e824abE99b2b39497": "UNKNOWN"
+  },
   "contracts": {
     "0xbE861866E2Ca8f401e2b51b2cFb36A61B0Bf6840": "OssifiableProxy",
     "0x04d160820C0f2E2C693D9Eb26078189D10A1a3e1": "AppProxyUpgradeable",
     "0x7d7EcCE45cAc6eF043f34e8049399b4b03044F97": "OssifiableProxy",
     "0xEC39F7ea18BC1c1bf3C0617fb6110dfC62d1e888": "LidoTemplate",
     "0x9b322efdB04840052f97649fD0C27B678De88DA2": "MinFirstAllocationStrategy",
-    "0x4d0E05677c1005C4C808cb5e824abE99b2b39497": "UNKNOWN",
     "0xccb86588b776743CCCB6572D2a6eAFd466012191": "OssifiableProxy",
     "0x7FC784952EE7e96e9A8C3f271712805fc439dfD7": "OperatorGrid",
     "0x2c2e8fE09a2449aB93D9eAD68f987D33189E6168": "OracleDaemonConfig",
