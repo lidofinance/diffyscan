@@ -24,7 +24,7 @@ def get_bytecode_from_node(contract_address, rpc_url):
     ):
         raise NodeError(f"Received bad response: {sources_url_response_in_json}")
 
-    logger.okay(f"Bytecode was successfully received")
+    logger.okay("Bytecode was successfully received")
     return sources_url_response_in_json["result"]
 
 
@@ -38,9 +38,9 @@ def get_account(rpc_url):
     account_address_response = pull(rpc_url, payload).json()
 
     if "result" not in account_address_response:
-        raise NodeError(f"The deployer account isn't set")
+        raise NodeError("The deployer account isn't set")
 
-    logger.okay(f"The account was successfully received")
+    logger.okay("The account was successfully received")
 
     return account_address_response["result"][0]
 
@@ -61,7 +61,7 @@ def deploy_contract(rpc_url, deployer, data):
     if "error" in response_sendTransaction:
         raise NodeError(response_sendTransaction["error"]["message"])
 
-    logger.okay(f"Transaction was successfully deployed")
+    logger.okay("Transaction was successfully deployed")
 
     tx_hash = response_sendTransaction["result"]
 
@@ -80,11 +80,11 @@ def deploy_contract(rpc_url, deployer, data):
         or "contractAddress" not in response_getTransactionReceipt["result"]
         or "status" not in response_getTransactionReceipt["result"]
     ):
-        raise NodeError(f"Failed to received transaction receipt")
+        raise NodeError("Failed to received transaction receipt")
 
     if response_getTransactionReceipt["result"]["status"] != "0x1":
         raise NodeError(
-            f"Failed to received transaction receipt. \
+            "Failed to received transaction receipt. \
   Transaction has been reverted (status 0x0). Input missmatch?",
         )
 
