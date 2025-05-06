@@ -29,11 +29,7 @@ from .utils.binary_verifier import deep_match_bytecode
 from .utils.hardhat import hardhat
 from .utils.node_handler import get_bytecode_from_node, get_account, deploy_contract
 from .utils.calldata import get_calldata
-from .utils.custom_exceptions import (
-    ExceptionHandler,
-    BaseCustomException,
-    ExplorerError,
-)
+from .utils.custom_exceptions import ExceptionHandler, BaseCustomException
 
 __version__ = "0.0.0"
 
@@ -123,8 +119,6 @@ def run_source_diff(
     logger.info(
         f"Fetching source code from blockchain explorer {explorer_hostname} ..."
     )
-    if "solcInput" not in contract_code:
-        raise ExplorerError("No 'solcInput' found in contract code")
 
     source_files = (
         contract_code["solcInput"].items()
