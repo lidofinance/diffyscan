@@ -130,7 +130,7 @@ def _get_contract_from_blockscout(explorer_hostname, contract):
             "sources": source_files,
             "settings": {
                 "optimizer": {
-                    "enabled": response["optimization_enabled"],
+                    "enabled": response["optimization_enabled"] == True,
                     "runs": int(response["optimization_runs"]),
                 },
                 "outputSelection": {
@@ -243,6 +243,6 @@ def get_explorer_hostname(config):
         explorer_hostname = config["explorer_hostname"]
     else:
         logger.warn(
-            'Failed to find explorer hostname in the config ("explorer_hostname" or "explorer_hostname_env_var")'
+            f'Failed to find explorer hostname in the config ("explorer_hostname" or "explorer_hostname_env_var")'
         )
     return explorer_hostname

@@ -62,11 +62,11 @@ def run_bytecode_diff(
     is_fully_matched = local_compiled_bytecode == remote_deployed_bytecode
 
     if is_fully_matched:
-        logger.okay("Bytecodes fully match")
+        logger.okay(f"Bytecodes fully match")
         return
 
     logger.info(
-        "Static bytecodes not match, trying local deployment to bind immutables"
+        f"Static bytecodes not match, trying local deployment to bind immutables"
     )
 
     calldata = get_calldata(
@@ -88,7 +88,7 @@ def run_bytecode_diff(
     is_fully_matched = local_deployed_bytecode == remote_deployed_bytecode
 
     if is_fully_matched:
-        logger.okay("Bytecodes fully match")
+        logger.okay(f"Bytecodes fully match")
         return
 
     deep_match_bytecode(
@@ -122,7 +122,7 @@ def run_source_diff(
 
     source_files = (
         contract_code["solcInput"].items()
-        if "sources" not in contract_code["solcInput"]
+        if not "sources" in contract_code["solcInput"]
         else contract_code["solcInput"]["sources"].items()
     )
     files_count = len(source_files)
@@ -234,11 +234,13 @@ def process_config(
         )
     if explorer_token is None:
         logger.warn(
-            'Failed to find an explorer token in the config ("explorer_token_env_var")'
+            f'Failed to find an explorer token in the config ("explorer_token_env_var")'
         )
         explorer_token = os.getenv("ETHERSCAN_EXPLORER_TOKEN", default=None)
     if explorer_token is None:
-        logger.warn('Failed to find explorer token in env ("ETHERSCAN_EXPLORER_TOKEN")')
+        logger.warn(
+            f'Failed to find explorer token in env ("ETHERSCAN_EXPLORER_TOKEN")'
+        )
 
     github_api_token = os.getenv("GITHUB_API_TOKEN", "")
     if not github_api_token:
@@ -246,7 +248,7 @@ def process_config(
 
     if enable_binary_comparison:
         if "bytecode_comparison" not in config:
-            raise ValueError('Failed to find "bytecode_comparison" section in config')
+            raise ValueError(f'Failed to find "bytecode_comparison" section in config')
 
         local_rpc_url = load_env("LOCAL_RPC_URL", masked=False, required=True)
         remote_rpc_url = load_env("REMOTE_RPC_URL", masked=True, required=True)
@@ -292,7 +294,7 @@ def process_config(
                 ExceptionHandler.raise_exception_or_log(custom_exc)
                 traceback.print_exc()
     except KeyboardInterrupt:
-        logger.info("Keyboard interrupt by user")
+        logger.info(f"Keyboard interrupt by user")
 
     finally:
         if enable_binary_comparison:

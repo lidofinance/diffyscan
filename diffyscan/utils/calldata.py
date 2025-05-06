@@ -1,5 +1,6 @@
 from .logger import logger
 from .encoder import encode_constructor_arguments
+from .custom_exceptions import CalldataError
 
 
 def get_calldata(contract_address_from_config, target_compiled_contract, binary_config):
@@ -42,16 +43,16 @@ def get_constructor_abi(target_compiled_contract):
         ][0]
     except IndexError:
         logger.okay(
-            "Contract's ABI doesn't have a constructor, calldata calculation skipped"
+            f"Contract's ABI doesn't have a constructor, calldata calculation skipped"
         )
         return None
 
-    logger.okay("Constructor in ABI successfully found")
+    logger.okay(f"Constructor in ABI successfully found")
     return constructor_abi
 
 
 def get_raw_calldata_from_config(contract_address_from_config, binary_config):
-    logger.info("Trying to use prepared calldata from config")
+    logger.info(f"Trying to use prepared calldata from config")
 
     calldata_field = binary_config["constructor_calldata"]
     prepared_calldata_from_config = calldata_field[contract_address_from_config]
@@ -61,7 +62,7 @@ def get_raw_calldata_from_config(contract_address_from_config, binary_config):
 def parse_calldata_from_config(
     contract_address_from_config, constructor_args, target_compiled_contract
 ):
-    logger.info("Trying to parse calldata from config")
+    logger.info(f"Trying to parse calldata from config")
     constructor_abi = get_constructor_abi(target_compiled_contract)
     if constructor_abi is None:
         raise CalldataError("Failed to find ABI constructor in compiled contract")
