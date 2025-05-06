@@ -1,5 +1,8 @@
 {
   "contracts": {
+    "0x9A2029735Bd14C8b17fd03FE05D5F04F7AF797c2": "EasyTrack",
+    "0x0b6de69562CADa4dBFdCA7e448fdc71D3542A590": "EVMScriptExecutor",
+
     "0xbE861866E2Ca8f401e2b51b2cFb36A61B0Bf6840": "OssifiableProxy",
     "0x04d160820C0f2E2C693D9Eb26078189D10A1a3e1": "AppProxyUpgradeable",
     "0xDFD55388020a8CEDADCe0B177DF5EF1E11553b43": "WstETH",
@@ -138,6 +141,11 @@
       "url": "https://github.com/OpenZeppelin/openzeppelin-solidity",
       "commit": "v2.0.0",
       "relative_root": ""
+    },
+    "EasyTrack": {
+      "url": "https://github.com/lidofinance/easy-track",
+      "commit": "v1.0.0",
+      "relative_root": "contracts/EasyTrack.sol"
     }
   },
   "fail_on_comparison_error": true,

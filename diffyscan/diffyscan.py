@@ -120,9 +120,15 @@ def run_source_diff(
         f"Fetching source code from blockchain explorer {explorer_hostname} ..."
     )
 
+    if "solcInput" not in contract_code:
+        for k, v in contract_code.items():
+            if isinstance(k, slice) and k.start == "solcInput":
+                contract_code["solcInput"] = v
+                break
+
     source_files = (
         contract_code["solcInput"].items()
-        if not "sources" in contract_code["solcInput"]
+        if "sources" not in contract_code["solcInput"]
         else contract_code["solcInput"]["sources"].items()
     )
     files_count = len(source_files)

@@ -154,7 +154,7 @@ def resolve_dep(path_to_file, config):
     dep_names = sorted(list(config["dependencies"].keys()), key=len, reverse=True)
 
     for dep_name in dep_names:
-        if path_to_file.startswith(f"{dep_name}/"):
+        if path_to_file.startswith(f"{dep_name}"):
             return (config["dependencies"][dep_name], dep_name)
 
     return (None, None)
