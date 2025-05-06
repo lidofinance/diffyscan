@@ -79,8 +79,7 @@ def run_bytecode_diff(
         config["bytecode_comparison"],
     )
 
-    if calldata:
-        contract_creation_code += calldata
+    contract_creation_code += calldata
 
     local_contract_address = deploy_contract(
         local_rpc_url, deployer_account, contract_creation_code
