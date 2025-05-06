@@ -63,16 +63,21 @@ def parse_calldata_from_config(
     contract_address_from_config, constructor_args, target_compiled_contract
 ):
     logger.info(f"Trying to parse calldata from config")
-    constructor_abi = get_constructor_abi(target_compiled_contract)
-    if constructor_abi is None:
-        raise CalldataError("Failed to find ABI constructor in compiled contract")
 
     if constructor_args is None:
         raise CalldataError("Failed to find constructor's args in config")
 
-    calldata = encode_constructor_arguments(
-        constructor_abi, constructor_args[contract_address_from_config]
-    )
+    constructor_abi = get_constructor_abi(target_compiled_contract)
+    constructor_config_args = constructor_args[contract_address_from_config]
+
+    if constructor_abi is None:
+        if len(constructor_config_args) > 0:
+            raise CalldataError(
+                f"Constructor args provided for contract without constructor: {contract_address_from_config}"
+            )
+        return ""
+
+    calldata = encode_constructor_arguments(constructor_abi, constructor_config_args)
 
     if not calldata:
         raise CalldataError("Contract calldata is empty")
