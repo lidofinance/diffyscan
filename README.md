@@ -143,7 +143,7 @@ module.exports = {
 Start the script
 
 ```bash
-dyffyscan /path/to/config.json /path/to/hardhat_config.js
+diffyscan /path/to/config.json /path/to/hardhat_config.js --enable-binary-comparison
 ```
 
 > Note: Brownie verification tooling might rewrite the imports in the source submission. It transforms relative paths to imported contracts into flat paths ('./folder/contract.sol' -> 'contract.sol'), which makes Diffyscan unable to find a contract for verification.
@@ -151,7 +151,7 @@ dyffyscan /path/to/config.json /path/to/hardhat_config.js
 For contracts whose sources were verified by brownie tooling:
 
 ```bash
-diffyscan /path/to/config.json /path/to/hardhat_config.js --support-brownie
+diffyscan /path/to/config.json /path/to/hardhat_config.js --enable-binary-comparison --support-brownie
 ```
 
 ℹ️ See more config examples inside the [config_samples](./config_samples/) dir.
