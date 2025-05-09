@@ -1,5 +1,3 @@
-import itertools
-
 from .logger import logger, bgYellow, bgRed, bgGreen, red, green, to_hex
 from .constants import OPCODES, PUSH0, PUSH32
 from .custom_exceptions import BinVerifierError
