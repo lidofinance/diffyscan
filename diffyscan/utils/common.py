@@ -36,7 +36,7 @@ def load_config(path: str) -> Config:
 
 
 def fetch(url, headers=None):
-    logger.log(f"Fetch: {url}")
+    logger.log(f"Fetch: {mask_text(url)}")
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
