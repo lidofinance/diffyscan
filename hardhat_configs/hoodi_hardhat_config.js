@@ -4,7 +4,7 @@ module.exports = {
     hardhat: {
       chainId: 560048,
       blockGasLimit: 92000000,
-      hardfork: "cancun",
+      hardfork: "prague",
     }
   },
 };
