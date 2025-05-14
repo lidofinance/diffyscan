@@ -106,6 +106,18 @@ def run_source_diff(
     recursive_parsing=False,
     prettify=False,
 ):
+    source_files = (
+        contract_code["solcInput"].items()
+        if "sources" not in contract_code["solcInput"]
+        else contract_code["solcInput"]["sources"].items()
+    )
+
+    if is_monolithic_contract(source_files):
+        logger.warn(
+            f"Contract {contract_code['name']} is monolithic, skipping source code diff"
+        )
+        return
+
     explorer_hostname = get_explorer_hostname(config)
     logger.divider()
     logger.okay("Contract", contract_address_from_config)
@@ -120,11 +132,6 @@ def run_source_diff(
         f"Fetching source code from blockchain explorer {explorer_hostname} ..."
     )
 
-    source_files = (
-        contract_code["solcInput"].items()
-        if "sources" not in contract_code["solcInput"]
-        else contract_code["solcInput"]["sources"].items()
-    )
     files_count = len(source_files)
     logger.okay("Contract", contract_code["name"])
     logger.okay("Files", files_count)
@@ -238,9 +245,7 @@ def process_config(
         )
         explorer_token = os.getenv("ETHERSCAN_EXPLORER_TOKEN", default=None)
     if explorer_token is None:
-        logger.warn(
-            'Failed to find explorer token in env ("ETHERSCAN_EXPLORER_TOKEN")'
-        )
+        logger.warn('Failed to find explorer token in env ("ETHERSCAN_EXPLORER_TOKEN")')
 
     github_api_token = os.getenv("GITHUB_API_TOKEN", "")
     if not github_api_token:
@@ -384,6 +389,35 @@ def main():
     execution_time = time.time() - START_TIME
 
     logger.okay(f"Done in {round(execution_time, 3)}s ✨" + " " * 100)
+
+
+def is_monolithic_contract(source_files: dict) -> bool:
+    """
+    Determines if the contract is monolithic (single-file/flattened mode).
+
+    In single-file (flattened) mode, Etherscan returns only one source file,
+    and its key is just a name (e.g., 'EasyTrack'), without a '.sol' extension and without any '/'.
+    In the usual (multi-file) mode, the keys are file paths, such as 'contracts/EasyTrack.sol'.
+
+    Example of single-file (flattened) mode:
+        source_files = dict_items([
+            ('EasyTrack', {'content': 'contract EasyTrack { ... }'})
+        ])
+
+    Example of multi-file mode:
+        source_files = dict_items([
+            ('contracts/EasyTrack.sol', {'content': 'contract EasyTrack { ... }'}),
+            ('contracts/Utils.sol', {'content': 'library Utils { ... }'})
+        ])
+
+    Returns True if the contract is single-file (monolithic), otherwise False.
+    """
+    files = list(source_files)
+    if len(files) != 1:
+        return False
+
+    filename, _ = files[0]
+    return ".sol" not in filename and "/" not in filename
 
 
 if __name__ == "__main__":
