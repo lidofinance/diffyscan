@@ -42,7 +42,7 @@ def _get_contract_from_etherscan(token, etherscan_hostname, contract):
     if solc_input.startswith("{{"):
         contract["solcInput"] = json.loads(solc_input[1:-1])
     else:
-        contract["solcInput":] = {
+        contract["solcInput"] = {
             "language": "Solidity",
             "sources": {result["ContractName"]: {"content": solc_input}},
             "settings": {
