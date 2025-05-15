@@ -112,12 +112,6 @@ def run_source_diff(
         else contract_code["solcInput"]["sources"].items()
     )
 
-    if is_monolithic_contract(source_files):
-        logger.warn(
-            f"Contract {contract_code['name']} is monolithic, skipping source code diff"
-        )
-        return
-
     explorer_hostname = get_explorer_hostname(config)
     logger.divider()
     logger.okay("Contract", contract_address_from_config)
@@ -145,6 +139,9 @@ def run_source_diff(
     report = []
 
     for index, (path_to_file, source_code) in enumerate(source_files):
+        if not is_standard_json_contract(source_files):
+            path_to_file = path_to_file + ".sol"
+
         file_number = index + 1
         split_path_to_file = path_to_file.split("/")
         origin = split_path_to_file[0]
@@ -260,6 +257,12 @@ def process_config(
 
         ExceptionHandler.initialize(config["fail_on_comparison_error"])
 
+    enable_source_comparison = config.get("source_comparison", True)
+    if not enable_source_comparison:
+        logger.warn(
+            f'Source code comparison is disabled in {path}. To enable, set "source_comparison": true in your config'
+        )
+
     try:
         if enable_binary_comparison:
             hardhat.start(
@@ -277,14 +280,17 @@ def process_config(
                     contract_address,
                     contract_name,
                 )
-                run_source_diff(
-                    contract_address,
-                    contract_code,
-                    config,
-                    github_api_token,
-                    recursive_parsing,
-                    unify_formatting,
-                )
+
+                if enable_source_comparison:
+                    run_source_diff(
+                        contract_address,
+                        contract_code,
+                        config,
+                        github_api_token,
+                        recursive_parsing,
+                        unify_formatting,
+                    )
+
                 if enable_binary_comparison:
                     run_bytecode_diff(
                         contract_address,
@@ -391,33 +397,40 @@ def main():
     logger.okay(f"Done in {round(execution_time, 3)}s ✨" + " " * 100)
 
 
-def is_monolithic_contract(source_files: dict) -> bool:
+def is_standard_json_contract(source_files: dict) -> bool:
     """
-    Determines if the contract is monolithic (single-file/flattened mode).
+    Determines if the contract source code is in Standard JSON format.
 
-    In single-file (flattened) mode, Etherscan returns only one source file,
-    and its key is just a name (e.g., 'EasyTrack'), without a '.sol' extension and without any '/'.
-    In the usual (multi-file) mode, the keys are file paths, such as 'contracts/EasyTrack.sol'.
+    Etherscan provides contract source code in two formats:
+    1. Standard JSON - source files are organized in directories with dependencies,
+       each file has proper path and .sol extension
+    2. Single file - contract code is provided as a single string without dependencies,
+       the file identifier is just a contract name without path or extension
 
-    Example of single-file (flattened) mode:
-        source_files = dict_items([
-            ('EasyTrack', {'content': 'contract EasyTrack { ... }'})
-        ])
+    Examples:
+        Single file format (no dependencies):
+            source_files = dict_items([
+                ('Contract', {'content': 'contract Contract { ... }'})
+            ])
 
-    Example of multi-file mode:
-        source_files = dict_items([
-            ('contracts/EasyTrack.sol', {'content': 'contract EasyTrack { ... }'}),
-            ('contracts/Utils.sol', {'content': 'library Utils { ... }'})
-        ])
+        Standard JSON format (with dependencies):
+            source_files = dict_items([
+                ('src/Contract.sol', {'content': 'contract Contract { ... }'}),
+                ('src/Dependency.sol', {'content': 'contract Dependency { ... }'})
+            ])
 
-    Returns True if the contract is single-file (monolithic), otherwise False.
+    Args:
+        source_files: Dictionary of contract source files from Etherscan
+
+    Returns:
+        bool: True if the contract is in Standard JSON format, False if it's a single file
     """
     files = list(source_files)
     if len(files) != 1:
-        return False
+        return True
 
     filename, _ = files[0]
-    return ".sol" not in filename and "/" not in filename
+    return ".sol" in filename or "/" in filename
 
 
 if __name__ == "__main__":

@@ -12,6 +12,7 @@
   },
   "dependencies": {},
   "fail_on_comparison_error": true,
+  "source_comparison": false,
   "bytecode_comparison": {
     "constructor_args": {
       "0x9A2029735Bd14C8b17fd03FE05D5F04F7AF797c2": [
