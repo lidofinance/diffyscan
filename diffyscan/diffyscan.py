@@ -261,7 +261,7 @@ def process_config(
     enable_source_comparison = config.get("source_comparison", True)
     if not enable_source_comparison:
         logger.warn(
-            f'Source code comparison is disabled in {path}. To enable, set "source_comparison": true in your config'
+            f'Source code comparison is disabled in {path}. To enable, set "source_comparison": true in the config'
         )
 
     try:
