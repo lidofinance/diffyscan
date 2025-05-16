@@ -75,7 +75,8 @@ def run_bytecode_diff(
         config["bytecode_comparison"],
     )
 
-    contract_creation_code += calldata
+    if calldata:
+        contract_creation_code += calldata
 
     local_contract_address = deploy_contract(
         local_rpc_url, deployer_account, contract_creation_code
@@ -106,6 +107,12 @@ def run_source_diff(
     recursive_parsing=False,
     prettify=False,
 ):
+    source_files = (
+        contract_code["solcInput"].items()
+        if "sources" not in contract_code["solcInput"]
+        else contract_code["solcInput"]["sources"].items()
+    )
+
     explorer_hostname = get_explorer_hostname(config)
     logger.divider()
     logger.okay("Contract", contract_address_from_config)
@@ -120,11 +127,6 @@ def run_source_diff(
         f"Fetching source code from blockchain explorer {explorer_hostname} ..."
     )
 
-    source_files = (
-        contract_code["solcInput"].items()
-        if "sources" not in contract_code["solcInput"]
-        else contract_code["solcInput"]["sources"].items()
-    )
     files_count = len(source_files)
     logger.okay("Contract", contract_code["name"])
     logger.okay("Files", files_count)
@@ -138,6 +140,9 @@ def run_source_diff(
     report = []
 
     for index, (path_to_file, source_code) in enumerate(source_files):
+        if not is_standard_json_contract(source_files):
+            path_to_file = path_to_file + ".sol"
+
         file_number = index + 1
         split_path_to_file = path_to_file.split("/")
         origin = split_path_to_file[0]
@@ -238,9 +243,7 @@ def process_config(
         )
         explorer_token = os.getenv("ETHERSCAN_EXPLORER_TOKEN", default=None)
     if explorer_token is None:
-        logger.warn(
-            'Failed to find explorer token in env ("ETHERSCAN_EXPLORER_TOKEN")'
-        )
+        logger.warn('Failed to find explorer token in env ("ETHERSCAN_EXPLORER_TOKEN")')
 
     github_api_token = os.getenv("GITHUB_API_TOKEN", "")
     if not github_api_token:
@@ -253,7 +256,13 @@ def process_config(
         local_rpc_url = load_env("LOCAL_RPC_URL", masked=False, required=True)
         remote_rpc_url = load_env("REMOTE_RPC_URL", masked=True, required=True)
 
-        ExceptionHandler.initialize(config["fail_on_comparison_error"])
+        ExceptionHandler.initialize(config["fail_on_bytecode_comparison_error"])
+
+    enable_source_comparison = config.get("source_comparison", True)
+    if not enable_source_comparison:
+        logger.warn(
+            f'Source code comparison is disabled in {path}. To enable, set "source_comparison": true in the config'
+        )
 
     try:
         if enable_binary_comparison:
@@ -272,14 +281,17 @@ def process_config(
                     contract_address,
                     contract_name,
                 )
-                run_source_diff(
-                    contract_address,
-                    contract_code,
-                    config,
-                    github_api_token,
-                    recursive_parsing,
-                    unify_formatting,
-                )
+
+                if enable_source_comparison:
+                    run_source_diff(
+                        contract_address,
+                        contract_code,
+                        config,
+                        github_api_token,
+                        recursive_parsing,
+                        unify_formatting,
+                    )
+
                 if enable_binary_comparison:
                     run_bytecode_diff(
                         contract_address,
@@ -384,6 +396,42 @@ def main():
     execution_time = time.time() - START_TIME
 
     logger.okay(f"Done in {round(execution_time, 3)}s ✨" + " " * 100)
+
+
+def is_standard_json_contract(source_files: dict) -> bool:
+    """
+    Determines if the contract source code is in Standard JSON format.
+
+    Etherscan provides contract source code in two formats:
+    1. Standard JSON - source files are organized in directories with dependencies,
+       each file has proper path and .sol extension
+    2. Single file - contract code is provided as a single string without dependencies,
+       the file identifier is just a contract name without path or extension
+
+    Examples:
+        Single file format (no dependencies):
+            source_files = dict_items([
+                ('Contract', {'content': 'contract Contract { ... }'})
+            ])
+
+        Standard JSON format (with dependencies):
+            source_files = dict_items([
+                ('src/Contract.sol', {'content': 'contract Contract { ... }'}),
+                ('src/Dependency.sol', {'content': 'contract Dependency { ... }'})
+            ])
+
+    Args:
+        source_files: Dictionary of contract source files from Etherscan
+
+    Returns:
+        bool: True if the contract is in Standard JSON format, False if it's a single file
+    """
+    files = list(source_files)
+    if len(files) != 1:
+        return True
+
+    filename, _ = files[0]
+    return ".sol" in filename or "/" in filename
 
 
 if __name__ == "__main__":

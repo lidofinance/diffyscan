@@ -23,7 +23,7 @@
       "relative_root": "contracts"
     }
   },
-  "fail_on_comparison_error": true,
+  "fail_on_bytecode_comparison_error": true,
   "bytecode_comparison": {
     "constructor_args": {
       "0xB34F2747BCd9BCC4107A0ccEb43D5dcdd7Fabf89": [

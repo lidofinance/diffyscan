@@ -16,7 +16,7 @@
       "//": "OZ 4.6.0"
     }
   },
-  "fail_on_comparison_error": true,
+  "fail_on_bytecode_comparison_error": true,
   "bytecode_comparison": {
     "constructor_args": {
       "0xfD050cDa025f6378e54ab5fd5Da377D242Ed74d3": [

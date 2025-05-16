@@ -4,6 +4,15 @@ from .custom_exceptions import CalldataError
 
 
 def get_calldata(contract_address_from_config, target_compiled_contract, binary_config):
+    constructor_abi = get_constructor_abi(target_compiled_contract)
+
+    if constructor_abi is None:
+        logger.info(
+            "Contract's ABI doesn't have a constructor, calldata calculation skipped"
+        )
+        return None
+    else:
+        logger.okay("Constructor in ABI successfully found")
 
     raw_calldata_exist = (
         "constructor_calldata" in binary_config
@@ -21,16 +30,19 @@ def get_calldata(contract_address_from_config, target_compiled_contract, binary_
         )
     if not raw_calldata_exist and not calldata_args_exist:
         raise CalldataError(
-            "Contract address not found in 'constructor_args' and in 'constructor_calldata' in config"
+            "Contract address not found in 'constructor_args' and in 'constructor_calldata' in config, but ABI has a constructor"
         )
+
     if raw_calldata_exist:
         return get_raw_calldata_from_config(contract_address_from_config, binary_config)
 
-    return parse_calldata_from_config(
-        contract_address_from_config,
-        binary_config["constructor_args"],
-        target_compiled_contract,
-    )
+    if calldata_args_exist:
+        return parse_calldata_from_config(
+            contract_address_from_config,
+            binary_config["constructor_args"],
+            constructor_abi,
+        )
+    return None
 
 
 def get_constructor_abi(target_compiled_contract):
@@ -42,13 +54,9 @@ def get_constructor_abi(target_compiled_contract):
             if entry["type"] == "constructor"
         ][0]
     except IndexError:
-        logger.okay(
-            "Contract's ABI doesn't have a constructor, calldata calculation skipped"
-        )
         return None
 
-    logger.okay("Constructor in ABI successfully found")
-    return constructor_abi
+    return constructor_abi if len(constructor_abi) > 0 else None
 
 
 def get_raw_calldata_from_config(contract_address_from_config, binary_config):
@@ -60,14 +68,10 @@ def get_raw_calldata_from_config(contract_address_from_config, binary_config):
 
 
 def parse_calldata_from_config(
-    contract_address_from_config, constructor_args, target_compiled_contract
+    contract_address_from_config, constructor_args, constructor_abi
 ):
     logger.info("Trying to parse calldata from config")
 
-    if constructor_args is None:
-        raise CalldataError("Failed to find constructor's args in config")
-
-    constructor_abi = get_constructor_abi(target_compiled_contract)
     constructor_config_args = constructor_args[contract_address_from_config]
 
     if constructor_abi is None:

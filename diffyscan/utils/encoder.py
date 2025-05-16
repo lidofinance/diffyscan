@@ -27,13 +27,16 @@ def to_hex_with_alignment(value: int) -> str:
     return format(value, "064x")
 
 
-def encode_int(value: int, bits: int, is_signed: bool) -> str:
+def encode_int(value, bits: int, is_signed: bool) -> str:
     """
     Encodes an integer value (possibly negative if signed) into 32 bytes
     using two's complement for negative values.
     """
+    if isinstance(value, str):
+        value = int(value, 16)
+
     # Convert bool to int if needed (though typically you'd handle bool in a separate branch).
-    if isinstance(value, bool):
+    elif isinstance(value, bool):
         value = 1 if value else 0
 
     # Python's 'format' doesn't automatically do two's-complement for negative integers.
@@ -280,7 +283,7 @@ def encode_constructor_arguments(constructor_abi: list, constructor_config_args:
 
             elif re.match(r"^(u?int)(\d*)$", arg_type):
                 bits, is_signed = _parse_solidity_int_type(arg_type)
-                constructor_calldata += encode_int(int(arg_value), bits, is_signed)
+                constructor_calldata += encode_int(arg_value, bits, is_signed)
 
             elif re.match(r"^bytes(\d+)$", arg_type):
                 match_len = re.match(r"^bytes(\d+)$", arg_type)
