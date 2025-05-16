@@ -137,7 +137,7 @@
       "relative_root": ""
     }
   },
-  "fail_on_comparison_error": true,
+  "fail_on_bytecode_comparison_error": true,
   "bytecode_comparison": {
     "constructor_args": {
       "0x7d7EcCE45cAc6eF043f34e8049399b4b03044F97": [

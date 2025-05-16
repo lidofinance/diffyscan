@@ -11,7 +11,7 @@
     "relative_root": "contracts"
   },
   "dependencies": {},
-  "fail_on_comparison_error": true,
+  "fail_on_bytecode_comparison_error": true,
   "source_comparison": false,
   "bytecode_comparison": {
     "constructor_args": {

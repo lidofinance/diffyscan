@@ -256,7 +256,7 @@ def process_config(
         local_rpc_url = load_env("LOCAL_RPC_URL", masked=False, required=True)
         remote_rpc_url = load_env("REMOTE_RPC_URL", masked=True, required=True)
 
-        ExceptionHandler.initialize(config["fail_on_comparison_error"])
+        ExceptionHandler.initialize(config["fail_on_bytecode_comparison_error"])
 
     enable_source_comparison = config.get("source_comparison", True)
     if not enable_source_comparison:
