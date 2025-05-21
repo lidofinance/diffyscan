@@ -1,0 +1,52 @@
+{
+  "contracts": {
+    "<LAUNCH_VERIFIER>": "DGLaunchStateVerifier",
+    "<OMNIBUS_CONTRACT>": "LaunchOmnibusMainnet",
+    "<ROLES_VALIDATOR>": "RolesValidatorMainnet",
+    "<TIME_CONSTRAINTS>": "TimeConstraints"
+  },
+  "explorer_hostname": "api.etherscan.io",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/dual-governance",
+    "commit": "<DEPLOY_COMMIT>",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "lib/openzeppelin-contracts/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "dbb6104ce834628e473d2173bbc9d47f81a9eec3",
+      "relative_root": "contracts"
+    }
+  },
+  "fail_on_comparison_error": false,
+  "bytecode_comparison": {
+    "hardhat_config_name": "hardhat.config.js",
+    "constructor_args": {
+      "<LAUNCH_VERIFIER>": [
+	     [
+			   "<TIMELOCK>",
+			   "<DUAL_GOVERNANCE>",
+				 "<DAO_EMERGENCY_GOVERNANCE>",
+				 "0x8B7854488Fde088d686Ea672B6ba1A5242515f45",
+				 "0xFFe21561251c49AdccFad065C94Fb4931dF49081",
+				 1781913600,
+				 2592000,
+				 2
+		   ]
+	    ],
+      "<ROLES_VALIDATOR>": [
+	      "<DG_ADMIN_EXECUTOR>",
+	      "<RESEAL_MANAGER>"
+      ],
+      "<TIME_CONSTRAINTS>": [],
+      "<OMNIBUS_CONTRACT>": [
+	      "<DUAL_GOVERNANCE>",
+		    "<DG_ADMIN_EXECUTOR>",
+		    "<RESEAL_MANAGER>",
+		    "<ROLES_VALIDATOR>",
+		    "<LAUNCH_VERIFIER>",
+		    "<TIME_CONSTRAINTS>"
+	    ]
+    }
+  }
+}
