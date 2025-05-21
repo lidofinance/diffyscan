@@ -1,0 +1,123 @@
+{
+  "contracts": {
+    "<DG_ADMIN_EXECUTOR>": "Executor",
+    "<DUAL_GOVERNANCE>": "DualGovernance",
+    "<TIMELOCK>": "EmergencyProtectedTimelock",
+    "<DG_CONFIG>": "ImmutableDualGovernanceConfigProvider",
+    "<DRY_RUN_EMERGENCY_GOVERNANCE>": "TimelockedGovernance",
+    "<TIEBREAKER_CORE>": "TiebreakerCoreCommittee",
+    "<TIEBREAKER_SUB_1>": "TiebreakerSubCommittee",
+    "<TIEBREAKER_SUB_2>": "TiebreakerSubCommittee",
+    "<TIEBREAKER_SUB_3>": "TiebreakerSubCommittee",
+    "<ESCROW_MASTER_COPY>": "Escrow",
+    "<RESEAL_MANAGER>": "ResealManager",
+    "<DAO_EMERGENCY_GOVERNANCE>": "TimelockedGovernance",
+  },
+  "explorer_hostname": "api.etherscan.io",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/dual-governance",
+    "commit": "3eOflae5740ef8410e928f6cc106e3a5f45a5a75",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "lib/openzeppelin-contracts/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "dbb6104ce834628e473d2173bbc9d47f81a9eec3",
+      "relative_root": "contracts"
+    }
+  },
+  "fail_on_comparison_error": false,
+  "bytecode_comparison": {
+    "hardhat_config_name": "hardhat.config.js",
+    "constructor_args": {
+      "<DG_ADMIN_EXECUTOR>": ["0x93b17aba1dcacd259df82dc58a7e582f456e5c0b"],
+      "<DUAL_GOVERNANCE>": [
+		    [
+          "<TIMELOCK>",
+          "<RESEAL_MANAGER>",
+          "<DG_CONFIG>"
+        ],
+        [
+          "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
+          "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
+          "0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1"
+        ],
+        [
+          4,
+          15768000,
+          63072000,
+          255,
+          4147200
+        ]
+ 
+	    ],
+      "<TIMELOCK>": [
+		    [
+          259200,
+          2592000,
+          864000,
+          31536000,
+          94608000
+        ],
+        "<DG_ADMIN_EXECUTOR>",
+        259200,
+        86400
+	    ],
+      "<DG_CONFIG>": [
+		    [
+          100,
+          1000,
+          18000,
+          5184000,
+          3888000,
+          18000,
+          259200,
+          18000,
+          604800,
+          5184000,
+          15552000,
+          1296000
+        ] 
+	    ],
+      "<DRY_RUN_EMERGENCY_GOVERNANCE>": [
+	      "0xdd778153c3d0AE1B70fe81E0219b5D2C3e3951C2",
+	      "<TIMELOCK>"
+      ],
+      "<TIEBREAKER_CORE>": [
+	      "0x93b17aba1dcacd259df82dc58a7e582f456e5c0b",
+	      "<DUAL_GOVERNANCE>",
+	      "<TIME_LOCK>"
+      ],
+      "<TIEBREAKER_SUB_1>": [
+	      [<TIEBREAKER_SUB_1_MEMBERS>],
+	      <TIEBREAKER_SUB_1_QUORUM>,
+	      "<TIEBREAKER_CORE>"
+      ],
+      "<TIEBREAKER_SUB_2>": [
+	      [<TIEBREAKER_SUB_2_MEMBERS>],
+	      <TIEBREAKER_SUB_2_QUORUM>,
+	      "<TIEBREAKER_CORE>"
+	    ],
+      "<TIEBREAKER_SUB_3>": [
+	      [<TIEBREAKER_SUB_3_MEMBERS>],
+	      <TIEBREAKER_SUB_3_QUORUM>,
+	      "<TIEBREAKER_CORE>"
+	    ],
+      "<ESCROW_MASTER_COPY>": [
+        "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
+        "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
+        "0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1"
+        "<DUAL_GOVERNANCE>",
+        4,
+	      4147200
+      ],
+      "<RESEAL_MANAGER>": [
+	      "<TIMELOCK>"
+      ],
+      "<DAO_EMERGENCY_GOVERNANCE>": [
+	      "0x2e59A20f205bB85a89C53f1936454680651E618e",
+	      "<TIMELOCK>"
+	    ]
+    }
+  }
+}
