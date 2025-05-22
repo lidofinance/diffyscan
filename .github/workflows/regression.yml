@@ -10,8 +10,6 @@ permissions:                 # least-privilege principle
 jobs:
   regression:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_API_TOKEN: ${{ github.token }}
     strategy:
       fail-fast: false
       matrix:
@@ -22,7 +20,7 @@ jobs:
             hardhat: hardhat_configs/sepolia_hardhat_config.js
     env:
       ETHERSCAN_EXPLORER_TOKEN: ${{ secrets.ETHERSCAN_EXPLORER_TOKEN }}
-      GITHUB_API_TOKEN: ${{ secrets.GITHUB_API_TOKEN }}
+      GITHUB_API_TOKEN: ${{ github.token }}
       LOCAL_RPC_URL: ${{ secrets.LOCAL_RPC_URL }}
       REMOTE_RPC_URL: ${{ secrets.REMOTE_RPC_URL }}
     steps:
