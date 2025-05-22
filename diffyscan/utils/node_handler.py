@@ -85,7 +85,7 @@ def deploy_contract(rpc_url, deployer, data):
     if response_getTransactionReceipt["result"]["status"] != "0x1":
         raise NodeError(
             "Failed to receive transaction receipt. \
-  Transaction has been reverted (status 0x0). Input missmatch?",
+  Transaction has been reverted (status 0x0). Input mismatch?",
         )
 
     contract_address = response_getTransactionReceipt["result"]["contractAddress"]
