@@ -244,25 +244,17 @@ def parse_compiled_contract(target_compiled_contract):
 
 def get_explorer_hostname(config):
     explorer_hostname = None
-    if "explorer_hostname_env_var" in config:
-        explorer_hostname = load_env(
-            config["explorer_hostname_env_var"], masked=True, required=False
-        )
-    elif "explorer_hostname" in config:
+    if "explorer_hostname" in config:
         explorer_hostname = config["explorer_hostname"]
     else:
         logger.warn(
-            'Failed to find explorer hostname in the config ("explorer_hostname" or "explorer_hostname_env_var")'
+            'Failed to find explorer hostname in the config ("explorer_hostname")'
         )
     return explorer_hostname
 
 
 def get_explorer_chain_id(config):
     chain_id = None
-    if "explorer_chain_id_env_var" in config:
-        chain_id = load_env(
-            config["explorer_chain_id_env_var"], masked=False, required=False
-        )
-    elif "explorer_chain_id" in config:
+    if "explorer_chain_id" in config:
         chain_id = config["explorer_chain_id"]
     return chain_id

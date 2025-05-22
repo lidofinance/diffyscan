@@ -40,7 +40,7 @@
     "0x2dfF8E2c55959f719Faa6dCC4a3B0937bcA71F73": "ACL"
   },
   "explorer_token_env_var": "ETHERSCAN_TOKEN",
-  "explorer_hostname": "api-sepolia.etherscan.io",
+  "explorer_hostname": "api.etherscan.io",
   "explorer_chain_id": 11155111,
   "github_repo": {
     "url": "https://github.com/lidofinance/lido-dao",
@@ -159,9 +159,7 @@
         12,
         1655733600
       ],
-      "0x1c2807B207f140a1DE0b39E5546eDEf67Af2568c": [
-        1
-      ],
+      "0x1c2807B207f140a1DE0b39E5546eDEf67Af2568c": [1],
       "0xd06dF83b8ad6D89C86a187fba4Eae918d497BdCB": [
         "0x9D381f44d1fbdf8190fA0EcdC028e2Af24DdD3FE",
         "0x0000000000000000000000000000000000000000",
@@ -188,29 +186,8 @@
       "0xbac2A471443F18aC5C31078b96C5797A78fCc680": [
         "0x8f6254332f69557A72b0DA2D5F0Bc07d4CA991E7",
         "0x6885e36bfcb68cb383dfe90023a462c03bcb2ae5",
-        [
-          1500,
-          500,
-          1000,
-          250,
-          2000,
-          100,
-          100,
-          128,
-          5000000
-        ],
-        [
-          [],
-          [],
-          [],
-          [],
-          [],
-          [],
-          [],
-          [],
-          [],
-          []
-        ]
+        [1500, 500, 1000, 250, 2000, 100, 100, 128, 5000000],
+        [[], [], [], [], [], [], [], [], [], []]
       ],
       "0x7bC76076b0f3879b4A750450C0Ccf02c6Ca11220": [
         "0x6885E36BFcb68CB383DfE90023a462C03BCB2AE5",

@@ -3,7 +3,8 @@
     "0x9A2029735Bd14C8b17fd03FE05D5F04F7AF797c2": "EasyTrack",
     "0x0b6de69562CADa4dBFdCA7e448fdc71D3542A590": "EVMScriptExecutor"
   },
-  "explorer_hostname": "api-hoodi.etherscan.io",
+  "explorer_hostname": "api.etherscan.io",
+  "explorer_chain_id": 560048,
   "explorer_token_env_var": "ETHERSCAN_TOKEN",
   "github_repo": {
     "url": "https://github.com/lidofinance/easy-track",

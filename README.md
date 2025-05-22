@@ -35,19 +35,7 @@ Set your Etherscan token to fetch verified source code,
 
 ```bash
 export ETHERSCAN_EXPLORER_TOKEN=<your-etherscan-token>
-export OPTISCAN_EXPLORER_TOKEN=<your-etherscan-optimism-token>
 ```
-
-Set your Etherscan API endpoint URL to fetch verified source code,
-
-```bash
-export L1_EXPLORER_API_HOSTNAME=<your-l1-explorer-api-hostname>
-export L2_EXPLORER_API_HOSTNAME=<your-l2-explorer-api-hostname>
-export L1_EXPLORER_CHAIN_ID=<l1-chain-id>
-export L2_EXPLORER_CHAIN_ID=<l2-chain-id>
-```
-
-Chain IDs are required for the Etherscan v2 API endpoint.
 
 Set your Github token to query API without strict rate limiting,
 

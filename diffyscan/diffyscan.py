@@ -121,6 +121,8 @@ def run_source_diff(
     logger.okay("Blockchain explorer Hostname", explorer_hostname)
     if explorer_chain_id:
         logger.okay("Blockchain explorer Chain ID", explorer_chain_id)
+    else:
+        logger.warn("Blockchain explorer Chain ID isn't set")
     logger.okay("Repo", config["github_repo"]["url"])
     logger.okay("Repo commit", config["github_repo"]["commit"])
     logger.okay("Repo relative root", config["github_repo"]["relative_root"])
