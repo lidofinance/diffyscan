@@ -200,16 +200,6 @@ def compile_contract_from_explorer(contract_code):
         "contracts"
     ].values()
 
-    is_compiler_already_prepared = os.path.isfile(compiler_path)
-
-    if not is_compiler_already_prepared:
-        prepare_compiler(required_platform, build_info, compiler_path)
-
-    input_settings = json.dumps(contract_code["solcInput"])
-    compiled_contracts = compile_contracts(compiler_path, input_settings)[
-        "contracts"
-    ].values()
-
     target_contract_name = contract_code["name"]
     return get_target_compiled_contract(compiled_contracts, target_contract_name)
 
