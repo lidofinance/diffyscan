@@ -1,14 +1,14 @@
 {
   "contracts": {
-    "<LAUNCH_VERIFIER>": "DGLaunchStateVerifier",
-    "<OMNIBUS_CONTRACT>": "LaunchOmnibusMainnet",
-    "<ROLES_VALIDATOR>": "RolesValidatorMainnet",
-    "<TIME_CONSTRAINTS>": "TimeConstraints"
+    "0xd48c2fc419569537Bb069BAD2165dC0cEB160CEC": "DGLaunchStateVerifier",
+    "0x6FFDa833d2cf6AA76fa199D96dB22C4075c14D71": "LaunchOmnibusMainnet",
+    "0xC90E7CC979f3e931829CdA552B50D82d420B9E8E": "RolesValidatorMainnet",
+    "0x2a30F5aC03187674553024296bed35Aa49749DDa": "TimeConstraints"
   },
   "explorer_hostname": "api.etherscan.io",
   "github_repo": {
     "url": "https://github.com/lidofinance/dual-governance",
-    "commit": "<DEPLOY_COMMIT>",
+    "commit": "76dd0acaed61758f2ef966f459aaa5e45c72a6d1",
     "relative_root": ""
   },
   "dependencies": {
@@ -18,35 +18,35 @@
       "relative_root": "contracts"
     }
   },
-  "fail_on_comparison_error": false,
+  "fail_on_bytecode_comparison_error": false,
   "bytecode_comparison": {
     "hardhat_config_name": "hardhat.config.js",
     "constructor_args": {
-      "<LAUNCH_VERIFIER>": [
-	     [
-			   "<TIMELOCK>",
-			   "<DUAL_GOVERNANCE>",
-				 "<DAO_EMERGENCY_GOVERNANCE>",
-				 "0x8B7854488Fde088d686Ea672B6ba1A5242515f45",
-				 "0xFFe21561251c49AdccFad065C94Fb4931dF49081",
-				 1781913600,
-				 2592000,
-				 2
-		   ]
-	    ],
-      "<ROLES_VALIDATOR>": [
-	      "<DG_ADMIN_EXECUTOR>",
-	      "<RESEAL_MANAGER>"
+      "0xd48c2fc419569537Bb069BAD2165dC0cEB160CEC": [
+        [
+          "0xCE0425301C85c5Ea2A0873A2dEe44d78E02D2316",
+          "0xcdF49b058D606AD34c5789FD8c3BF8B3E54bA2db",
+          "0x553337946F2FAb8911774b20025fa776B76a7CcE",
+          "0x8B7854488Fde088d686Ea672B6ba1A5242515f45",
+          "0xC7792b3F2B399bB0EdF53fECDceCeB97FBEB18AF",
+          1781913600,
+          2592000,
+          2
+        ]
       ],
-      "<TIME_CONSTRAINTS>": [],
-      "<OMNIBUS_CONTRACT>": [
-	      "<DUAL_GOVERNANCE>",
-		    "<DG_ADMIN_EXECUTOR>",
-		    "<RESEAL_MANAGER>",
-		    "<ROLES_VALIDATOR>",
-		    "<LAUNCH_VERIFIER>",
-		    "<TIME_CONSTRAINTS>"
-	    ]
+      "0xC90E7CC979f3e931829CdA552B50D82d420B9E8E": [
+        "0x23E0B465633FF5178808F4A75186E2F2F9537021",
+        "0x7914b5a1539b97Bd0bbd155757F25FD79A522d24"
+      ],
+      "0x2a30F5aC03187674553024296bed35Aa49749DDa": [],
+      "0x6FFDa833d2cf6AA76fa199D96dB22C4075c14D71": [
+        "0xcdF49b058D606AD34c5789FD8c3BF8B3E54bA2db",
+        "0x23E0B465633FF5178808F4A75186E2F2F9537021",
+        "0x7914b5a1539b97Bd0bbd155757F25FD79A522d24",
+        "0xC90E7CC979f3e931829CdA552B50D82d420B9E8E",
+        "0xd48c2fc419569537Bb069BAD2165dC0cEB160CEC",
+        "0x2a30F5aC03187674553024296bed35Aa49749DDa"
+      ]
     }
   }
 }

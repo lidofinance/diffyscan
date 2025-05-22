@@ -1,22 +1,22 @@
 {
   "contracts": {
-    "<DG_ADMIN_EXECUTOR>": "Executor",
-    "<DUAL_GOVERNANCE>": "DualGovernance",
-    "<TIMELOCK>": "EmergencyProtectedTimelock",
-    "<DG_CONFIG>": "ImmutableDualGovernanceConfigProvider",
-    "<DRY_RUN_EMERGENCY_GOVERNANCE>": "TimelockedGovernance",
-    "<TIEBREAKER_CORE>": "TiebreakerCoreCommittee",
-    "<TIEBREAKER_SUB_1>": "TiebreakerSubCommittee",
-    "<TIEBREAKER_SUB_2>": "TiebreakerSubCommittee",
-    "<TIEBREAKER_SUB_3>": "TiebreakerSubCommittee",
-    "<ESCROW_MASTER_COPY>": "Escrow",
-    "<RESEAL_MANAGER>": "ResealManager",
-    "<DAO_EMERGENCY_GOVERNANCE>": "TimelockedGovernance",
+    "0x23E0B465633FF5178808F4A75186E2F2F9537021": "Executor",
+    "0xcdF49b058D606AD34c5789FD8c3BF8B3E54bA2db": "DualGovernance",
+    "0xCE0425301C85c5Ea2A0873A2dEe44d78E02D2316": "EmergencyProtectedTimelock",
+    "0xa1692Af6FDfdD1030E4E9c4Bc429986FA64CB5EF": "ImmutableDualGovernanceConfigProvider",
+    "0x75850938C1Aa50B8cC6eb3c00995759dc1425ae6": "TimelockedGovernance",
+    "0x175742c3DDD88B0192df3EcF98f180A79cb259D0": "TiebreakerCoreCommittee",
+    "0x74836470337Ba5d2a92fe16E44AD862E28fcf9B3": "TiebreakerSubCommittee",
+    "0xb9d82E1A49f6a66E8a07260BA05Cf9Ac8a938B1C": "TiebreakerSubCommittee",
+    "0x7dAdae4e1a0DB43F6bcfA75295666fc044605679": "TiebreakerSubCommittee",
+    "0xb84317C0E142D8911A0d69Dc32c48d87753B8d1C": "Escrow",
+    "0x7914b5a1539b97Bd0bbd155757F25FD79A522d24": "ResealManager",
+    "0x553337946F2FAb8911774b20025fa776B76a7CcE": "TimelockedGovernance"
   },
   "explorer_hostname": "api.etherscan.io",
   "github_repo": {
     "url": "https://github.com/lidofinance/dual-governance",
-    "commit": "3eOflae5740ef8410e928f6cc106e3a5f45a5a75",
+    "commit": "3e0f1ae5740ef8410e928f6cc106e3a5f45a5a75",
     "relative_root": ""
   },
   "dependencies": {
@@ -26,98 +26,100 @@
       "relative_root": "contracts"
     }
   },
-  "fail_on_comparison_error": false,
+  "fail_on_bytecode_comparison_error": false,
   "bytecode_comparison": {
     "hardhat_config_name": "hardhat.config.js",
     "constructor_args": {
-      "<DG_ADMIN_EXECUTOR>": ["0x93b17aba1dcacd259df82dc58a7e582f456e5c0b"],
-      "<DUAL_GOVERNANCE>": [
-		    [
-          "<TIMELOCK>",
-          "<RESEAL_MANAGER>",
-          "<DG_CONFIG>"
+      "0x23E0B465633FF5178808F4A75186E2F2F9537021": [
+        "0x93b17aba1dcacd259df82dc58a7e582f456e5c0b"
+      ],
+      "0xcdF49b058D606AD34c5789FD8c3BF8B3E54bA2db": [
+        [
+          "0xCE0425301C85c5Ea2A0873A2dEe44d78E02D2316",
+          "0x7914b5a1539b97Bd0bbd155757F25FD79A522d24",
+          "0xa1692Af6FDfdD1030E4E9c4Bc429986FA64CB5EF"
         ],
         [
           "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
           "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
           "0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1"
         ],
-        [
-          4,
-          15768000,
-          63072000,
-          255,
-          4147200
-        ]
- 
-	    ],
-      "<TIMELOCK>": [
-		    [
-          259200,
-          2592000,
-          864000,
-          31536000,
-          94608000
-        ],
-        "<DG_ADMIN_EXECUTOR>",
+        [4, 15768000, 63072000, 255, 4147200]
+      ],
+      "0xCE0425301C85c5Ea2A0873A2dEe44d78E02D2316": [
+        [259200, 2592000, 864000, 31536000, 94608000],
+        "0x23E0B465633FF5178808F4A75186E2F2F9537021",
         259200,
         86400
-	    ],
-      "<DG_CONFIG>": [
-		    [
-          100,
-          1000,
-          18000,
-          5184000,
-          3888000,
-          18000,
-          259200,
-          18000,
-          604800,
-          5184000,
-          15552000,
-          1296000
-        ] 
-	    ],
-      "<DRY_RUN_EMERGENCY_GOVERNANCE>": [
-	      "0xdd778153c3d0AE1B70fe81E0219b5D2C3e3951C2",
-	      "<TIMELOCK>"
       ],
-      "<TIEBREAKER_CORE>": [
-	      "0x93b17aba1dcacd259df82dc58a7e582f456e5c0b",
-	      "<DUAL_GOVERNANCE>",
-	      "<TIME_LOCK>"
+      "0xa1692Af6FDfdD1030E4E9c4Bc429986FA64CB5EF": [
+        [
+          10000000000000000, 100000000000000000, 18000, 432000, 3888000, 18000,
+          259200, 18000, 604800, 5184000, 15552000, 1296000
+        ]
       ],
-      "<TIEBREAKER_SUB_1>": [
-	      [<TIEBREAKER_SUB_1_MEMBERS>],
-	      <TIEBREAKER_SUB_1_QUORUM>,
-	      "<TIEBREAKER_CORE>"
+      "0x75850938C1Aa50B8cC6eb3c00995759dc1425ae6": [
+        "0xdd778153c3d0AE1B70fe81E0219b5D2C3e3951C2",
+        "0xCE0425301C85c5Ea2A0873A2dEe44d78E02D2316"
       ],
-      "<TIEBREAKER_SUB_2>": [
-	      [<TIEBREAKER_SUB_2_MEMBERS>],
-	      <TIEBREAKER_SUB_2_QUORUM>,
-	      "<TIEBREAKER_CORE>"
-	    ],
-      "<TIEBREAKER_SUB_3>": [
-	      [<TIEBREAKER_SUB_3_MEMBERS>],
-	      <TIEBREAKER_SUB_3_QUORUM>,
-	      "<TIEBREAKER_CORE>"
-	    ],
-      "<ESCROW_MASTER_COPY>": [
+      "0x175742c3DDD88B0192df3EcF98f180A79cb259D0": [
+        "0x23E0B465633FF5178808F4A75186E2F2F9537021",
+        "0xcdF49b058D606AD34c5789FD8c3BF8B3E54bA2db",
+        2592000
+      ],
+      "0x74836470337Ba5d2a92fe16E44AD862E28fcf9B3": [
+        "0x23E0B465633FF5178808F4A75186E2F2F9537021",
+        [
+          "0x805fa0f79dc0ddcd73dcbc23487d2d5bd77de598",
+          "0x49769c3443c74f144991ca560ba5f635581b8176",
+          "0x9A921867EbB579D137184b397E7D087f1ae716fd",
+          "0x81000e270B4f66B8666544E8FEc073e0a23FFf00",
+          "0xD8a9072D82a28307279aC0aD3c97Cb61bEe67952"
+        ],
+        3,
+        "0x175742c3DDD88B0192df3EcF98f180A79cb259D0"
+      ],
+      "0xb9d82E1A49f6a66E8a07260BA05Cf9Ac8a938B1C": [
+        "0x23E0B465633FF5178808F4A75186E2F2F9537021",
+        [
+          "0x9837b0Db0b733DED04D96a0A25Ba1E414A6C4c08",
+          "0xDBD124e898839ec8C829d806C0328f069d1bB810",
+          "0xf8Bfa395744Cb25fa4368Ffe2344Dc35546092d9",
+          "0x8103E9eDC04d87F6DA24A3a0c7778daE689E9D63",
+          "0xfcd02c040cea45dc6cec3e24f1d3946fce7077b0",
+          "0xD7cABE01709c7E36e9D1fb3248A19b525578a1Fc",
+          "0x8ed4dfd3A610CCF1FB45e797bf5D8e0f93084F22"
+        ],
+        5,
+        "0x175742c3DDD88B0192df3EcF98f180A79cb259D0"
+      ],
+      "0x7dAdae4e1a0DB43F6bcfA75295666fc044605679": [
+        "0x23E0B465633FF5178808F4A75186E2F2F9537021",
+        [
+          "0x80B2D9FA613c35Ec52B0dA5D84e6A819bcc5e369",
+          "0xEC7ABf73f339361ecCA951E1746C90a3e6205BFC",
+          "0xb04b6fb471e766d7f21a6aa0e4e25b2aea0a75ab",
+          "0x60BDa95a40d5536303BFcf84D679ca461A23398d",
+          "0x5d60F5d653Cc318d1f0ABacd83eD4feeAa6e5804"
+        ],
+        3,
+        "0x175742c3DDD88B0192df3EcF98f180A79cb259D0"
+      ],
+      "0xb84317C0E142D8911A0d69Dc32c48d87753B8d1C": [
         "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
         "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
-        "0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1"
-        "<DUAL_GOVERNANCE>",
+        "0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1",
+        "0xcdF49b058D606AD34c5789FD8c3BF8B3E54bA2db",
         4,
-	      4147200
+        4147200
       ],
-      "<RESEAL_MANAGER>": [
-	      "<TIMELOCK>"
+      "0x7914b5a1539b97Bd0bbd155757F25FD79A522d24": [
+        "0xCE0425301C85c5Ea2A0873A2dEe44d78E02D2316"
       ],
-      "<DAO_EMERGENCY_GOVERNANCE>": [
-	      "0x2e59A20f205bB85a89C53f1936454680651E618e",
-	      "<TIMELOCK>"
-	    ]
+      "0x553337946F2FAb8911774b20025fa776B76a7CcE": [
+        "0x2e59A20f205bB85a89C53f1936454680651E618e",
+        "0xCE0425301C85c5Ea2A0873A2dEe44d78E02D2316"
+      ]
     }
   }
 }
