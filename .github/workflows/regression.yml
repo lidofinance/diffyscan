@@ -36,6 +36,11 @@ jobs:
         run: |
           poetry install --no-interaction
           npm ci
+      
+      - name: Run unit tests
+        run: |
+          poetry run pytest -q
+      
       - name: Run diffyscan
         run: |
-          poetry run diffyscan ${{ matrix.config }} ${{ matrix.hardhat }} -Y -B
+          poetry run diffyscan --hardhat-path ${{ matrix.hardhat }} ${{ matrix.config }} -Y -B
