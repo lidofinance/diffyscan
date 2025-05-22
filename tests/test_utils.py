@@ -4,7 +4,7 @@ from diffyscan.diffyscan import is_standard_json_contract
 
 
 def test_single_file_format():
-    source_files = {"Contract": {"content": "contract C {}"}}
+    source_files = [("Contract", {"content": "contract Contract { ... }"})]
     assert not is_standard_json_contract(source_files)
 
 
