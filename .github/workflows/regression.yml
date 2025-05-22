@@ -1,6 +1,7 @@
 name: Regression Tests
 
-on: [push]
+on:
+  push
 
 # .github/workflows/ci.yaml
 permissions:                 # least-privilege principle
