@@ -15,4 +15,4 @@ class Config(TypedDict):
     explorer_hostname: str
     explorer_token_env_var: str
     bytecode_comparison: BinartConfig
-    fail_on_comparison_error: bool
+    fail_on_bytecode_comparison_error: bool

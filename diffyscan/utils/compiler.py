@@ -1,4 +1,3 @@
-import platform
 import hashlib
 import subprocess
 import json
@@ -109,6 +108,6 @@ def get_target_compiled_contract(compiled_contracts, target_contract_name):
     if len(contracts_to_check) != 1:
         raise CompileError("multiple contracts with the same name")
 
-    logger.okay(f"Contracts were successfully compiled")
+    logger.okay("Contracts were successfully compiled")
 
     return contracts_to_check[0]

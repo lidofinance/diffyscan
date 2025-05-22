@@ -1,10 +1,10 @@
 module.exports = {
-  solidity: "0.8.9",
+  solidity: "0.8.25",
   networks: {
     hardhat: {
-      chainId: 17000,
+      chainId: 560048,
       blockGasLimit: 92000000,
-      hardfork: "cancun",
+      hardfork: "prague",
     }
   },
 };

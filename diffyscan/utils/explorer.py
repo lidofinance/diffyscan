@@ -42,7 +42,7 @@ def _get_contract_from_etherscan(token, etherscan_hostname, contract):
     if solc_input.startswith("{{"):
         contract["solcInput"] = json.loads(solc_input[1:-1])
     else:
-        contract["solcInput":] = {
+        contract["solcInput"] = {
             "language": "Solidity",
             "sources": {result["ContractName"]: {"content": solc_input}},
             "settings": {
@@ -130,7 +130,7 @@ def _get_contract_from_blockscout(explorer_hostname, contract):
             "sources": source_files,
             "settings": {
                 "optimizer": {
-                    "enabled": response["optimization_enabled"] == True,
+                    "enabled": response["optimization_enabled"],
                     "runs": int(response["optimization_runs"]),
                 },
                 "outputSelection": {
@@ -243,6 +243,6 @@ def get_explorer_hostname(config):
         explorer_hostname = config["explorer_hostname"]
     else:
         logger.warn(
-            f'Failed to find explorer hostname in the config ("explorer_hostname" or "explorer_hostname_env_var")'
+            'Failed to find explorer hostname in the config ("explorer_hostname" or "explorer_hostname_env_var")'
         )
     return explorer_hostname
