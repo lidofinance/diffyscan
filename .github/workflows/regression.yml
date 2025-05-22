@@ -2,6 +2,11 @@ name: Regression Tests
 
 on: [push]
 
+# .github/workflows/ci.yaml
+permissions:                 # least-privilege principle
+  contents: read             # widen only if you need more
+  pull-requests: write
+
 jobs:
   regression:
     runs-on: ubuntu-latest
