@@ -5,6 +5,8 @@ on: [push]
 jobs:
   regression:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_API_TOKEN: ${{ github.token }}
     strategy:
       fail-fast: false
       matrix:
