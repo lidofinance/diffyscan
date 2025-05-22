@@ -20,8 +20,11 @@ def _errorNoSourceCodeAndExit(address):
     sys.exit(1)
 
 
-def _get_contract_from_etherscan(token, etherscan_hostname, contract):
-    etherscan_link = f"https://{etherscan_hostname}/api?module=contract&action=getsourcecode&address={contract}"
+def _get_contract_from_etherscan(token, etherscan_hostname, contract, chain_id=None):
+    if chain_id is None:
+        etherscan_link = f"https://{etherscan_hostname}/api?module=contract&action=getsourcecode&address={contract}"
+    else:
+        etherscan_link = f"https://{etherscan_hostname}/v2/api?chainid={chain_id}&module=contract&action=getsourcecode&address={contract}"
     if token is not None:
         etherscan_link = f"{etherscan_link}&apikey={token}"
 
@@ -153,7 +156,11 @@ def _get_contract_from_blockscout(explorer_hostname, contract):
 
 
 def get_contract_from_explorer(
-    token, explorer_hostname, contract_address, contract_name_from_config
+    token,
+    explorer_hostname,
+    contract_address,
+    contract_name_from_config,
+    chain_id=None,
 ):
     result = {}
     if explorer_hostname.startswith("zksync"):
@@ -161,7 +168,9 @@ def get_contract_from_explorer(
     elif explorer_hostname.endswith("mantle.xyz"):
         result = _get_contract_from_mantle(explorer_hostname, contract_address)
     elif explorer_hostname.endswith("lineascan.build"):
-        result = _get_contract_from_etherscan(None, explorer_hostname, contract_address)
+        result = _get_contract_from_etherscan(
+            None, explorer_hostname, contract_address, chain_id
+        )
     elif (
         explorer_hostname.endswith("mode.network")
         or explorer_hostname.endswith("blockscout.com")
@@ -171,7 +180,7 @@ def get_contract_from_explorer(
         result = _get_contract_from_blockscout(explorer_hostname, contract_address)
     else:
         result = _get_contract_from_etherscan(
-            token, explorer_hostname, contract_address
+            token, explorer_hostname, contract_address, chain_id
         )
 
     contract_name_from_etherscan = result["name"]
@@ -246,3 +255,14 @@ def get_explorer_hostname(config):
             'Failed to find explorer hostname in the config ("explorer_hostname" or "explorer_hostname_env_var")'
         )
     return explorer_hostname
+
+
+def get_explorer_chain_id(config):
+    chain_id = None
+    if "explorer_chain_id_env_var" in config:
+        chain_id = load_env(
+            config["explorer_chain_id_env_var"], masked=False, required=False
+        )
+    elif "explorer_chain_id" in config:
+        chain_id = config["explorer_chain_id"]
+    return chain_id

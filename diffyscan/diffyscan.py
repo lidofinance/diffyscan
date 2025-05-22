@@ -17,6 +17,7 @@ from .utils.explorer import (
     compile_contract_from_explorer,
     parse_compiled_contract,
     get_explorer_hostname,
+    get_explorer_chain_id,
 )
 from .utils.github import (
     get_file_from_github,
@@ -114,9 +115,12 @@ def run_source_diff(
     )
 
     explorer_hostname = get_explorer_hostname(config)
+    explorer_chain_id = get_explorer_chain_id(config)
     logger.divider()
     logger.okay("Contract", contract_address_from_config)
     logger.okay("Blockchain explorer Hostname", explorer_hostname)
+    if explorer_chain_id:
+        logger.okay("Blockchain explorer Chain ID", explorer_chain_id)
     logger.okay("Repo", config["github_repo"]["url"])
     logger.okay("Repo commit", config["github_repo"]["commit"])
     logger.okay("Repo relative root", config["github_repo"]["relative_root"])
@@ -280,6 +284,7 @@ def process_config(
                     get_explorer_hostname(config),
                     contract_address,
                     contract_name,
+                    get_explorer_chain_id(config),
                 )
 
                 if enable_source_comparison:
