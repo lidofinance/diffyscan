@@ -69,7 +69,7 @@ Alternatively, create a new config file named `config.json` near the diffyscan.p
     "0x28FAB2059C713A7F9D8c86Db49f9bb0e96Af1ef8": "OssifiableProxy",
     "0xDba5Ad530425bb1b14EECD76F1b4a517780de537": "LidoLocator"
   },
-  "explorer_hostname": "api-holesky.etherscan.io",
+  "explorer_hostname": "api.etherscan.io",
   "explorer_chain_id": 17000,
   "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
   "github_repo": {
