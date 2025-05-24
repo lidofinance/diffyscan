@@ -73,8 +73,9 @@
     "0xF19E48C5Ad2F8aBB452F5A6AB9cb104E70495e08": "PinnedBeaconProxy",
     "0x5ED5661F744E11A2076865810B0d7553b74468D2": "ENSSubdomainRegistrar"
   },
-  "explorer_hostname": "api-hoodi.etherscan.io",
+  "explorer_hostname": "api.etherscan.io",
   "explorer_token_env_var": "ETHERSCAN_TOKEN",
+  "explorer_chain_id": 560048,
   "github_repo": {
     "url": "https://github.com/lidofinance/core",
     "commit": "v3.0.0-alpha",

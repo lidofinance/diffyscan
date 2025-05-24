@@ -54,8 +54,9 @@
     "0xD327b4Fb87fa01599DaD491Aa63B333c44C74472": "AppProxyUpgradeable",
     "0x2997EA0D07D79038D83Cb04b3BB9A2Bc512E3fDA": "AppProxyUpgradeable"
   },
-  "explorer_hostname": "api-holesky.etherscan.io",
+  "explorer_hostname": "api.etherscan.io",
   "explorer_token_env_var": "ETHERSCAN_TOKEN",
+  "explorer_chain_id": 17000,
   "github_repo": {
     "url": "https://github.com/lidofinance/lido-dao",
     "commit": "cadffa46a2b8ed6cfa1127fca2468bae1a82d6bf",
