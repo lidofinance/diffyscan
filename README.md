@@ -12,7 +12,7 @@ Key features:
 
 - retrieve and diff sources from the GitHub repo against the queried ones from a blockscan service (e.g. Etherscan)
 - compare the bytecode compiled and deployed on the forked network locally against remote (see section 'bytecode_comparison' in `./config_samples/lido_dao_sepolia_config.json` as an example)
-- preprocess solidity sourcecode by means of prettifier solidity plugin before comparing the sources (option `--prettify`) if needed.
+- preprocess solidity sourcecode by means of prettier solidity plugin before comparing the sources (option `--prettify`) if needed.
 - preprocess imports to flat paths for Brownie compatibility (option `--support-brownie`)
 - enable binary comparison (option `--enable-binary-comparison`)
 - provide own Hardhat config as optional argument
@@ -23,7 +23,7 @@ Key features:
 pipx install git+https://github.com/lidofinance/diffyscan
 ```
 
-If deployed bytecode binary comparison or pretifier sources preprocessing are needed:
+If deployed bytecode binary comparison or prettier source preprocessing are needed:
 
 ```shell
 npm install
@@ -157,7 +157,7 @@ This project was developed using these dependencies with their exact versions li
 
 - Python 3.12
 - Poetry 1.8
-- if deployed bytecode binary comparison or pretifier sources preprocessing are needed:
+- if deployed bytecode binary comparison or prettier source preprocessing are needed:
   - npm
 
 Other versions may work as well but were not tested at all.
@@ -195,7 +195,7 @@ poetry shell
 poetry install
 ```
 
-5. If deployed bytecode binary comparison or pretifier sources preprocessing are needed:
+5. If deployed bytecode binary comparison or prettier source preprocessing are needed:
 
 ```shell
 npm install
