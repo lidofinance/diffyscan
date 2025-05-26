@@ -1,0 +1,29 @@
+{
+    "contracts": {
+        "0x45C0FFB5b9710B512B819058b7b9dDE839608D43": "TransparentUpgradeableProxy",
+        "0xF60eF59b1a37347E33E008DF03a50be19368F44E": "L2LidoGateway",
+        "0x8E0f85515ec4412483b68DeA14661A86741cdC0a": "TransparentUpgradeableProxy",
+        "0xaF4B5fDFa12656f8A4500055B102185C4b04a06E": "L2WstETHToken",
+        "0xA66AA05F4b89104D9CEBE6A3f696Ac084cdE0055": "ProxyAdmin"
+    },
+    "explorer_hostname": "explorer-api-holesky.morphl2.io",
+    "github_repo": {
+        "url": "https://github.com/morph-l2/morph/",
+        "commit": "c73b334a899321e03c8550ece3c181a38a5d9902",
+        "relative_root": "contracts"
+    },
+    "dependencies": {
+        "@openzeppelin/contracts": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+            "commit": "bd325d56b4c62c9c5c1aff048c37c6bb18ac0290",
+            "relative_root": "contracts",
+            "//": "version 4.9.5"
+        },
+        "@openzeppelin/contracts-upgradeable": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable",
+            "commit": "a40cb0bda838c2ef3dfc252c179f5c37c32e80c4",
+            "relative_root": "contracts",
+            "//": "version 4.9.5"
+        }
+    }
+}

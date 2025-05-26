@@ -1,0 +1,28 @@
+{
+    "contracts": {
+        "0xae9aA78222Ca3b6D1C38dF167D1F4f9B8fD7aC8a": "TransparentUpgradeableProxy",
+        "0xc22c108f6ebef2d8a087620e4923244768a942fb": "L1LidoGateway",
+        "0x1001a8c1766dd469958c2cabb4ee153d001865fc": "ProxyAdmin"
+    },
+    "explorer_hostname": "api-holesky.etherscan.io",
+    "explorer_token_env_var": "ETHERSCAN_TOKEN",
+    "github_repo": {
+        "url": "https://github.com/morph-l2/morph/",
+        "commit": "c73b334a899321e03c8550ece3c181a38a5d9902",
+        "relative_root": "contracts"
+    },
+    "dependencies": {
+        "@openzeppelin/contracts": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+            "commit": "bd325d56b4c62c9c5c1aff048c37c6bb18ac0290",
+            "relative_root": "contracts",
+            "//": "version 4.9.5"
+        },
+        "@openzeppelin/contracts-upgradeable": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable",
+            "commit": "a40cb0bda838c2ef3dfc252c179f5c37c32e80c4",
+            "relative_root": "contracts",
+            "//": "version 4.9.5"
+        }
+    }
+}
