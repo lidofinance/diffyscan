@@ -1,14 +1,14 @@
 {
   "contracts": {
     "0xd48c2fc419569537Bb069BAD2165dC0cEB160CEC": "DGLaunchStateVerifier",
-    "0x6FFDa833d2cf6AA76fa199D96dB22C4075c14D71": "LaunchOmnibusMainnet",
-    "0xC90E7CC979f3e931829CdA552B50D82d420B9E8E": "RolesValidatorMainnet",
+    "0xcD7d0c2f0aEFF8cBD17702bfa9505421253edE54": "DGLaunchOmnibusMainnet",
+    "0x31534e3aFE219B609da3715a00a1479D2A2d7981": "DGRolesValidatorMainnet",
     "0x2a30F5aC03187674553024296bed35Aa49749DDa": "TimeConstraints"
   },
   "explorer_hostname": "api.etherscan.io",
   "github_repo": {
     "url": "https://github.com/lidofinance/dual-governance",
-    "commit": "76dd0acaed61758f2ef966f459aaa5e45c72a6d1",
+    "commit": "f3f26383ee130d6a8bb0d1f420151e4a311018eb",
     "relative_root": ""
   },
   "dependencies": {
@@ -34,16 +34,16 @@
           2
         ]
       ],
-      "0xC90E7CC979f3e931829CdA552B50D82d420B9E8E": [
+      "0x31534e3aFE219B609da3715a00a1479D2A2d7981": [
         "0x23E0B465633FF5178808F4A75186E2F2F9537021",
         "0x7914b5a1539b97Bd0bbd155757F25FD79A522d24"
       ],
       "0x2a30F5aC03187674553024296bed35Aa49749DDa": [],
-      "0x6FFDa833d2cf6AA76fa199D96dB22C4075c14D71": [
+      "0xcD7d0c2f0aEFF8cBD17702bfa9505421253edE54": [
         "0xcdF49b058D606AD34c5789FD8c3BF8B3E54bA2db",
         "0x23E0B465633FF5178808F4A75186E2F2F9537021",
         "0x7914b5a1539b97Bd0bbd155757F25FD79A522d24",
-        "0xC90E7CC979f3e931829CdA552B50D82d420B9E8E",
+        "0x31534e3aFE219B609da3715a00a1479D2A2d7981",
         "0xd48c2fc419569537Bb069BAD2165dC0cEB160CEC",
         "0x2a30F5aC03187674553024296bed35Aa49749DDa"
       ]
