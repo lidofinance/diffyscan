@@ -17,7 +17,7 @@ diffyscan = "diffyscan.diffyscan:main"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4"
-requests = "^2.32.2"
+requests = "^2.32.4"
 termtables = "^0.2.4"
 
 [tool.poetry.group.dev.dependencies]
