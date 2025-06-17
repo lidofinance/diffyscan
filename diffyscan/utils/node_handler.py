@@ -17,7 +17,9 @@ def get_bytecode_from_node(contract_address, rpc_url):
         }
     )
 
-    sources_url_response_in_json = pull(rpc_url, payload).json()
+    headers = {"Content-Type": "application/json"}
+
+    sources_url_response_in_json = pull(rpc_url, payload, headers).json()
     if (
         "result" not in sources_url_response_in_json
         or sources_url_response_in_json["result"] == "0x"
