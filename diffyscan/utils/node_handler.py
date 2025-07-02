@@ -18,7 +18,6 @@ def get_bytecode_from_node(contract_address, rpc_url):
     )
 
     headers = {"Content-Type": "application/json"}
-
     sources_url_response_in_json = pull(rpc_url, payload, headers).json()
     if (
         "result" not in sources_url_response_in_json
@@ -37,7 +36,8 @@ def get_account(rpc_url):
         {"id": 42, "jsonrpc": "2.0", "method": "eth_accounts", "params": []}
     )
 
-    account_address_response = pull(rpc_url, payload).json()
+    headers = {"Content-Type": "application/json"}
+    account_address_response = pull(rpc_url, payload, headers).json()
 
     if "result" not in account_address_response:
         raise NodeError("The deployer account isn't set")
@@ -58,7 +58,8 @@ def deploy_contract(rpc_url, deployer, data):
             "id": 1,
         }
     )
-    response_sendTransaction = pull(rpc_url, payload_sendTransaction).json()
+    headers = {"Content-Type": "application/json"}
+    response_sendTransaction = pull(rpc_url, payload_sendTransaction, headers).json()
 
     if "error" in response_sendTransaction:
         raise NodeError(response_sendTransaction["error"]["message"])
