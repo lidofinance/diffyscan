@@ -1,0 +1,32 @@
+{
+  "contracts": {
+    "0x397206ecdbdcb1A55A75e60Fc4D054feC72E5f63": "CuratedSubmitExitRequestHashes",
+    "0xAa3D6A8B52447F272c1E8FAaA06EA06658bd95E2": "SDVTSubmitExitRequestHashes"
+  },
+  "explorer_hostname": "api-hoodi.etherscan.io",
+  "explorer_token_env_var": "ETHERSCAN_TOKEN",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/easy-track",
+    "commit": "ff06b9a67a5efafe0418057a86024e33525d14e7",
+    "relative_root": ""
+  },
+  "dependencies": {},
+  "fail_on_bytecode_comparison_error": true,
+  "bytecode_comparison": {
+    "hardhat_config_name": "hoodi_hardhat_config.js",
+    "constructor_calldata": {},
+    "constructor_args": {
+      "0x397206ecdbdcb1A55A75e60Fc4D054feC72E5f63": [
+        "0000000000000000000000005cdbe1590c083b5a2a64427faa63a7cfdb91fbb5",
+        "000000000000000000000000cc820558b39ee15c7c45b59390b503b83fb499a8",
+        "0000000000000000000000008664d394c2b3278f26a1b44b967aef99707eeab2"
+      ],
+      "0xAa3D6A8B52447F272c1E8FAaA06EA06658bd95E2": [
+        "000000000000000000000000bb958292042c604855d23f8db458855d20e16996",
+        "0000000000000000000000000b5236beca68004db89434462dfc3bb074d2c830",
+        "000000000000000000000000cc820558b39ee15c7c45b59390b503b83fb499a8",
+        "0000000000000000000000008664d394c2b3278f26a1b44b967aef99707eeab2"
+      ]
+    }
+  }
+}
