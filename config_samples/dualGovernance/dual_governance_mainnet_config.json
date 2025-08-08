@@ -1,22 +1,23 @@
 {
   "contracts": {
     "0x23E0B465633FF5178808F4A75186E2F2F9537021": "Executor",
-    "0xcdF49b058D606AD34c5789FD8c3BF8B3E54bA2db": "DualGovernance",
+    "0xC1db28B3301331277e307FDCfF8DE28242A4486E": "DualGovernance",
     "0xCE0425301C85c5Ea2A0873A2dEe44d78E02D2316": "EmergencyProtectedTimelock",
     "0xa1692Af6FDfdD1030E4E9c4Bc429986FA64CB5EF": "ImmutableDualGovernanceConfigProvider",
+    "0xc934E90E76449F09f2369BB85DCEa056567A327a": "ImmutableDualGovernanceConfigProvider",
     "0x75850938C1Aa50B8cC6eb3c00995759dc1425ae6": "TimelockedGovernance",
-    "0x175742c3DDD88B0192df3EcF98f180A79cb259D0": "TiebreakerCoreCommittee",
-    "0x74836470337Ba5d2a92fe16E44AD862E28fcf9B3": "TiebreakerSubCommittee",
-    "0xb9d82E1A49f6a66E8a07260BA05Cf9Ac8a938B1C": "TiebreakerSubCommittee",
-    "0x7dAdae4e1a0DB43F6bcfA75295666fc044605679": "TiebreakerSubCommittee",
-    "0xb84317C0E142D8911A0d69Dc32c48d87753B8d1C": "Escrow",
+    "0xf65614d73952Be91ce0aE7Dd9cFf25Ba15bEE2f5": "TiebreakerCoreCommittee",
+    "0x3D3ba54D54bbFF40F2Dfa2A8e27bD4dE3dab2951": "TiebreakerSubCommittee",
+    "0xDBfa0B8A15a503f25224fcA5F84a3853230A715C": "TiebreakerSubCommittee",
+    "0xBF048f2111497B6Df5E062811f5fC422804D4baE": "TiebreakerSubCommittee",
+    "0xd6A67636c05BeB5B4a5c90D408b03A63c4e39426": "Escrow",
     "0x7914b5a1539b97Bd0bbd155757F25FD79A522d24": "ResealManager",
     "0x553337946F2FAb8911774b20025fa776B76a7CcE": "TimelockedGovernance"
   },
   "explorer_hostname": "api.etherscan.io",
   "github_repo": {
     "url": "https://github.com/lidofinance/dual-governance",
-    "commit": "3e0f1ae5740ef8410e928f6cc106e3a5f45a5a75",
+    "commit": "14b59968c98992bf51a6f1340457127ddc0cc6c2",
     "relative_root": ""
   },
   "dependencies": {
@@ -31,9 +32,9 @@
     "hardhat_config_name": "hardhat.config.js",
     "constructor_args": {
       "0x23E0B465633FF5178808F4A75186E2F2F9537021": [
-        "0x93b17aba1dcacd259df82dc58a7e582f456e5c0b"
+        "0x93B17aBA1DcACd259dF82dc58A7E582F456E5C0B"
       ],
-      "0xcdF49b058D606AD34c5789FD8c3BF8B3E54bA2db": [
+      "0xC1db28B3301331277e307FDCfF8DE28242A4486E": [
         [
           "0xCE0425301C85c5Ea2A0873A2dEe44d78E02D2316",
           "0x7914b5a1539b97Bd0bbd155757F25FD79A522d24",
@@ -62,12 +63,12 @@
         "0xdd778153c3d0AE1B70fe81E0219b5D2C3e3951C2",
         "0xCE0425301C85c5Ea2A0873A2dEe44d78E02D2316"
       ],
-      "0x175742c3DDD88B0192df3EcF98f180A79cb259D0": [
-        "0x23E0B465633FF5178808F4A75186E2F2F9537021",
-        "0xcdF49b058D606AD34c5789FD8c3BF8B3E54bA2db",
+      "0xf65614d73952Be91ce0aE7Dd9cFf25Ba15bEE2f5": [
+        "0x93B17aBA1DcACd259dF82dc58A7E582F456E5C0B",
+        "0xC1db28B3301331277e307FDCfF8DE28242A4486E",
         2592000
       ],
-      "0x74836470337Ba5d2a92fe16E44AD862E28fcf9B3": [
+      "0x3D3ba54D54bbFF40F2Dfa2A8e27bD4dE3dab2951": [
         "0x23E0B465633FF5178808F4A75186E2F2F9537021",
         [
           "0x805fa0f79dc0ddcd73dcbc23487d2d5bd77de598",
@@ -77,9 +78,9 @@
           "0xD8a9072D82a28307279aC0aD3c97Cb61bEe67952"
         ],
         3,
-        "0x175742c3DDD88B0192df3EcF98f180A79cb259D0"
+        "0xf65614d73952Be91ce0aE7Dd9cFf25Ba15bEE2f5"
       ],
-      "0xb9d82E1A49f6a66E8a07260BA05Cf9Ac8a938B1C": [
+      "0xDBfa0B8A15a503f25224fcA5F84a3853230A715C": [
         "0x23E0B465633FF5178808F4A75186E2F2F9537021",
         [
           "0x9837b0Db0b733DED04D96a0A25Ba1E414A6C4c08",
@@ -91,9 +92,9 @@
           "0x8ed4dfd3A610CCF1FB45e797bf5D8e0f93084F22"
         ],
         5,
-        "0x175742c3DDD88B0192df3EcF98f180A79cb259D0"
+        "0xf65614d73952Be91ce0aE7Dd9cFf25Ba15bEE2f5"
       ],
-      "0x7dAdae4e1a0DB43F6bcfA75295666fc044605679": [
+      "0xBF048f2111497B6Df5E062811f5fC422804D4baE": [
         "0x23E0B465633FF5178808F4A75186E2F2F9537021",
         [
           "0x80B2D9FA613c35Ec52B0dA5D84e6A819bcc5e369",
@@ -103,13 +104,13 @@
           "0x5d60F5d653Cc318d1f0ABacd83eD4feeAa6e5804"
         ],
         3,
-        "0x175742c3DDD88B0192df3EcF98f180A79cb259D0"
+        "0xf65614d73952Be91ce0aE7Dd9cFf25Ba15bEE2f5"
       ],
-      "0xb84317C0E142D8911A0d69Dc32c48d87753B8d1C": [
+      "0xd6A67636c05BeB5B4a5c90D408b03A63c4e39426": [
         "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
         "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
         "0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1",
-        "0xcdF49b058D606AD34c5789FD8c3BF8B3E54bA2db",
+        "0xC1db28B3301331277e307FDCfF8DE28242A4486E",
         4,
         4147200
       ],
@@ -119,6 +120,9 @@
       "0x553337946F2FAb8911774b20025fa776B76a7CcE": [
         "0x2e59A20f205bB85a89C53f1936454680651E618e",
         "0xCE0425301C85c5Ea2A0873A2dEe44d78E02D2316"
+      ],
+      "0xc934E90E76449F09f2369BB85DCEa056567A327a": [
+        [999999999999999999, 1000000000000000000, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0]
       ]
     }
   }

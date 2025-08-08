@@ -1,0 +1,36 @@
+{
+  "contracts": {
+    "0x487b764a2085ffd595D9141BAec0A766B7904786": "DGUpgradeStateVerifierMainnet",
+    "0x67988077f29FbA661911d9567E05cc52C51ca1B0": "DGUpgradeOmnibusMainnet"
+  },
+  "explorer_hostname": "api.etherscan.io",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/dual-governance",
+    "commit": "959e1766a1a27eeb5ca57dc05e4f5cae1e025f47",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "lib/openzeppelin-contracts/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "dbb6104ce834628e473d2173bbc9d47f81a9eec3",
+      "relative_root": "contracts"
+    }
+  },
+  "fail_on_bytecode_comparison_error": false,
+  "bytecode_comparison": {
+    "hardhat_config_name": "hardhat.config.js",
+    "constructor_args": {
+      "0x487b764a2085ffd595D9141BAec0A766B7904786": [
+        "0xC1db28B3301331277e307FDCfF8DE28242A4486E",
+        "0xf65614d73952Be91ce0aE7Dd9cFf25Ba15bEE2f5",
+        "0xc934E90E76449F09f2369BB85DCEa056567A327a"
+      ],
+      "0x67988077f29FbA661911d9567E05cc52C51ca1B0": [
+        "0x487b764a2085ffd595D9141BAec0A766B7904786",
+        "0xC1db28B3301331277e307FDCfF8DE28242A4486E",
+        "0xf65614d73952Be91ce0aE7Dd9cFf25Ba15bEE2f5",
+        "0xc934E90E76449F09f2369BB85DCEa056567A327a"
+      ]
+    }
+  }
+}
