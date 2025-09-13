@@ -7,23 +7,23 @@
   "explorer_token_env_var": "ETHERSCAN_TOKEN",
   "github_repo": {
     "url": "https://github.com/lidofinance/easy-track",
-    "commit": "ff06b9a67a5efafe0418057a86024e33525d14e7",
+    "commit": "d769bbaa21a739a1ec231043d67a12463d742a84",
     "relative_root": ""
   },
   "dependencies": {},
   "fail_on_bytecode_comparison_error": true,
   "bytecode_comparison": {
-    "hardhat_config_name": "hoodi_mainnet_config.js",
+    "hardhat_config_name": "mainnet_hardhat_config.js",
     "constructor_calldata": {},
     "constructor_args": {
       "0x8aa34dAaF0fC263203A15Bcfa0Ed926D466e59F3": [
-        "0000000000000000000000000D97E876ad14DB2b183CFeEB8aa1A5C788eB1831",
+        "00000000000000000000000055032650b14df07b85bF18A3a3eC8E0Af2e028d5",
         "000000000000000000000000FdDf38947aFB03C621C71b06C9C70bce73f12999",
         "0000000000000000000000000De4Ea0184c2ad0BacA7183356Aea5B8d5Bf5c6e"
       ],
       "0xB7668B5485d0f826B86a75b0115e088bB9ee03eE": [
         "00000000000000000000000008637515E85A4633E23dfc7861e2A9f53af640f7",
-        "0000000000000000000000002325b0a607808dE42D918DB07F925FFcCfBb2968",
+        "000000000000000000000000aE7B191A31f627b4eB1d4DaC64eaB9976995b433",
         "000000000000000000000000FdDf38947aFB03C621C71b06C9C70bce73f12999",
         "0000000000000000000000000De4Ea0184c2ad0BacA7183356Aea5B8d5Bf5c6e"
       ]
