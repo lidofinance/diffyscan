@@ -22,18 +22,21 @@ def trim_solidity_meta(bytecode: str) -> dict:
     if meta_size > len(bytecode):
         return {"bytecode": bytecode, "metadata": "", "string_literal": ""}
 
-    stop_index = bytecode.index("5b5056fe")
-    if stop_index == -1:
+    stop_opcode = "5b5056fe"
+
+    if stop_opcode not in bytecode:
         return {
             "bytecode": bytecode,
             "metadata": bytecode[-meta_size:],
             "string_literal": "",
         }
 
+    stop_index = bytecode.index(stop_opcode)
+
     return {
         "bytecode": bytecode[:-stop_index],
         "string_literal": bytes.fromhex(
-            bytecode[stop_index + len("5b5056fe") : -meta_size]
+            bytecode[stop_index + len(stop_opcode) : -meta_size]
         ).decode("ascii"),
         "metadata": bytecode[-meta_size:],
     }
