@@ -31,13 +31,13 @@ def trim_solidity_meta(bytecode: str) -> dict:
             "string_literal": "",
         }
 
-    stop_index = bytecode.index(stop_opcode)
+    stop_index = bytecode.index(stop_opcode) + len(stop_opcode)
 
     return {
         "bytecode": bytecode[:-stop_index],
-        "string_literal": bytes.fromhex(
-            bytecode[stop_index + len(stop_opcode) : -meta_size]
-        ).decode("ascii"),
+        "string_literal": bytes.fromhex(bytecode[stop_index:-meta_size]).decode(
+            "ascii"
+        ),
         "metadata": bytecode[-meta_size:],
     }
 
