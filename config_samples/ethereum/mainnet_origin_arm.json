@@ -1,0 +1,38 @@
+{
+  "contracts": {
+    "0xec6fdcc3904f8dd6a9cbbbcc41b741df5963b42e": "LidoARM"
+  },
+  "explorer_hostname": "api.etherscan.io",
+  "explorer_token_env_var": "ETHERSCAN_TOKEN",
+  "explorer_chain_id": 1,
+  "github_repo": {
+    "url": "https://github.com/OriginProtocol/arm-oeth",
+    "commit": "700fa99f0610ad4874197cd0d71ff9d4c244a201",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "dependencies/@openzeppelin-contracts-upgradeable-5.0.2": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable",
+      "commit": "v5.0.0",
+      "relative_root": "contracts"
+    },
+    "dependencies/@openzeppelin-contracts-5.0.2": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "v5.0.0",
+      "relative_root": "contracts"
+    }
+  },
+  "fail_on_bytecode_comparison_error": true,
+  "bytecode_comparison": {
+    "constructor_args": {
+      "0xec6fdcc3904f8dd6a9cbbbcc41b741df5963b42e": [
+        "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
+        "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1",
+        600,
+        10000000,
+        1000000000000000000
+      ]
+    }
+  }
+}
