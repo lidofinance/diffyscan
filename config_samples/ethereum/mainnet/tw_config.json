@@ -11,6 +11,7 @@
   },
   "explorer_hostname": "api.etherscan.io",
   "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+  "explorer_chain_id": 1,
   "github_repo": {
     "url": "https://github.com/lidofinance/core",
     "commit": "c9ef333e28b51cca9741241d4aceab77a414cb85",
