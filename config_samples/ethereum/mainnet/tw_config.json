@@ -72,6 +72,11 @@
   "fail_on_bytecode_comparison_error": true,
   "bytecode_comparison": {
     "hardhat_config_name": "mainnet_hardhat_config.js",
+    "libraries": {
+      "contracts/common/lib/MinFirstAllocationStrategy.sol": {
+        "MinFirstAllocationStrategy": "0x7e70De6D1877B3711b2bEDa7BA00013C7142d993"
+      }
+    },
     "constructor_calldata": {},
     "constructor_args": {
       "0x2C298963FB763f74765829722a1ebe0784f4F5Cf": [

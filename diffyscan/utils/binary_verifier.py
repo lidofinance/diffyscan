@@ -26,7 +26,7 @@ def trim_solidity_meta(bytecode: str) -> dict:
 
     if stop_opcode not in bytecode:
         return {
-            "bytecode": bytecode,
+            "bytecode": bytecode[:-meta_size],
             "metadata": bytecode[-meta_size:],
             "string_literal": "",
         }
