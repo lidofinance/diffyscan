@@ -14,8 +14,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - config: config_samples/lido_dao_holesky_config.json
-            hardhat: hardhat_configs/holesky_hardhat_config.js
+          - config: config_samples/ethereum/mainnet/tw_config.json
+            hardhat: hardhat_configs/mainnet_hardhat_config.js
+          - config: config_samples/ethereum/mainnet/tw_easy_track_config.json
+            hardhat: hardhat_configs/mainnet_hardhat_config.js
     env:
       ETHERSCAN_EXPLORER_TOKEN: ${{ secrets.ETHERSCAN_EXPLORER_TOKEN }}
       GITHUB_API_TOKEN: ${{ github.token }}
