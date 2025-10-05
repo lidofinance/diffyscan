@@ -193,7 +193,7 @@ def get_contract_from_explorer(
     return result
 
 
-def compile_contract_from_explorer(contract_code):
+def compile_contract_from_explorer(contract_code, libraries=None):
     required_platform = get_solc_native_platform_from_os()
     build_name = contract_code["compiler"][1:]
     build_info = get_compiler_info(required_platform, build_name)
@@ -204,13 +204,28 @@ def compile_contract_from_explorer(contract_code):
     if not is_compiler_already_prepared:
         prepare_compiler(required_platform, build_info, compiler_path)
 
-    input_settings = json.dumps(contract_code["solcInput"])
+    solc_input = contract_code["solcInput"]
+
+    # Add libraries to solc input before compilation if provided
+    if libraries:
+        logger.okay(f"Adding libraries to solc input: {libraries}")
+        if "settings" not in solc_input:
+            solc_input["settings"] = {}
+        if "libraries" not in solc_input["settings"]:
+            solc_input["settings"]["libraries"] = {}
+        solc_input["settings"]["libraries"].update(libraries)
+
+    input_settings = json.dumps(solc_input)
     compiled_contracts = compile_contracts(compiler_path, input_settings)[
         "contracts"
     ].values()
 
     target_contract_name = contract_code["name"]
-    return get_target_compiled_contract(compiled_contracts, target_contract_name)
+    compiled_contract = get_target_compiled_contract(
+        compiled_contracts, target_contract_name
+    )
+
+    return compiled_contract
 
 
 def parse_compiled_contract(target_compiled_contract):
