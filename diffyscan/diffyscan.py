@@ -50,7 +50,12 @@ def run_bytecode_diff(
     address_name = f"{contract_address_from_config} : {contract_name_from_config}"
     logger.divider()
     logger.info(f"Binary bytecode comparison started for {address_name}")
-    target_compiled_contract = compile_contract_from_explorer(contract_source_code)
+
+    # Get libraries from config if they exist
+    libraries = config.get("bytecode_comparison", {}).get("libraries", None)
+    target_compiled_contract = compile_contract_from_explorer(
+        contract_source_code, libraries
+    )
 
     contract_creation_code, local_compiled_bytecode, immutables = (
         parse_compiled_contract(target_compiled_contract)
