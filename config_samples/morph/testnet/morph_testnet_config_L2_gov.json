@@ -1,0 +1,12 @@
+{
+    "contracts": {
+        "0x01938475718f22eBAf62f3EAc1A23855C6EAf97b": "MorphBridgeExecutor"
+    },
+    "explorer_hostname": "explorer-api-holesky.morphl2.io",
+    "github_repo": {
+        "url": "https://github.com/morph-l2/governance-crosschain-bridges",
+        "commit": "04280f618113e40c4a25b00b7c9fbdee1f1edd8d",
+        "relative_root": "contracts/bridges"
+    },
+    "dependencies": {}
+}
