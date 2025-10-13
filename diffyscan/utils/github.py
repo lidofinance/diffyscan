@@ -1,13 +1,106 @@
 import base64
+import os
+import hashlib
 
 from .common import fetch, parse_repo_link
 from .logger import logger
 
+# Cache directory for storing GitHub files
+GITHUB_CACHE_DIR = os.path.join(os.getcwd(), ".diffyscan_cache", "github")
 
-def get_file_from_github(github_api_token, dependency_repo, path_to_file, dep_name):
+
+def _get_github_cache_key(user_slash_repo, commit, relative_root, path_to_file):
+    """
+    Generate a unique cache key for a GitHub file.
+
+    Args:
+        user_slash_repo: Repository in format "user/repo"
+        commit: Git commit hash
+        relative_root: Relative root path in the repo
+        path_to_file: Path to the file
+
+    Returns:
+        A string cache key (hash)
+    """
+    # Combine all parts to create unique identifier
+    cache_string = f"{user_slash_repo}:{commit}:{relative_root}:{path_to_file}"
+    # Use SHA256 hash for consistent, filesystem-safe cache keys
+    return hashlib.sha256(cache_string.encode()).hexdigest()
+
+
+def _get_github_cache_path(cache_key):
+    """Get the file path for a GitHub cache key."""
+    return os.path.join(GITHUB_CACHE_DIR, f"{cache_key}.txt")
+
+
+def _load_from_github_cache(user_slash_repo, commit, relative_root, path_to_file):
+    """
+    Load file content from GitHub cache if available.
+
+    Returns:
+        Cached file content or None if not found
+    """
+    cache_key = _get_github_cache_key(
+        user_slash_repo, commit, relative_root, path_to_file
+    )
+    cache_path = _get_github_cache_path(cache_key)
+
+    if os.path.exists(cache_path):
+        try:
+            logger.info(f"Loading GitHub file from cache: {path_to_file}")
+            with open(cache_path, "r", encoding="utf-8") as f:
+                return f.read()
+        except Exception as e:
+            logger.warn(f"Failed to load from GitHub cache: {e}")
+            return None
+    return None
+
+
+def _save_to_github_cache(
+    user_slash_repo, commit, relative_root, path_to_file, content
+):
+    """
+    Save file content to GitHub cache.
+
+    Args:
+        user_slash_repo: Repository in format "user/repo"
+        commit: Git commit hash
+        relative_root: Relative root path in the repo
+        path_to_file: Path to the file
+        content: File content to cache
+    """
+    cache_key = _get_github_cache_key(
+        user_slash_repo, commit, relative_root, path_to_file
+    )
+    cache_path = _get_github_cache_path(cache_key)
+
+    try:
+        # Create cache directory if it doesn't exist
+        os.makedirs(GITHUB_CACHE_DIR, exist_ok=True)
+
+        with open(cache_path, "w", encoding="utf-8") as f:
+            f.write(content)
+        logger.info(f"Saved GitHub file to cache: {path_to_file}")
+    except Exception as e:
+        logger.warn(f"Failed to save to GitHub cache: {e}")
+
+
+def get_file_from_github(
+    github_api_token, dependency_repo, path_to_file, dep_name, use_cache=False
+):
     path_to_file = path_to_file_without_dependency(path_to_file, dep_name)
-
     user_slash_repo = parse_repo_link(dependency_repo["url"])
+
+    # Try to load from cache if enabled
+    if use_cache:
+        cached_content = _load_from_github_cache(
+            user_slash_repo,
+            dependency_repo["commit"],
+            dependency_repo["relative_root"],
+            path_to_file,
+        )
+        if cached_content is not None:
+            return cached_content
 
     github_api_url = get_github_api_url(
         user_slash_repo,
@@ -30,14 +123,37 @@ def get_file_from_github(github_api_token, dependency_repo, path_to_file, dep_na
         logger.error("No file content")
         return None
 
-    return base64.b64decode(file_content).decode()
+    decoded_content = base64.b64decode(file_content).decode()
+
+    # Save to cache if enabled
+    if use_cache:
+        _save_to_github_cache(
+            user_slash_repo,
+            dependency_repo["commit"],
+            dependency_repo["relative_root"],
+            path_to_file,
+            decoded_content,
+        )
+
+    return decoded_content
 
 
 def get_file_from_github_recursive(
-    github_api_token, dependency_repo, path_to_file, dep_name
+    github_api_token, dependency_repo, path_to_file, dep_name, use_cache=False
 ):
     path_to_file = path_to_file_without_dependency(path_to_file, dep_name)
     user_slash_repo = parse_repo_link(dependency_repo["url"])
+
+    # Try to load from cache if enabled
+    if use_cache:
+        cached_content = _load_from_github_cache(
+            user_slash_repo,
+            dependency_repo["commit"],
+            dependency_repo["relative_root"],
+            path_to_file,
+        )
+        if cached_content is not None:
+            return cached_content
 
     direct_file_content = _get_direct_file(
         github_api_token,
@@ -47,15 +163,36 @@ def get_file_from_github_recursive(
         dependency_repo["commit"],
     )
     if direct_file_content:
+        # Save to cache if enabled
+        if use_cache:
+            _save_to_github_cache(
+                user_slash_repo,
+                dependency_repo["commit"],
+                dependency_repo["relative_root"],
+                path_to_file,
+                direct_file_content,
+            )
         return direct_file_content
 
-    return _recursive_search(
+    recursive_content = _recursive_search(
         github_api_token,
         user_slash_repo,
         dependency_repo["relative_root"],
         path_to_file,
         dependency_repo["commit"],
     )
+
+    # Save to cache if enabled and content was found
+    if use_cache and recursive_content:
+        _save_to_github_cache(
+            user_slash_repo,
+            dependency_repo["commit"],
+            dependency_repo["relative_root"],
+            path_to_file,
+            recursive_content,
+        )
+
+    return recursive_content
 
 
 def _get_direct_file(

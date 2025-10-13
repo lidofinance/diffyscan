@@ -12,6 +12,7 @@ Key features:
 
 - retrieve and diff sources from the GitHub repo against the queried ones from a blockscan service (e.g. Etherscan)
 - compare the bytecode compiled and deployed on the forked network locally against remote (see section 'bytecode_comparison' in `./config_samples/lido_dao_sepolia_config.json` as an example)
+- cache sources from blockchain explorers (option `--cache-explorer`) and GitHub files (option `--cache-github`) to avoid re-fetching on repeated runs
 - preprocess solidity sourcecode by means of prettier solidity plugin before comparing the sources (option `--prettify`) if needed.
 - preprocess imports to flat paths for Brownie compatibility (option `--support-brownie`)
 - enable binary comparison (option `--enable-binary-comparison`)
@@ -145,6 +146,61 @@ For contracts whose sources were verified by brownie tooling:
 
 ```bash
 diffyscan /path/to/config.json /path/to/hardhat_config.js --enable-binary-comparison --support-brownie
+```
+
+### Caching
+
+Diffyscan supports two types of caching to speed up repeated runs and reduce API rate limiting:
+
+#### Cache Explorer Sources
+
+Cache contract sources from blockchain explorers (Etherscan, Blockscout, etc.):
+
+```bash
+diffyscan config_samples/lido_dao_sepolia_config.json --cache-explorer
+```
+
+Explorer sources are cached in `.diffyscan_cache/` with unique identifiers based on chain ID and contract address (e.g., `1_0xcontractaddress.json`).
+
+#### Cache GitHub Files
+
+Cache files retrieved from GitHub repositories:
+
+```bash
+diffyscan config_samples/lido_dao_sepolia_config.json --cache-github
+```
+
+GitHub files are cached in `.diffyscan_cache/github/` with SHA256 hash identifiers based on repository, commit, and file path.
+
+#### Using Both Caches
+
+For maximum performance, enable both caches:
+
+```bash
+diffyscan config_samples/lido_dao_sepolia_config.json --cache-explorer --cache-github
+```
+
+**Benefits:**
+
+- Significantly faster repeated runs (no API calls)
+- API rate limit friendly for both Etherscan and GitHub
+- Works offline after initial fetch
+- Useful for repeated testing and development
+
+**Cache management:**
+
+```bash
+# Clear all caches
+rm -rf .diffyscan_cache/
+
+# Clear only explorer cache
+rm -rf .diffyscan_cache/*.json
+
+# Clear only GitHub cache
+rm -rf .diffyscan_cache/github/
+
+# View cached files
+ls -la .diffyscan_cache/
 ```
 
 ℹ️ See more config examples inside the [config_samples](./config_samples/) dir.

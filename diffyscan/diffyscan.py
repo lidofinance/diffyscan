@@ -112,6 +112,7 @@ def run_source_diff(
     github_api_token,
     recursive_parsing=False,
     prettify=False,
+    cache_github=False,
 ):
     source_files = (
         contract_code["solcInput"].items()
@@ -179,11 +180,11 @@ def run_source_diff(
 
         if recursive_parsing:
             github_file = get_file_from_github_recursive(
-                github_api_token, repo, path_to_file, dep_name
+                github_api_token, repo, path_to_file, dep_name, cache_github
             )
         else:
             github_file = get_file_from_github(
-                github_api_token, repo, path_to_file, dep_name
+                github_api_token, repo, path_to_file, dep_name, cache_github
             )
 
         if not github_file:
@@ -239,6 +240,8 @@ def process_config(
     recursive_parsing: bool,
     unify_formatting: bool,
     enable_binary_comparison: bool,
+    cache_explorer: bool,
+    cache_github: bool,
 ):
     logger.info(f"Loading config {path}...")
     config = load_config(path)
@@ -292,6 +295,7 @@ def process_config(
                     contract_address,
                     contract_name,
                     get_explorer_chain_id(config),
+                    cache_explorer,
                 )
 
                 if enable_source_comparison:
@@ -302,6 +306,7 @@ def process_config(
                         github_api_token,
                         recursive_parsing,
                         unify_formatting,
+                        cache_github,
                     )
 
                 if enable_binary_comparison:
@@ -361,6 +366,16 @@ def parse_arguments():
         help="Enable binary bytecode comparison",
         action="store_true",
     )
+    parser.add_argument(
+        "--cache-explorer",
+        help="Cache contract sources from blockchain explorers to avoid re-fetching on repeated runs",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--cache-github",
+        help="Cache files retrieved from GitHub to avoid re-fetching on repeated runs",
+        action="store_true",
+    )
     return parser.parse_args()
 
 
@@ -381,6 +396,8 @@ def main():
             args.support_brownie,
             args.prettify,
             args.enable_binary_comparison,
+            args.cache_explorer,
+            args.cache_github,
         )
     elif os.path.isfile(args.path):
         process_config(
@@ -389,6 +406,8 @@ def main():
             args.support_brownie,
             args.prettify,
             args.enable_binary_comparison,
+            args.cache_explorer,
+            args.cache_github,
         )
     elif os.path.isdir(args.path):
         for filename in os.listdir(args.path):
@@ -400,6 +419,8 @@ def main():
                     args.support_brownie,
                     args.prettify,
                     args.enable_binary_comparison,
+                    args.cache_explorer,
+                    args.cache_github,
                 )
     else:
         logger.error(f"Specified config path {args.path} not found")
