@@ -21,6 +21,7 @@ class Hardhat:
         hardhat_config_path: str,
         local_rpc_url: str,
         remote_rpc_url: str,
+        chain_id: int = None,
     ):
         parsed_url = urlparse(local_rpc_url)
         if not parsed_url.port or not parsed_url.hostname:
@@ -42,6 +43,10 @@ class Hardhat:
             "--config",
             hardhat_config_path,
         ]
+
+        if chain_id is not None:
+            hardhat_cmd.extend(["--chain-id", str(chain_id)])
+
         hardhat_cmd_line_masked = " ".join(
             hardhat_cmd + ["--fork", mask_text(remote_rpc_url)]
         )
