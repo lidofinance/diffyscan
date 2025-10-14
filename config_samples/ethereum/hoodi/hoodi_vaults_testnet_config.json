@@ -43,14 +43,17 @@
     "0x4965052b7aa07375A261317Daa2823A159c36ef6": "LazyOracle",
     "0x5cDbE1590c083b5A2A64427fAA63A7cfDB91FbB5": "AppProxyUpgradeable",
     "0x95F00b016bB31b7182D96D25074684518246E42a": "NodeOperatorsRegistry",
-    "0x0B5236BECA68004DB89434462DfC3BB074d2c830": "AppProxyUpgradeable"
+    "0x0B5236BECA68004DB89434462DfC3BB074d2c830": "AppProxyUpgradeable",
+    "0x933b84D2C01B04C2f53cD2FB1b7055241E122C83": "V3TemporaryAdmin",
+    "0xE22486EA7cE77daE718fFa7B7114fD50CF73Cbac": "V3VoteScript",
+    "0xd253b0ca059343e70474e685Beb2974F10CCFa67": "V3Template"
   },
   "explorer_hostname": "api.etherscan.io",
   "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
   "explorer_chain_id": 560048,
   "github_repo": {
     "url": "https://github.com/lidofinance/core",
-    "commit": "5de69c2d678ec99c0f48826a6929e62a4a48ce7e",
+    "commit": "fa501529aaa687dc255614473520ee4c4f2e993e",
     "relative_root": ""
   },
   "dependencies": {
@@ -163,7 +166,7 @@
         "0x"
       ],
       "0xd5F04A81ac472B2cB32073CE9dDABa6FaF022827": [
-        "00000000000000000000000000000000219ab540356cbb839cbe05303d7705fa"
+        "0x00000000219ab540356cBB839Cbe05303d7705Fa"
       ],
       "0x2F0303F20E0795E6CCd17BD5efE791A586f28E03": [
         "0x3508A952176b3c15387C97BE809eaffB1982176a",
@@ -354,6 +357,38 @@
         "0xA48DF029Fd2e5FCECB3886c5c2F60e3625A1E87d",
         "0xe1635b63b5f7b5e545f2a637558a4029dea7905361a2f0fc28c66e9136cf86a4",
         "0x"
+      ],
+      "0x933b84D2C01B04C2f53cD2FB1b7055241E122C83": [
+        "0x0534aA41907c9631fae990960bCC72d75fA7cfeD",
+        true
+      ],
+      "0xE22486EA7cE77daE718fFa7B7114fD50CF73Cbac": [
+        [
+          "0xd253b0ca059343e70474e685Beb2974F10CCFa67",
+          "0x3ca7c3e38968823ccb4c78ea688df41356f182ae1d159e4ee608d30d68cef320"
+        ]
+      ],
+      "0xd253b0ca059343e70474e685Beb2974F10CCFa67": [
+        [
+          "0x47975A61067a4CE41BeB730cf6c57378E55b849A",
+          "0x65da873a408e893A9c7b0bfB84646A3Ab55948A7",
+          "0x2341c9BE0E639f262f8170f9ef1efeCC92cCF617",
+          "0x16e2D8ABc9d0682A10e10Ba5300DF000757BE522",
+          "0x35A4f9c9c2B1f81bDe7Eaa1f23b6465D3d741EEF",
+          "0x6D799F4C92e8eE9CC0E33367Dd47990ed49a21AC",
+          "0xb3e6a8B6A752d3bb905A1B3Ef12bbdeE77E8160e",
+          "0xdc79D1751D1435fEc9204c03ca3D64ceEB73A7df",
+          "0x7b2B6EA1e53B2039a493cA587805183883Cb8B88",
+          "0x2291496c76CC2e9368DbE9d4977ED2623cbDfb32",
+          "0xBC2bb8310730F3D2b514Cb26f7e0A8776De879Ac",
+          "0xA48DF029Fd2e5FCECB3886c5c2F60e3625A1E87d",
+          "0x0534aA41907c9631fae990960bCC72d75fA7cfeD",
+          "0xd3545AC0286A94970BacC41D3AF676b89606204F",
+          "0xe2EF9536DAAAEBFf5b1c130957AB3E80056b06D8",
+          "0x49B3512c44891bef83F8967d075121Bd1b07a01B",
+          "0x9CAaCCc62c66d817CC59c44780D1b722359795bF",
+          "0x78780e70Eae33e2935814a327f7dB6c01136cc62"
+        ]
       ]
     }
   }
