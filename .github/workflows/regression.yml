@@ -18,7 +18,7 @@ jobs:
             hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
           - config: config_samples/ethereum/mainnet/tw_easy_track_config.json
-            hardhat: hardhat_configs/mainnet_hardhat_config.js
+            hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
           - config: config_samples/ethereum/hoodi/hoodi_vaults_testnet_config.json
             hardhat: hardhat_configs/hoodi_hardhat_config.ts
