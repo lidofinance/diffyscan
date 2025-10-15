@@ -14,15 +14,23 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - config: config_samples/ethereum/mainnet/tw_config.json
+          - config: config_samples/ethereum/mainnet/tw/tw_config.json
             hardhat: hardhat_configs/mainnet_hardhat_config.ts
-          - config: config_samples/ethereum/mainnet/tw_easy_track_config.json
+            network: mainnet
+          - config: config_samples/ethereum/mainnet/tw/tw_easy_track_config.json
             hardhat: hardhat_configs/mainnet_hardhat_config.ts
+            network: mainnet
+          - config: config_samples/ethereum/hoodi/vaults/hoodi_vaults_testnet_config.json
+            hardhat: hardhat_configs/hoodi_hardhat_config.ts
+            network: hoodi
+          - config: config_samples/ethereum/hoodi/vaults/hoodi_vaults_easy_track_config.json
+            hardhat: hardhat_configs/hoodi_hardhat_config.ts
+            network: hoodi
     env:
       ETHERSCAN_EXPLORER_TOKEN: ${{ secrets.ETHERSCAN_EXPLORER_TOKEN }}
       GITHUB_API_TOKEN: ${{ github.token }}
       LOCAL_RPC_URL: "http://127.0.0.1:7545"
-      REMOTE_RPC_URL: ${{ secrets.REMOTE_RPC_URL }}
+      REMOTE_RPC_URL: ${{ matrix.network == 'mainnet' && secrets['REMOTE_RPC_URL_MAINNET'] || secrets['REMOTE_RPC_URL_HOODI'] }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

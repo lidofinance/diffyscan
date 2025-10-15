@@ -4,7 +4,7 @@
     "0xAa3D6A8B52447F272c1E8FAaA06EA06658bd95E2": "SDVTSubmitExitRequestHashes"
   },
   "explorer_hostname": "api-hoodi.etherscan.io",
-  "explorer_token_env_var": "ETHERSCAN_TOKEN",
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
   "github_repo": {
     "url": "https://github.com/lidofinance/easy-track",
     "commit": "ff06b9a67a5efafe0418057a86024e33525d14e7",

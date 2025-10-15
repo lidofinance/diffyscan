@@ -1,0 +1,75 @@
+{
+  "contracts": {
+    "0xa4A0FbE57E2D274B90BbDEaC9E6492eBE9E5acBE": "RegisterGroupsInOperatorGrid",
+    "0x7fC0E3084124090fd3401154584727a7a16Af834": "UpdateGroupsShareLimitInOperatorGrid",
+    "0xf8F8902c333666c175ccAcC738c3c3D80a78ACfb": "RegisterTiersInOperatorGrid",
+    "0xB17f6E44ed6bf55b8139573119c02526631e24d3": "AlterTiersInOperatorGrid",
+    "0xBC2bb8310730F3D2b514Cb26f7e0A8776De879Ac": "VaultsAdapter",
+    "0xc3FA83D65a900303e1d99cDBBF762c6630562c04": "SetJailStatusInOperatorGrid",
+    "0x351426775c75aB5127de860Cdcaf1953F1D622a2": "UpdateVaultsFeesInOperatorGrid",
+    "0x83DfE5Fe8ac8b7DB38c020F4F54BF09b65D92c63": "ForceValidatorExitsInVaultHub",
+    "0xa11906bBBBaC5207b8FDA4F7F294d7EcB8dcc758": "SocializeBadDebtInVaultHub",
+    "0xc5dCd2A9642ceA9B71A632BF5b8ff52424Ea1B40": "SetLiabilitySharesTargetInVaultHub"
+  },
+  "explorer_hostname": "api.etherscan.io",
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+  "explorer_chain_id": 560048,
+  "github_repo": {
+    "url": "https://github.com/lidofinance/easy-track",
+    "commit": "7055c7b87b9940a0d6a483aeb79b1b430e33bc4f",
+    "relative_root": ""
+  },
+  "dependencies": {},
+  "fail_on_bytecode_comparison_error": true,
+  "bytecode_comparison": {
+    "constructor_calldata": {},
+    "constructor_args": {
+      "0xa4A0FbE57E2D274B90BbDEaC9E6492eBE9E5acBE": [
+        "0xeBe5948787Bb3a565F67ccD93cb85A91960c472a",
+        "0xe2EF9536DAAAEBFf5b1c130957AB3E80056b06D8",
+        50000000000000000000000
+      ],
+      "0x7fC0E3084124090fd3401154584727a7a16Af834": [
+        "0xeBe5948787Bb3a565F67ccD93cb85A91960c472a",
+        "0xe2EF9536DAAAEBFf5b1c130957AB3E80056b06D8",
+        50000000000000000000000
+      ],
+      "0xf8F8902c333666c175ccAcC738c3c3D80a78ACfb": [
+        "0xeBe5948787Bb3a565F67ccD93cb85A91960c472a",
+        "0xe2EF9536DAAAEBFf5b1c130957AB3E80056b06D8"
+      ],
+      "0xB17f6E44ed6bf55b8139573119c02526631e24d3": [
+        "0xeBe5948787Bb3a565F67ccD93cb85A91960c472a",
+        "0xe2EF9536DAAAEBFf5b1c130957AB3E80056b06D8",
+        0
+      ],
+      "0xBC2bb8310730F3D2b514Cb26f7e0A8776De879Ac": [
+        "0xeBe5948787Bb3a565F67ccD93cb85A91960c472a",
+        "0xe2EF9536DAAAEBFf5b1c130957AB3E80056b06D8",
+        "0x79a20FD0FA36453B2F45eAbab19bfef43575Ba9E",
+        100000000000000000
+      ],
+      "0xc3FA83D65a900303e1d99cDBBF762c6630562c04": [
+        "0xeBe5948787Bb3a565F67ccD93cb85A91960c472a",
+        "0xBC2bb8310730F3D2b514Cb26f7e0A8776De879Ac"
+      ],
+      "0x351426775c75aB5127de860Cdcaf1953F1D622a2": [
+        "0xeBe5948787Bb3a565F67ccD93cb85A91960c472a",
+        "0xBC2bb8310730F3D2b514Cb26f7e0A8776De879Ac",
+        "0xe2EF9536DAAAEBFf5b1c130957AB3E80056b06D8"
+      ],
+      "0x83DfE5Fe8ac8b7DB38c020F4F54BF09b65D92c63": [
+        "0xeBe5948787Bb3a565F67ccD93cb85A91960c472a",
+        "0xBC2bb8310730F3D2b514Cb26f7e0A8776De879Ac"
+      ],
+      "0xa11906bBBBaC5207b8FDA4F7F294d7EcB8dcc758": [
+        "0xeBe5948787Bb3a565F67ccD93cb85A91960c472a",
+        "0xBC2bb8310730F3D2b514Cb26f7e0A8776De879Ac"
+      ],
+      "0xc5dCd2A9642ceA9B71A632BF5b8ff52424Ea1B40": [
+        "0xeBe5948787Bb3a565F67ccD93cb85A91960c472a",
+        "0xBC2bb8310730F3D2b514Cb26f7e0A8776De879Ac"
+      ]
+    }
+  }
+}
