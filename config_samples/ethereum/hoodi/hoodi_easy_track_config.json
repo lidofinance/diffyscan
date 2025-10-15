@@ -5,7 +5,7 @@
   },
   "explorer_hostname": "api.etherscan.io",
   "explorer_chain_id": 560048,
-  "explorer_token_env_var": "ETHERSCAN_TOKEN",
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
   "github_repo": {
     "url": "https://github.com/lidofinance/easy-track",
     "commit": "564700faaa6a8af5bfac24314414ca99244a069f",
