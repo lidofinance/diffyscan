@@ -3,6 +3,39 @@ from .encoder import encode_constructor_arguments
 from .custom_exceptions import CalldataError
 
 
+def _check_calldata_config(contract_address, binary_config):
+    """
+    Check which calldata configuration method is available and validate consistency.
+
+    Returns:
+        tuple: (has_raw_calldata, has_args)
+    """
+    has_raw = (
+        "constructor_calldata" in binary_config
+        and contract_address in binary_config["constructor_calldata"]
+    )
+
+    has_args = (
+        "constructor_args" in binary_config
+        and contract_address in binary_config["constructor_args"]
+    )
+
+    # Validate: can't have both
+    if has_raw and has_args:
+        raise CalldataError(
+            f"Contract {contract_address} found in both 'constructor_args' and 'constructor_calldata' in config"
+        )
+
+    # Validate: must have at least one
+    if not has_raw and not has_args:
+        raise CalldataError(
+            f"Contract {contract_address} not found in 'constructor_args' or 'constructor_calldata' in config, "
+            "but ABI has a constructor"
+        )
+
+    return has_raw, has_args
+
+
 def get_calldata(contract_address_from_config, target_compiled_contract, binary_config):
     constructor_abi = get_constructor_abi(target_compiled_contract)
 
@@ -11,38 +44,22 @@ def get_calldata(contract_address_from_config, target_compiled_contract, binary_
             "Contract's ABI doesn't have a constructor, calldata calculation skipped"
         )
         return None
-    else:
-        logger.okay("Constructor in ABI successfully found")
 
-    raw_calldata_exist = (
-        "constructor_calldata" in binary_config
-        and contract_address_from_config in binary_config["constructor_calldata"]
+    logger.okay("Constructor in ABI successfully found")
+
+    has_raw, has_args = _check_calldata_config(
+        contract_address_from_config, binary_config
     )
 
-    calldata_args_exist = (
-        "constructor_args" in binary_config
-        and contract_address_from_config in binary_config["constructor_args"]
-    )
-
-    if raw_calldata_exist and calldata_args_exist:
-        raise CalldataError(
-            "Contract address found in 'constructor_args' and in 'constructor_calldata' in config"
-        )
-    if not raw_calldata_exist and not calldata_args_exist:
-        raise CalldataError(
-            "Contract address not found in 'constructor_args' and in 'constructor_calldata' in config, but ABI has a constructor"
-        )
-
-    if raw_calldata_exist:
+    if has_raw:
         return get_raw_calldata_from_config(contract_address_from_config, binary_config)
 
-    if calldata_args_exist:
-        return parse_calldata_from_config(
-            contract_address_from_config,
-            binary_config["constructor_args"],
-            constructor_abi,
-        )
-    return None
+    # Must have args if we got here (validation ensures one or the other)
+    return parse_calldata_from_config(
+        contract_address_from_config,
+        binary_config["constructor_args"],
+        constructor_abi,
+    )
 
 
 def get_constructor_abi(target_compiled_contract):

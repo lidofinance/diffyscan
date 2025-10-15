@@ -232,6 +232,44 @@ def _get_contract_from_blockscout(explorer_hostname, contract):
     return contract
 
 
+def _get_explorer_fetcher(explorer_hostname):
+    """
+    Determine which fetcher function to use based on the explorer hostname.
+
+    Returns a tuple of (fetcher_function, requires_token)
+    """
+    if explorer_hostname.startswith("zksync"):
+        return _get_contract_from_zksync, False
+    elif explorer_hostname.endswith("mantle.xyz"):
+        return _get_contract_from_mantle, False
+    elif explorer_hostname.endswith("lineascan.build"):
+        return (
+            lambda hostname, address, token=None, chain_id=None: _get_contract_from_etherscan(
+                None, hostname, address, chain_id
+            ),
+            False,
+        )
+    elif any(
+        explorer_hostname.endswith(domain)
+        for domain in ["mode.network", "blockscout.com", "swellnetwork.io", "lisk.com"]
+    ):
+        return _get_contract_from_blockscout, False
+    else:
+        # Default to Etherscan-compatible
+        return _get_contract_from_etherscan, True
+
+
+def _validate_contract_name(
+    contract_address, expected_name, actual_name, source="explorer"
+):
+    """Validate that the contract name from the source matches the expected name."""
+    if actual_name != expected_name:
+        raise ExplorerError(
+            f"Contract name in config does not match with {source} {contract_address}: "
+            f"{expected_name} != {actual_name}"
+        )
+
+
 def get_contract_from_explorer(
     token,
     explorer_hostname,
@@ -244,45 +282,30 @@ def get_contract_from_explorer(
     if use_cache:
         cached_result = _load_from_cache(contract_address, chain_id)
         if cached_result is not None:
-            # Verify the cached contract name matches config
-            contract_name_from_cache = cached_result["name"]
-            if contract_name_from_cache != contract_name_from_config:
-                raise ExplorerError(
-                    f"Contract name in config does not match with cached data {contract_address}: \
-                      {contract_name_from_config} != {contract_name_from_cache}",
-                )
+            _validate_contract_name(
+                contract_address,
+                contract_name_from_config,
+                cached_result["name"],
+                "cached data",
+            )
             return cached_result
         else:
             logger.warn(f"No cached explorer contract found for {contract_address}")
 
     # Fetch from explorer if not cached
-    result = {}
-    if explorer_hostname.startswith("zksync"):
-        result = _get_contract_from_zksync(explorer_hostname, contract_address)
-    elif explorer_hostname.endswith("mantle.xyz"):
-        result = _get_contract_from_mantle(explorer_hostname, contract_address)
-    elif explorer_hostname.endswith("lineascan.build"):
-        result = _get_contract_from_etherscan(
-            None, explorer_hostname, contract_address, chain_id
-        )
-    elif (
-        explorer_hostname.endswith("mode.network")
-        or explorer_hostname.endswith("blockscout.com")
-        or explorer_hostname.endswith("swellnetwork.io")
-        or explorer_hostname.endswith("lisk.com")
-    ):
-        result = _get_contract_from_blockscout(explorer_hostname, contract_address)
-    else:
-        result = _get_contract_from_etherscan(
-            token, explorer_hostname, contract_address, chain_id
-        )
+    fetcher, requires_token = _get_explorer_fetcher(explorer_hostname)
 
-    contract_name_from_etherscan = result["name"]
-    if contract_name_from_etherscan != contract_name_from_config:
-        raise ExplorerError(
-            f"Contract name in config does not match with Blockchain explorer {contract_address}: \
-              {contract_name_from_config} != {contract_name_from_etherscan}",
-        )
+    if requires_token:
+        result = fetcher(token, explorer_hostname, contract_address, chain_id)
+    else:
+        result = fetcher(explorer_hostname, contract_address)
+
+    _validate_contract_name(
+        contract_address,
+        contract_name_from_config,
+        result["name"],
+        "blockchain explorer",
+    )
 
     # Save to cache if enabled
     if use_cache:
@@ -345,19 +368,27 @@ def parse_compiled_contract(target_compiled_contract):
     return contract_creation_code_without_calldata, deployed_bytecode, immutables
 
 
+def get_config_value(config, key, warn_if_missing=True):
+    """
+    Get a value from config with optional warning if missing.
+
+    Args:
+        config: Configuration dictionary
+        key: Key to look up
+        warn_if_missing: Whether to warn if the key is not found
+
+    Returns:
+        The config value or None if not found
+    """
+    value = config.get(key)
+    if value is None and warn_if_missing:
+        logger.warn(f'Failed to find "{key}" in the config')
+    return value
+
+
 def get_explorer_hostname(config):
-    explorer_hostname = None
-    if "explorer_hostname" in config:
-        explorer_hostname = config["explorer_hostname"]
-    else:
-        logger.warn(
-            'Failed to find explorer hostname in the config ("explorer_hostname")'
-        )
-    return explorer_hostname
+    return get_config_value(config, "explorer_hostname", warn_if_missing=True)
 
 
 def get_explorer_chain_id(config):
-    chain_id = None
-    if "explorer_chain_id" in config:
-        chain_id = config["explorer_chain_id"]
-    return chain_id
+    return get_config_value(config, "explorer_chain_id", warn_if_missing=False)

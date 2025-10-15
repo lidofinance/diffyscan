@@ -35,38 +35,39 @@ def load_config(path: str) -> Config:
         return json.load(config_file)
 
 
+def _handle_request_errors(error_class):
+    """Decorator to handle common HTTP request errors and convert them to custom exceptions."""
+
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            try:
+                response = func(*args, **kwargs)
+                response.raise_for_status()
+                return response
+            except requests.exceptions.HTTPError as http_err:
+                raise error_class(f"HTTP error occurred: {http_err}")
+            except requests.exceptions.ConnectionError as conn_err:
+                raise error_class(f"Connection error occurred: {conn_err}")
+            except requests.exceptions.Timeout as timeout_err:
+                raise error_class(f"Timeout error occurred: {timeout_err}")
+            except requests.exceptions.RequestException as req_err:
+                raise error_class(f"Request exception occurred: {req_err}")
+
+        return wrapper
+
+    return decorator
+
+
+@_handle_request_errors(ExplorerError)
 def fetch(url, headers=None):
     logger.log(f"Fetch: {mask_text(url)}")
-    try:
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
-    except requests.exceptions.HTTPError as http_err:
-        raise ExplorerError(f"HTTP error occurred: {http_err}")
-    except requests.exceptions.ConnectionError as conn_err:
-        raise ExplorerError(f"Connection error occurred: {conn_err}")
-    except requests.exceptions.Timeout as timeout_err:
-        raise ExplorerError(f"Timeout error occurred: {timeout_err}")
-    except requests.exceptions.RequestException as req_err:
-        raise ExplorerError(f"Request exception occurred: {req_err}")
-
-    return response
+    return requests.get(url, headers=headers)
 
 
+@_handle_request_errors(NodeError)
 def pull(url, payload=None, headers=None):
     logger.log(f"Pull: {url}")
-    try:
-        response = requests.post(url, data=payload, headers=headers)
-        response.raise_for_status()
-    except requests.exceptions.HTTPError as http_err:
-        raise NodeError(f"HTTP error occurred: {http_err}")
-    except requests.exceptions.ConnectionError as conn_err:
-        raise NodeError(f"Connection error occurred: {conn_err}")
-    except requests.exceptions.Timeout as timeout_err:
-        raise NodeError(f"Timeout error occurred: {timeout_err}")
-    except requests.exceptions.RequestException as req_err:
-        raise NodeError(f"Request exception occurred: {req_err}")
-
-    return response
+    return requests.post(url, data=payload, headers=headers)
 
 
 def mask_text(text, mask_start=3, mask_end=3):
