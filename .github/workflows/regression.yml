@@ -14,16 +14,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - config: config_samples/ethereum/mainnet/tw_config.json
+          - config: config_samples/ethereum/mainnet/tw/tw_config.json
             hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
-          - config: config_samples/ethereum/mainnet/tw_easy_track_config.json
+          - config: config_samples/ethereum/mainnet/tw/tw_easy_track_config.json
             hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
-          - config: config_samples/ethereum/hoodi/hoodi_vaults_testnet_config.json
+          - config: config_samples/ethereum/hoodi/vaults/hoodi_vaults_testnet_config.json
             hardhat: hardhat_configs/hoodi_hardhat_config.ts
             network: hoodi
-          - config: config_samples/ethereum/hoodi/hoodi_vaults_easy_track_config.json
+          - config: config_samples/ethereum/hoodi/vaults/hoodi_vaults_easy_track_config.json
             hardhat: hardhat_configs/hoodi_hardhat_config.ts
             network: hoodi
     env:
