@@ -5,8 +5,20 @@ from .logger import logger
 from .custom_exceptions import NodeError
 
 
-def get_bytecode_from_node(contract_address, rpc_url):
+def get_bytecode_from_node(contract_address: str, rpc_url: str) -> str:
+    """
+    Get the bytecode of a contract from an RPC node.
 
+    Args:
+        contract_address: The contract address
+        rpc_url: The RPC URL
+
+    Returns:
+        The contract bytecode as a hex string
+
+    Raises:
+        NodeError: If the bytecode cannot be retrieved
+    """
     logger.info(f'Receiving the bytecode from "{mask_text(rpc_url)}" ...')
 
     payload = json.dumps(
@@ -30,7 +42,19 @@ def get_bytecode_from_node(contract_address, rpc_url):
     return sources_url_response_in_json["result"]
 
 
-def get_chain_id(rpc_url):
+def get_chain_id(rpc_url: str) -> int:
+    """
+    Get the chain ID from an RPC node.
+
+    Args:
+        rpc_url: The RPC URL
+
+    Returns:
+        The chain ID as an integer
+
+    Raises:
+        NodeError: If the chain ID cannot be retrieved
+    """
     logger.info(f'Receiving the chain ID from "{mask_text(rpc_url)}" ...')
 
     payload = json.dumps(
@@ -50,7 +74,19 @@ def get_chain_id(rpc_url):
     return chain_id
 
 
-def get_account(rpc_url):
+def get_account(rpc_url: str) -> str:
+    """
+    Get the first account from an RPC node.
+
+    Args:
+        rpc_url: The RPC URL
+
+    Returns:
+        The account address
+
+    Raises:
+        NodeError: If no account is available
+    """
     logger.info(f'Receiving the account from "{rpc_url}" ...')
 
     payload = json.dumps(
@@ -68,7 +104,21 @@ def get_account(rpc_url):
     return account_address_response["result"][0]
 
 
-def deploy_contract(rpc_url, deployer, data):
+def deploy_contract(rpc_url: str, deployer: str, data: str) -> str:
+    """
+    Deploy a contract and return its address.
+
+    Args:
+        rpc_url: The RPC URL
+        deployer: The deployer account address
+        data: The contract creation bytecode
+
+    Returns:
+        The deployed contract address
+
+    Raises:
+        NodeError: If deployment fails
+    """
     logger.info(f'Trying to deploy transaction to "{rpc_url}" ...')
 
     payload_sendTransaction = json.dumps(

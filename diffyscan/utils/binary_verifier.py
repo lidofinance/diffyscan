@@ -33,11 +33,17 @@ def trim_solidity_meta(bytecode: str) -> dict:
 
     stop_index = bytecode.index(stop_opcode) + len(stop_opcode)
 
+    # Try to decode string literal safely
+    string_literal = ""
+    try:
+        string_literal = bytes.fromhex(bytecode[stop_index:-meta_size]).decode("ascii")
+    except (ValueError, UnicodeDecodeError):
+        # If decoding fails, it might not be a string literal
+        logger.warn("Failed to decode potential string literal from bytecode")
+
     return {
-        "bytecode": bytecode[:-stop_index],
-        "string_literal": bytes.fromhex(bytecode[stop_index:-meta_size]).decode(
-            "ascii"
-        ),
+        "bytecode": bytecode[:stop_index],
+        "string_literal": string_literal,
         "metadata": bytecode[-meta_size:],
     }
 

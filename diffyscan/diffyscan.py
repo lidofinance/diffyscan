@@ -44,9 +44,6 @@ from .utils.custom_exceptions import (
 __version__ = "0.0.0"
 
 
-g_skip_user_input: bool = False
-
-
 def run_bytecode_diff(
     contract_address_from_config,
     contract_name_from_config,
@@ -128,6 +125,7 @@ def run_source_diff(
     recursive_parsing=False,
     prettify=False,
     cache_github=False,
+    skip_user_input=False,
 ):
     """
     Run source code diff for a contract.
@@ -170,7 +168,7 @@ def run_source_diff(
     logger.okay("Contract", contract_code["name"])
     logger.okay("Files", files_count)
 
-    if not g_skip_user_input:
+    if not skip_user_input:
         input("Press Enter to proceed...")
         logger.divider()
 
@@ -200,8 +198,9 @@ def run_source_diff(
         diffs_count = None
 
         if not repo:
-            logger.error("File not found", path_to_file)
-            sys.exit()
+            error_msg = f"File not found in any repository: {path_to_file}"
+            logger.error(error_msg)
+            raise ValueError(error_msg)
 
         file_found = bool(repo)
 
@@ -272,9 +271,12 @@ def run_source_diff(
     }
 
 
-def _load_explorer_token(config):
+def _load_explorer_token(config: dict) -> str | None:
     """
     Load explorer token from config or environment.
+
+    Args:
+        config: The configuration dictionary
 
     Returns:
         str or None: The explorer token if found
@@ -300,20 +302,34 @@ def _load_explorer_token(config):
     return token
 
 
-def _validate_github_token():
-    """Validate that GitHub API token is set."""
+def _validate_github_token() -> str:
+    """
+    Validate that GitHub API token is set.
+
+    Returns:
+        The GitHub API token
+
+    Raises:
+        ValueError: If the token is not set
+    """
     github_api_token = os.getenv("GITHUB_API_TOKEN", "")
     if not github_api_token:
         raise ValueError("GITHUB_API_TOKEN variable is not set")
     return github_api_token
 
 
-def _setup_binary_comparison(config):
+def _setup_binary_comparison(config: dict) -> tuple[str, str]:
     """
     Setup and validate binary comparison configuration.
 
+    Args:
+        config: The configuration dictionary
+
     Returns:
         tuple: (local_rpc_url, remote_rpc_url)
+
+    Raises:
+        ValueError: If required configuration is missing
     """
     if "bytecode_comparison" not in config:
         raise ValueError('Failed to find "bytecode_comparison" section in config')
@@ -334,6 +350,7 @@ def process_config(
     enable_binary_comparison: bool,
     cache_explorer: bool,
     cache_github: bool,
+    skip_user_input: bool = False,
 ):
     """
     Process a config file and run comparisons.
@@ -412,6 +429,7 @@ def process_config(
                         recursive_parsing,
                         unify_formatting,
                         cache_github,
+                        skip_user_input,
                     )
                     source_stats.append(source_result)
 
@@ -460,7 +478,13 @@ def process_config(
     }
 
 
-def parse_arguments():
+def parse_arguments() -> argparse.Namespace:
+    """
+    Parse command-line arguments.
+
+    Returns:
+        Parsed arguments
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--version", "-V", action="store_true", help="Display version information"
@@ -512,8 +536,10 @@ def parse_arguments():
 
 
 def print_final_summary(
-    all_results, enable_source_comparison, enable_binary_comparison
-):
+    all_results: list[dict],
+    enable_source_comparison: bool,
+    enable_binary_comparison: bool,
+) -> None:
     """
     Print a final summary of all comparisons performed.
 
@@ -598,11 +624,10 @@ def print_final_summary(
     logger.info("=" * 80)
 
 
-def main():
-    global g_skip_user_input
-
+def main() -> None:
+    """Main entry point for the diffyscan application."""
     args = parse_arguments()
-    g_skip_user_input = args.yes
+    skip_user_input = args.yes
     if args.version:
         print(f"Diffyscan {__version__}")
         return
@@ -621,6 +646,7 @@ def main():
             args.enable_binary_comparison,
             args.cache_explorer,
             args.cache_github,
+            skip_user_input,
         )
         all_results.append(result)
     elif os.path.isfile(args.path):
@@ -632,6 +658,7 @@ def main():
             args.enable_binary_comparison,
             args.cache_explorer,
             args.cache_github,
+            skip_user_input,
         )
         all_results.append(result)
     elif os.path.isdir(args.path):
@@ -646,11 +673,13 @@ def main():
                     args.enable_binary_comparison,
                     args.cache_explorer,
                     args.cache_github,
+                    skip_user_input,
                 )
                 all_results.append(result)
     else:
-        logger.error(f"Specified config path {args.path} not found")
-        sys.exit(1)
+        error_msg = f"Specified config path {args.path} not found"
+        logger.error(error_msg)
+        raise FileNotFoundError(error_msg)
 
     execution_time = time.time() - START_TIME
 

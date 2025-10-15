@@ -86,8 +86,12 @@ def _save_to_github_cache(
 
 
 def get_file_from_github(
-    github_api_token, dependency_repo, path_to_file, dep_name, use_cache=False
-):
+    github_api_token: str,
+    dependency_repo: dict,
+    path_to_file: str,
+    dep_name: str | None,
+    use_cache: bool = False,
+) -> str | None:
     path_to_file = path_to_file_without_dependency(path_to_file, dep_name)
     user_slash_repo = parse_repo_link(dependency_repo["url"])
 
@@ -139,8 +143,12 @@ def get_file_from_github(
 
 
 def get_file_from_github_recursive(
-    github_api_token, dependency_repo, path_to_file, dep_name, use_cache=False
-):
+    github_api_token: str,
+    dependency_repo: dict,
+    path_to_file: str,
+    dep_name: str | None,
+    use_cache: bool = False,
+) -> str | None:
     path_to_file = path_to_file_without_dependency(path_to_file, dep_name)
     user_slash_repo = parse_repo_link(dependency_repo["url"])
 
@@ -273,9 +281,19 @@ def _recursive_search(
     return None
 
 
-def path_to_file_without_dependency(path_to_file, dep_name):
-    # exclude dependency prefix from path to file
-    # "@aragon/something/lib/my.sol" => "lib/my.sol"
+def path_to_file_without_dependency(path_to_file: str, dep_name: str | None) -> str:
+    """
+    Exclude dependency prefix from path to file.
+
+    Example: "@aragon/something/lib/my.sol" => "lib/my.sol"
+
+    Args:
+        path_to_file: The full file path
+        dep_name: The dependency name prefix to remove
+
+    Returns:
+        The file path without the dependency prefix
+    """
     if not dep_name:
         return path_to_file
 
@@ -285,10 +303,23 @@ def path_to_file_without_dependency(path_to_file, dep_name):
     return path_to_file_without_dependency
 
 
-def resolve_dep(path_to_file, config):
-    # find the dependency that matches the path_to_file
-    # e.g. "@openzeppelin/contracts-v4.4" in "@openzeppelin/contracts-v4.4/utils/structs/EnumerableSet.sol"
-    dep_names = sorted(list(config["dependencies"].keys()), key=len, reverse=True)
+def resolve_dep(path_to_file: str, config: dict) -> tuple[dict | None, str | None]:
+    """
+    Find the dependency configuration that matches the path_to_file.
+
+    Example: "@openzeppelin/contracts-v4.4" in
+    "@openzeppelin/contracts-v4.4/utils/structs/EnumerableSet.sol"
+
+    Args:
+        path_to_file: The file path to resolve
+        config: The configuration dict containing dependencies
+
+    Returns:
+        A tuple of (dependency_config, dep_name) or (None, None)
+    """
+    dep_names = sorted(
+        list(config.get("dependencies", {}).keys()), key=len, reverse=True
+    )
 
     for dep_name in dep_names:
         if path_to_file.startswith(f"{dep_name}/"):
@@ -297,7 +328,21 @@ def resolve_dep(path_to_file, config):
     return (None, None)
 
 
-def get_github_api_url(user_slash_repo, relative_root, path_to_file, commit):
+def get_github_api_url(
+    user_slash_repo: str, relative_root: str, path_to_file: str | None, commit: str
+) -> str:
+    """
+    Build GitHub API URL for fetching file contents.
+
+    Args:
+        user_slash_repo: Repository in format "user/repo"
+        relative_root: Relative root path in the repo
+        path_to_file: Path to the file (can be None for directory listing)
+        commit: Git commit hash or branch name
+
+    Returns:
+        The GitHub API URL
+    """
     url = f"https://api.github.com/repos/{user_slash_repo}/contents"
     if relative_root:
         url += f"/{relative_root}"

@@ -3,12 +3,21 @@ from .encoder import encode_constructor_arguments
 from .custom_exceptions import CalldataError
 
 
-def _check_calldata_config(contract_address, binary_config):
+def _check_calldata_config(
+    contract_address: str, binary_config: dict
+) -> tuple[bool, bool]:
     """
     Check which calldata configuration method is available and validate consistency.
 
+    Args:
+        contract_address: The contract address
+        binary_config: Binary comparison configuration
+
     Returns:
         tuple: (has_raw_calldata, has_args)
+
+    Raises:
+        CalldataError: If configuration is invalid
     """
     has_raw = (
         "constructor_calldata" in binary_config
@@ -36,7 +45,25 @@ def _check_calldata_config(contract_address, binary_config):
     return has_raw, has_args
 
 
-def get_calldata(contract_address_from_config, target_compiled_contract, binary_config):
+def get_calldata(
+    contract_address_from_config: str,
+    target_compiled_contract: dict,
+    binary_config: dict,
+) -> str | None:
+    """
+    Get constructor calldata from config or encode from constructor arguments.
+
+    Args:
+        contract_address_from_config: The contract address
+        target_compiled_contract: The compiled contract data
+        binary_config: Binary comparison configuration
+
+    Returns:
+        The encoded calldata or None if no constructor
+
+    Raises:
+        CalldataError: If calldata configuration is invalid
+    """
     constructor_abi = get_constructor_abi(target_compiled_contract)
 
     if constructor_abi is None:
@@ -62,7 +89,16 @@ def get_calldata(contract_address_from_config, target_compiled_contract, binary_
     )
 
 
-def get_constructor_abi(target_compiled_contract):
+def get_constructor_abi(target_compiled_contract: dict) -> list | None:
+    """
+    Extract constructor ABI from compiled contract.
+
+    Args:
+        target_compiled_contract: The compiled contract data
+
+    Returns:
+        The constructor inputs list or None if no constructor
+    """
     constructor_abi = None
     try:
         constructor_abi = [
@@ -76,7 +112,10 @@ def get_constructor_abi(target_compiled_contract):
     return constructor_abi if len(constructor_abi) > 0 else None
 
 
-def get_raw_calldata_from_config(contract_address_from_config, binary_config):
+def get_raw_calldata_from_config(
+    contract_address_from_config: str, binary_config: dict
+) -> str:
+    """Get raw calldata from config."""
     logger.info("Trying to use prepared calldata from config")
 
     calldata_field = binary_config["constructor_calldata"]
@@ -85,8 +124,24 @@ def get_raw_calldata_from_config(contract_address_from_config, binary_config):
 
 
 def parse_calldata_from_config(
-    contract_address_from_config, constructor_args, constructor_abi
-):
+    contract_address_from_config: str,
+    constructor_args: dict,
+    constructor_abi: list | None,
+) -> str:
+    """
+    Parse and encode calldata from constructor arguments in config.
+
+    Args:
+        contract_address_from_config: The contract address
+        constructor_args: Constructor arguments from config
+        constructor_abi: Constructor ABI
+
+    Returns:
+        The encoded calldata
+
+    Raises:
+        CalldataError: If encoding fails
+    """
     logger.info("Trying to parse calldata from config")
 
     constructor_config_args = constructor_args[contract_address_from_config]

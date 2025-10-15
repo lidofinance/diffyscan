@@ -11,7 +11,16 @@ from .logger import logger
 from .custom_exceptions import CompileError
 
 
-def get_solc_native_platform_from_os():
+def get_solc_native_platform_from_os() -> str:
+    """
+    Get the Solidity compiler platform identifier for the current OS.
+
+    Returns:
+        Platform identifier string
+
+    Raises:
+        CompileError: If the platform is not supported
+    """
     platform_name = sys.platform
     if platform_name == "linux":
         return "linux-amd64"
@@ -23,7 +32,7 @@ def get_solc_native_platform_from_os():
         raise CompileError(f"Unsupported platform {platform_name}")
 
 
-def get_compiler_info(required_platform, required_compiler_version):
+def get_compiler_info(required_platform: str, required_compiler_version: str) -> dict:
     compilers_list_url = f"https://raw.githubusercontent.com/ethereum/solc-bin/refs/heads/gh-pages/{required_platform}/list.json"
     available_compilers_list = fetch(compilers_list_url).json()
     required_build_info = next(
@@ -43,7 +52,10 @@ def get_compiler_info(required_platform, required_compiler_version):
     return required_build_info
 
 
-def download_compiler(required_platform, build_info, destination_path):
+def download_compiler(
+    required_platform: str, build_info: dict, destination_path: str
+) -> bytes:
+    """Download the Solidity compiler binary."""
     compiler_url = (
         f'https://binaries.soliditylang.org/{required_platform}/{build_info["path"]}'
     )
@@ -59,7 +71,8 @@ def download_compiler(required_platform, build_info, destination_path):
     return download_compiler_response.content
 
 
-def check_compiler_checksum(compiler, valid_checksum):
+def check_compiler_checksum(compiler: bytes, valid_checksum: str) -> None:
+    """Verify the compiler binary checksum."""
     compiler_checksum = hashlib.sha256(compiler).hexdigest()
     if compiler_checksum != valid_checksum:
         raise CompileError(
@@ -67,12 +80,16 @@ def check_compiler_checksum(compiler, valid_checksum):
         )
 
 
-def set_compiler_executable(compiler_path):
+def set_compiler_executable(compiler_path: str) -> None:
+    """Set the compiler binary as executable."""
     compiler_file_rights = os.stat(compiler_path)
     os.chmod(compiler_path, compiler_file_rights.st_mode | stat.S_IEXEC)
 
 
-def prepare_compiler(required_platform, build_info, compiler_path):
+def prepare_compiler(
+    required_platform: str, build_info: dict, compiler_path: str
+) -> None:
+    """Download, verify, and prepare the Solidity compiler."""
     create_dirs(compiler_path)
     compiler_binary = download_compiler(required_platform, build_info, compiler_path)
     valid_checksum = build_info["sha256"][2:]
@@ -80,7 +97,8 @@ def prepare_compiler(required_platform, build_info, compiler_path):
     set_compiler_executable(compiler_path)
 
 
-def compile_contracts(compiler_path, input_settings):
+def compile_contracts(compiler_path: str, input_settings: str) -> dict:
+    """Compile Solidity contracts using the solc compiler."""
     try:
         process = subprocess.run(
             [compiler_path, "--standard-json"],
@@ -98,7 +116,9 @@ def compile_contracts(compiler_path, input_settings):
     return json.loads(process.stdout)
 
 
-def get_target_compiled_contract(compiled_contracts, target_contract_name):
+def get_target_compiled_contract(
+    compiled_contracts: list, target_contract_name: str
+) -> dict:
     contracts_to_check = []
     for contracts in compiled_contracts:
         for name, contract in contracts.items():
