@@ -15,9 +15,9 @@ jobs:
       matrix:
         include:
           - config: config_samples/ethereum/mainnet/tw_config.json
-            hardhat: hardhat_configs/mainnet_hardhat_config.js
+            hardhat: hardhat_configs/mainnet_hardhat_config.ts
           - config: config_samples/ethereum/mainnet/tw_easy_track_config.json
-            hardhat: hardhat_configs/mainnet_hardhat_config.js
+            hardhat: hardhat_configs/mainnet_hardhat_config.ts
     env:
       ETHERSCAN_EXPLORER_TOKEN: ${{ secrets.ETHERSCAN_EXPLORER_TOKEN }}
       GITHUB_API_TOKEN: ${{ github.token }}
@@ -30,14 +30,23 @@ jobs:
           python-version: "3.12"
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
       - name: Install Poetry
         run: |
-          pip install poetry~=1.8
+          pip install poetry~=2.2
       - name: Install dependencies
         run: |
           poetry install --no-interaction
           npm ci
+
+      - name: Restore diffyscan caches
+        uses: actions/cache@v4
+        with:
+          path: .diffyscan_cache
+          key: diffyscan-cache-${{ matrix.config }}-${{ github.run_id }}
+          restore-keys: |
+            diffyscan-cache-${{ matrix.config }}-
+            diffyscan-cache-
 
       - name: Run unit tests
         run: |
@@ -45,4 +54,4 @@ jobs:
 
       - name: Run diffyscan
         run: |
-          poetry run diffyscan --hardhat-path ${{ matrix.hardhat }} ${{ matrix.config }} -Y -B
+          poetry run diffyscan --hardhat-path ${{ matrix.hardhat }} ${{ matrix.config }} -Y -B -E -G

@@ -6,6 +6,7 @@ from .custom_exceptions import NodeError
 
 
 def get_bytecode_from_node(contract_address, rpc_url):
+
     logger.info(f'Receiving the bytecode from "{mask_text(rpc_url)}" ...')
 
     payload = json.dumps(
@@ -27,6 +28,26 @@ def get_bytecode_from_node(contract_address, rpc_url):
 
     logger.okay("Bytecode was successfully received")
     return sources_url_response_in_json["result"]
+
+
+def get_chain_id(rpc_url):
+    logger.info(f'Receiving the chain ID from "{mask_text(rpc_url)}" ...')
+
+    payload = json.dumps(
+        {"id": 1, "jsonrpc": "2.0", "method": "eth_chainId", "params": []}
+    )
+
+    headers = {"Content-Type": "application/json"}
+    chain_id_response = pull(rpc_url, payload, headers).json()
+
+    if "result" not in chain_id_response:
+        raise NodeError(f"Failed to retrieve chain ID: {chain_id_response}")
+
+    logger.okay("Chain ID was successfully received")
+
+    # Convert hex string to decimal integer
+    chain_id = int(chain_id_response["result"], 16)
+    return chain_id
 
 
 def get_account(rpc_url):

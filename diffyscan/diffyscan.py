@@ -28,7 +28,12 @@ from .utils.helpers import create_dirs
 from .utils.logger import logger
 from .utils.binary_verifier import deep_match_bytecode
 from .utils.hardhat import hardhat
-from .utils.node_handler import get_bytecode_from_node, get_account, deploy_contract
+from .utils.node_handler import (
+    get_bytecode_from_node,
+    get_account,
+    deploy_contract,
+    get_chain_id,
+)
 from .utils.calldata import get_calldata
 from .utils.custom_exceptions import ExceptionHandler, BaseCustomException
 
@@ -280,12 +285,27 @@ def process_config(
 
     try:
         if enable_binary_comparison:
+            logger.info("Getting remote chain ID...")
+            remote_chain_id = get_chain_id(remote_rpc_url)
+            logger.okay("Remote chain ID", remote_chain_id)
+
             hardhat.start(
                 hardhat_config_path,
                 local_rpc_url,
                 remote_rpc_url,
+                remote_chain_id,
             )
+            logger.divider()
+            logger.info("Getting local chain ID and deployer account...")
             deployer_account = get_account(local_rpc_url)
+            local_chain_id = get_chain_id(local_rpc_url)
+
+            logger.okay("Local chain ID", local_chain_id)
+
+            if remote_chain_id != local_chain_id:
+                raise ValueError(
+                    f"Remote chain ID {remote_chain_id} does not match local chain ID {local_chain_id}"
+                )
 
         for contract_address, contract_name in config["contracts"].items():
             try:
@@ -368,11 +388,13 @@ def parse_arguments():
     )
     parser.add_argument(
         "--cache-explorer",
+        "-E",
         help="Cache contract sources from blockchain explorers to avoid re-fetching on repeated runs",
         action="store_true",
     )
     parser.add_argument(
         "--cache-github",
+        "-G",
         help="Cache files retrieved from GitHub to avoid re-fetching on repeated runs",
         action="store_true",
     )
