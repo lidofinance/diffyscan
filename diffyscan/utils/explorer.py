@@ -14,10 +14,87 @@ from .compiler import (
 from .constants import SOLC_DIR
 from .custom_exceptions import ExplorerError
 
+# Cache directory for storing Etherscan sources
+CACHE_DIR = os.path.join(os.getcwd(), ".diffyscan_cache")
+
 
 def _errorNoSourceCodeAndExit(address):
     logger.error("source code is not verified or an EOA address", address)
     sys.exit(1)
+
+
+def _get_cache_key(contract_address, chain_id):
+    """
+    Generate a unique cache key from contract address and chain ID.
+
+    Args:
+        contract_address: The contract address
+        chain_id: The chain ID (can be None)
+
+    Returns:
+        A string cache key
+    """
+    # Normalize address to lowercase
+    normalized_address = contract_address.lower()
+
+    # Combine with chain_id (use "unknown" if chain_id is None)
+    chain_id_str = str(chain_id) if chain_id is not None else "unknown"
+
+    # Create cache key: chainid_address
+    return f"{chain_id_str}_{normalized_address}"
+
+
+def _get_cache_path(cache_key):
+    """Get the file path for a cache key."""
+    return os.path.join(CACHE_DIR, f"{cache_key}.json")
+
+
+def _load_from_cache(contract_address, chain_id):
+    """
+    Load contract data from cache if available.
+
+    Args:
+        contract_address: The contract address
+        chain_id: The chain ID
+
+    Returns:
+        Cached contract data or None if not found
+    """
+    cache_key = _get_cache_key(contract_address, chain_id)
+    cache_path = _get_cache_path(cache_key)
+
+    if os.path.exists(cache_path):
+        try:
+            logger.info(f"Loading contract from cache: {cache_key}")
+            with open(cache_path, "r") as f:
+                return json.load(f)
+        except Exception as e:
+            logger.warn(f"Failed to load from cache: {e}")
+            return None
+    return None
+
+
+def _save_to_cache(contract_address, chain_id, contract_data):
+    """
+    Save contract data to cache.
+
+    Args:
+        contract_address: The contract address
+        chain_id: The chain ID
+        contract_data: The contract data to cache
+    """
+    cache_key = _get_cache_key(contract_address, chain_id)
+    cache_path = _get_cache_path(cache_key)
+
+    try:
+        # Create cache directory if it doesn't exist
+        os.makedirs(CACHE_DIR, exist_ok=True)
+
+        with open(cache_path, "w") as f:
+            json.dump(contract_data, f, indent=2)
+        logger.info(f"Saved contract to cache: {cache_key}")
+    except Exception as e:
+        logger.warn(f"Failed to save to cache: {e}")
 
 
 def _get_contract_from_etherscan(token, etherscan_hostname, contract, chain_id=None):
@@ -161,7 +238,24 @@ def get_contract_from_explorer(
     contract_address,
     contract_name_from_config,
     chain_id=None,
+    use_cache=False,
 ):
+    # Try to load from cache if enabled
+    if use_cache:
+        cached_result = _load_from_cache(contract_address, chain_id)
+        if cached_result is not None:
+            # Verify the cached contract name matches config
+            contract_name_from_cache = cached_result["name"]
+            if contract_name_from_cache != contract_name_from_config:
+                raise ExplorerError(
+                    f"Contract name in config does not match with cached data {contract_address}: \
+                      {contract_name_from_config} != {contract_name_from_cache}",
+                )
+            return cached_result
+        else:
+            logger.warn(f"No cached explorer contract found for {contract_address}")
+
+    # Fetch from explorer if not cached
     result = {}
     if explorer_hostname.startswith("zksync"):
         result = _get_contract_from_zksync(explorer_hostname, contract_address)
@@ -189,6 +283,10 @@ def get_contract_from_explorer(
             f"Contract name in config does not match with Blockchain explorer {contract_address}: \
               {contract_name_from_config} != {contract_name_from_etherscan}",
         )
+
+    # Save to cache if enabled
+    if use_cache:
+        _save_to_cache(contract_address, chain_id, result)
 
     return result
 
