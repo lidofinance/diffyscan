@@ -7,3 +7,6 @@ __pycache__
 node_modules
 dist
 */cache/
+.idea
+cache
+.diffyscan_cache

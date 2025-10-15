@@ -1,7 +1,7 @@
 # Diffyscan
 
 ![python >=3.10,<4](https://img.shields.io/badge/python-≥3.10,<4-blue)
-![poetry ^1.8](https://img.shields.io/badge/poetry-^1.8-blue)
+![poetry ^2.2](https://img.shields.io/badge/poetry-^2.2-blue)
 ![NodeJs >=20](https://img.shields.io/badge/NodeJS-≥20-yellow)
 ![license MIT](https://img.shields.io/badge/license-MIT-brightgreen)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
@@ -12,7 +12,8 @@ Key features:
 
 - retrieve and diff sources from the GitHub repo against the queried ones from a blockscan service (e.g. Etherscan)
 - compare the bytecode compiled and deployed on the forked network locally against remote (see section 'bytecode_comparison' in `./config_samples/lido_dao_sepolia_config.json` as an example)
-- preprocess solidity sourcecode by means of prettifier solidity plugin before comparing the sources (option `--prettify`) if needed.
+- cache sources from blockchain explorers (option `--cache-explorer`) and GitHub files (option `--cache-github`) to avoid re-fetching on repeated runs
+- preprocess solidity sourcecode by means of prettier solidity plugin before comparing the sources (option `--prettify`) if needed.
 - preprocess imports to flat paths for Brownie compatibility (option `--support-brownie`)
 - enable binary comparison (option `--enable-binary-comparison`)
 - provide own Hardhat config as optional argument
@@ -23,7 +24,7 @@ Key features:
 pipx install git+https://github.com/lidofinance/diffyscan
 ```
 
-If deployed bytecode binary comparison or pretifier sources preprocessing are needed:
+If deployed bytecode binary comparison or prettier source preprocessing are needed:
 
 ```shell
 npm install
@@ -35,14 +36,6 @@ Set your Etherscan token to fetch verified source code,
 
 ```bash
 export ETHERSCAN_EXPLORER_TOKEN=<your-etherscan-token>
-export OPTISCAN_EXPLORER_TOKEN=<your-etherscan-optimism-token>
-```
-
-Set your Etherscan API endpoint URL to fetch verified source code,
-
-```bash
-export L1_EXPLORER_API_HOSTNAME=<your-l1-explorer-api-hostname>
-export L2_EXPLORER_API_HOSTNAME=<your-l2-explorer-api-hostname>
 ```
 
 Set your Github token to query API without strict rate limiting,
@@ -77,7 +70,8 @@ Alternatively, create a new config file named `config.json` near the diffyscan.p
     "0x28FAB2059C713A7F9D8c86Db49f9bb0e96Af1ef8": "OssifiableProxy",
     "0xDba5Ad530425bb1b14EECD76F1b4a517780de537": "LidoLocator"
   },
-  "explorer_hostname": "api-holesky.etherscan.io",
+  "explorer_hostname": "api.etherscan.io",
+  "explorer_chain_id": 17000,
   "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
   "github_repo": {
     "url": "https://github.com/lidofinance/lido-dao",
@@ -154,6 +148,61 @@ For contracts whose sources were verified by brownie tooling:
 diffyscan /path/to/config.json /path/to/hardhat_config.js --enable-binary-comparison --support-brownie
 ```
 
+### Caching
+
+Diffyscan supports two types of caching to speed up repeated runs and reduce API rate limiting:
+
+#### Cache Explorer Sources
+
+Cache contract sources from blockchain explorers (Etherscan, Blockscout, etc.):
+
+```bash
+diffyscan config_samples/lido_dao_sepolia_config.json --cache-explorer
+```
+
+Explorer sources are cached in `.diffyscan_cache/` with unique identifiers based on chain ID and contract address (e.g., `1_0xcontractaddress.json`).
+
+#### Cache GitHub Files
+
+Cache files retrieved from GitHub repositories:
+
+```bash
+diffyscan config_samples/lido_dao_sepolia_config.json --cache-github
+```
+
+GitHub files are cached in `.diffyscan_cache/github/` with SHA256 hash identifiers based on repository, commit, and file path.
+
+#### Using Both Caches
+
+For maximum performance, enable both caches:
+
+```bash
+diffyscan config_samples/lido_dao_sepolia_config.json --cache-explorer --cache-github
+```
+
+**Benefits:**
+
+- Significantly faster repeated runs (no API calls)
+- API rate limit friendly for both Etherscan and GitHub
+- Works offline after initial fetch
+- Useful for repeated testing and development
+
+**Cache management:**
+
+```bash
+# Clear all caches
+rm -rf .diffyscan_cache/
+
+# Clear only explorer cache
+rm -rf .diffyscan_cache/*.json
+
+# Clear only GitHub cache
+rm -rf .diffyscan_cache/github/
+
+# View cached files
+ls -la .diffyscan_cache/
+```
+
 ℹ️ See more config examples inside the [config_samples](./config_samples/) dir.
 
 ## Development setup
@@ -164,7 +213,7 @@ This project was developed using these dependencies with their exact versions li
 
 - Python 3.12
 - Poetry 1.8
-- if deployed bytecode binary comparison or pretifier sources preprocessing are needed:
+- if deployed bytecode binary comparison or prettier source preprocessing are needed:
   - npm
 
 Other versions may work as well but were not tested at all.
@@ -202,7 +251,7 @@ poetry shell
 poetry install
 ```
 
-5. If deployed bytecode binary comparison or pretifier sources preprocessing are needed:
+5. If deployed bytecode binary comparison or prettier source preprocessing are needed:
 
 ```shell
 npm install

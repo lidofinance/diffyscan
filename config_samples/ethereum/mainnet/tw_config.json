@@ -1,0 +1,151 @@
+{
+  "contracts": {
+    "0x2C298963FB763f74765829722a1ebe0784f4F5Cf": "LidoLocator",
+    "0xE9906E543274cebcd335d2C560094089e9547e8d": "AccountingOracle",
+    "0x905A211eD6830Cfc95643f0bE2ff64E7f3bf9b94": "ValidatorsExitBusOracle",
+    "0x7D2BAa6094E1C4B60Da4cbAF4A77C3f4694fD53D": "WithdrawalVault",
+    "0x226f9265CBC37231882b7409658C18bB7738173A": "StakingRouter",
+    "0x6828b023e737f96B168aCd0b5c6351971a4F81aE": "NodeOperatorsRegistry",
+    "0xbDb567672c867DB533119C2dcD4FB9d8b44EC82f": "ValidatorExitDelayVerifier",
+    "0xDC00116a0D3E064427dA2600449cfD2566B3037B": "TriggerableWithdrawalsGateway"
+  },
+  "explorer_hostname": "api.etherscan.io",
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+  "explorer_chain_id": 1,
+  "github_repo": {
+    "url": "https://github.com/lidofinance/core",
+    "commit": "c9ef333e28b51cca9741241d4aceab77a414cb85",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "@aragon/os": {
+      "url": "https://github.com/aragon/aragonOS",
+      "commit": "f3ae59b00f73984e562df00129c925339cd069ff",
+      "relative_root": ""
+    },
+    "@aragon/minime": {
+      "url": "https://github.com/aragon/minime",
+      "commit": "1d5251fc88eee5024ff318d95bc9f4c5de130430",
+      "relative_root": ""
+    },
+    "@aragon/apps-lido": {
+      "url": "https://github.com/lidofinance/aragon-apps/",
+      "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+      "relative_root": ""
+    },
+    "@aragon/apps-finance": {
+      "url": "https://github.com/lidofinance/aragon-apps/",
+      "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+      "relative_root": "apps/finance"
+    },
+    "@aragon/apps-vault": {
+      "url": "https://github.com/lidofinance/aragon-apps/",
+      "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+      "relative_root": "apps/vault"
+    },
+    "@aragon/apps-agent": {
+      "url": "https://github.com/lidofinance/aragon-apps/",
+      "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+      "relative_root": "apps/agent"
+    },
+    "openzeppelin-solidity": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "06e265b38d3e9daeaa7b33f9035c700d6bc0c6a0",
+      "relative_root": ""
+    },
+    "solidity-bytes-utils": {
+      "url": "https://github.com/GNSPS/solidity-bytes-utils",
+      "commit": "9776282d181839fbb4b18f2cf218e316d6df871c",
+      "relative_root": ""
+    },
+    "@openzeppelin/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "fa64a1ced0b70ab89073d5d0b6e01b0778f7e7d6",
+      "relative_root": "contracts"
+    },
+    "@openzeppelin/contracts-v4.4": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "6bd6b76d1156e20e45d1016f355d154141c7e5b9",
+      "relative_root": "contracts"
+    }
+  },
+  "fail_on_bytecode_comparison_error": true,
+  "bytecode_comparison": {
+    "hardhat_config_name": "mainnet_hardhat_config.js",
+    "libraries": {
+      "contracts/common/lib/MinFirstAllocationStrategy.sol": {
+        "MinFirstAllocationStrategy": "0x7e70De6D1877B3711b2bEDa7BA00013C7142d993"
+      }
+    },
+    "constructor_calldata": {},
+    "constructor_args": {
+      "0x2C298963FB763f74765829722a1ebe0784f4F5Cf": [
+        [
+          "000000000000000000000000852deD011285fe67063a08005c71a85690503Cee",
+          "000000000000000000000000fFA96D84dEF2EA035c7AB153D8B991128e3d72fD",
+          "000000000000000000000000388C818CA8B9251b393131C08a736A67ccB19297",
+          "000000000000000000000000442af784A788A5bd6F42A01Ebe9F287a871243fb",
+          "000000000000000000000000ae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
+          "0000000000000000000000006232397ebac4f5772e53285B26c47914E9461E75",
+          "000000000000000000000000e6793B9e4FbA7DE0ee833F9D02bba7DB5EB27823",
+          "000000000000000000000000D15a672319Cf0352560eE76d9e89eAB0889046D3",
+          "000000000000000000000000FdDf38947aFB03C621C71b06C9C70bce73f12999",
+          "0000000000000000000000003e40D73EB977Dc6a537aF587D48316feE66E9C8c",
+          "0000000000000000000000000De4Ea0184c2ad0BacA7183356Aea5B8d5Bf5c6e",
+          "000000000000000000000000889edC2eDab5f40e902b864aD4d7AdE8E412F9B1",
+          "000000000000000000000000B9D7934878B5FB9610B3fE8A5e441e8fad7E293f",
+          "000000000000000000000000bf05A929c3D7885a6aeAd833a992dA6E5ac23b09",
+          "000000000000000000000000bDb567672c867DB533119C2dcD4FB9d8b44EC82f",
+          "000000000000000000000000DC00116a0D3E064427dA2600449cfD2566B3037B"
+        ]
+      ],
+      "0xE9906E543274cebcd335d2C560094089e9547e8d": [
+        "000000000000000000000000C1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb",
+        "000000000000000000000000ae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
+        "000000000000000000000000442af784A788A5bd6F42A01Ebe9F287a871243fb",
+        "000000000000000000000000000000000000000000000000000000000000000c",
+        "000000000000000000000000000000000000000000000000000000005FC63057"
+      ],
+      "0x905A211eD6830Cfc95643f0bE2ff64E7f3bf9b94": [
+        "000000000000000000000000000000000000000000000000000000000000000c",
+        "000000000000000000000000000000000000000000000000000000005FC63057",
+        "000000000000000000000000C1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb"
+      ],
+      "0x7D2BAa6094E1C4B60Da4cbAF4A77C3f4694fD53D": [
+        "000000000000000000000000ae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
+        "0000000000000000000000003e40D73EB977Dc6a537aF587D48316feE66E9C8c",
+        "000000000000000000000000DC00116a0D3E064427dA2600449cfD2566B3037B"
+      ],
+      "0x226f9265CBC37231882b7409658C18bB7738173A": [
+        "00000000000000000000000000000000219ab540356cbb839cbe05303d7705fa"
+      ],
+      "0x6828b023e737f96B168aCd0b5c6351971a4F81aE": [],
+      "0xbDb567672c867DB533119C2dcD4FB9d8b44EC82f": [
+        "000000000000000000000000C1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb",
+        [
+          "0000000000000000000000000000000000000000000000000096000000000028",
+          "0000000000000000000000000000000000000000000000000096000000000028",
+          "000000000000000000000000000000000000000000000000000000b600000018",
+          "000000000000000000000000000000000000000000000000000000b600000018",
+          "000000000000000000000000000000000000000000000000000000000040000d",
+          "000000000000000000000000000000000000000000000000000000000040000d"
+        ],
+        "0000000000000000000000000000000000000000000000000000000000B1C000",
+        "0000000000000000000000000000000000000000000000000000000000B1C000",
+        "00000000000000000000000000000000000000000000000000000000005EC000",
+        "0000000000000000000000000000000000000000000000000000000000002000",
+        "0000000000000000000000000000000000000000000000000000000000000020",
+        "000000000000000000000000000000000000000000000000000000000000000c",
+        "000000000000000000000000000000000000000000000000000000005FC63057",
+        "0000000000000000000000000000000000000000000000000000000000018000"
+      ],
+      "0xDC00116a0D3E064427dA2600449cfD2566B3037B": [
+        "0000000000000000000000003e40D73EB977Dc6a537aF587D48316feE66E9C8c",
+        "000000000000000000000000C1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb",
+        "0000000000000000000000000000000000000000000000000000000000002bc0",
+        "0000000000000000000000000000000000000000000000000000000000000001",
+        "0000000000000000000000000000000000000000000000000000000000000030"
+      ]
+    }
+  }
+}

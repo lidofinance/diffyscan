@@ -6,6 +6,7 @@ from .custom_exceptions import NodeError
 
 
 def get_bytecode_from_node(contract_address, rpc_url):
+
     logger.info(f'Receiving the bytecode from "{mask_text(rpc_url)}" ...')
 
     payload = json.dumps(
@@ -17,7 +18,8 @@ def get_bytecode_from_node(contract_address, rpc_url):
         }
     )
 
-    sources_url_response_in_json = pull(rpc_url, payload).json()
+    headers = {"Content-Type": "application/json"}
+    sources_url_response_in_json = pull(rpc_url, payload, headers).json()
     if (
         "result" not in sources_url_response_in_json
         or sources_url_response_in_json["result"] == "0x"
@@ -28,6 +30,26 @@ def get_bytecode_from_node(contract_address, rpc_url):
     return sources_url_response_in_json["result"]
 
 
+def get_chain_id(rpc_url):
+    logger.info(f'Receiving the chain ID from "{mask_text(rpc_url)}" ...')
+
+    payload = json.dumps(
+        {"id": 1, "jsonrpc": "2.0", "method": "eth_chainId", "params": []}
+    )
+
+    headers = {"Content-Type": "application/json"}
+    chain_id_response = pull(rpc_url, payload, headers).json()
+
+    if "result" not in chain_id_response:
+        raise NodeError(f"Failed to retrieve chain ID: {chain_id_response}")
+
+    logger.okay("Chain ID was successfully received")
+
+    # Convert hex string to decimal integer
+    chain_id = int(chain_id_response["result"], 16)
+    return chain_id
+
+
 def get_account(rpc_url):
     logger.info(f'Receiving the account from "{rpc_url}" ...')
 
@@ -35,7 +57,8 @@ def get_account(rpc_url):
         {"id": 42, "jsonrpc": "2.0", "method": "eth_accounts", "params": []}
     )
 
-    account_address_response = pull(rpc_url, payload).json()
+    headers = {"Content-Type": "application/json"}
+    account_address_response = pull(rpc_url, payload, headers).json()
 
     if "result" not in account_address_response:
         raise NodeError("The deployer account isn't set")
@@ -56,7 +79,8 @@ def deploy_contract(rpc_url, deployer, data):
             "id": 1,
         }
     )
-    response_sendTransaction = pull(rpc_url, payload_sendTransaction).json()
+    headers = {"Content-Type": "application/json"}
+    response_sendTransaction = pull(rpc_url, payload_sendTransaction, headers).json()
 
     if "error" in response_sendTransaction:
         raise NodeError(response_sendTransaction["error"]["message"])
@@ -85,7 +109,7 @@ def deploy_contract(rpc_url, deployer, data):
     if response_getTransactionReceipt["result"]["status"] != "0x1":
         raise NodeError(
             "Failed to receive transaction receipt. \
-  Transaction has been reverted (status 0x0). Input missmatch?",
+  Transaction has been reverted (status 0x0). Input mismatch?",
         )
 
     contract_address = response_getTransactionReceipt["result"]["contractAddress"]

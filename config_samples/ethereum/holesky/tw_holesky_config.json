@@ -1,0 +1,139 @@
+{
+  "contracts": {
+    "0xa437ab5614033d071493C88Fd351aFEbc802521f": "LidoLocator",
+    "0xCA2689BE9b3Fc8a02F61f7CC3a7d0968119c53b5": "AccountingOracle",
+    "0xeCE105ABd3F2653398BE75e680dB033A238E2aD6": "ValidatorsExitBusOracle",
+    "0x6aAA28C515E02ED0fe1B51e74323e14E910eA7d7": "WithdrawalVault",
+    "0xE6E775C6AdF8753588237b1De32f61937bC54341": "StakingRouter",
+    "0x834aa47DCd21A32845099a78B4aBb17A7f0bD503": "NodeOperatorsRegistry",
+    "0x9c5da60e54fcae8592132Fc9a67511e686b52BE8": "ValidatorExitDelayVerifier",
+    "0x4FD4113f2B92856B59BC3be77f2943B7F4eaa9a5": "TriggerableWithdrawalsGateway"
+  },
+  "explorer_hostname": "api-holesky.etherscan.io",
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/core",
+    "commit": "8c5f90d8bbf6a3341a174eaa0123fbfe7ecb2cfe",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "@aragon/os": {
+      "url": "https://github.com/aragon/aragonOS",
+      "commit": "f3ae59b00f73984e562df00129c925339cd069ff",
+      "relative_root": ""
+    },
+    "@aragon/minime": {
+      "url": "https://github.com/aragon/minime",
+      "commit": "1d5251fc88eee5024ff318d95bc9f4c5de130430",
+      "relative_root": ""
+    },
+    "@aragon/apps-lido": {
+      "url": "https://github.com/lidofinance/aragon-apps/",
+      "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+      "relative_root": ""
+    },
+    "@aragon/apps-finance": {
+      "url": "https://github.com/lidofinance/aragon-apps/",
+      "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+      "relative_root": "apps/finance"
+    },
+    "@aragon/apps-vault": {
+      "url": "https://github.com/lidofinance/aragon-apps/",
+      "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+      "relative_root": "apps/vault"
+    },
+    "@aragon/apps-agent": {
+      "url": "https://github.com/lidofinance/aragon-apps/",
+      "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+      "relative_root": "apps/agent"
+    },
+    "openzeppelin-solidity": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "06e265b38d3e9daeaa7b33f9035c700d6bc0c6a0",
+      "relative_root": ""
+    },
+    "solidity-bytes-utils": {
+      "url": "https://github.com/GNSPS/solidity-bytes-utils",
+      "commit": "9776282d181839fbb4b18f2cf218e316d6df871c",
+      "relative_root": ""
+    },
+    "@openzeppelin/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "fa64a1ced0b70ab89073d5d0b6e01b0778f7e7d6",
+      "relative_root": "contracts"
+    },
+    "@openzeppelin/contracts-v4.4": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "6bd6b76d1156e20e45d1016f355d154141c7e5b9",
+      "relative_root": "contracts"
+    }
+  },
+  "fail_on_bytecode_comparison_error": true,
+  "bytecode_comparison": {
+    "hardhat_config_name": "holesky_hardhat_config.js",
+    "constructor_calldata": {},
+    "constructor_args": {
+      "0xa437ab5614033d071493C88Fd351aFEbc802521f": [
+        [
+          "0000000000000000000000004e97a3972ce8511d87f334da17a2c332542a5246",
+          "000000000000000000000000808de3b26be9438f12e9b45528955ea94c17f217",
+          "000000000000000000000000e73a3602b99f1f913e72f8bdcbc235e206794ac8",
+          "000000000000000000000000072f72be3acfe2c52715829f2cd9061a6c8ff019",
+          "0000000000000000000000003f1c547b21f65e10480de3ad8e19faac46c95034",
+          "00000000000000000000000080d1b1ff6e84134404aba18a628347960c38cca7",
+          "000000000000000000000000072f72be3acfe2c52715829f2cd9061a6c8ff019",
+          "0000000000000000000000004e46bd7147ccf666e1d73a3a456fc7a68de82eca",
+          "000000000000000000000000d6ebf043d30a7fe46d1db32ba90a0a51207fe229",
+          "000000000000000000000000e92329ec7ddb11d25e25b3c21eebf11f15eb325d",
+          "000000000000000000000000ffddf7025410412deaa05e3e1ce68fe53208afcb",
+          "000000000000000000000000c7cc160b58f8bb0bac94b80847e2cf2800565c50",
+          "000000000000000000000000f0179dec45a37423ead4fad5fcb136197872ead9",
+          "000000000000000000000000c01fc1f2787687bc656eac0356ba9db6e6b7afb7",
+          "0000000000000000000000009c5da60e54fcae8592132fc9a67511e686b52be8",
+          "0000000000000000000000004fd4113f2b92856b59bc3be77f2943b7f4eaa9a5"
+        ]
+      ],
+      "0xCA2689BE9b3Fc8a02F61f7CC3a7d0968119c53b5": [
+        "00000000000000000000000028fab2059c713a7f9d8c86db49f9bb0e96af1ef8",
+        "0000000000000000000000003f1c547b21f65e10480de3ad8e19faac46c95034",
+        "000000000000000000000000072f72be3acfe2c52715829f2cd9061a6c8ff019",
+        "000000000000000000000000000000000000000000000000000000000000000c",
+        "0000000000000000000000000000000000000000000000000000000065156ac0"
+      ],
+      "0xeCE105ABd3F2653398BE75e680dB033A238E2aD6": [
+        "000000000000000000000000000000000000000000000000000000000000000c",
+        "0000000000000000000000000000000000000000000000000000000065156ac0",
+        "00000000000000000000000028fab2059c713a7f9d8c86db49f9bb0e96af1ef8"
+      ],
+      "0x6aAA28C515E02ED0fe1B51e74323e14E910eA7d7": [
+        "0000000000000000000000003f1c547b21f65e10480de3ad8e19faac46c95034",
+        "000000000000000000000000e92329ec7ddb11d25e25b3c21eebf11f15eb325d",
+        "0000000000000000000000004fd4113f2b92856b59bc3be77f2943b7f4eaa9a5"
+      ],
+      "0xE6E775C6AdF8753588237b1De32f61937bC54341": [
+        "0000000000000000000000004242424242424242424242424242424242424242"
+      ],
+      "0x834aa47DCd21A32845099a78B4aBb17A7f0bD503": [],
+      "0x9c5da60e54fcae8592132Fc9a67511e686b52BE8": [
+        "00000000000000000000000028fab2059c713a7f9d8c86db49f9bb0e96af1ef8",
+        "0000000000000000000000000000000000000000000000000096000000000028",
+        "0000000000000000000000000000000000000000000000000096000000000028",
+        "0000000000000000000000000000000000000000000000000000000000005b00",
+        "0000000000000000000000000000000000000000000000000000000000005b00",
+        "0000000000000000000000000000000000000000000000000000000000000001",
+        "0000000000000000000000000000000000000000000000000000000000000001",
+        "0000000000000000000000000000000000000000000000000000000000000020",
+        "000000000000000000000000000000000000000000000000000000000000000c",
+        "0000000000000000000000000000000000000000000000000000000065156ac0",
+        "0000000000000000000000000000000000000000000000000000000000018000"
+      ],
+      "0x4FD4113f2B92856B59BC3be77f2943B7F4eaa9a5": [
+        "000000000000000000000000e92329ec7ddb11d25e25b3c21eebf11f15eb325d",
+        "00000000000000000000000028fab2059c713a7f9d8c86db49f9bb0e96af1ef8",
+        "00000000000000000000000000000000000000000000000000000000000032c8",
+        "0000000000000000000000000000000000000000000000000000000000000001",
+        "0000000000000000000000000000000000000000000000000000000000000030"
+      ]
+    }
+  }
+}

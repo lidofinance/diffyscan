@@ -13,12 +13,31 @@ def trim_solidity_meta(bytecode: str) -> dict:
     Strips Solidity metadata from the end of the bytecode, if present.
     Solidity appends a CBOR metadata section at the end, indicated by
     the last 2 bytes in big-endian (multiplied by 2 for hex, plus 4).
+
+    Strips string constants from the end of the bytecode, if present.
+    5b5056fe used to prevent executor wander into constant string or CBOR metadata
     """
     meta_size = int(bytecode[-4:], 16) * 2 + 4
+
     if meta_size > len(bytecode):
-        return {"bytecode": bytecode, "metadata": ""}
+        return {"bytecode": bytecode, "metadata": "", "string_literal": ""}
+
+    stop_opcode = "5b5056fe"
+
+    if stop_opcode not in bytecode:
+        return {
+            "bytecode": bytecode[:-meta_size],
+            "metadata": bytecode[-meta_size:],
+            "string_literal": "",
+        }
+
+    stop_index = bytecode.index(stop_opcode) + len(stop_opcode)
+
     return {
-        "bytecode": bytecode[:-meta_size],
+        "bytecode": bytecode[:-stop_index],
+        "string_literal": bytes.fromhex(bytecode[stop_index:-meta_size]).decode(
+            "ascii"
+        ),
         "metadata": bytecode[-meta_size:],
     }
 
@@ -114,6 +133,15 @@ def deep_match_bytecode(
     # If they differ in length, we still attempt to compare
     if len(actual_instructions) != len(expected_instructions):
         logger.warn("Codes have a different length")
+
+    if actual_trimmed["string_literal"] != expected_trimmed["string_literal"]:
+        logger.error("String literals don't match")
+        logger.error("Expected: %s", expected_trimmed["string_literal"])
+        logger.error("Actual: %s", actual_trimmed["string_literal"])
+    elif actual_trimmed["string_literal"]:
+        logger.warn(
+            f"String literals found. Make sure it's not op code.\n{actual_trimmed['string_literal']}"
+        )
 
     # Pair them up by index
     zipped_instructions = list(zip(actual_instructions, expected_instructions))

@@ -17,11 +17,12 @@ diffyscan = "diffyscan.diffyscan:main"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4"
-requests = "^2.32.2"
+requests = "^2.32.5"
 termtables = "^0.2.4"
 
 [tool.poetry.group.dev.dependencies]
-black = "^24.4.2"
+black = "^25.9.0"
+pytest = "^8.4.2"
 
 [tool.poetry-dynamic-versioning]
 enable = true

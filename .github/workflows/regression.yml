@@ -1,0 +1,57 @@
+name: Regression Tests
+
+on: [workflow_dispatch, push]
+
+# .github/workflows/ci.yaml
+permissions: # least-privilege principle
+  contents: read # widen only if you need more
+  pull-requests: write
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - config: config_samples/ethereum/mainnet/tw_config.json
+            hardhat: hardhat_configs/mainnet_hardhat_config.ts
+          - config: config_samples/ethereum/mainnet/tw_easy_track_config.json
+            hardhat: hardhat_configs/mainnet_hardhat_config.ts
+    env:
+      ETHERSCAN_EXPLORER_TOKEN: ${{ secrets.ETHERSCAN_EXPLORER_TOKEN }}
+      GITHUB_API_TOKEN: ${{ github.token }}
+      LOCAL_RPC_URL: "http://127.0.0.1:7545"
+      REMOTE_RPC_URL: ${{ secrets.REMOTE_RPC_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Poetry
+        run: |
+          pip install poetry~=2.2
+      - name: Install dependencies
+        run: |
+          poetry install --no-interaction
+          npm ci
+
+      - name: Restore diffyscan caches
+        uses: actions/cache@v4
+        with:
+          path: .diffyscan_cache
+          key: diffyscan-cache-${{ matrix.config }}-${{ github.run_id }}
+          restore-keys: |
+            diffyscan-cache-${{ matrix.config }}-
+            diffyscan-cache-
+
+      - name: Run unit tests
+        run: |
+          poetry run pytest -q
+
+      - name: Run diffyscan
+        run: |
+          poetry run diffyscan --hardhat-path ${{ matrix.hardhat }} ${{ matrix.config }} -Y -B -E -G

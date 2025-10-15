@@ -17,6 +17,7 @@ from .utils.explorer import (
     compile_contract_from_explorer,
     parse_compiled_contract,
     get_explorer_hostname,
+    get_explorer_chain_id,
 )
 from .utils.github import (
     get_file_from_github,
@@ -27,7 +28,12 @@ from .utils.helpers import create_dirs
 from .utils.logger import logger
 from .utils.binary_verifier import deep_match_bytecode
 from .utils.hardhat import hardhat
-from .utils.node_handler import get_bytecode_from_node, get_account, deploy_contract
+from .utils.node_handler import (
+    get_bytecode_from_node,
+    get_account,
+    deploy_contract,
+    get_chain_id,
+)
 from .utils.calldata import get_calldata
 from .utils.custom_exceptions import ExceptionHandler, BaseCustomException
 
@@ -49,7 +55,12 @@ def run_bytecode_diff(
     address_name = f"{contract_address_from_config} : {contract_name_from_config}"
     logger.divider()
     logger.info(f"Binary bytecode comparison started for {address_name}")
-    target_compiled_contract = compile_contract_from_explorer(contract_source_code)
+
+    # Get libraries from config if they exist
+    libraries = config.get("bytecode_comparison", {}).get("libraries", None)
+    target_compiled_contract = compile_contract_from_explorer(
+        contract_source_code, libraries
+    )
 
     contract_creation_code, local_compiled_bytecode, immutables = (
         parse_compiled_contract(target_compiled_contract)
@@ -106,6 +117,7 @@ def run_source_diff(
     github_api_token,
     recursive_parsing=False,
     prettify=False,
+    cache_github=False,
 ):
     source_files = (
         contract_code["solcInput"].items()
@@ -114,9 +126,14 @@ def run_source_diff(
     )
 
     explorer_hostname = get_explorer_hostname(config)
+    explorer_chain_id = get_explorer_chain_id(config)
     logger.divider()
     logger.okay("Contract", contract_address_from_config)
     logger.okay("Blockchain explorer Hostname", explorer_hostname)
+    if explorer_chain_id:
+        logger.okay("Blockchain explorer Chain ID", explorer_chain_id)
+    else:
+        logger.warn("Blockchain explorer Chain ID isn't set")
     logger.okay("Repo", config["github_repo"]["url"])
     logger.okay("Repo commit", config["github_repo"]["commit"])
     logger.okay("Repo relative root", config["github_repo"]["relative_root"])
@@ -168,11 +185,11 @@ def run_source_diff(
 
         if recursive_parsing:
             github_file = get_file_from_github_recursive(
-                github_api_token, repo, path_to_file, dep_name
+                github_api_token, repo, path_to_file, dep_name, cache_github
             )
         else:
             github_file = get_file_from_github(
-                github_api_token, repo, path_to_file, dep_name
+                github_api_token, repo, path_to_file, dep_name, cache_github
             )
 
         if not github_file:
@@ -228,6 +245,8 @@ def process_config(
     recursive_parsing: bool,
     unify_formatting: bool,
     enable_binary_comparison: bool,
+    cache_explorer: bool,
+    cache_github: bool,
 ):
     logger.info(f"Loading config {path}...")
     config = load_config(path)
@@ -266,12 +285,27 @@ def process_config(
 
     try:
         if enable_binary_comparison:
+            logger.info("Getting remote chain ID...")
+            remote_chain_id = get_chain_id(remote_rpc_url)
+            logger.okay("Remote chain ID", remote_chain_id)
+
             hardhat.start(
                 hardhat_config_path,
                 local_rpc_url,
                 remote_rpc_url,
+                remote_chain_id,
             )
+            logger.divider()
+            logger.info("Getting local chain ID and deployer account...")
             deployer_account = get_account(local_rpc_url)
+            local_chain_id = get_chain_id(local_rpc_url)
+
+            logger.okay("Local chain ID", local_chain_id)
+
+            if remote_chain_id != local_chain_id:
+                raise ValueError(
+                    f"Remote chain ID {remote_chain_id} does not match local chain ID {local_chain_id}"
+                )
 
         for contract_address, contract_name in config["contracts"].items():
             try:
@@ -280,6 +314,8 @@ def process_config(
                     get_explorer_hostname(config),
                     contract_address,
                     contract_name,
+                    get_explorer_chain_id(config),
+                    cache_explorer,
                 )
 
                 if enable_source_comparison:
@@ -290,6 +326,7 @@ def process_config(
                         github_api_token,
                         recursive_parsing,
                         unify_formatting,
+                        cache_github,
                     )
 
                 if enable_binary_comparison:
@@ -349,6 +386,18 @@ def parse_arguments():
         help="Enable binary bytecode comparison",
         action="store_true",
     )
+    parser.add_argument(
+        "--cache-explorer",
+        "-E",
+        help="Cache contract sources from blockchain explorers to avoid re-fetching on repeated runs",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--cache-github",
+        "-G",
+        help="Cache files retrieved from GitHub to avoid re-fetching on repeated runs",
+        action="store_true",
+    )
     return parser.parse_args()
 
 
@@ -369,6 +418,8 @@ def main():
             args.support_brownie,
             args.prettify,
             args.enable_binary_comparison,
+            args.cache_explorer,
+            args.cache_github,
         )
     elif os.path.isfile(args.path):
         process_config(
@@ -377,6 +428,8 @@ def main():
             args.support_brownie,
             args.prettify,
             args.enable_binary_comparison,
+            args.cache_explorer,
+            args.cache_github,
         )
     elif os.path.isdir(args.path):
         for filename in os.listdir(args.path):
@@ -388,6 +441,8 @@ def main():
                     args.support_brownie,
                     args.prettify,
                     args.enable_binary_comparison,
+                    args.cache_explorer,
+                    args.cache_github,
                 )
     else:
         logger.error(f"Specified config path {args.path} not found")
