@@ -1,0 +1,130 @@
+{
+  "contracts": {
+    "0x0eCc17597D292271836691358B22340b78F3035B": "Executor",
+    "0x9CAaCCc62c66d817CC59c44780D1b722359795bF": "DualGovernance",
+    "0x0A5E22782C0Bd4AddF10D771f0bF0406B038282d": "EmergencyProtectedTimelock",
+    "0x2b685e6fB288bBb7A82533BAfb679FfDF6E5bb33": "ImmutableDualGovernanceConfigProvider",
+    "0x7E3041218cc33727DF2B469bdB70fC07016Ff3C0": "ImmutableDualGovernanceConfigProvider",
+    "0xF1Fbb8360C19830228260Ed5Bb432476A9d4897a": "TimelockedGovernance",
+    "0x9Ce4bA766C87cC87e507307163eA54C5003A3563": "TiebreakerCoreCommittee",
+    "0xEd27F0d08630685A0cEFb1040596Cb264cf79f14": "TiebreakerSubCommittee",
+    "0xE3e3c67997A4Db7d47ac7fa8ef81B677daBe5794": "TiebreakerSubCommittee",
+    "0xF4F16CB3B9E7a076E55c508035f25E606913Cc9d": "TiebreakerSubCommittee",
+    "0x61b7C2351F63b7f9840736D020eE65D2803A00fb": "Escrow",
+    "0x05172CbCDb7307228F781436b327679e4DAE166B": "ResealManager",
+    "0x69E8e916c4A19F42C13C802abDF2767E1fB4F059": "TimelockedGovernance"
+  },
+  "explorer_hostname": "api-hoodi.etherscan.io",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/dual-governance",
+    "commit": "0e5d6873cff71d495b31c1b97488b8b77ae62bc7",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "lib/openzeppelin-contracts/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "dbb6104ce834628e473d2173bbc9d47f81a9eec3",
+      "relative_root": "contracts"
+    }
+  },
+  "fail_on_bytecode_comparison_error": false,
+  "bytecode_comparison": {
+    "hardhat_config_name": "hardhat.config.js",
+    "constructor_args": {
+      "0x0eCc17597D292271836691358B22340b78F3035B": [
+        "0x4bcbefcf4d6f8cd4e5f4681a79b61ef4b50db2cd"
+      ],
+      "0x9CAaCCc62c66d817CC59c44780D1b722359795bF": [
+        [
+          "0x0A5E22782C0Bd4AddF10D771f0bF0406B038282d",
+          "0x05172CbCDb7307228F781436b327679e4DAE166B",
+          "0x2b685e6fB288bBb7A82533BAfb679FfDF6E5bb33"
+        ],
+        [
+          "0x3508A952176b3c15387C97BE809eaffB1982176a",
+          "0x7E99eE3C66636DE415D2d7C880938F2f40f94De4",
+          "0xfe56573178f1bcdf53F01A6E9977670dcBBD9186"
+        ],
+        [4, 300, 1800, 255, 3600]
+      ],
+      "0x0A5E22782C0Bd4AddF10D771f0bF0406B038282d": [
+        [120, 1800, 1800, 2592000, 63072000],
+        "0x0eCc17597D292271836691358B22340b78F3035B",
+        120,
+        120
+      ],
+      "0x2b685e6fB288bBb7A82533BAfb679FfDF6E5bb33": [
+        [
+          30000000000000000, 150000000000000000, 300, 300, 1800, 180, 300, 180,
+          180, 600, 3600, 1200
+        ]
+      ],
+      "0xF1Fbb8360C19830228260Ed5Bb432476A9d4897a": [
+        "0x4EdF1162Bd6A52AD119e0f5AC40325Ee01F5A092",
+        "0x0A5E22782C0Bd4AddF10D771f0bF0406B038282d"
+      ],
+      "0x9Ce4bA766C87cC87e507307163eA54C5003A3563": [
+        "0x4bcbefcf4d6f8cd4e5f4681a79b61ef4b50db2cd",
+        "0x9CAaCCc62c66d817CC59c44780D1b722359795bF",
+        900
+      ],
+      "0xEd27F0d08630685A0cEFb1040596Cb264cf79f14": [
+        "0x0eCc17597D292271836691358B22340b78F3035B",
+        [
+          "0x36c648351274bb4455ba6aaabf3f976824a93af4",
+          "0x6FD09F5b4341C79CBDf679bccC2394C6FD7D0016",
+          "0xe8B2097674daF8fC3DcCDDf05a2cBeF8253A4bAB",
+          "0x7Cd64b87251f793027590c34b206145c3aa362Ae",
+          "0x526d46eCa1d7969924e981ecDbcAa74e9f0EE566",
+          "0x6389CBcF38172a1e8eCF1C34c00cd7f603AfB80C"
+        ],
+        2,
+        "0x9Ce4bA766C87cC87e507307163eA54C5003A3563"
+      ],
+      "0xE3e3c67997A4Db7d47ac7fa8ef81B677daBe5794": [
+        "0x0eCc17597D292271836691358B22340b78F3035B",
+        [
+          "0x36c648351274bb4455ba6aaabf3f976824a93af4",
+          "0x6FD09F5b4341C79CBDf679bccC2394C6FD7D0016",
+          "0xe8B2097674daF8fC3DcCDDf05a2cBeF8253A4bAB",
+          "0x7Cd64b87251f793027590c34b206145c3aa362Ae",
+          "0x526d46eCa1d7969924e981ecDbcAa74e9f0EE566",
+          "0x6389CBcF38172a1e8eCF1C34c00cd7f603AfB80C"
+        ],
+        2,
+        "0x9Ce4bA766C87cC87e507307163eA54C5003A3563"
+      ],
+      "0xF4F16CB3B9E7a076E55c508035f25E606913Cc9d": [
+        "0x0eCc17597D292271836691358B22340b78F3035B",
+        [
+          "0x36c648351274bb4455ba6aaabf3f976824a93af4",
+          "0x6FD09F5b4341C79CBDf679bccC2394C6FD7D0016",
+          "0xe8B2097674daF8fC3DcCDDf05a2cBeF8253A4bAB",
+          "0x7Cd64b87251f793027590c34b206145c3aa362Ae",
+          "0x526d46eCa1d7969924e981ecDbcAa74e9f0EE566",
+          "0x6389CBcF38172a1e8eCF1C34c00cd7f603AfB80C"
+        ],
+        2,
+        "0x9Ce4bA766C87cC87e507307163eA54C5003A3563"
+      ],
+      "0x61b7C2351F63b7f9840736D020eE65D2803A00fb": [
+        "0x3508A952176b3c15387C97BE809eaffB1982176a",
+        "0x7E99eE3C66636DE415D2d7C880938F2f40f94De4",
+        "0xfe56573178f1bcdf53F01A6E9977670dcBBD9186",
+        "0x9CAaCCc62c66d817CC59c44780D1b722359795bF",
+        4,
+        3600
+      ],
+      "0x05172CbCDb7307228F781436b327679e4DAE166B": [
+        "0x0A5E22782C0Bd4AddF10D771f0bF0406B038282d"
+      ],
+      "0x69E8e916c4A19F42C13C802abDF2767E1fB4F059": [
+        "0x49B3512c44891bef83F8967d075121Bd1b07a01B",
+        "0x0A5E22782C0Bd4AddF10D771f0bF0406B038282d"
+      ],
+      "0x7E3041218cc33727DF2B469bdB70fC07016Ff3C0": [
+        [999999999999999999, 1000000000000000000, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0]
+      ]
+    }
+  }
+}
