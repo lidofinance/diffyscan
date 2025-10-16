@@ -2,7 +2,8 @@
 
 ![python >=3.10,<4](https://img.shields.io/badge/python-≥3.10,<4-blue)
 ![poetry ^2.2](https://img.shields.io/badge/poetry-^2.2-blue)
-![NodeJs >=20](https://img.shields.io/badge/NodeJS-≥20-yellow)
+![NodeJs ^22](https://img.shields.io/badge/NodeJS-^22-yellow)
+![Hardhat ^3.0](https://img.shields.io/badge/Hardhat-^3.0-cyan)
 ![license MIT](https://img.shields.io/badge/license-MIT-brightgreen)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
@@ -11,11 +12,11 @@ Diff deployed EVM-compatible smart contract sourcecode and bytecode against the 
 Key features:
 
 - retrieve and diff sources from the GitHub repo against the queried ones from a blockscan service (e.g. Etherscan)
-- compare the bytecode compiled and deployed on the forked network locally against remote (see section 'bytecode_comparison' in `./config_samples/lido_dao_sepolia_config.json` as an example)
+- compare the bytecode compiled and deployed on the forked network locally against remote (see section 'bytecode_comparison' in `./config_samples/lido_dao_sepolia_config.json` as an example) - enabled by default
 - cache sources from blockchain explorers (option `--cache-explorer`) and GitHub files (option `--cache-github`) to avoid re-fetching on repeated runs
 - preprocess solidity sourcecode by means of prettier solidity plugin before comparing the sources (option `--prettify`) if needed.
 - preprocess imports to flat paths for Brownie compatibility (option `--support-brownie`)
-- enable binary comparison (option `--enable-binary-comparison`)
+- skip binary comparison if needed (option `--skip-binary-comparison`)
 - provide own Hardhat config as optional argument
 
 ## Install
@@ -87,7 +88,6 @@ Alternatively, create a new config file named `config.json` near the diffyscan.p
   },
   "fail_on_bytecode_comparison_error": true,
   "bytecode_comparison": {
-    "hardhat_config_name": "holesky_hardhat.config.js",
     "constructor_calldata": {
       "0x28FAB2059C713A7F9D8c86Db49f9bb0e96Af1ef8": "000000000000000000000000ab89ed3d8f31bcf8bb7de53f02084d1e6f043d34000000000000000000000000e92329ec7ddb11d25e25b3c21eebf11f15eb325d00000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000"
     },
@@ -115,19 +115,24 @@ Alternatively, create a new config file named `config.json` near the diffyscan.p
 }
 ```
 
-then create a new Hardhat config file named `hardhat_config.js` near the diffyscan.py
+then create a new Hardhat config file named `hardhat_config.ts` near the diffyscan.py
 
-```js
-module.exports = {
-  solidity: "0.8.9",
+```ts
+import type { HardhatUserConfig } from "hardhat/config";
+
+const config: HardhatUserConfig = {
+  solidity: "0.8.25",
   networks: {
     hardhat: {
-      chainId: 17000,
+      type: "edr-simulated",
+      chainId: 560048,
       blockGasLimit: 92000000,
-      hardfork: "cancun",
+      hardfork: "prague",
     },
   },
 };
+
+export default config;
 ```
 
 > Note: Hardhat config file is needed to avoid standard config generation routine to be launched.
@@ -137,7 +142,13 @@ module.exports = {
 Start the script
 
 ```bash
-diffyscan /path/to/config.json /path/to/hardhat_config.js --enable-binary-comparison
+diffyscan /path/to/config.json --hardhat-path /path/to/hardhat_config.ts
+```
+
+To skip binary comparison (which is enabled by default):
+
+```bash
+diffyscan /path/to/config.json --hardhat-path /path/to/hardhat_config.ts --skip-binary-comparison
 ```
 
 > Note: Brownie verification tooling might rewrite the imports in the source submission. It transforms relative paths to imported contracts into flat paths ('./folder/contract.sol' -> 'contract.sol'), which makes Diffyscan unable to find a contract for verification.
@@ -145,7 +156,7 @@ diffyscan /path/to/config.json /path/to/hardhat_config.js --enable-binary-compar
 For contracts whose sources were verified by brownie tooling:
 
 ```bash
-diffyscan /path/to/config.json /path/to/hardhat_config.js --enable-binary-comparison --support-brownie
+diffyscan /path/to/config.json --hardhat-path /path/to/hardhat_config.ts --support-brownie
 ```
 
 ### Caching

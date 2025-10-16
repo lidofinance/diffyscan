@@ -515,9 +515,9 @@ def parse_arguments() -> argparse.Namespace:
         action="store_true",
     )
     parser.add_argument(
-        "--enable-binary-comparison",
-        "-B",
-        help="Enable binary bytecode comparison",
+        "--skip-binary-comparison",
+        "-S",
+        help="Skip binary bytecode comparison (enabled by default)",
         action="store_true",
     )
     parser.add_argument(
@@ -634,6 +634,9 @@ def main() -> None:
     logger.info("Welcome to Diffyscan!")
     logger.divider()
 
+    # Binary comparison is enabled by default, unless --skip-binary-comparison is set
+    enable_binary_comparison = not args.skip_binary_comparison
+
     # Collect all results for final summary
     all_results = []
 
@@ -643,7 +646,7 @@ def main() -> None:
             args.hardhat_path,
             args.support_brownie,
             args.prettify,
-            args.enable_binary_comparison,
+            enable_binary_comparison,
             args.cache_explorer,
             args.cache_github,
             skip_user_input,
@@ -655,7 +658,7 @@ def main() -> None:
             args.hardhat_path,
             args.support_brownie,
             args.prettify,
-            args.enable_binary_comparison,
+            enable_binary_comparison,
             args.cache_explorer,
             args.cache_github,
             skip_user_input,
@@ -670,7 +673,7 @@ def main() -> None:
                     args.hardhat_path,
                     args.support_brownie,
                     args.prettify,
-                    args.enable_binary_comparison,
+                    enable_binary_comparison,
                     args.cache_explorer,
                     args.cache_github,
                     skip_user_input,
@@ -687,9 +690,7 @@ def main() -> None:
     enable_source_comparison = any(len(r["source_stats"]) > 0 for r in all_results)
 
     # Print final summary
-    print_final_summary(
-        all_results, enable_source_comparison, args.enable_binary_comparison
-    )
+    print_final_summary(all_results, enable_source_comparison, enable_binary_comparison)
 
     logger.okay(f"Done in {round(execution_time, 3)}s ✨" + " " * 100)
 
