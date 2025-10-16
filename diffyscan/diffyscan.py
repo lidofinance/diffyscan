@@ -685,7 +685,6 @@ def main() -> None:
 
     # Determine what comparisons were enabled (check first result)
     enable_source_comparison = any(len(r["source_stats"]) > 0 for r in all_results)
-    enable_binary_comparison = any(len(r["bytecode_stats"]) > 0 for r in all_results)
 
     # Print final summary
     print_final_summary(
