@@ -83,4 +83,5 @@ jobs:
 
       - name: Run diffyscan
         run: |
-          poetry run diffyscan --hardhat-path ${{ matrix.hardhat }} -Y -E -G ${{ matrix.flags }} ${{ matrix.config }}
+          FLAGS="${{ matrix.flags }}"
+          poetry run diffyscan --hardhat-path ${{ matrix.hardhat }} -Y -E -G ${{ matrix.config }} ${FLAGS}
