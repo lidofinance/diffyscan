@@ -33,11 +33,17 @@ def trim_solidity_meta(bytecode: str) -> dict:
 
     stop_index = bytecode.index(stop_opcode) + len(stop_opcode)
 
+    # Try to decode string literal safely
+    string_literal = ""
+    try:
+        string_literal = bytes.fromhex(bytecode[stop_index:-meta_size]).decode("ascii")
+    except (ValueError, UnicodeDecodeError):
+        # If decoding fails, it might not be a string literal
+        logger.warn("Failed to decode potential string literal from bytecode")
+
     return {
-        "bytecode": bytecode[:-stop_index],
-        "string_literal": bytes.fromhex(bytecode[stop_index:-meta_size]).decode(
-            "ascii"
-        ),
+        "bytecode": bytecode[:stop_index],
+        "string_literal": string_literal,
         "metadata": bytecode[-meta_size:],
     }
 
@@ -100,83 +106,8 @@ def overlaps_any_immutable(
     return False
 
 
-def deep_match_bytecode(
-    actual_bytecode: str, expected_bytecode: str, immutables: dict
-) -> None:
-    """
-    Compare two chunks of bytecode instruction-by-instruction, ignoring differences
-    that appear within known 'immutable' regions.
-
-    If:
-      - No differences => "Bytecodes fully match."
-      - Differences only in immutables => "Bytecodes have differences only on the immutable reference position."
-      - Differences outside immutables => raises BinVerifierError.
-    """
-    logger.info("Comparing actual code with the expected one...")
-
-    # Possibly strip out metadata from both
-    actual_trimmed = trim_solidity_meta(actual_bytecode)
-    expected_trimmed = trim_solidity_meta(expected_bytecode)
-
-    if actual_trimmed["metadata"] or expected_trimmed["metadata"]:
-        logger.info("Metadata has been detected and trimmed")
-
-    # Parse instructions
-    actual_instructions, unknown_opcodes_a = parse(actual_trimmed["bytecode"])
-    expected_instructions, unknown_opcodes_b = parse(expected_trimmed["bytecode"])
-
-    # Check for unknown opcodes
-    unknown_opcodes = unknown_opcodes_a | unknown_opcodes_b
-    if unknown_opcodes:
-        logger.warn(f"Detected unknown opcodes: {unknown_opcodes}")
-
-    # If they differ in length, we still attempt to compare
-    if len(actual_instructions) != len(expected_instructions):
-        logger.warn("Codes have a different length")
-
-    if actual_trimmed["string_literal"] != expected_trimmed["string_literal"]:
-        logger.error("String literals don't match")
-        logger.error("Expected: %s", expected_trimmed["string_literal"])
-        logger.error("Actual: %s", actual_trimmed["string_literal"])
-    elif actual_trimmed["string_literal"]:
-        logger.warn(
-            f"String literals found. Make sure it's not op code.\n{actual_trimmed['string_literal']}"
-        )
-
-    # Pair them up by index
-    zipped_instructions = list(zip(actual_instructions, expected_instructions))
-
-    # Identify mismatch indexes
-    def is_mismatch(pair) -> bool:
-        return pair[0]["bytecode"] != pair[1]["bytecode"]
-
-    mismatches = [
-        idx for idx, pair in enumerate(zipped_instructions) if is_mismatch(pair)
-    ]
-
-    # If no mismatches at all => fully match
-    if not mismatches and len(actual_instructions) == len(expected_instructions):
-        logger.okay("Bytecodes fully match")
-        return
-
-    # We'll show a few lines around each mismatch for context
-    near_lines_count = 3
-    checkpoints = {0, *mismatches}
-    # handle last line if instructions differ in count
-    if actual_instructions:
-        checkpoints.add(len(actual_instructions) - 1)
-    if expected_instructions:
-        checkpoints.add(len(expected_instructions) - 1)
-
-    # Expand around mismatches
-    for ind in list(checkpoints):
-        start_idx = max(0, ind - near_lines_count)
-        end_idx = min(ind + near_lines_count, len(zipped_instructions) - 1)
-        checkpoints.update(range(start_idx, end_idx + 1))
-
-    checkpoints = sorted(checkpoints)
-
-    # Print a small legend
+def _print_diff_legend():
+    """Print the legend explaining the diff output colors."""
     logger.divider()
     logger.info("0000 00 STOP - both expected and actual bytecode instructions match")
     logger.info(f'{bgRed("0x0002")} - the actual bytecode differs')
@@ -194,11 +125,91 @@ def deep_match_bytecode(
     )
     logger.divider()
 
+
+def _get_checkpoints_for_display(
+    mismatches, actual_instructions, expected_instructions, context_lines=3
+):
+    """
+    Get the set of instruction indices to display around mismatches.
+
+    Args:
+        mismatches: List of mismatch indices
+        actual_instructions: List of actual instructions
+        expected_instructions: List of expected instructions
+        context_lines: Number of lines to show around each mismatch
+
+    Returns:
+        Sorted list of indices to display
+    """
+    checkpoints = {0, *mismatches}
+
+    # Include last lines if instructions differ in count
+    if actual_instructions:
+        checkpoints.add(len(actual_instructions) - 1)
+    if expected_instructions:
+        checkpoints.add(len(expected_instructions) - 1)
+
+    # Expand around mismatches
+    max_idx = min(len(actual_instructions), len(expected_instructions)) - 1
+    for idx in list(checkpoints):
+        start_idx = max(0, idx - context_lines)
+        end_idx = min(idx + context_lines, max_idx)
+        checkpoints.update(range(start_idx, end_idx + 1))
+
+    return sorted(checkpoints)
+
+
+def _format_instruction_diff(actual, expected, immutables):
+    """
+    Format a single instruction diff for display.
+
+    Returns:
+        tuple: (formatted_string, is_immutable_only_diff)
+    """
+    # Compare opcodes
+    same_opcode = actual["op"]["code"] == expected["op"]["code"]
+    if same_opcode:
+        opcode = to_hex(actual["op"]["code"])
+        opname = actual["op"]["name"]
+    else:
+        opcode = (
+            bgRed(to_hex(actual["op"]["code"]))
+            + " "
+            + bgGreen(to_hex(expected["op"]["code"]))
+        )
+        opname = bgRed(actual["op"]["name"]) + " " + bgGreen(expected["op"]["name"])
+
+    actual_params = format_bytecode(actual["bytecode"])
+    expected_params = format_bytecode(expected["bytecode"])
+
+    # Check if within immutable region
+    instr_start = expected["start"]
+    instr_len = expected["length"]
+    within_immutable_region = overlaps_any_immutable(immutables, instr_start, instr_len)
+
+    is_immutable_only = True
+    if actual_params == expected_params:
+        params = actual_params
+    else:
+        # There's a difference
+        if within_immutable_region:
+            params = bgYellow(actual_params) + " " + bgGreen(expected_params)
+        else:
+            params = bgRed(actual_params) + " " + bgGreen(expected_params)
+            is_immutable_only = False
+
+    return (opcode, opname, params), is_immutable_only
+
+
+def _print_instruction_diffs(zipped_instructions, checkpoints, immutables):
+    """
+    Print the instruction diffs for display.
+
+    Returns:
+        bool: True if all differences are in immutable regions only
+    """
     is_matched_with_excluded_immutables = True
 
-    # Print the diff lines
-    # note: for shortness, we won't handle "None" instructions here,
-    # since we used zip() not zip_longest(). Adjust if needed.
     for prev_idx, cur_idx in zip(checkpoints, checkpoints[1:]):
         if prev_idx != cur_idx - 1:
             print("...")
@@ -206,41 +217,90 @@ def deep_match_bytecode(
         actual = zipped_instructions[cur_idx][0]
         expected = zipped_instructions[cur_idx][1]
 
-        # Compare opcodes
-        same_opcode = actual["op"]["code"] == expected["op"]["code"]
-        if same_opcode:
-            opcode = to_hex(actual["op"]["code"])
-            opname = actual["op"]["name"]
-        else:
-            opcode = (
-                bgRed(to_hex(actual["op"]["code"]))
-                + " "
-                + bgGreen(to_hex(expected["op"]["code"]))
-            )
-            opname = bgRed(actual["op"]["name"]) + " " + bgGreen(expected["op"]["name"])
-
-        actual_params = format_bytecode(actual["bytecode"])
-        expected_params = format_bytecode(expected["bytecode"])
-
-        # Check partial overlap with immutables
-        instr_start = expected["start"]
-        instr_len = expected["length"]
-        within_immutable_region = overlaps_any_immutable(
-            immutables, instr_start, instr_len
+        (opcode, opname, params), is_immutable_only = _format_instruction_diff(
+            actual, expected, immutables
         )
 
-        if actual_params == expected_params:
-            # Perfect match => no highlight
-            params = actual_params
-        else:
-            # There's a difference
-            if within_immutable_region:
-                params = bgYellow(actual_params) + " " + bgGreen(expected_params)
-            else:
-                params = bgRed(actual_params) + " " + bgGreen(expected_params)
-                is_matched_with_excluded_immutables = False
+        if not is_immutable_only:
+            is_matched_with_excluded_immutables = False
 
         print(f"{to_hex(cur_idx, 4)} {opcode} {opname} {params}")
+
+    return is_matched_with_excluded_immutables
+
+
+def _validate_string_literals(actual_trimmed, expected_trimmed):
+    """Validate and warn about string literals in bytecode."""
+    if actual_trimmed["string_literal"] != expected_trimmed["string_literal"]:
+        logger.error("String literals don't match")
+        logger.error("Expected: %s", expected_trimmed["string_literal"])
+        logger.error("Actual: %s", actual_trimmed["string_literal"])
+    elif actual_trimmed["string_literal"]:
+        logger.warn(
+            f"String literals found. Make sure it's not op code.\n{actual_trimmed['string_literal']}"
+        )
+
+
+def deep_match_bytecode(
+    actual_bytecode: str, expected_bytecode: str, immutables: dict
+) -> bool:
+    """
+    Compare two chunks of bytecode instruction-by-instruction, ignoring differences
+    that appear within known 'immutable' regions.
+
+    If:
+      - No differences => "Bytecodes fully match."
+      - Differences only in immutables => "Bytecodes have differences only on the immutable reference position."
+      - Differences outside immutables => raises BinVerifierError.
+    """
+    logger.info("Comparing actual code with the expected one...")
+
+    # Strip out metadata from both
+    actual_trimmed = trim_solidity_meta(actual_bytecode)
+    expected_trimmed = trim_solidity_meta(expected_bytecode)
+
+    if actual_trimmed["metadata"] or expected_trimmed["metadata"]:
+        logger.info("Metadata has been detected and trimmed")
+
+    # Parse instructions
+    actual_instructions, unknown_opcodes_a = parse(actual_trimmed["bytecode"])
+    expected_instructions, unknown_opcodes_b = parse(expected_trimmed["bytecode"])
+
+    # Check for unknown opcodes
+    unknown_opcodes = unknown_opcodes_a | unknown_opcodes_b
+    if unknown_opcodes:
+        logger.warn(f"Detected unknown opcodes: {unknown_opcodes}")
+
+    # Check length differences
+    if len(actual_instructions) != len(expected_instructions):
+        logger.warn("Codes have a different length")
+
+    # Validate string literals
+    _validate_string_literals(actual_trimmed, expected_trimmed)
+
+    # Pair up instructions and find mismatches
+    zipped_instructions = list(zip(actual_instructions, expected_instructions))
+    mismatches = [
+        idx
+        for idx, (actual, expected) in enumerate(zipped_instructions)
+        if actual["bytecode"] != expected["bytecode"]
+    ]
+
+    # If no mismatches at all => fully match
+    if not mismatches and len(actual_instructions) == len(expected_instructions):
+        logger.okay("Bytecodes match (after trimming metadata and string literals)")
+        return True
+
+    # Display diff with context
+    checkpoints = _get_checkpoints_for_display(
+        mismatches, actual_instructions, expected_instructions
+    )
+
+    _print_diff_legend()
+
+    is_matched_with_excluded_immutables = _print_instruction_diffs(
+        zipped_instructions, checkpoints, immutables
+    )
 
     # If we found any mismatch outside immutables => fail
     if not is_matched_with_excluded_immutables:
@@ -250,3 +310,4 @@ def deep_match_bytecode(
 
     # Otherwise, differences exist but only in immutables
     logger.okay("Bytecodes have differences only on the immutable reference position")
+    return False

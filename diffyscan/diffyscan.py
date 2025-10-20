@@ -35,12 +35,13 @@ from .utils.node_handler import (
     get_chain_id,
 )
 from .utils.calldata import get_calldata
-from .utils.custom_exceptions import ExceptionHandler, BaseCustomException
+from .utils.custom_exceptions import (
+    ExceptionHandler,
+    BaseCustomException,
+    BinVerifierError,
+)
 
 __version__ = "0.0.0"
-
-
-g_skip_user_input: bool = False
 
 
 def run_bytecode_diff(
@@ -52,6 +53,12 @@ def run_bytecode_diff(
     local_rpc_url,
     remote_rpc_url,
 ):
+    """
+    Run bytecode comparison for a contract.
+
+    Returns:
+        bool: True if bytecodes match (fully or only in immutables), False if there are differences
+    """
     address_name = f"{contract_address_from_config} : {contract_name_from_config}"
     logger.divider()
     logger.info(f"Binary bytecode comparison started for {address_name}")
@@ -74,7 +81,7 @@ def run_bytecode_diff(
 
     if is_fully_matched:
         logger.okay("Bytecodes fully match")
-        return
+        return True
 
     logger.info(
         "Static bytecodes not match, trying local deployment to bind immutables"
@@ -101,9 +108,9 @@ def run_bytecode_diff(
 
     if is_fully_matched:
         logger.okay("Bytecodes fully match")
-        return
+        return True
 
-    deep_match_bytecode(
+    return deep_match_bytecode(
         local_deployed_bytecode,
         remote_deployed_bytecode,
         immutables,
@@ -118,7 +125,20 @@ def run_source_diff(
     recursive_parsing=False,
     prettify=False,
     cache_github=False,
+    skip_user_input=False,
 ):
+    """
+    Run source code diff for a contract.
+
+    Returns:
+        dict: Statistics with keys:
+            - 'files_count': total number of files
+            - 'files_found': number of files found
+            - 'identical_files': number of files with no diffs
+            - 'files_with_diffs': number of files with non-zero diffs
+            - 'contract_address': address of the contract
+            - 'contract_name': name of the contract
+    """
     source_files = (
         contract_code["solcInput"].items()
         if "sources" not in contract_code["solcInput"]
@@ -148,7 +168,7 @@ def run_source_diff(
     logger.okay("Contract", contract_code["name"])
     logger.okay("Files", files_count)
 
-    if not g_skip_user_input:
+    if not skip_user_input:
         input("Press Enter to proceed...")
         logger.divider()
 
@@ -178,8 +198,9 @@ def run_source_diff(
         diffs_count = None
 
         if not repo:
-            logger.error("File not found", path_to_file)
-            sys.exit()
+            error_msg = f"File not found in any repository: {path_to_file}"
+            logger.error(error_msg)
+            raise ValueError(error_msg)
 
         file_found = bool(repo)
 
@@ -236,7 +257,89 @@ def run_source_diff(
     identical_files = len([row for row in report if row[3] == 0])
     logger.info(f"Identical files: {identical_files} / {files_found}")
 
+    files_with_diffs = len([row for row in report if row[2] and row[3] > 0])
+
     logger.report_table(report)
+
+    return {
+        "files_count": files_count,
+        "files_found": files_found,
+        "identical_files": identical_files,
+        "files_with_diffs": files_with_diffs,
+        "contract_address": contract_address_from_config,
+        "contract_name": contract_code["name"],
+    }
+
+
+def _load_explorer_token(config: dict) -> str | None:
+    """
+    Load explorer token from config or environment.
+
+    Args:
+        config: The configuration dictionary
+
+    Returns:
+        str or None: The explorer token if found
+    """
+    # Try config first
+    if "explorer_token_env_var" in config:
+        token = load_env(config["explorer_token_env_var"], masked=True, required=False)
+        if token:
+            return token
+        logger.warn(
+            f'Failed to find explorer token in env ("{config["explorer_token_env_var"]}")'
+        )
+    else:
+        logger.warn(
+            'Failed to find an explorer token in the config ("explorer_token_env_var")'
+        )
+
+    # Fall back to default environment variable
+    token = os.getenv("ETHERSCAN_EXPLORER_TOKEN", default=None)
+    if token is None:
+        logger.warn('Failed to find explorer token in env ("ETHERSCAN_EXPLORER_TOKEN")')
+
+    return token
+
+
+def _validate_github_token() -> str:
+    """
+    Validate that GitHub API token is set.
+
+    Returns:
+        The GitHub API token
+
+    Raises:
+        ValueError: If the token is not set
+    """
+    github_api_token = os.getenv("GITHUB_API_TOKEN", "")
+    if not github_api_token:
+        raise ValueError("GITHUB_API_TOKEN variable is not set")
+    return github_api_token
+
+
+def _setup_binary_comparison(config: dict) -> tuple[str, str]:
+    """
+    Setup and validate binary comparison configuration.
+
+    Args:
+        config: The configuration dictionary
+
+    Returns:
+        tuple: (local_rpc_url, remote_rpc_url)
+
+    Raises:
+        ValueError: If required configuration is missing
+    """
+    if "bytecode_comparison" not in config:
+        raise ValueError('Failed to find "bytecode_comparison" section in config')
+
+    local_rpc_url = load_env("LOCAL_RPC_URL", masked=False, required=True)
+    remote_rpc_url = load_env("REMOTE_RPC_URL", masked=True, required=True)
+
+    ExceptionHandler.initialize(config.get("fail_on_bytecode_comparison_error", True))
+
+    return local_rpc_url, remote_rpc_url
 
 
 def process_config(
@@ -247,41 +350,40 @@ def process_config(
     enable_binary_comparison: bool,
     cache_explorer: bool,
     cache_github: bool,
+    skip_user_input: bool = False,
 ):
+    """
+    Process a config file and run comparisons.
+
+    Returns:
+        dict: Summary statistics with keys:
+            - 'source_stats': list of per-contract source statistics
+            - 'bytecode_stats': list of per-contract bytecode results
+            - 'config_path': path to the config file
+    """
     logger.info(f"Loading config {path}...")
     config = load_config(path)
 
-    explorer_token = None
-    if "explorer_token_env_var" in config:
-        explorer_token = load_env(
-            config["explorer_token_env_var"], masked=True, required=False
-        )
-    if explorer_token is None:
-        logger.warn(
-            'Failed to find an explorer token in the config ("explorer_token_env_var")'
-        )
-        explorer_token = os.getenv("ETHERSCAN_EXPLORER_TOKEN", default=None)
-    if explorer_token is None:
-        logger.warn('Failed to find explorer token in env ("ETHERSCAN_EXPLORER_TOKEN")')
+    # Load tokens and validate
+    explorer_token = _load_explorer_token(config)
+    github_api_token = _validate_github_token()
 
-    github_api_token = os.getenv("GITHUB_API_TOKEN", "")
-    if not github_api_token:
-        raise ValueError("GITHUB_API_TOKEN variable is not set")
-
+    # Setup binary comparison if enabled
+    local_rpc_url = None
+    remote_rpc_url = None
     if enable_binary_comparison:
-        if "bytecode_comparison" not in config:
-            raise ValueError('Failed to find "bytecode_comparison" section in config')
+        local_rpc_url, remote_rpc_url = _setup_binary_comparison(config)
 
-        local_rpc_url = load_env("LOCAL_RPC_URL", masked=False, required=True)
-        remote_rpc_url = load_env("REMOTE_RPC_URL", masked=True, required=True)
-
-        ExceptionHandler.initialize(config["fail_on_bytecode_comparison_error"])
-
+    # Check if source comparison is enabled
     enable_source_comparison = config.get("source_comparison", True)
     if not enable_source_comparison:
         logger.warn(
             f'Source code comparison is disabled in {path}. To enable, set "source_comparison": true in the config'
         )
+
+    # Statistics tracking
+    source_stats = []
+    bytecode_stats = []
 
     try:
         if enable_binary_comparison:
@@ -319,7 +421,7 @@ def process_config(
                 )
 
                 if enable_source_comparison:
-                    run_source_diff(
+                    source_result = run_source_diff(
                         contract_address,
                         contract_code,
                         config,
@@ -327,10 +429,12 @@ def process_config(
                         recursive_parsing,
                         unify_formatting,
                         cache_github,
+                        skip_user_input,
                     )
+                    source_stats.append(source_result)
 
                 if enable_binary_comparison:
-                    run_bytecode_diff(
+                    bytecode_match = run_bytecode_diff(
                         contract_address,
                         contract_name,
                         contract_code,
@@ -339,9 +443,27 @@ def process_config(
                         local_rpc_url,
                         remote_rpc_url,
                     )
+                    bytecode_stats.append(
+                        {
+                            "contract_address": contract_address,
+                            "contract_name": contract_name,
+                            "match": bytecode_match,
+                        }
+                    )
             except BaseCustomException as custom_exc:
                 ExceptionHandler.raise_exception_or_log(custom_exc)
                 traceback.print_exc()
+                # Track failed bytecode comparison if it was a BinVerifierError
+                if enable_binary_comparison and isinstance(
+                    custom_exc, BinVerifierError
+                ):
+                    bytecode_stats.append(
+                        {
+                            "contract_address": contract_address,
+                            "contract_name": contract_name,
+                            "match": False,
+                        }
+                    )
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt by user")
 
@@ -349,8 +471,20 @@ def process_config(
         if enable_binary_comparison:
             hardhat.stop()
 
+    return {
+        "source_stats": source_stats,
+        "bytecode_stats": bytecode_stats,
+        "config_path": path,
+    }
 
-def parse_arguments():
+
+def parse_arguments() -> argparse.Namespace:
+    """
+    Parse command-line arguments.
+
+    Returns:
+        Parsed arguments
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--version", "-V", action="store_true", help="Display version information"
@@ -381,9 +515,9 @@ def parse_arguments():
         action="store_true",
     )
     parser.add_argument(
-        "--enable-binary-comparison",
-        "-B",
-        help="Enable binary bytecode comparison",
+        "--skip-binary-comparison",
+        "-S",
+        help="Skip binary bytecode comparison (enabled by default)",
         action="store_true",
     )
     parser.add_argument(
@@ -398,59 +532,234 @@ def parse_arguments():
         help="Cache files retrieved from GitHub to avoid re-fetching on repeated runs",
         action="store_true",
     )
+    parser.add_argument(
+        "--allow-source-diff",
+        dest="allow_source_diff",
+        action="append",
+        default=[],
+        help="Allow source diffs for a specific contract address (0x...). Can be passed multiple times.",
+    )
+    parser.add_argument(
+        "--allow-bytecode-diff",
+        dest="allow_bytecode_diff",
+        action="append",
+        default=[],
+        help="Allow bytecode diffs for a specific contract address (0x...). Can be passed multiple times.",
+    )
     return parser.parse_args()
 
 
-def main():
-    global g_skip_user_input
+def print_final_summary(
+    all_results: list[dict],
+    enable_source_comparison: bool,
+    enable_binary_comparison: bool,
+) -> None:
+    """
+    Print a final summary of all comparisons performed.
 
+    Args:
+        all_results: List of dictionaries with 'source_stats' and 'bytecode_stats'
+        enable_source_comparison: Whether source comparison was enabled
+        enable_binary_comparison: Whether bytecode comparison was enabled
+    """
+    logger.divider()
+    logger.divider()
+    logger.info("=" * 80)
+    logger.info("FINAL SUMMARY")
+    logger.info("=" * 80)
+
+    if enable_source_comparison:
+        # Aggregate source code statistics
+        total_contracts = 0
+        contracts_with_diffs = []
+        total_files_with_diffs = 0
+
+        for result in all_results:
+            for stat in result["source_stats"]:
+                total_contracts += 1
+                if stat["files_with_diffs"] > 0:
+                    contracts_with_diffs.append(
+                        {
+                            "address": stat["contract_address"],
+                            "name": stat["contract_name"],
+                            "files_with_diffs": stat["files_with_diffs"],
+                            "total_files": stat["files_found"],
+                        }
+                    )
+                    total_files_with_diffs += stat["files_with_diffs"]
+
+        logger.divider()
+        logger.info("SOURCE CODE COMPARISON SUMMARY:")
+        logger.okay(f"Total contracts analyzed: {total_contracts}")
+        logger.okay(
+            f"Contracts with non-zero source diffs: {len(contracts_with_diffs)}"
+        )
+        logger.okay(f"Total files with non-zero diffs: {total_files_with_diffs}")
+
+        if contracts_with_diffs:
+            logger.divider()
+            logger.info("Contracts with source code differences:")
+            for contract in contracts_with_diffs:
+                logger.warn(
+                    f"  • {contract['name']} ({contract['address']}): "
+                    f"{contract['files_with_diffs']} file(s) with diffs out of {contract['total_files']}"
+                )
+
+    if enable_binary_comparison:
+        # Aggregate bytecode statistics
+        total_bytecode_checks = 0
+        bytecode_mismatches = []
+
+        for result in all_results:
+            for stat in result["bytecode_stats"]:
+                total_bytecode_checks += 1
+                if not stat["match"]:
+                    bytecode_mismatches.append(
+                        {
+                            "address": stat["contract_address"],
+                            "name": stat["contract_name"],
+                        }
+                    )
+
+        logger.divider()
+        logger.info("BYTECODE COMPARISON SUMMARY:")
+        logger.okay(f"Total contracts analyzed: {total_bytecode_checks}")
+        logger.okay(
+            f"Contracts with non-zero bytecode diffs: {len(bytecode_mismatches)}"
+        )
+
+        if bytecode_mismatches:
+            logger.divider()
+            logger.info("Contracts with bytecode differences:")
+            for contract in bytecode_mismatches:
+                logger.warn(f"  • {contract['name']} ({contract['address']})")
+
+    logger.divider()
+    logger.info("=" * 80)
+
+
+def main() -> None:
+    """Main entry point for the diffyscan application."""
     args = parse_arguments()
-    g_skip_user_input = args.yes
+    skip_user_input = args.yes
     if args.version:
         print(f"Diffyscan {__version__}")
         return
     logger.info("Welcome to Diffyscan!")
     logger.divider()
+
+    # Binary comparison is enabled by default, unless --skip-binary-comparison is set
+    enable_binary_comparison = not args.skip_binary_comparison
+
+    # Collect all results for final summary
+    all_results = []
+
     if args.path is None:
-        process_config(
+        result = process_config(
             DEFAULT_CONFIG_PATH,
             args.hardhat_path,
             args.support_brownie,
             args.prettify,
-            args.enable_binary_comparison,
+            enable_binary_comparison,
             args.cache_explorer,
             args.cache_github,
+            skip_user_input,
         )
+        all_results.append(result)
     elif os.path.isfile(args.path):
-        process_config(
+        result = process_config(
             args.path,
             args.hardhat_path,
             args.support_brownie,
             args.prettify,
-            args.enable_binary_comparison,
+            enable_binary_comparison,
             args.cache_explorer,
             args.cache_github,
+            skip_user_input,
         )
+        all_results.append(result)
     elif os.path.isdir(args.path):
         for filename in os.listdir(args.path):
             config_path = os.path.join(args.path, filename)
             if os.path.isfile(config_path):
-                process_config(
+                result = process_config(
                     config_path,
                     args.hardhat_path,
                     args.support_brownie,
                     args.prettify,
-                    args.enable_binary_comparison,
+                    enable_binary_comparison,
                     args.cache_explorer,
                     args.cache_github,
+                    skip_user_input,
                 )
+                all_results.append(result)
     else:
-        logger.error(f"Specified config path {args.path} not found")
-        sys.exit(1)
+        error_msg = f"Specified config path {args.path} not found"
+        logger.error(error_msg)
+        raise FileNotFoundError(error_msg)
 
     execution_time = time.time() - START_TIME
 
+    # Determine what comparisons were enabled (check first result)
+    enable_source_comparison = any(len(r["source_stats"]) > 0 for r in all_results)
+
+    # Print final summary
+    print_final_summary(all_results, enable_source_comparison, enable_binary_comparison)
+
+    # Prepare allowlists (lowercased addresses)
+    allowed_source_addrs = set(addr.lower() for addr in (args.allow_source_diff or []))
+    allowed_bytecode_addrs = set(
+        addr.lower() for addr in (args.allow_bytecode_diff or [])
+    )
+
+    # Compute unallowed diffs
+    unallowed_source_diffs = 0
+    if enable_source_comparison:
+        for result in all_results:
+            for stat in result["source_stats"]:
+                if (
+                    stat["files_with_diffs"] > 0
+                    and stat["contract_address"].lower() not in allowed_source_addrs
+                ):
+                    unallowed_source_diffs += 1
+
+    unallowed_bytecode_diffs = 0
+    if enable_binary_comparison:
+        for result in all_results:
+            for stat in result["bytecode_stats"]:
+                if (not stat["match"]) and stat[
+                    "contract_address"
+                ].lower() not in allowed_bytecode_addrs:
+                    unallowed_bytecode_diffs += 1
+
+    # Report allowlisted diffs for visibility
+    if allowed_source_addrs or allowed_bytecode_addrs:
+        logger.divider()
+        if allowed_source_addrs:
+            logger.warn(
+                "Allowed source diffs for addresses",
+                ", ".join(sorted(allowed_source_addrs)),
+            )
+        if allowed_bytecode_addrs:
+            logger.warn(
+                "Allowed bytecode diffs for addresses",
+                ", ".join(sorted(allowed_bytecode_addrs)),
+            )
+
+    # Decide exit code: non-zero if any unallowed diffs exist
+    has_unallowed_diffs = (unallowed_source_diffs > 0) or (unallowed_bytecode_diffs > 0)
+
     logger.okay(f"Done in {round(execution_time, 3)}s ✨" + " " * 100)
+
+    if has_unallowed_diffs:
+        # Explicitly log a final line explaining failure condition
+        logger.error(
+            "Exiting with non-zero code due to unallowed diffs",
+            f"source={unallowed_source_diffs}, bytecode={unallowed_bytecode_diffs}",
+        )
+        sys.exit(1)
+    else:
+        sys.exit(0)
 
 
 def is_standard_json_contract(source_files: dict) -> bool:

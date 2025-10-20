@@ -163,21 +163,23 @@ def encode_tuple(components_abi: list, values: list) -> str:
     # Now calculate the static size (each static part is 32 bytes)
     static_size = 32 * len(static_parts)
     dynamic_offset = 0
+    dynamic_parts_for_offset_calc = dynamic_parts.copy()
+
     # Replace None placeholders with offsets (relative to the beginning of the dynamic section)
     for i in range(len(static_parts)):
         if static_parts[i] is None:
             # The offset is computed as static_size + current dynamic_offset
             static_parts[i] = to_hex_with_alignment(static_size + dynamic_offset)
             # Assume each dynamic part is already 32-byte aligned.
-            part_length = len(dynamic_parts.pop(0)) // 2
-            # Round up to the next multiple of 32 bytes:
-            padded_length = ((part_length + 31) // 32) * 32
-            dynamic_offset += padded_length
+            if dynamic_parts_for_offset_calc:
+                part_length = len(dynamic_parts_for_offset_calc.pop(0)) // 2
+                # Round up to the next multiple of 32 bytes:
+                padded_length = ((part_length + 31) // 32) * 32
+                dynamic_offset += padded_length
 
-    # Concatenate static parts and then (re-)concatenate dynamic parts.
+    # Concatenate static parts and then concatenate dynamic parts.
     encoded_static = "".join(static_parts)
-    # TODO: dynamic parts for this non-nested impl are omitted
-    encoded_dynamic = ""
+    encoded_dynamic = "".join(dynamic_parts)
 
     return encoded_static + encoded_dynamic
 
@@ -264,7 +266,9 @@ def encode_array(element_type: str, elements: list) -> str:
     return length_hex + elements_hex
 
 
-def encode_constructor_arguments(constructor_abi: list, constructor_config_args: list):
+def encode_constructor_arguments(
+    constructor_abi: list, constructor_config_args: list
+) -> str:
     arg_length = len(constructor_abi)
 
     constructor_calldata = ""

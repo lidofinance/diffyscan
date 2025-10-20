@@ -18,12 +18,14 @@ from .custom_exceptions import ExplorerError
 CACHE_DIR = os.path.join(os.getcwd(), ".diffyscan_cache")
 
 
-def _errorNoSourceCodeAndExit(address):
-    logger.error("source code is not verified or an EOA address", address)
-    sys.exit(1)
+def _error_no_source_code_and_exit(address: str) -> None:
+    """Report that source code is not available and raise an exception."""
+    error_msg = f"Source code is not verified or an EOA address: {address}"
+    logger.error(error_msg)
+    raise ExplorerError(error_msg)
 
 
-def _get_cache_key(contract_address, chain_id):
+def _get_cache_key(contract_address: str, chain_id: int | None) -> str:
     """
     Generate a unique cache key from contract address and chain ID.
 
@@ -44,12 +46,12 @@ def _get_cache_key(contract_address, chain_id):
     return f"{chain_id_str}_{normalized_address}"
 
 
-def _get_cache_path(cache_key):
+def _get_cache_path(cache_key: str) -> str:
     """Get the file path for a cache key."""
     return os.path.join(CACHE_DIR, f"{cache_key}.json")
 
 
-def _load_from_cache(contract_address, chain_id):
+def _load_from_cache(contract_address: str, chain_id: int | None) -> dict | None:
     """
     Load contract data from cache if available.
 
@@ -74,7 +76,9 @@ def _load_from_cache(contract_address, chain_id):
     return None
 
 
-def _save_to_cache(contract_address, chain_id, contract_data):
+def _save_to_cache(
+    contract_address: str, chain_id: int | None, contract_data: dict
+) -> None:
     """
     Save contract data to cache.
 
@@ -97,7 +101,12 @@ def _save_to_cache(contract_address, chain_id, contract_data):
         logger.warn(f"Failed to save to cache: {e}")
 
 
-def _get_contract_from_etherscan(token, etherscan_hostname, contract, chain_id=None):
+def _get_contract_from_etherscan(
+    token: str | None,
+    etherscan_hostname: str,
+    contract: str,
+    chain_id: int | None = None,
+) -> dict:
     if chain_id is None:
         etherscan_link = f"https://{etherscan_hostname}/api?module=contract&action=getsourcecode&address={contract}"
     else:
@@ -112,7 +121,7 @@ def _get_contract_from_etherscan(token, etherscan_hostname, contract, chain_id=N
 
     result = response["result"][0]
     if "ContractName" not in result:
-        _errorNoSourceCodeAndExit(contract)
+        _error_no_source_code_and_exit(contract)
 
     solc_input = result["SourceCode"]
     contract = {
@@ -147,7 +156,7 @@ def _get_contract_from_etherscan(token, etherscan_hostname, contract, chain_id=N
     return contract
 
 
-def _get_contract_from_zksync(zksync_explorer_hostname, contract):
+def _get_contract_from_zksync(zksync_explorer_hostname: str, contract: str) -> dict:
     zksync_explorer_link = (
         f"https://{zksync_explorer_hostname}/contract_verification/info/{contract}"
     )
@@ -155,13 +164,13 @@ def _get_contract_from_zksync(zksync_explorer_hostname, contract):
     response = fetch(zksync_explorer_link).json()
 
     if not response.get("verifiedAt"):
-        logger.error("Status", response.status_code)
-        logger.error("Response", response.text)
-        sys.exit(1)
+        error_msg = f"Contract not verified. Status: {response.get('status_code')}"
+        logger.error(error_msg)
+        raise ExplorerError(error_msg)
 
     data = response["request"]
     if "contractName" not in data:
-        _errorNoSourceCodeAndExit(contract)
+        _error_no_source_code_and_exit(contract)
 
     contract = {
         "name": data["ContractName"],
@@ -171,32 +180,54 @@ def _get_contract_from_zksync(zksync_explorer_hostname, contract):
     return contract
 
 
-def _get_contract_from_mantle(mantle_explorer_hostname, contract):
+def _get_contract_from_mantle(mantle_explorer_hostname: str, contract: str) -> dict:
     etherscan_link = f"https://{mantle_explorer_hostname}/api?module=contract&action=getsourcecode&address={contract}"
     response = fetch(etherscan_link).json()
 
     data = response["result"][0]
     if "ContractName" not in data:
-        _errorNoSourceCodeAndExit(contract)
+        _error_no_source_code_and_exit(contract)
 
-    source_files = [(data["FileName"], {"content": data["SourceCode"]})]
+    # Build source files dictionary from the primary file and additional sources
+    source_files = {data["FileName"]: {"content": data["SourceCode"]}}
     for entry in data.get("AdditionalSources", []):
-        source_files.append((entry["Filename"], {"content": entry["SourceCode"]}))
+        source_files[entry["Filename"]] = {"content": entry["SourceCode"]}
 
-    contract = {
+    result = {
         "name": data["ContractName"],
-        "sources": json.loads(data["sourceCode"]["sources"]),
+        "solcInput": {
+            "language": "Solidity",
+            "sources": source_files,
+            "settings": {
+                "optimizer": {
+                    "enabled": data.get("OptimizationUsed", "0") == "1",
+                    "runs": int(data.get("Runs", "200")),
+                },
+                "outputSelection": {
+                    "*": {
+                        "*": [
+                            "abi",
+                            "evm.bytecode",
+                            "evm.deployedBytecode",
+                            "evm.methodIdentifiers",
+                            "metadata",
+                        ],
+                        "": ["ast"],
+                    }
+                },
+            },
+        },
         "compiler": data["CompilerVersion"],
     }
-    return contract
+    return result
 
 
-def _get_contract_from_blockscout(explorer_hostname, contract):
+def _get_contract_from_blockscout(explorer_hostname: str, contract: str) -> dict:
     explorer_link = f"https://{explorer_hostname}/api/v2/smart-contracts/{contract}"
     response = fetch(explorer_link).json()
 
     if "name" not in response:
-        _errorNoSourceCodeAndExit(contract)
+        _error_no_source_code_and_exit(contract)
 
     source_files = {response["file_path"]: {"content": response["source_code"]}}
 
@@ -232,57 +263,83 @@ def _get_contract_from_blockscout(explorer_hostname, contract):
     return contract
 
 
+def _get_explorer_fetcher(explorer_hostname: str) -> tuple:
+    """
+    Determine which fetcher function to use based on the explorer hostname.
+
+    Returns a tuple of (fetcher_function, requires_token)
+    """
+    if explorer_hostname.startswith("zksync"):
+        return _get_contract_from_zksync, False
+    elif explorer_hostname.endswith("mantle.xyz"):
+        return _get_contract_from_mantle, False
+    elif explorer_hostname.endswith("lineascan.build"):
+        return (
+            lambda hostname, address, token=None, chain_id=None: _get_contract_from_etherscan(
+                None, hostname, address, chain_id
+            ),
+            False,
+        )
+    elif any(
+        explorer_hostname.endswith(domain)
+        for domain in ["mode.network", "blockscout.com", "swellnetwork.io", "lisk.com"]
+    ):
+        return _get_contract_from_blockscout, False
+    else:
+        # Default to Etherscan-compatible
+        return _get_contract_from_etherscan, True
+
+
+def _validate_contract_name(
+    contract_address: str,
+    expected_name: str,
+    actual_name: str,
+    source: str = "explorer",
+) -> None:
+    """Validate that the contract name from the source matches the expected name."""
+    if actual_name != expected_name:
+        raise ExplorerError(
+            f"Contract name in config does not match with {source} {contract_address}: "
+            f"{expected_name} != {actual_name}"
+        )
+
+
 def get_contract_from_explorer(
-    token,
-    explorer_hostname,
-    contract_address,
-    contract_name_from_config,
-    chain_id=None,
-    use_cache=False,
-):
+    token: str | None,
+    explorer_hostname: str,
+    contract_address: str,
+    contract_name_from_config: str,
+    chain_id: int | None = None,
+    use_cache: bool = False,
+) -> dict:
     # Try to load from cache if enabled
     if use_cache:
         cached_result = _load_from_cache(contract_address, chain_id)
         if cached_result is not None:
-            # Verify the cached contract name matches config
-            contract_name_from_cache = cached_result["name"]
-            if contract_name_from_cache != contract_name_from_config:
-                raise ExplorerError(
-                    f"Contract name in config does not match with cached data {contract_address}: \
-                      {contract_name_from_config} != {contract_name_from_cache}",
-                )
+            _validate_contract_name(
+                contract_address,
+                contract_name_from_config,
+                cached_result["name"],
+                "cached data",
+            )
             return cached_result
         else:
             logger.warn(f"No cached explorer contract found for {contract_address}")
 
     # Fetch from explorer if not cached
-    result = {}
-    if explorer_hostname.startswith("zksync"):
-        result = _get_contract_from_zksync(explorer_hostname, contract_address)
-    elif explorer_hostname.endswith("mantle.xyz"):
-        result = _get_contract_from_mantle(explorer_hostname, contract_address)
-    elif explorer_hostname.endswith("lineascan.build"):
-        result = _get_contract_from_etherscan(
-            None, explorer_hostname, contract_address, chain_id
-        )
-    elif (
-        explorer_hostname.endswith("mode.network")
-        or explorer_hostname.endswith("blockscout.com")
-        or explorer_hostname.endswith("swellnetwork.io")
-        or explorer_hostname.endswith("lisk.com")
-    ):
-        result = _get_contract_from_blockscout(explorer_hostname, contract_address)
-    else:
-        result = _get_contract_from_etherscan(
-            token, explorer_hostname, contract_address, chain_id
-        )
+    fetcher, requires_token = _get_explorer_fetcher(explorer_hostname)
 
-    contract_name_from_etherscan = result["name"]
-    if contract_name_from_etherscan != contract_name_from_config:
-        raise ExplorerError(
-            f"Contract name in config does not match with Blockchain explorer {contract_address}: \
-              {contract_name_from_config} != {contract_name_from_etherscan}",
-        )
+    if requires_token:
+        result = fetcher(token, explorer_hostname, contract_address, chain_id)
+    else:
+        result = fetcher(explorer_hostname, contract_address)
+
+    _validate_contract_name(
+        contract_address,
+        contract_name_from_config,
+        result["name"],
+        "blockchain explorer",
+    )
 
     # Save to cache if enabled
     if use_cache:
@@ -291,7 +348,9 @@ def get_contract_from_explorer(
     return result
 
 
-def compile_contract_from_explorer(contract_code, libraries=None):
+def compile_contract_from_explorer(
+    contract_code: dict, libraries: dict | None = None
+) -> dict:
     required_platform = get_solc_native_platform_from_os()
     build_name = contract_code["compiler"][1:]
     build_info = get_compiler_info(required_platform, build_name)
@@ -326,7 +385,9 @@ def compile_contract_from_explorer(contract_code, libraries=None):
     return compiled_contract
 
 
-def parse_compiled_contract(target_compiled_contract):
+def parse_compiled_contract(
+    target_compiled_contract: dict,
+) -> tuple[str, str, dict[int, int]]:
     contract_creation_code_without_calldata = (
         "0x" + target_compiled_contract["evm"]["bytecode"]["object"]
     )
@@ -345,19 +406,29 @@ def parse_compiled_contract(target_compiled_contract):
     return contract_creation_code_without_calldata, deployed_bytecode, immutables
 
 
-def get_explorer_hostname(config):
-    explorer_hostname = None
-    if "explorer_hostname" in config:
-        explorer_hostname = config["explorer_hostname"]
-    else:
-        logger.warn(
-            'Failed to find explorer hostname in the config ("explorer_hostname")'
-        )
-    return explorer_hostname
+def get_config_value(config: dict, key: str, warn_if_missing: bool = True):
+    """
+    Get a value from config with optional warning if missing.
+
+    Args:
+        config: Configuration dictionary
+        key: Key to look up
+        warn_if_missing: Whether to warn if the key is not found
+
+    Returns:
+        The config value or None if not found
+    """
+    value = config.get(key)
+    if value is None and warn_if_missing:
+        logger.warn(f'Failed to find "{key}" in the config')
+    return value
 
 
-def get_explorer_chain_id(config):
-    chain_id = None
-    if "explorer_chain_id" in config:
-        chain_id = config["explorer_chain_id"]
-    return chain_id
+def get_explorer_hostname(config: dict) -> str | None:
+    """Get explorer hostname from config."""
+    return get_config_value(config, "explorer_hostname", warn_if_missing=True)
+
+
+def get_explorer_chain_id(config: dict) -> int | None:
+    """Get explorer chain ID from config."""
+    return get_config_value(config, "explorer_chain_id", warn_if_missing=False)

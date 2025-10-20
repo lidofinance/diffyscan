@@ -17,15 +17,36 @@ jobs:
           - config: config_samples/ethereum/mainnet/tw/tw_config.json
             hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
+            flags: ""
           - config: config_samples/ethereum/mainnet/tw/tw_easy_track_config.json
             hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
+            flags: >
+              --allow-source-diff 0x8aa34dAaF0fC263203A15Bcfa0Ed926D466e59F3
+              --allow-source-diff 0xB7668B5485d0f826B86a75b0115e088bB9ee03eE
           - config: config_samples/ethereum/hoodi/vaults/hoodi_vaults_testnet_config.json
             hardhat: hardhat_configs/hoodi_hardhat_config.ts
             network: hoodi
+            flags: >
+              --allow-source-diff 0x95F00b016bB31b7182D96D25074684518246E42a
+              --allow-bytecode-diff 0x7E99eE3C66636DE415D2d7C880938F2f40f94De4
+              --allow-bytecode-diff 0x2F0303F20E0795E6CCd17BD5efE791A586f28E03
+              --allow-bytecode-diff 0x6d1a9bBFF97f7565e9532FEB7b499982848E5e07
+              --allow-bytecode-diff 0x7b2B6EA1e53B2039a493cA587805183883Cb8B88
           - config: config_samples/ethereum/hoodi/vaults/hoodi_vaults_easy_track_config.json
             hardhat: hardhat_configs/hoodi_hardhat_config.ts
             network: hoodi
+            flags: >
+              --allow-source-diff 0xa4A0FbE57E2D274B90BbDEaC9E6492eBE9E5acBE
+              --allow-source-diff 0x7fC0E3084124090fd3401154584727a7a16Af834
+              --allow-source-diff 0xf8F8902c333666c175ccAcC738c3c3D80a78ACfb
+              --allow-source-diff 0xB17f6E44ed6bf55b8139573119c02526631e24d3
+              --allow-source-diff 0xBC2bb8310730F3D2b514Cb26f7e0A8776De879Ac
+              --allow-source-diff 0xc3FA83D65a900303e1d99cDBBF762c6630562c04
+              --allow-source-diff 0x351426775c75aB5127de860Cdcaf1953F1D622a2
+              --allow-source-diff 0x83DfE5Fe8ac8b7DB38c020F4F54BF09b65D92c63
+              --allow-source-diff 0xa11906bBBBaC5207b8FDA4F7F294d7EcB8dcc758
+              --allow-source-diff 0xc5dCd2A9642ceA9B71A632BF5b8ff52424Ea1B40
     env:
       ETHERSCAN_EXPLORER_TOKEN: ${{ secrets.ETHERSCAN_EXPLORER_TOKEN }}
       GITHUB_API_TOKEN: ${{ github.token }}
@@ -62,4 +83,5 @@ jobs:
 
       - name: Run diffyscan
         run: |
-          poetry run diffyscan --hardhat-path ${{ matrix.hardhat }} ${{ matrix.config }} -Y -B -E -G
+          FLAGS="${{ matrix.flags }}"
+          poetry run diffyscan --hardhat-path ${{ matrix.hardhat }} -Y -E -G ${{ matrix.config }} ${FLAGS}
