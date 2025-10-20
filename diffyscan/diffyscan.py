@@ -532,6 +532,20 @@ def parse_arguments() -> argparse.Namespace:
         help="Cache files retrieved from GitHub to avoid re-fetching on repeated runs",
         action="store_true",
     )
+    parser.add_argument(
+        "--allow-source-diff",
+        dest="allow_source_diff",
+        action="append",
+        default=[],
+        help="Allow source diffs for a specific contract address (0x...). Can be passed multiple times.",
+    )
+    parser.add_argument(
+        "--allow-bytecode-diff",
+        dest="allow_bytecode_diff",
+        action="append",
+        default=[],
+        help="Allow bytecode diffs for a specific contract address (0x...). Can be passed multiple times.",
+    )
     return parser.parse_args()
 
 
@@ -692,7 +706,60 @@ def main() -> None:
     # Print final summary
     print_final_summary(all_results, enable_source_comparison, enable_binary_comparison)
 
+    # Prepare allowlists (lowercased addresses)
+    allowed_source_addrs = set(addr.lower() for addr in (args.allow_source_diff or []))
+    allowed_bytecode_addrs = set(
+        addr.lower() for addr in (args.allow_bytecode_diff or [])
+    )
+
+    # Compute unallowed diffs
+    unallowed_source_diffs = 0
+    if enable_source_comparison:
+        for result in all_results:
+            for stat in result["source_stats"]:
+                if (
+                    stat["files_with_diffs"] > 0
+                    and stat["contract_address"].lower() not in allowed_source_addrs
+                ):
+                    unallowed_source_diffs += 1
+
+    unallowed_bytecode_diffs = 0
+    if enable_binary_comparison:
+        for result in all_results:
+            for stat in result["bytecode_stats"]:
+                if (not stat["match"]) and stat[
+                    "contract_address"
+                ].lower() not in allowed_bytecode_addrs:
+                    unallowed_bytecode_diffs += 1
+
+    # Report allowlisted diffs for visibility
+    if allowed_source_addrs or allowed_bytecode_addrs:
+        logger.divider()
+        if allowed_source_addrs:
+            logger.warn(
+                "Allowed source diffs for addresses",
+                ", ".join(sorted(allowed_source_addrs)),
+            )
+        if allowed_bytecode_addrs:
+            logger.warn(
+                "Allowed bytecode diffs for addresses",
+                ", ".join(sorted(allowed_bytecode_addrs)),
+            )
+
+    # Decide exit code: non-zero if any unallowed diffs exist
+    has_unallowed_diffs = (unallowed_source_diffs > 0) or (unallowed_bytecode_diffs > 0)
+
     logger.okay(f"Done in {round(execution_time, 3)}s ✨" + " " * 100)
+
+    if has_unallowed_diffs:
+        # Explicitly log a final line explaining failure condition
+        logger.error(
+            "Exiting with non-zero code due to unallowed diffs",
+            f"source={unallowed_source_diffs}, bytecode={unallowed_bytecode_diffs}",
+        )
+        sys.exit(1)
+    else:
+        sys.exit(0)
 
 
 def is_standard_json_contract(source_files: dict) -> bool:
