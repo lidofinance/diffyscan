@@ -51,10 +51,10 @@ Set remote RPC URL to validate contract bytecode at remote rpc node,
 export REMOTE_RPC_URL =<remote-rpc-url>
 ```
 
-Set local RPC URL to check immutables against the local deployment and provided constructor arguments,
+Set local RPC URL to check immutables against the local deployment and provided constructor arguments. If not set, it defaults to `http://127.0.0.1:7545`.
 
 ```bash
-export LOCAL_RPC_URL =<local-rpc-url> (example `http://127.0.0.1:7545`)
+export LOCAL_RPC_URL=<local-rpc-url>
 ```
 
 Start script with one of the examples provided (or entire folder of configs)
