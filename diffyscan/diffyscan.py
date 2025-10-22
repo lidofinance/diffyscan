@@ -11,6 +11,7 @@ from .utils.constants import (
     DEFAULT_CONFIG_PATH,
     DEFAULT_HARDHAT_CONFIG_PATH,
     START_TIME,
+    DEFAULT_LOCAL_RPC_URL,
 )
 from .utils.explorer import (
     get_contract_from_explorer,
@@ -334,7 +335,11 @@ def _setup_binary_comparison(config: dict) -> tuple[str, str]:
     if "bytecode_comparison" not in config:
         raise ValueError('Failed to find "bytecode_comparison" section in config')
 
-    local_rpc_url = load_env("LOCAL_RPC_URL", masked=False, required=True)
+    # LOCAL_RPC_URL may be empty; default to localhost Ganache/Hardhat-compatible URL
+    local_rpc_url = load_env("LOCAL_RPC_URL", masked=False, required=False)
+    if not local_rpc_url:
+        local_rpc_url = DEFAULT_LOCAL_RPC_URL
+        logger.okay("LOCAL_RPC_URL (default)", local_rpc_url)
     remote_rpc_url = load_env("REMOTE_RPC_URL", masked=True, required=True)
 
     ExceptionHandler.initialize(config.get("fail_on_bytecode_comparison_error", True))
