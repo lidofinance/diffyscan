@@ -16,7 +16,7 @@ exclude = ["config_samples"]
 diffyscan = "diffyscan.diffyscan:main"
 
 [tool.poetry.dependencies]
-python = ">=3.10,<4"
+python = ">=3.11,<4"
 requests = "^2.32.5"
 termtables = "^0.2.4"
 

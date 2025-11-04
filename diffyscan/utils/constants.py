@@ -8,7 +8,7 @@ START_TIME_INT = int(START_TIME)
 DIFFS_DIR = f"{DIGEST_DIR}/{START_TIME_INT}/diffs"
 LOGS_PATH = f"{DIGEST_DIR}/{START_TIME_INT}/logs.txt"
 DEFAULT_CONFIG_PATH = "config.json"
-DEFAULT_HARDHAT_CONFIG_PATH = "hardhat_config.js"
+DEFAULT_HARDHAT_CONFIG_PATH = "hardhat_config.ts"
 DEFAULT_LOCAL_RPC_URL = "http://127.0.0.1:7545"
 
 SOLC_DIR = os.path.join(tempfile.gettempdir(), "solc_builds")
