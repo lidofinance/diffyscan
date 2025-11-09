@@ -54,7 +54,7 @@
   "explorer_chain_id": 560048,
   "github_repo": {
     "url": "https://github.com/lidofinance/core",
-    "commit": "33006a9c68d880a608b7b537ffde9c7abae0d3c6",
+    "commit": "6c7ee2c1d39f008fa7d2d7de5c983dcfe8d7718c",
     "relative_root": ""
   },
   "dependencies": {

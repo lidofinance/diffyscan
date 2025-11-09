@@ -16,7 +16,7 @@
   "explorer_chain_id": 560048,
   "github_repo": {
     "url": "https://github.com/lidofinance/easy-track",
-    "commit": "a7862b369e6a0d2ea55089cc7b6b9f0645ce0cea",
+    "commit": "0dc9ba2befba405a8da37dc892a21dc1ac9498c6",
     "relative_root": ""
   },
   "dependencies": {},
