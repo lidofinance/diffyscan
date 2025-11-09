@@ -29,6 +29,7 @@
     "0x1d10DB6a66EF8D2A6f6D36Ad4dc7092Ef7C12569": "VaultFactory",
     "0xb3e6a8B6A752d3bb905A1B3Ef12bbdeE77E8160e": "UpgradeableBeacon",
     "0xE96BE4FB723e68e7b96244b7399C64a58bcD0062": "StakingVault",
+    "0x3e144aEd003b5AE6953A99B78dD34154CF3F8c76": "PinnedBeaconProxy",
     "0x7D25D43D5a69ae0521440211C655C11840aF0FD6": "Dashboard",
     "0xbf95Cd394cC03cD03fEA62A435ac347314877f1d": "ValidatorConsolidationRequests",
     "0xcb883B1bD0a41512b42D2dB267F2A2cd919FB216": "OssifiableProxy",
@@ -390,6 +391,10 @@
           "0x9CAaCCc62c66d817CC59c44780D1b722359795bF",
           "0x78780e70Eae33e2935814a327f7dB6c01136cc62"
         ]
+      ],
+      "0x3e144aEd003b5AE6953A99B78dD34154CF3F8c76": [
+        "0xb3e6a8B6A752d3bb905A1B3Ef12bbdeE77E8160e",
+        "0x"
       ]
     }
   }
