@@ -28,6 +28,8 @@ jobs:
             hardhat: hardhat_configs/hoodi_hardhat_config.ts
             network: hoodi
             flags: >
+              --allow-source-diff 0x1d10DB6a66EF8D2A6f6D36Ad4dc7092Ef7C12569
+              --allow-source-diff 0x7D25D43D5a69ae0521440211C655C11840aF0FD6
               --allow-source-diff 0xbf95Cd394cC03cD03fEA62A435ac347314877f1d
               --allow-source-diff 0x95F00b016bB31b7182D96D25074684518246E42a
               --allow-source-diff 0x933b84D2C01B04C2f53cD2FB1b7055241E122C83
