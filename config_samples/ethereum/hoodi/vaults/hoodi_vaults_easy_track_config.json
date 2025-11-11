@@ -1,9 +1,9 @@
 {
   "contracts": {
-    "0xF5ce5E9348EB58AfA29aD933ae3A0DCb74b68d1b": "RegisterGroupsInOperatorGrid",
+    "0xfEF8B796Fea42b3C68E342364Adcf88F1d6145a6": "RegisterGroupsInOperatorGrid",
     "0x56Ff87F41a8CF795764E15E496124240Ac17695b": "UpdateGroupsShareLimitInOperatorGrid",
-    "0x6d91c6751DfB46E7E22eC78f5e6FbcEb1BBe6614": "RegisterTiersInOperatorGrid",
-    "0xA76bD0a2ca6E1Be2F7Cf62fa63BddaCb6d6d1287": "AlterTiersInOperatorGrid",
+    "0x4DF806111AC58e93d90E6D2fBE8522a76be6F499": "RegisterTiersInOperatorGrid",
+    "0xF21f98cac0Ba38f02b4d5be1667cc345929E8877": "AlterTiersInOperatorGrid",
     "0xBC2bb8310730F3D2b514Cb26f7e0A8776De879Ac": "VaultsAdapter",
     "0xc3FA83D65a900303e1d99cDBBF762c6630562c04": "SetJailStatusInOperatorGrid",
     "0x351426775c75aB5127de860Cdcaf1953F1D622a2": "UpdateVaultsFeesInOperatorGrid",
@@ -16,7 +16,7 @@
   "explorer_chain_id": 560048,
   "github_repo": {
     "url": "https://github.com/lidofinance/easy-track",
-    "commit": "0dc9ba2befba405a8da37dc892a21dc1ac9498c6",
+    "commit": "cad11be3e59309c0c992dc0b8ecd69043e9431de",
     "relative_root": ""
   },
   "dependencies": {},
@@ -24,7 +24,7 @@
   "bytecode_comparison": {
     "constructor_calldata": {},
     "constructor_args": {
-      "0xF5ce5E9348EB58AfA29aD933ae3A0DCb74b68d1b": [
+      "0xfEF8B796Fea42b3C68E342364Adcf88F1d6145a6": [
         "0xeBe5948787Bb3a565F67ccD93cb85A91960c472a",
         "0xe2EF9536DAAAEBFf5b1c130957AB3E80056b06D8",
         500000000000000000000000
@@ -34,11 +34,11 @@
         "0xe2EF9536DAAAEBFf5b1c130957AB3E80056b06D8",
         500000000000000000000000
       ],
-      "0x6d91c6751DfB46E7E22eC78f5e6FbcEb1BBe6614": [
+      "0x4DF806111AC58e93d90E6D2fBE8522a76be6F499": [
         "0xeBe5948787Bb3a565F67ccD93cb85A91960c472a",
         "0xe2EF9536DAAAEBFf5b1c130957AB3E80056b06D8"
       ],
-      "0xA76bD0a2ca6E1Be2F7Cf62fa63BddaCb6d6d1287": [
+      "0xF21f98cac0Ba38f02b4d5be1667cc345929E8877": [
         "0xeBe5948787Bb3a565F67ccD93cb85A91960c472a",
         "0xe2EF9536DAAAEBFf5b1c130957AB3E80056b06D8",
         500000000000000000000000
