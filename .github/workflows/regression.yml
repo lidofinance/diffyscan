@@ -14,6 +14,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - config: config_samples/ethereum/mainnet/vaults/vaults_config.json
+            hardhat: hardhat_configs/mainnet_hardhat_config.ts
+            network: mainnet
+            flags: ""
+          - config: config_samples/ethereum/mainnet/vaults/vaults_easy_track_config.json
+            hardhat: hardhat_configs/mainnet_hardhat_config.ts
+            network: mainnet
+            flags: ""
           - config: config_samples/ethereum/mainnet/tw/tw_config.json
             hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
