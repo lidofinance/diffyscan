@@ -282,7 +282,13 @@ def _get_explorer_fetcher(explorer_hostname: str) -> tuple:
         )
     elif any(
         explorer_hostname.endswith(domain)
-        for domain in ["mode.network", "blockscout.com", "swellnetwork.io", "lisk.com"]
+        for domain in [
+            "mode.network",
+            "blockscout.com",
+            "swellnetwork.io",
+            "lisk.com",
+            "inkonchain.com",
+        ]
     ):
         return _get_contract_from_blockscout, False
     else:
