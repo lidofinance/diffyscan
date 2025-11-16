@@ -288,6 +288,7 @@ def _get_explorer_fetcher(explorer_hostname: str) -> tuple:
             "swellnetwork.io",
             "lisk.com",
             "inkonchain.com",
+            "routescan.io",
         ]
     ):
         return _get_contract_from_blockscout, False
