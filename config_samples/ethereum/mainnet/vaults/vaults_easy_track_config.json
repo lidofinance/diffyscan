@@ -1,0 +1,96 @@
+{
+  "contracts": {
+    "0x194A46DA1947E98c9D79af13E06Cfbee0D8610cC": "RegisterGroupsInOperatorGrid",
+    "0xE73842AEbEC99Dacf2aAEec61409fD01A033f478": "RegisterGroupsInOperatorGrid",
+    "0x8Bdc726a3147D8187820391D7c6F9F942606aEe6": "UpdateGroupsShareLimitInOperatorGrid",
+    "0xf23559De8ab37fF7a154384B0822dA867Cfa7Eac": "UpdateGroupsShareLimitInOperatorGrid",
+    "0xa29173C7BCf39dA48D5E404146A652d7464aee14": "AlterTiersInOperatorGrid",
+    "0x73f80240ad9363d5d3C5C3626953C351cA36Bfe9": "AlterTiersInOperatorGrid",
+    "0x5292A1284e4695B95C0840CF8ea25A818751C17F": "RegisterTiersInOperatorGrid",
+    "0xe2DE6d2DefF15588a71849c0429101F8ca9FB14D": "VaultsAdapter",
+    "0x93F1DEE4473Ee9F42c8257C201e33a6Da30E5d67": "SetJailStatusInOperatorGrid",
+    "0x5C3bDFa3E7f312d8cf72F56F2b797b026f6B471c": "UpdateVaultsFeesInOperatorGrid",
+    "0x6C968cD89CA358fbAf57B18e77a8973Fa869a6aA": "ForceValidatorExitsInVaultHub",
+    "0x1dF50522A1D868C12bF71747Bb6F24A18Fe6d32C": "SocializeBadDebtInVaultHub",
+    "0x4E5Cc771c7b77f1417fa6BA9262d83C6CCc1e969": "SetLiabilitySharesTargetInVaultHub"
+  },
+  "explorer_hostname": "api.etherscan.io",
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+  "explorer_chain_id": 1,
+  "github_repo": {
+    "url": "https://github.com/lidofinance/easy-track",
+    "commit": "c64468ca5126237c33e17b71d9307a6aea0ee5cc",
+    "relative_root": ""
+  },
+  "dependencies": {},
+  "fail_on_bytecode_comparison_error": true,
+  "bytecode_comparison": {
+    "constructor_calldata": {},
+    "constructor_args": {
+      "0x194A46DA1947E98c9D79af13E06Cfbee0D8610cC": [
+        "0x18A1065c81b0Cc356F1b1C843ddd5E14e4AefffF",
+        "0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb",
+        50000000000000000000000
+      ],
+      "0xE73842AEbEC99Dacf2aAEec61409fD01A033f478": [
+        "0x18A1065c81b0Cc356F1b1C843ddd5E14e4AefffF",
+        "0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb",
+        1000000000000000000000000
+      ],
+      "0x8Bdc726a3147D8187820391D7c6F9F942606aEe6": [
+        "0x18A1065c81b0Cc356F1b1C843ddd5E14e4AefffF",
+        "0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb",
+        50000000000000000000000
+      ],
+      "0xf23559De8ab37fF7a154384B0822dA867Cfa7Eac": [
+        "0x18A1065c81b0Cc356F1b1C843ddd5E14e4AefffF",
+        "0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb",
+        1000000000000000000000000
+      ],
+      "0xa29173C7BCf39dA48D5E404146A652d7464aee14": [
+        "0x18A1065c81b0Cc356F1b1C843ddd5E14e4AefffF",
+        "0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb",
+        0
+      ],
+      "0x73f80240ad9363d5d3C5C3626953C351cA36Bfe9": [
+        "0x18A1065c81b0Cc356F1b1C843ddd5E14e4AefffF",
+        "0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb",
+        1000000000000000000000000
+      ],
+      "0x5292A1284e4695B95C0840CF8ea25A818751C17F": [
+        "0x18A1065c81b0Cc356F1b1C843ddd5E14e4AefffF",
+        "0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb"
+      ],
+      "0xe2DE6d2DefF15588a71849c0429101F8ca9FB14D": [
+        "0x18A1065c81b0Cc356F1b1C843ddd5E14e4AefffF",
+        "0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb",
+        "0xFE5986E06210aC1eCC1aDCafc0cc7f8D63B3F977",
+        100000000000000000
+      ],
+      "0x93F1DEE4473Ee9F42c8257C201e33a6Da30E5d67": [
+        "0x18A1065c81b0Cc356F1b1C843ddd5E14e4AefffF",
+        "0xe2DE6d2DefF15588a71849c0429101F8ca9FB14D"
+      ],
+      "0x5C3bDFa3E7f312d8cf72F56F2b797b026f6B471c": [
+        "0x18A1065c81b0Cc356F1b1C843ddd5E14e4AefffF",
+        "0xe2DE6d2DefF15588a71849c0429101F8ca9FB14D",
+        "0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb",
+        1000,
+        0,
+        100
+      ],
+      "0x6C968cD89CA358fbAf57B18e77a8973Fa869a6aA": [
+        "0x18A1065c81b0Cc356F1b1C843ddd5E14e4AefffF",
+        "0xe2DE6d2DefF15588a71849c0429101F8ca9FB14D"
+      ],
+      "0x1dF50522A1D868C12bF71747Bb6F24A18Fe6d32C": [
+        "0x18A1065c81b0Cc356F1b1C843ddd5E14e4AefffF",
+        "0xe2DE6d2DefF15588a71849c0429101F8ca9FB14D"
+      ],
+      "0x4E5Cc771c7b77f1417fa6BA9262d83C6CCc1e969": [
+        "0x18A1065c81b0Cc356F1b1C843ddd5E14e4AefffF",
+        "0xe2DE6d2DefF15588a71849c0429101F8ca9FB14D"
+      ]
+    }
+  }
+}
