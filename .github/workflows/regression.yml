@@ -18,6 +18,10 @@ jobs:
             hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
             flags: ""
+          - config: config_samples/ethereum/mainnet/vaults/vaults_voting_config.json
+            hardhat: hardhat_configs/mainnet_hardhat_config.ts
+            network: mainnet
+            flags: ""
           - config: config_samples/ethereum/mainnet/vaults/vaults_easy_track_config.json
             hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
