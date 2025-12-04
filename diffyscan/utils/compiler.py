@@ -105,7 +105,7 @@ def compile_contracts(compiler_path: str, input_settings: str) -> dict:
             input=input_settings.encode(),
             capture_output=True,
             check=True,
-            timeout=30,
+            timeout=60,
         )
     except subprocess.CalledProcessError as e:
         raise CompileError(f"Error during compiler subprocess execution: {e}")
