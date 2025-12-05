@@ -1,0 +1,129 @@
+{
+  "contracts": {
+    "0xe19f54e8322214839a87408f084aa14ebefe9e87": "AgreementV2"
+  },
+  "explorer_hostname": "api.etherscan.io",
+  "explorer_chain_id": 1,
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+  "github_repo": {
+    "url": "https://github.com/security-alliance/safe-harbor",
+    "commit": "1e24f5f0b9d435fcd4c0cffecc23e79b9ff48efc",
+    "relative_root": "registry-contracts"
+  },
+  "dependencies": {
+    "lib/openzeppelin-contracts/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "acd4ff74de833399287ed6b31b4debf6b2b35527",
+      "relative_root": "contracts"
+    },
+    "lib/forge-std/src": {
+      "url": "https://github.com/foundry-rs/forge-std",
+      "commit": "77876f8a5b44b770a935621bb331660c90ac928e",
+      "relative_root": "src"
+    }
+  },
+  "fail_on_bytecode_comparison_error": true,
+  "bytecode_comparison": {
+    "constructor_args": {
+      "0xe19f54e8322214839a87408f084aa14ebefe9e87": [
+        [
+          "Lido on Ethereum",
+          "https://bafybeigvd7z4iemq7vrdcczgyu2afm7egxwrggftiplydc3vdrdmgccwvu.ipfs.w3s.link/The_SEAL_Whitehat_Safe_Harbor_Agremeent_V1_01.pdf",
+          [
+            10,
+            2000000,
+            2000000,
+            0,
+            false,
+            "As a condition to eligibility for any bounty under the Safe Harbor program, a Whitehat represents, warrants, and covenants that they:\n\n- are at least 18 or the age of majority in their jurisdiction (whichever is higher) and have full legal capacity;\n- are not (i) a citizen or resident of, located, incorporated, or otherwise established in any jurisdiction that is the subject of comprehensive sanctions or an embargo administered or enforced by the United States, United Kingdom, European Union, or United Nations, or (ii) a person that is, or that is owned or controlled by, or acting on behalf of, any person that is the subject of any sanctions administered or enforced by any of those authorities;\n- are not (and for the prior 12 months have not been) an employee, contractor, or service provider of any Lido Labs or Lido Ecosystem affiliate, nor an immediate family member of such a person, and are not acting on their behalf or receiving any advice from the said persons;\n- The Whitehat further acknowledges that the Lido Labs, acting solely in its diligence-support capacity, may require additional information (including information relating to their identity and jurisdiction) and may provide Lido DAO with all information gathered as a result of this diligence check and an assessment of whether making such payment would violate, or would present an undue risk of violating, any applicable law or regulation (including sanctions, anti–money laundering, or anti–terrorist–financing laws). Lido Labs will not make any payment determinations, which remain exclusively within the authority of Lido DAO. These representations, warranties, and acknowledgements are continuing and are conditions precedent to eligibility for any bounty.\n\nThese representations, warranties, and acknowledgements are continuing and are conditions precedent to eligibility for any bounty."
+          ],
+          [
+            [
+              "eip155:1",
+              "0x2e59A20f205bB85a89C53f1936454680651E618e",
+              [
+                ["0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb", 2],
+                ["0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84", 2],
+                ["0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0", 2],
+                ["0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1", 2],
+                ["0xb9d7934878b5fb9610b3fe8a5e441e8fad7e293f", 2],
+                ["0xE76c52750019b80B43E36DF30bf4060EB73F573a", 2],
+                ["0xf95f069f9ad107938f6ba802a3da87892298610e", 2],
+                ["0xDC00116a0D3E064427dA2600449cfD2566B3037B", 2],
+                ["0xbDb567672c867DB533119C2dcD4FB9d8b44EC82f", 2],
+                ["0x852deD011285fe67063a08005c71a85690503Cee", 2],
+                ["0xD624B08C83bAECF0807Dd2c6880C3154a5F0B288", 2],
+                ["0x0De4Ea0184c2ad0BacA7183356Aea5B8d5Bf5c6e", 2],
+                ["0x7FaDB6358950c5fAA66Cb5EB8eE5147De3df355a", 2],
+                ["0xf1647c86E6D7959f638DD9CE1d90e2F3C9503129", 2],
+                ["0xbf05A929c3D7885a6aeAd833a992dA6E5ac23b09", 2],
+                ["0xb8FFC3Cd6E7Cf5a098A1c92F48009765B24088Dc", 2],
+                ["0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32", 2],
+                ["0x2e59A20f205bB85a89C53f1936454680651E618e", 2],
+                ["0xf73a1260d222f447210581DDf212D915c09a3249", 2],
+                ["0xB9E5CBB9CA5b0d659238807E84D0176930753d86", 2],
+                ["0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c", 2],
+                ["0x9895f0f17cc1d1891b6f18ee0b483b6f221b37bb", 2],
+                ["0x853cc0D5917f49B57B8e9F89e491F5E18919093A", 2],
+                ["0x0cb113890b4d49455dfe06554e2d784598a29c9", 2],
+                ["0x4ee3118e3858e8d7164a634825bfe0f73d99c792", 2],
+                ["0xF5Dc67E54FC96F993CD06073f71ca732C1E654B1", 2],
+                ["0x0D97E876ad14DB2b183CFeEB8aa1A5C788eB1831", 2],
+                ["0x2325b0a607808dE42D918DB07F925FFcCfBb2968", 2],
+                ["0x8B3f33234ABD88493c0Cd28De33D583B70beDe35", 2],
+                ["0xEe06EA501f7d9DC6F4200385A8D910182D155d3e", 2],
+                ["0x6c82877cac5a7a739f16ca0a89c0a328b8764a24", 2],
+                ["0xA6BC802fAa064414AA62117B4a53D27fFfF741F1", 2],
+                ["0x8A854C4E750CDf24f138f34A9061b2f556066912", 2],
+                ["0xCE0425301C85c5Ea2A0873A2dEe44d78E02D2316", 2],
+                ["0x23E0B465633FF5178808F4A75186E2F2F9537021", 2],
+                ["0xC1db28B3301331277e307FDCfF8DE28242A4486E", 2],
+                ["0xa1692Af6FDfdD1030E4E9c4Bc429986FA64CB5EF", 2],
+                ["0x553337946F2FAb8911774b20025fa776B76a7CcE", 2],
+                ["0x165813A31446a98c84E20Dda8C101BB3C8228e1c", 2],
+                ["0x7914b5a1539b97Bd0bbd155757F25FD79A522d24", 2],
+                ["0xf65614d73952Be91ce0aE7Dd9cFf25Ba15bEE2f5", 2],
+                ["0x3D3ba54D54bbFF40F2Dfa2A8e27bD4dE3dab2951", 2],
+                ["0xDBfa0B8A15a503f25224fcA5F84a3853230A715C", 2],
+                ["0xBF048f2111497B6Df5E062811f5fC422804D4baE", 2],
+                ["0x2a30F5aC03187674553024296bed35Aa49749DDa", 2],
+                ["0x55032650b14df07b85bF18A3a3eC8E0Af2e028d5", 2],
+                ["0xaE7B191A31f627b4eB1d4DaC64eaB9976995b433", 2],
+                ["0xcF33a38111d0B1246A3F38a838fb41D626B454f0", 2],
+                ["0xB314D4A76C457c93150d308787939063F4Cc67E0", 2],
+                ["0xdA7dE2ECdDfccC6c3AF10108Db212ACBBf9EA83F", 2],
+                ["0x4d72BFF1BeaC69925F8Bd12526a39BAAb069e5Da", 2],
+                ["0x9D28ad303C90DF524BA960d7a2DAC56DcC31e428", 2],
+                ["0xD99CC66fEC647E68294C6477B40fC7E0F6F618D0", 2],
+                ["0xdC5FE1782B6943f318E05230d688713a560063DC", 2],
+                ["0xE1686C2E90eb41a48356c1cC7FaA17629af3ADB3", 2],
+                ["0x4D4074628678Bd302921c20573EEa1ed38DdF7FB", 2],
+                ["0x71093efF8D8599b5fA340D665Ad60fA7C80688e4", 2],
+                ["0xaa328816027F2D32B9F56d190BC9Fa4A5C07637f", 2],
+                ["0xc72b58aa02E0e98cF8A4a0E9Dce75e763800802C", 2],
+                ["0x06cd61045f958A209a0f8D746e103eCc625f4193", 2],
+                ["0xFdab48c4D627e500207e9AF29c98579d90Ea0ad4", 2],
+                ["0xF0211b7660680B49De1A7E9f25C65660F0a13Fea", 2],
+                ["0xFE5986E06210aC1eCC1aDCafc0cc7f8D63B3F977", 2],
+                ["0x23ED611be0e1a820978875C0122F92260804cdDf", 2],
+                ["0x1d201BE093d847f6446530Efb0E8Fb426d176709", 2],
+                ["0xF4bF42c6D6A0E38825785048124DBAD6c9eaaac3", 2],
+                ["0xC69685E89Cefc327b43B7234AC646451B27c544d", 2],
+                ["0x02Ca7772FF14a9F6c1a08aF385aA96bb1b34175A", 2],
+                ["0x5FbE8cEf9CCc56ad245736D3C5bAf82ad54Ca789", 2],
+                ["0x06A56487494aa080deC7Bf69128EdA9225784553", 2],
+                ["0x294825c2764c7D412dc32d87E2242c4f1D989AF3", 2],
+                ["0xaC4Aae7123248684C405A4b0038C1560EC7fE018", 2],
+                ["0x5DB427080200c235F2Ae8Cd17A7be87921f7AD6c", 2],
+                ["0x881dAd714679A6FeaA636446A0499101375A365c", 2]
+              ]
+            ]
+          ],
+          [["Security Team", "safeharbor@lido.fi"]]
+        ],
+        "0x44921b272A2209a2A687135593815b3154845217",
+        "0xA1E2CD361e17ba10DCfAe3aA33f463DcB53a2Ffd"
+      ]
+    }
+  }
+}
