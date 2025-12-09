@@ -1,7 +1,7 @@
 {
   "contracts": {
     "0xf738A2C7d69694B618dbB547C1c5A152D7958f06": "V3TemporaryAdmin",
-    "0xf2BeCc7aF0AA50DaD54781e06d5ce1A7eAD59AfA": "V3VoteScript",
+    "0xE1F4c16908fCE6935b5Ad38C6e3d58830fe86442": "V3VoteScript",
     "0x34E01ecFebd403370b0879C628f8A5319dDb8507": "V3Template"
   },
   "explorer_hostname": "api.etherscan.io",
@@ -9,7 +9,7 @@
   "explorer_chain_id": 1,
   "github_repo": {
     "url": "https://github.com/lidofinance/core",
-    "commit": "dff61bb1a9279c9138eddb6c9736714bd4bd18d2",
+    "commit": "238af02a8b53cf04d5c7b183d70bed6c8deb41b0",
     "relative_root": ""
   },
   "dependencies": {
@@ -31,7 +31,7 @@
       "0xf738A2C7d69694B618dbB547C1c5A152D7958f06": [
         "0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c"
       ],
-      "0xf2BeCc7aF0AA50DaD54781e06d5ce1A7eAD59AfA": [
+      "0xE1F4c16908fCE6935b5Ad38C6e3d58830fe86442": [
         [
           "0x34E01ecFebd403370b0879C628f8A5319dDb8507",
           "0x2a30F5aC03187674553024296bed35Aa49749DDa",
