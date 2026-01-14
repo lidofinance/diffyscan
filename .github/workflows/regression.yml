@@ -37,12 +37,12 @@ jobs:
               --allow-source-diff 0xa29173C7BCf39dA48D5E404146A652d7464aee14
               --allow-source-diff 0x73f80240ad9363d5d3C5C3626953C351cA36Bfe9
               --allow-source-diff 0x5292A1284e4695B95C0840CF8ea25A818751C17F
-              --allow-source-diff 0xe2DE6d2DefF15588a71849c0429101F8ca9FB14D
-              --allow-source-diff 0x93F1DEE4473Ee9F42c8257C201e33a6Da30E5d67
-              --allow-source-diff 0x5C3bDFa3E7f312d8cf72F56F2b797b026f6B471c
-              --allow-source-diff 0x6C968cD89CA358fbAf57B18e77a8973Fa869a6aA
-              --allow-source-diff 0x1dF50522A1D868C12bF71747Bb6F24A18Fe6d32C
-              --allow-source-diff 0x4E5Cc771c7b77f1417fa6BA9262d83C6CCc1e969
+              --allow-source-diff 0x28F9Ac198C4E0FA6A9Ad2c2f97CB38F1A3120f27
+              --allow-source-diff 0x6a4f33F05E7412A11100353724Bb6a152Cf0D305
+              --allow-source-diff 0xDfA0bc38113B6d53c2881573FD764CEEFf468610
+              --allow-source-diff 0x6F5c0A5a824773E8f8285bC5aA59ea0Aab2A6400
+              --allow-source-diff 0xaf35A63a4114B7481589fDD9FDB3e35Fd65fAed7
+              --allow-source-diff 0x647DeE7bF33e44829e6430F7A08F63b3319694f0
           - config: config_samples/ethereum/mainnet/tw/tw_config.json
             hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
