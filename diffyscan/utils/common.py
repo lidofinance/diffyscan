@@ -62,7 +62,14 @@ def _handle_request_errors(error_class: type[BaseException]):
                 response.raise_for_status()
                 return response
             except requests.exceptions.HTTPError as http_err:
-                raise error_class(f"HTTP error occurred: {http_err}")
+                # Include response body for better debugging
+                response_body = ""
+                if http_err.response is not None:
+                    try:
+                        response_body = f" Response: {http_err.response.text}"
+                    except Exception:
+                        pass
+                raise error_class(f"HTTP error occurred: {http_err}{response_body}")
             except requests.exceptions.ConnectionError as conn_err:
                 raise error_class(f"Connection error occurred: {conn_err}")
             except requests.exceptions.Timeout as timeout_err:
