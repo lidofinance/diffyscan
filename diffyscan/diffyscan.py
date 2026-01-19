@@ -313,10 +313,7 @@ def _validate_github_token() -> str:
     Raises:
         ValueError: If the token is not set
     """
-    github_api_token = os.getenv("GITHUB_API_TOKEN", "")
-    if not github_api_token:
-        raise ValueError("GITHUB_API_TOKEN variable is not set")
-    return github_api_token
+    return load_env("GITHUB_API_TOKEN", masked=True, required=True)
 
 
 def _setup_binary_comparison(config: dict) -> tuple[str, str]:
