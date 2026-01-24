@@ -1,0 +1,61 @@
+{
+  "contracts": {
+    "0xFaBA8f777996C0C28fe9e6554D84cB30ca3e1881": "ERC1967Proxy",
+    "0x5f5f5061509c20b307cb8ab6ee031cfc1e0fe136": "AaveV3ATokenWrapper"
+  },
+  "explorer_hostname": "api.etherscan.io",
+  "explorer_chain_id": 1,
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+  "github_repo": {
+    "url": "https://github.com/0xTwyne/aave-v3-aToken-wrapper",
+    "commit": "2b3f4c42e81767737d55b64263395adb187ce19e",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "lib/aave-v3-origin/src": {
+      "url": "https://github.com/aave-dao/aave-v3-origin",
+      "commit": "6138e1fda45884b6547d094a1ddeef43dcab4977",
+      "relative_root": "src"
+    },
+    "lib/ethereum-vault-connector/src": {
+      "url": "https://github.com/euler-xyz/ethereum-vault-connector",
+      "commit": "a7d3c29ef7e4964736e47675e0588630d6afbfd7",
+      "relative_root": "src"
+    },
+    "lib/forge-std/src": {
+      "url": "https://github.com/foundry-rs/forge-std",
+      "commit": "8e40513d678f392f398620b3ef2b418648b33e89",
+      "relative_root": "src"
+    },
+    "lib/aave-v3-origin/lib/solidity-utils/src": {
+      "url": "https://github.com/bgd-labs/solidity-utils",
+      "commit": "627712ae49771530594bc6ea0eb384544979d4ca",
+      "relative_root": "src"
+    },
+    "lib/aave-v3-origin/lib/solidity-utils/lib/openzeppelin-contracts-upgradeable/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable",
+      "commit": "fa525310e45f91eb20a6d3baa2644be8e0adba31",
+      "relative_root": "contracts"
+    },
+    "lib/aave-v3-origin/lib/solidity-utils/lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "69c8def5f222ff96f2b5beff05dfba996368aa79",
+      "relative_root": "contracts"
+    }
+  },
+  "fail_on_bytecode_comparison_error": true,
+  "bytecode_comparison": {
+    "constructor_args": {
+      "0xFaBA8f777996C0C28fe9e6554D84cB30ca3e1881": [
+        "0x5f5f5061509C20b307cb8aB6Ee031CFC1e0FE136",
+        "0x2016a0d20000000000000000000000000b925ed163218f6662a35e0f0371ac234f9e93710000000000000000000000008c54cb62900ec252e7992c85a5b7078a8af4fd7f000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000000135772617070656420737461746157535445544800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c7773746174615753544554480000000000000000000000000000000000000000"
+      ],
+      "0x5f5f5061509c20b307cb8ab6ee031cfc1e0fe136": [
+        "0xef39D6493884C4C84D38a4bFF879Ce16CEdE702a",
+        "0xa1517cCe0bE75700A8838EA1cEE0dc383cd3A332",
+        "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+        "0x8164Cc65827dcFe994AB23944CBC90e0aa80bFcb"
+      ]
+    }
+  }
+}
