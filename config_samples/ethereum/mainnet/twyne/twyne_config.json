@@ -1,0 +1,100 @@
+{
+  "contracts": {
+    "0xa1517cCe0bE75700A8838EA1cEE0dc383cd3A332": "ERC1967Proxy",
+    "0x434cc844126cd6c5f35f5db16e03f6379a831b66": "CollateralVaultFactory",
+    "0x0acd3A3c8Ab6a5F7b5A594C88DFa28999dA858aC": "ERC1967Proxy",
+    "0x7521dab4aa9fd9aabf8eaf1a2d9396c2f8032e9c": "VaultManager",
+    "0x0dd9065c998E75657BcE6C3a11d7F5AbA5CBdbD4": "HealthStatViewer",
+    "0x451949bde57aBe2F5DBD4758Cd50C6DCfC093A4C": "AaveV3LeverageOperator",
+    "0x229fE10bC00bBE99Ac99703647D4f74F31605e91": "AaveV3DeleverageOperator",
+    "0x868a21426852A775395d4b90De23B3e3E662bd78": "AaveV3TeleportOperator"
+  },
+  "explorer_hostname": "api.etherscan.io",
+  "explorer_chain_id": 1,
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+  "github_repo": {
+    "url": "https://github.com/0xTwyne/twyne-contracts",
+    "commit": "452e2b142222b6b54ee87e0df2ad89cc755fdeea",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "lib/euler-vault-kit/src": {
+      "url": "https://github.com/euler-xyz/euler-vault-kit",
+      "commit": "5b98b42048ba11ae82fb62dfec06d1010c8e41e6",
+      "relative_root": "src"
+    },
+    "lib/euler-vault-kit/lib/ethereum-vault-connector/src": {
+      "url": "https://github.com/euler-xyz/ethereum-vault-connector",
+      "commit": "084b32284ba643921f8d21bff3ddaf0c4e08d754",
+      "relative_root": "src"
+    },
+    "lib/euler-vault-kit/lib/openzeppelin-contracts/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "e682c7e5b5b347662868b9c8378a694626406c01",
+      "relative_root": "contracts"
+    },
+    "lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "acd4ff74de833399287ed6b31b4debf6b2b35527",
+      "relative_root": "contracts"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable",
+      "commit": "3d5fa5c24c411112bab47bec25cfa9ad0af0e6e8",
+      "relative_root": "contracts"
+    },
+    "lib/aave-v3-origin/src/contracts": {
+      "url": "https://github.com/aave-dao/aave-v3-origin",
+      "commit": "94bb4d5cdf9065deb9a6be576a836845de15aa9a",
+      "relative_root": "src/contracts"
+    },
+    "lib/euler-price-oracle": {
+      "url": "https://github.com/euler-xyz/euler-price-oracle",
+      "commit": "ffc3cb82615fc7d003a7f431175bd1eaf0bf41c5",
+      "relative_root": ""
+    },
+    "lib/forge-std/src": {
+      "url": "https://github.com/foundry-rs/forge-std",
+      "commit": "3b20d60d14b343ee4f908cb8079495c07f5e8981",
+      "relative_root": "src"
+    }
+  },
+  "fail_on_bytecode_comparison_error": true,
+  "bytecode_comparison": {
+    "constructor_args": {
+      "0x434cc844126cd6c5f35f5db16e03f6379a831b66": [
+        "0xef39D6493884C4C84D38a4bFF879Ce16CEdE702a"
+      ],
+      "0xa1517cCe0bE75700A8838EA1cEE0dc383cd3A332": [
+        "0x42CcbA95B6E0CB0c8405D347bC9d999D2C7A4c05",
+        "0xc4d66de800000000000000000000000005c859bf9424e7c40fed32a2b16ddb8433b44fbf"
+      ],
+      "0x0dd9065c998E75657BcE6C3a11d7F5AbA5CBdbD4": [
+        "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2"
+      ],
+      "0x451949bde57aBe2F5DBD4758Cd50C6DCfC093A4C": [
+        "0xef39D6493884C4C84D38a4bFF879Ce16CEdE702a",
+        "0x2Bba09866b6F1025258542478C39720A09B728bF",
+        "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb",
+        "0xa1517cCe0bE75700A8838EA1cEE0dc383cd3A332",
+        "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+        "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2"
+      ],
+      "0x229fE10bC00bBE99Ac99703647D4f74F31605e91": [
+        "0xef39D6493884C4C84D38a4bFF879Ce16CEdE702a",
+        "0x2Bba09866b6F1025258542478C39720A09B728bF",
+        "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb",
+        "0xa1517cCe0bE75700A8838EA1cEE0dc383cd3A332",
+        "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+        "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2"
+      ],
+      "0x868a21426852A775395d4b90De23B3e3E662bd78": [
+        "0xef39D6493884C4C84D38a4bFF879Ce16CEdE702a",
+        "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb",
+        "0xa1517cCe0bE75700A8838EA1cEE0dc383cd3A332",
+        "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+        "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2"
+      ]
+    }
+  }
+}

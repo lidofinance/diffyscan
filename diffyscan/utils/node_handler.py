@@ -125,7 +125,14 @@ def deploy_contract(rpc_url: str, deployer: str, data: str) -> str:
         {
             "jsonrpc": "2.0",
             "method": "eth_sendTransaction",
-            "params": [{"from": deployer, "gas": 9000000, "input": data}],
+            "params": [
+                {
+                    "from": deployer,
+                    "gas": 9000000,
+                    "gasPrice": 100 * 10**9,
+                    "input": data,
+                }
+            ],
             "id": 1,
         }
     )

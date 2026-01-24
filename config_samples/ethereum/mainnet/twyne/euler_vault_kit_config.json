@@ -1,0 +1,63 @@
+{
+  "contracts": {
+    "0xB5Eb1d005e389Bef38161691E2083b4d86FF647a": "GenericFactory",
+    "0x2Ff808ea1716D77cAE91d85FeEEEf74baAC85106": "EVault"
+  },
+  "explorer_hostname": "api.etherscan.io",
+  "explorer_chain_id": 1,
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+  "github_repo": {
+    "url": "https://github.com/euler-xyz/euler-vault-kit",
+    "commit": "3e5c2fea5e5296265d5c3a513b170f74b29b74b1",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "lib/euler-vault-kit": {
+      "url": "https://github.com/euler-xyz/euler-vault-kit",
+      "commit": "3e5c2fea5e5296265d5c3a513b170f74b29b74b1",
+      "relative_root": ""
+    },
+    "lib/ethereum-vault-connector/src": {
+      "url": "https://github.com/euler-xyz/ethereum-vault-connector",
+      "commit": "084b32284ba643921f8d21bff3ddaf0c4e08d754",
+      "relative_root": "src"
+    },
+    "lib/openzeppelin-contracts/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "e682c7e5b5b347662868b9c8378a694626406c01",
+      "relative_root": "contracts"
+    },
+    "lib/forge-std/src": {
+      "url": "https://github.com/foundry-rs/forge-std",
+      "commit": "b6a506db2262cad5ff982a87789ee6d1558ec861",
+      "relative_root": "src"
+    }
+  },
+  "fail_on_bytecode_comparison_error": true,
+  "bytecode_comparison": {
+    "constructor_args": {
+      "0xB5Eb1d005e389Bef38161691E2083b4d86FF647a": [
+        "0x05c859bF9424e7c40FED32a2b16DDb8433B44FBf"
+      ],
+      "0x2Ff808ea1716D77cAE91d85FeEEEf74baAC85106": [
+        [
+          "0xef39D6493884C4C84D38a4bFF879Ce16CEdE702a",
+          "0xFF06F28cf0c44Cf1E8F03E6835bB2F3a2a752C5C",
+          "0x84101fdEC409E6446263c4738c3AE11166EAa392",
+          "0x90534EaD5021A0C0698AFd91091811C1dbeCd6Bb",
+          "0x000000000022D473030F116dDEE9F6B43aC78BA3"
+        ],
+        [
+          "0xC54c4429592262D40C760cA65D6B5Fc8bB8174Ed",
+          "0xCDb9980eEa4f7B4569862C49d9f7025157cD6b62",
+          "0x002C3eB2Cb56fB252a5d1a88F27DF27f0941Bf00",
+          "0xf52BF182C5C5b053c827CCecB4016f985a0eb317",
+          "0xA2577B2584FD824Fe5fEB4950B7BD3F2f51d7308",
+          "0x230ae761f2d507E4135fB356a25f64Cd9Ed42421",
+          "0x4C962cCAfEd516c4AdE82650aa3FBa9e0982c1A9",
+          "0x77C70A543D78a4d5Df3f7E217Fa648a3308ED40a"
+        ]
+      ]
+    }
+  }
+}
