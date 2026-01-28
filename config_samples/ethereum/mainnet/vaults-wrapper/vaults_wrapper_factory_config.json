@@ -1,0 +1,41 @@
+{
+  "contracts": {
+    "0x06639923B260D5009daD1f8c34a03e5B81f1e5c9": "Factory"
+  },
+  "explorer_hostname": "api.etherscan.io",
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+  "explorer_chain_id": 1,
+  "github_repo": {
+    "url": "https://github.com/lidofinance/vaults-wrapper",
+    "commit": "3c903b7f1b75ac12a81557a52973d6b367c1c62c",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "lib/openzeppelin-contracts/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "3eddace0cb561947737934553a3dcc8e16c6250d",
+      "relative_root": "contracts"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable",
+      "commit": "3d5fa5c24c411112bab47bec25cfa9ad0af0e6e8",
+      "relative_root": "contracts"
+    }
+  },
+  "fail_on_bytecode_comparison_error": true,
+  "bytecode_comparison": {
+    "constructor_calldata": {},
+    "constructor_args": {
+      "0x06639923B260D5009daD1f8c34a03e5B81f1e5c9": [
+        "0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb",
+        [
+          "0x846a6341Bd38a201Bcd8012f4FCD55C244b67a35",
+          "0xE6054A1092bAEe5b87f6e558980b04d8922eE009",
+          "0x36dAA1E4E7E7a80fE5fccBF0e5275FFde88938Fa",
+          "0x20bd26E89542CaEeAfdc20121C7f8BC24539B3f6",
+          "0x8A5186Ad9A479F1341Fd12359b5D612f42b5fE14"
+        ]
+      ]
+    }
+  }
+}
