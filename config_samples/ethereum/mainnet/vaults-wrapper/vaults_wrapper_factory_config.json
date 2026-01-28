@@ -1,6 +1,11 @@
 {
   "contracts": {
-    "0x06639923B260D5009daD1f8c34a03e5B81f1e5c9": "Factory"
+    "0x06639923B260D5009daD1f8c34a03e5B81f1e5c9": "Factory",
+    "0x846a6341Bd38a201Bcd8012f4FCD55C244b67a35": "StvPoolFactory",
+    "0xE6054A1092bAEe5b87f6e558980b04d8922eE009": "StvStETHPoolFactory",
+    "0x36dAA1E4E7E7a80fE5fccBF0e5275FFde88938Fa": "WithdrawalQueueFactory",
+    "0x20bd26E89542CaEeAfdc20121C7f8BC24539B3f6": "DistributorFactory",
+    "0x8A5186Ad9A479F1341Fd12359b5D612f42b5fE14": "TimelockFactory"
   },
   "explorer_hostname": "api.etherscan.io",
   "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",

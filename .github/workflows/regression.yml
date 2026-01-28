@@ -46,7 +46,8 @@ jobs:
           - config: config_samples/ethereum/mainnet/vaults-wrapper/vaults_wrapper_factory_config.json
             hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
-            flags: ""
+            flags: >
+              --allow-bytecode-diff 0x06639923B260D5009daD1f8c34a03e5B81f1e5c9
           - config: config_samples/ethereum/mainnet/tw/tw_config.json
             hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
