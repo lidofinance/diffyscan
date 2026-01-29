@@ -47,7 +47,7 @@ jobs:
             hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
             flags: >
-              --allow-bytecode-diff 0x06639923B260D5009daD1f8c34a03e5B81f1e5c9
+              --allow-bytecode-diff 0x3f221b8E5bC098cC6C23611BEeacaeCfD77e1587
           - config: config_samples/ethereum/mainnet/tw/tw_config.json
             hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
