@@ -527,9 +527,9 @@ def process_config(
                                 "match": bytecode_match,
                             }
                         )
-                    except BinVerifierError as exc:
-                        # Treat bytecode mismatches as reportable diffs; final allowlist
-                        # handling happens after all contracts are processed.
+                    except BaseCustomException as exc:
+                        # Treat bytecode comparison errors as reportable diffs; final
+                        # allowlist handling happens after all contracts are processed.
                         logger.error(str(exc))
                         bytecode_stats.append(
                             {
