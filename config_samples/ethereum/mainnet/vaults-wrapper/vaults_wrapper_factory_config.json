@@ -1,30 +1,30 @@
 {
   "contracts": {
-    "0x06639923B260D5009daD1f8c34a03e5B81f1e5c9": "Factory",
-    "0x846a6341Bd38a201Bcd8012f4FCD55C244b67a35": "StvPoolFactory",
-    "0xE6054A1092bAEe5b87f6e558980b04d8922eE009": "StvStETHPoolFactory",
-    "0x36dAA1E4E7E7a80fE5fccBF0e5275FFde88938Fa": "WithdrawalQueueFactory",
-    "0x20bd26E89542CaEeAfdc20121C7f8BC24539B3f6": "DistributorFactory",
-    "0x8A5186Ad9A479F1341Fd12359b5D612f42b5fE14": "TimelockFactory",
-    "0x78850Bc268cF71424F183b6b71E7Ddd362e80Bd6": "DummyImplementation"
+    "0x3f221b8E5bC098cC6C23611BEeacaeCfD77e1587": "Factory",
+    "0x5Def7fBC0211351139B928f307EDC794af845Bde": "StvPoolFactory",
+    "0x671978CEEa7DAf405fA08E930E1047d1b7b21a69": "StvStETHPoolFactory",
+    "0xB011531857B6006479627e776feB6c0cEA5fc74a": "WithdrawalQueueFactory",
+    "0x9FD67B2D5b88BeBaC741EE50510cf808B4854a5F": "DistributorFactory",
+    "0x15f2C9ea98e5564d25A46eE39D19704476998786": "TimelockFactory",
+    "0x468029A88b6f75Eb1D13BB291fC3B82fc2C0232F": "DummyImplementation"
   },
   "explorer_hostname": "api.etherscan.io",
   "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
   "explorer_chain_id": 1,
   "github_repo": {
     "url": "https://github.com/lidofinance/vaults-wrapper",
-    "commit": "3c903b7f1b75ac12a81557a52973d6b367c1c62c",
+    "commit": "cce71d0f37021e0f4fd3aa3cc8305163bb39c1da",
     "relative_root": ""
   },
   "dependencies": {
     "lib/openzeppelin-contracts/contracts": {
       "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
-      "commit": "3eddace0cb561947737934553a3dcc8e16c6250d",
+      "commit": "c64a1edb67b6e3f4a15cca8909c9482ad33a02b0",
       "relative_root": "contracts"
     },
     "lib/openzeppelin-contracts-upgradeable/contracts": {
       "url": "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable",
-      "commit": "3d5fa5c24c411112bab47bec25cfa9ad0af0e6e8",
+      "commit": "e725abddf1e01cf05ace496e950fc8e243cc7cab",
       "relative_root": "contracts"
     }
   },
@@ -32,14 +32,14 @@
   "bytecode_comparison": {
     "constructor_calldata": {},
     "constructor_args": {
-      "0x06639923B260D5009daD1f8c34a03e5B81f1e5c9": [
+      "0x3f221b8E5bC098cC6C23611BEeacaeCfD77e1587": [
         "0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb",
         [
-          "0x846a6341Bd38a201Bcd8012f4FCD55C244b67a35",
-          "0xE6054A1092bAEe5b87f6e558980b04d8922eE009",
-          "0x36dAA1E4E7E7a80fE5fccBF0e5275FFde88938Fa",
-          "0x20bd26E89542CaEeAfdc20121C7f8BC24539B3f6",
-          "0x8A5186Ad9A479F1341Fd12359b5D612f42b5fE14"
+          "0x5Def7fBC0211351139B928f307EDC794af845Bde",
+          "0x671978CEEa7DAf405fA08E930E1047d1b7b21a69",
+          "0xB011531857B6006479627e776feB6c0cEA5fc74a",
+          "0x9FD67B2D5b88BeBaC741EE50510cf808B4854a5F",
+          "0x15f2C9ea98e5564d25A46eE39D19704476998786"
         ]
       ]
     }
