@@ -504,39 +504,40 @@ def process_config(
                     source_stats.append(source_result)
 
                 if enable_binary_comparison:
-                    bytecode_match = run_bytecode_diff(
-                        contract_address,
-                        contract_name,
-                        contract_code,
-                        config,
-                        github_api_token,
-                        recursive_parsing,
-                        cache_github,
-                        deployer_account,
-                        local_rpc_url,
-                        remote_rpc_url,
-                    )
-                    bytecode_stats.append(
-                        {
-                            "contract_address": contract_address,
-                            "contract_name": contract_name,
-                            "match": bytecode_match,
-                        }
-                    )
+                    try:
+                        bytecode_match = run_bytecode_diff(
+                            contract_address,
+                            contract_name,
+                            contract_code,
+                            config,
+                            github_api_token,
+                            recursive_parsing,
+                            cache_github,
+                            deployer_account,
+                            local_rpc_url,
+                            remote_rpc_url,
+                        )
+                        bytecode_stats.append(
+                            {
+                                "contract_address": contract_address,
+                                "contract_name": contract_name,
+                                "match": bytecode_match,
+                            }
+                        )
+                    except BinVerifierError as exc:
+                        # Treat bytecode mismatches as reportable diffs; final allowlist
+                        # handling happens after all contracts are processed.
+                        logger.error(str(exc))
+                        bytecode_stats.append(
+                            {
+                                "contract_address": contract_address,
+                                "contract_name": contract_name,
+                                "match": False,
+                            }
+                        )
             except BaseCustomException as custom_exc:
                 ExceptionHandler.raise_exception_or_log(custom_exc)
                 traceback.print_exc()
-                # Track failed bytecode comparison if it was a BinVerifierError
-                if enable_binary_comparison and isinstance(
-                    custom_exc, BinVerifierError
-                ):
-                    bytecode_stats.append(
-                        {
-                            "contract_address": contract_address,
-                            "contract_name": contract_name,
-                            "match": False,
-                        }
-                    )
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt by user")
 
