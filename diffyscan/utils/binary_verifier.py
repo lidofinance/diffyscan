@@ -272,7 +272,8 @@ def deep_match_bytecode(
         logger.warn(f"Detected unknown opcodes: {unknown_opcodes}")
 
     # Check length differences
-    if len(actual_instructions) != len(expected_instructions):
+    length_mismatch = len(actual_instructions) != len(expected_instructions)
+    if length_mismatch:
         logger.warn("Codes have a different length")
 
     # Validate string literals
@@ -291,6 +292,12 @@ def deep_match_bytecode(
         logger.okay("Bytecodes match (after trimming metadata and string literals)")
         return True
 
+    # If one side has no instructions, avoid diff rendering/index errors
+    if length_mismatch and (not actual_instructions or not expected_instructions):
+        raise BinVerifierError(
+            "Bytecodes have different length after trimming metadata and string literals"
+        )
+
     # Display diff with context
     checkpoints = _get_checkpoints_for_display(
         mismatches, actual_instructions, expected_instructions
@@ -301,6 +308,12 @@ def deep_match_bytecode(
     is_matched_with_excluded_immutables = _print_instruction_diffs(
         zipped_instructions, checkpoints, immutables
     )
+
+    # If lengths differ, this is a bytecode mismatch (not just immutables)
+    if length_mismatch:
+        raise BinVerifierError(
+            "Bytecodes have different length after trimming metadata and string literals"
+        )
 
     # If we found any mismatch outside immutables => fail
     if not is_matched_with_excluded_immutables:
