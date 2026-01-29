@@ -74,7 +74,7 @@ def _build_github_solc_input(
 
         if not github_file:
             missing.append(path_to_file)
-            github_file = source.get("content", "")
+            continue
 
         updated_sources[path_to_file] = {"content": github_file}
 
@@ -111,34 +111,29 @@ def run_bytecode_diff(
 
     # Get libraries from config if they exist
     libraries = config.get("bytecode_comparison", {}).get("libraries", None)
-    target_compiled_contract = None
-    try:
-        github_solc_input, missing_sources = _build_github_solc_input(
-            contract_source_code,
-            config,
-            github_api_token,
-            recursive_parsing,
-            cache_github,
+    github_solc_input, missing_sources = _build_github_solc_input(
+        contract_source_code,
+        config,
+        github_api_token,
+        recursive_parsing,
+        cache_github,
+    )
+    if missing_sources:
+        missing_preview = ", ".join(missing_sources[:5])
+        more = ""
+        if len(missing_sources) > 5:
+            more = f" (and {len(missing_sources) - 5} more)"
+        raise CompileError(
+            "missing GitHub sources for bytecode compilation; "
+            f"count={len(missing_sources)}; first={missing_preview}{more}"
         )
-        if missing_sources:
-            logger.warn(
-                f"Bytecode compile: {len(missing_sources)} source file(s) missing from GitHub; "
-                "falling back to explorer content for those files"
-            )
 
-        github_contract_source = dict(contract_source_code)
-        github_contract_source["solcInput"] = github_solc_input
-        target_compiled_contract = compile_contract_from_explorer(
-            github_contract_source, libraries
-        )
-        logger.okay("Compiled contract for bytecode comparison using GitHub sources")
-    except CompileError as exc:
-        logger.warn(
-            f"Failed to compile with GitHub sources, falling back to explorer sources: {exc}"
-        )
-        target_compiled_contract = compile_contract_from_explorer(
-            contract_source_code, libraries
-        )
+    github_contract_source = dict(contract_source_code)
+    github_contract_source["solcInput"] = github_solc_input
+    target_compiled_contract = compile_contract_from_explorer(
+        github_contract_source, libraries
+    )
+    logger.okay("Compiled contract for bytecode comparison using GitHub sources")
 
     contract_creation_code, local_compiled_bytecode, immutables = (
         parse_compiled_contract(target_compiled_contract)
