@@ -235,7 +235,10 @@ def run_source_diff(
     logger.okay("Files", files_count)
 
     if not skip_user_input:
-        input("Press Enter to proceed...")
+        if sys.stdin.isatty():
+            input("Press Enter to proceed...")
+        else:
+            logger.info("Skipping prompt (non-interactive stdin).")
         logger.divider()
 
     logger.info("Diffing...")
