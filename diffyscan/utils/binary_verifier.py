@@ -143,14 +143,15 @@ def _get_checkpoints_for_display(
     """
     checkpoints = {0, *mismatches}
 
-    # Include last lines if instructions differ in count
-    if actual_instructions:
-        checkpoints.add(len(actual_instructions) - 1)
-    if expected_instructions:
-        checkpoints.add(len(expected_instructions) - 1)
+    # Bound checkpoints to the shared instruction range
+    max_idx = min(len(actual_instructions), len(expected_instructions)) - 1
+    if max_idx < 0:
+        return [0]
+
+    # Include last comparable line for context
+    checkpoints.add(max_idx)
 
     # Expand around mismatches
-    max_idx = min(len(actual_instructions), len(expected_instructions)) - 1
     for idx in list(checkpoints):
         start_idx = max(0, idx - context_lines)
         end_idx = min(idx + context_lines, max_idx)
@@ -197,6 +198,9 @@ def _format_instruction_diff(actual, expected, immutables):
         else:
             params = bgRed(actual_params) + " " + bgGreen(expected_params)
             is_immutable_only = False
+
+    if not same_opcode:
+        is_immutable_only = False
 
     return (opcode, opname, params), is_immutable_only
 
