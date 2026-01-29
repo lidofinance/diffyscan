@@ -13,7 +13,7 @@
   "explorer_chain_id": 1,
   "github_repo": {
     "url": "https://github.com/lidofinance/vaults-wrapper",
-    "commit": "cce71d0f37021e0f4fd3aa3cc8305163bb39c1da",
+    "commit": "f35fe13ddca2084d7b848172b2698feb4fa88025",
     "relative_root": ""
   },
   "dependencies": {
