@@ -68,6 +68,8 @@ jobs:
               --allow-bytecode-diff 0x2F0303F20E0795E6CCd17BD5efE791A586f28E03
               --allow-bytecode-diff 0x6d1a9bBFF97f7565e9532FEB7b499982848E5e07
               --allow-bytecode-diff 0x933b84D2C01B04C2f53cD2FB1b7055241E122C83
+              --allow-bytecode-diff 0xE22486EA7cE77daE718fFa7B7114fD50CF73Cbac
+              --allow-bytecode-diff 0xd253b0ca059343e70474e685Beb2974F10CCFa67
           - config: config_samples/ethereum/hoodi/vaults/hoodi_vaults_easy_track_config.json
             hardhat: hardhat_configs/hoodi_hardhat_config.ts
             network: hoodi
