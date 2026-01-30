@@ -43,6 +43,19 @@ jobs:
               --allow-source-diff 0x6F5c0A5a824773E8f8285bC5aA59ea0Aab2A6400
               --allow-source-diff 0xaf35A63a4114B7481589fDD9FDB3e35Fd65fAed7
               --allow-source-diff 0x647DeE7bF33e44829e6430F7A08F63b3319694f0
+          - config: config_samples/ethereum/mainnet/gualGovernance/dual_governance_mainnet_config.json
+            hardhat: hardhat_configs/mainnet_hardhat_config.ts
+            network: mainnet
+            flags: >
+              --allow-bytecode-diff 0xd6A67636c05BeB5B4a5c90D408b03A63c4e39426
+          - config: config_samples/ethereum/mainnet/gualGovernance/dual_governance_mainnet_voting_config.json
+            hardhat: hardhat_configs/mainnet_hardhat_config.ts
+            network: mainnet
+            flags: ""
+          - config: config_samples/ethereum/mainnet/gualGovernance/dual_governance_mainnet_upgrade_voting_config.json
+            hardhat: hardhat_configs/mainnet_hardhat_config.ts
+            network: mainnet
+            flags: ""
           - config: config_samples/ethereum/mainnet/tw/tw_config.json
             hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
@@ -86,6 +99,7 @@ jobs:
               --allow-source-diff 0xc5dCd2A9642ceA9B71A632BF5b8ff52424Ea1B40
     env:
       ETHERSCAN_EXPLORER_TOKEN: ${{ secrets.ETHERSCAN_EXPLORER_TOKEN }}
+      ETHERSCAN_TOKEN: ${{ secrets.ETHERSCAN_EXPLORER_TOKEN }}
       GITHUB_API_TOKEN: ${{ github.token }}
       LOCAL_RPC_URL: "http://127.0.0.1:7545"
       REMOTE_RPC_URL: ${{ matrix.network == 'mainnet' && secrets['REMOTE_RPC_URL_MAINNET'] || secrets['REMOTE_RPC_URL_HOODI'] }}
