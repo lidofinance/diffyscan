@@ -6,6 +6,8 @@
     "0x2a30F5aC03187674553024296bed35Aa49749DDa": "TimeConstraints"
   },
   "explorer_hostname": "api.etherscan.io",
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+  "explorer_chain_id": 1,
   "github_repo": {
     "url": "https://github.com/lidofinance/dual-governance",
     "commit": "f3f26383ee130d6a8bb0d1f420151e4a311018eb",

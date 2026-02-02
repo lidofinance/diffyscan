@@ -40,9 +40,51 @@ from .utils.custom_exceptions import (
     ExceptionHandler,
     BaseCustomException,
     BinVerifierError,
+    CompileError,
 )
 
 __version__ = "0.0.0"
+
+
+def _build_github_solc_input(
+    contract_source_code,
+    config,
+    github_api_token,
+    recursive_parsing,
+    cache_github,
+):
+    solc_input = contract_source_code["solcInput"]
+    sources = solc_input.get("sources", solc_input)
+    updated_sources = {}
+    missing = []
+
+    for path_to_file, source in sources.items():
+        repo, dep_name = resolve_dep(path_to_file, config)
+        if not dep_name:
+            repo = config["github_repo"]
+
+        if recursive_parsing:
+            github_file = get_file_from_github_recursive(
+                github_api_token, repo, path_to_file, dep_name, cache_github
+            )
+        else:
+            github_file = get_file_from_github(
+                github_api_token, repo, path_to_file, dep_name, cache_github
+            )
+
+        if not github_file:
+            missing.append(path_to_file)
+            continue
+
+        updated_sources[path_to_file] = {"content": github_file}
+
+    if "sources" in solc_input:
+        github_solc_input = dict(solc_input)
+        github_solc_input["sources"] = updated_sources
+    else:
+        github_solc_input = {"sources": updated_sources}
+
+    return github_solc_input, missing
 
 
 def run_bytecode_diff(
@@ -50,6 +92,9 @@ def run_bytecode_diff(
     contract_name_from_config,
     contract_source_code,
     config,
+    github_api_token,
+    recursive_parsing,
+    cache_github,
     deployer_account,
     local_rpc_url,
     remote_rpc_url,
@@ -66,9 +111,29 @@ def run_bytecode_diff(
 
     # Get libraries from config if they exist
     libraries = config.get("bytecode_comparison", {}).get("libraries", None)
-    target_compiled_contract = compile_contract_from_explorer(
-        contract_source_code, libraries
+    github_solc_input, missing_sources = _build_github_solc_input(
+        contract_source_code,
+        config,
+        github_api_token,
+        recursive_parsing,
+        cache_github,
     )
+    if missing_sources:
+        missing_preview = ", ".join(missing_sources[:5])
+        more = ""
+        if len(missing_sources) > 5:
+            more = f" (and {len(missing_sources) - 5} more)"
+        raise CompileError(
+            "missing GitHub sources for bytecode compilation; "
+            f"count={len(missing_sources)}; first={missing_preview}{more}"
+        )
+
+    github_contract_source = dict(contract_source_code)
+    github_contract_source["solcInput"] = github_solc_input
+    target_compiled_contract = compile_contract_from_explorer(
+        github_contract_source, libraries
+    )
+    logger.okay("Compiled contract for bytecode comparison using GitHub sources")
 
     contract_creation_code, local_compiled_bytecode, immutables = (
         parse_compiled_contract(target_compiled_contract)
@@ -170,7 +235,10 @@ def run_source_diff(
     logger.okay("Files", files_count)
 
     if not skip_user_input:
-        input("Press Enter to proceed...")
+        if sys.stdin.isatty():
+            input("Press Enter to proceed...")
+        else:
+            logger.info("Skipping prompt (non-interactive stdin).")
         logger.divider()
 
     logger.info("Diffing...")
@@ -436,36 +504,40 @@ def process_config(
                     source_stats.append(source_result)
 
                 if enable_binary_comparison:
-                    bytecode_match = run_bytecode_diff(
-                        contract_address,
-                        contract_name,
-                        contract_code,
-                        config,
-                        deployer_account,
-                        local_rpc_url,
-                        remote_rpc_url,
-                    )
-                    bytecode_stats.append(
-                        {
-                            "contract_address": contract_address,
-                            "contract_name": contract_name,
-                            "match": bytecode_match,
-                        }
-                    )
+                    try:
+                        bytecode_match = run_bytecode_diff(
+                            contract_address,
+                            contract_name,
+                            contract_code,
+                            config,
+                            github_api_token,
+                            recursive_parsing,
+                            cache_github,
+                            deployer_account,
+                            local_rpc_url,
+                            remote_rpc_url,
+                        )
+                        bytecode_stats.append(
+                            {
+                                "contract_address": contract_address,
+                                "contract_name": contract_name,
+                                "match": bytecode_match,
+                            }
+                        )
+                    except BaseCustomException as exc:
+                        # Treat bytecode comparison errors as reportable diffs; final
+                        # allowlist handling happens after all contracts are processed.
+                        logger.error(str(exc))
+                        bytecode_stats.append(
+                            {
+                                "contract_address": contract_address,
+                                "contract_name": contract_name,
+                                "match": False,
+                            }
+                        )
             except BaseCustomException as custom_exc:
                 ExceptionHandler.raise_exception_or_log(custom_exc)
                 traceback.print_exc()
-                # Track failed bytecode comparison if it was a BinVerifierError
-                if enable_binary_comparison and isinstance(
-                    custom_exc, BinVerifierError
-                ):
-                    bytecode_stats.append(
-                        {
-                            "contract_address": contract_address,
-                            "contract_name": contract_name,
-                            "match": False,
-                        }
-                    )
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt by user")
 
