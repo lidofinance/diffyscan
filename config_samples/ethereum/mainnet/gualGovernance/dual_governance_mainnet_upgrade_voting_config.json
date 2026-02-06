@@ -4,6 +4,8 @@
     "0x67988077f29FbA661911d9567E05cc52C51ca1B0": "DGUpgradeOmnibusMainnet"
   },
   "explorer_hostname": "api.etherscan.io",
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+  "explorer_chain_id": 1,
   "github_repo": {
     "url": "https://github.com/lidofinance/dual-governance",
     "commit": "959e1766a1a27eeb5ca57dc05e4f5cae1e025f47",

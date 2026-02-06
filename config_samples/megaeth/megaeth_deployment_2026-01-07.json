@@ -1,0 +1,43 @@
+{
+  "contracts": {
+    "0x601aC63637933D88285A025C685AC4e9a92a98dA": "TransparentUpgradeableProxy",
+    "0x4f17a98eFdd1048B2c7e4a5399ef5B5c3eadE2bF": "ProxyAdmin"
+  },
+  "explorer_hostname": "megaeth.blockscout.com",
+  "explorer_chain_id": 4326,
+  "explorer_token_env_var": "MEGAETH_API_KEY",
+  "github_repo": {
+    "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+    "commit": "fcbae5394ae8ad52d8e580a3477db99814b9d565",
+    "relative_root": "contracts"
+  },
+  "dependencies": {
+    "lib/openzeppelin-contracts/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "fcbae5394ae8ad52d8e580a3477db99814b9d565",
+      "relative_root": "contracts"
+    }
+  },
+  "fail_on_bytecode_comparison_error": true,
+  "bytecode_comparison": {
+    "constructor_calldata": {},
+    "constructor_args": {
+      "0x601aC63637933D88285A025C685AC4e9a92a98dA": [
+        "0x518DD3D8a38ea4FB5f8c06c33b6a32F34F6C3712",
+        "0x72f6000D70B291C67bED898214156d01383274b1",
+        "0x2cd77a5a00000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000120000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000013ac97663d19ff20fe467bfa580748505e664beb000000000000000000000000000000000000000000000000000000000000001f57726170706564206c6971756964207374616b656420457468657220322e300000000000000000000000000000000000000000000000000000000000000000067773744554480000000000000000000000000000000000000000000000000000"
+      ],
+      "0x4f17a98eFdd1048B2c7e4a5399ef5B5c3eadE2bF": [
+        "0x72f6000D70B291C67bED898214156d01383274b1"
+      ]
+    }
+  },
+  "metadata": {
+    "chain_name": "megaeth",
+    "deployment_date": "2026-01-07",
+    "timelock_address": "0x72f6000D70B291C67bED898214156d01383274b1",
+    "timelock_requirements": {
+      "minimum_delay_seconds": 1
+    }
+  }
+}

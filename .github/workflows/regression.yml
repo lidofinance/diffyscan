@@ -48,6 +48,19 @@ jobs:
             network: mainnet
             flags: >
               --allow-bytecode-diff 0x3f221b8E5bC098cC6C23611BEeacaeCfD77e1587
+          - config: config_samples/ethereum/mainnet/gualGovernance/dual_governance_mainnet_config.json
+            hardhat: hardhat_configs/mainnet_hardhat_config.ts
+            network: mainnet
+            flags: >
+              --allow-bytecode-diff 0xd6A67636c05BeB5B4a5c90D408b03A63c4e39426
+          - config: config_samples/ethereum/mainnet/gualGovernance/dual_governance_mainnet_voting_config.json
+            hardhat: hardhat_configs/mainnet_hardhat_config.ts
+            network: mainnet
+            flags: ""
+          - config: config_samples/ethereum/mainnet/gualGovernance/dual_governance_mainnet_upgrade_voting_config.json
+            hardhat: hardhat_configs/mainnet_hardhat_config.ts
+            network: mainnet
+            flags: ""
           - config: config_samples/ethereum/mainnet/tw/tw_config.json
             hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
@@ -72,6 +85,9 @@ jobs:
               --allow-bytecode-diff 0x7E99eE3C66636DE415D2d7C880938F2f40f94De4
               --allow-bytecode-diff 0x2F0303F20E0795E6CCd17BD5efE791A586f28E03
               --allow-bytecode-diff 0x6d1a9bBFF97f7565e9532FEB7b499982848E5e07
+              --allow-bytecode-diff 0x933b84D2C01B04C2f53cD2FB1b7055241E122C83
+              --allow-bytecode-diff 0xE22486EA7cE77daE718fFa7B7114fD50CF73Cbac
+              --allow-bytecode-diff 0xd253b0ca059343e70474e685Beb2974F10CCFa67
           - config: config_samples/ethereum/hoodi/vaults/hoodi_vaults_easy_track_config.json
             hardhat: hardhat_configs/hoodi_hardhat_config.ts
             network: hoodi
@@ -88,6 +104,7 @@ jobs:
               --allow-source-diff 0xc5dCd2A9642ceA9B71A632BF5b8ff52424Ea1B40
     env:
       ETHERSCAN_EXPLORER_TOKEN: ${{ secrets.ETHERSCAN_EXPLORER_TOKEN }}
+      ETHERSCAN_TOKEN: ${{ secrets.ETHERSCAN_EXPLORER_TOKEN }}
       GITHUB_API_TOKEN: ${{ github.token }}
       LOCAL_RPC_URL: "http://127.0.0.1:7545"
       REMOTE_RPC_URL: ${{ matrix.network == 'mainnet' && secrets['REMOTE_RPC_URL_MAINNET'] || secrets['REMOTE_RPC_URL_HOODI'] }}
