@@ -1,0 +1,47 @@
+{
+  "contracts": {
+    "0x3f221b8E5bC098cC6C23611BEeacaeCfD77e1587": "Factory",
+    "0x5Def7fBC0211351139B928f307EDC794af845Bde": "StvPoolFactory",
+    "0x671978CEEa7DAf405fA08E930E1047d1b7b21a69": "StvStETHPoolFactory",
+    "0xB011531857B6006479627e776feB6c0cEA5fc74a": "WithdrawalQueueFactory",
+    "0x9FD67B2D5b88BeBaC741EE50510cf808B4854a5F": "DistributorFactory",
+    "0x15f2C9ea98e5564d25A46eE39D19704476998786": "TimelockFactory",
+    "0x468029A88b6f75Eb1D13BB291fC3B82fc2C0232F": "DummyImplementation"
+  },
+  "explorer_hostname": "api.etherscan.io",
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+  "explorer_chain_id": 1,
+  "github_repo": {
+    "url": "https://github.com/lidofinance/vaults-wrapper",
+    "commit": "f35fe13ddca2084d7b848172b2698feb4fa88025",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "lib/openzeppelin-contracts/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "c64a1edb67b6e3f4a15cca8909c9482ad33a02b0",
+      "relative_root": "contracts"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable",
+      "commit": "e725abddf1e01cf05ace496e950fc8e243cc7cab",
+      "relative_root": "contracts"
+    }
+  },
+  "fail_on_bytecode_comparison_error": true,
+  "bytecode_comparison": {
+    "constructor_calldata": {},
+    "constructor_args": {
+      "0x3f221b8E5bC098cC6C23611BEeacaeCfD77e1587": [
+        "0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb",
+        [
+          "0x5Def7fBC0211351139B928f307EDC794af845Bde",
+          "0x671978CEEa7DAf405fA08E930E1047d1b7b21a69",
+          "0xB011531857B6006479627e776feB6c0cEA5fc74a",
+          "0x9FD67B2D5b88BeBaC741EE50510cf808B4854a5F",
+          "0x15f2C9ea98e5564d25A46eE39D19704476998786"
+        ]
+      ]
+    }
+  }
+}

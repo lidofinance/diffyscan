@@ -43,6 +43,11 @@ jobs:
               --allow-source-diff 0x6F5c0A5a824773E8f8285bC5aA59ea0Aab2A6400
               --allow-source-diff 0xaf35A63a4114B7481589fDD9FDB3e35Fd65fAed7
               --allow-source-diff 0x647DeE7bF33e44829e6430F7A08F63b3319694f0
+          - config: config_samples/ethereum/mainnet/vaults-wrapper/vaults_wrapper_factory_config.json
+            hardhat: hardhat_configs/mainnet_hardhat_config.ts
+            network: mainnet
+            flags: >
+              --allow-bytecode-diff 0x3f221b8E5bC098cC6C23611BEeacaeCfD77e1587
           - config: config_samples/ethereum/mainnet/gualGovernance/dual_governance_mainnet_config.json
             hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
