@@ -119,11 +119,18 @@ def _get_contract_from_etherscan(
     if response["message"] == "NOTOK":
         raise ExplorerError(f'Received bad response: {response["result"]}')
 
-    result = response["result"][0]
+    results = response["result"]
+    if not results:
+        raise ExplorerError(f"Empty result from explorer API for contract {contract}")
+    result = results[0]
     if "ContractName" not in result:
         _error_no_source_code_and_exit(contract)
 
     solc_input = result["SourceCode"]
+    if not isinstance(solc_input, str):
+        raise ExplorerError(
+            f"Unexpected SourceCode type for {contract}: {type(solc_input).__name__}"
+        )
     contract = {
         "name": result["ContractName"],
         "compiler": result["CompilerVersion"],
@@ -136,8 +143,8 @@ def _get_contract_from_etherscan(
             "sources": {result["ContractName"]: {"content": solc_input}},
             "settings": {
                 "optimizer": {
-                    "enabled": result["OptimizationUsed"] == "1",
-                    "runs": int(result["Runs"]),
+                    "enabled": result.get("OptimizationUsed") == "1",
+                    "runs": int(result.get("Runs", 0)),
                 },
                 "outputSelection": {
                     "*": {
@@ -184,7 +191,12 @@ def _get_contract_from_mantle(mantle_explorer_hostname: str, contract: str) -> d
     etherscan_link = f"https://{mantle_explorer_hostname}/api?module=contract&action=getsourcecode&address={contract}"
     response = fetch(etherscan_link).json()
 
-    data = response["result"][0]
+    results = response["result"]
+    if not results:
+        raise ExplorerError(
+            f"Empty result from Mantle explorer for contract {contract}"
+        )
+    data = results[0]
     if "ContractName" not in data:
         _error_no_source_code_and_exit(contract)
 
@@ -228,6 +240,11 @@ def _get_contract_from_blockscout(explorer_hostname: str, contract: str) -> dict
 
     if "name" not in response:
         _error_no_source_code_and_exit(contract)
+
+    if "file_path" not in response or "source_code" not in response:
+        raise ExplorerError(
+            f"Blockscout response missing file_path or source_code for {contract}"
+        )
 
     source_files = {response["file_path"]: {"content": response["source_code"]}}
 

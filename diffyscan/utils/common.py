@@ -5,6 +5,7 @@ import subprocess
 import tempfile
 import requests
 import uuid
+import yaml
 
 from urllib.parse import urlparse
 
@@ -48,8 +49,60 @@ def load_env(
 
 
 def load_config(path: str) -> Config:
+    ext = os.path.splitext(path)[1].lower()
     with open(path, mode="r") as config_file:
-        return json.load(config_file)
+        if ext in (".yaml", ".yml"):
+            config = yaml.safe_load(config_file)
+            if config is None:
+                raise ValueError(
+                    f"{path}: YAML file is empty or contains only comments"
+                )
+            _validate_yaml_hex_keys(config, path)
+            return config
+        elif ext == ".json":
+            return json.load(config_file)
+        else:
+            raise ValueError(f"Unsupported config file extension: {ext}")
+
+
+def _validate_yaml_hex_keys(config: dict, path: str) -> None:
+    """Check that YAML didn't coerce hex addresses to integers."""
+    contracts = config.get("contracts")
+    if isinstance(contracts, dict):
+        for key, value in contracts.items():
+            if isinstance(key, int):
+                raise ValueError(
+                    f"{path}: contract address was parsed as integer ({key:#x}). "
+                    f'Quote it: "{key:#0{42}x}"'
+                )
+            if isinstance(value, int):
+                raise ValueError(
+                    f"{path}: contract name for {key} was parsed as integer ({value}). "
+                    f"Quote it in the YAML file."
+                )
+
+    bytecode = config.get("bytecode_comparison")
+    if not isinstance(bytecode, dict):
+        return
+    for section in ("constructor_args", "constructor_calldata"):
+        sub = bytecode.get(section)
+        if isinstance(sub, dict):
+            for key in sub:
+                if isinstance(key, int):
+                    raise ValueError(
+                        f"{path}: bytecode_comparison.{section} address was parsed as integer ({key:#x}). "
+                        f'Quote it: "{key:#0{42}x}"'
+                    )
+    libraries = bytecode.get("libraries")
+    if isinstance(libraries, dict):
+        for key, libs in libraries.items():
+            if isinstance(libs, dict):
+                for lib_name, lib_addr in libs.items():
+                    if isinstance(lib_addr, int):
+                        raise ValueError(
+                            f"{path}: bytecode_comparison.libraries.{key}.{lib_name} was parsed as integer ({lib_addr:#x}). "
+                            f'Quote it: "{lib_addr:#0{42}x}"'
+                        )
 
 
 def _handle_request_errors(error_class: type[BaseException]):
@@ -126,7 +179,7 @@ def parse_repo_link(repo_link: str) -> str:
         The user/repo part of the URL
     """
     parse_result = urlparse(repo_link)
-    repo_location = [item.strip("/") for item in parse_result[2].split("tree")]
+    repo_location = [item.strip("/") for item in parse_result.path.split("tree")]
     user_slash_repo = repo_location[0]
     return user_slash_repo
 

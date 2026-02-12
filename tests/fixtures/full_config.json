@@ -1,0 +1,63 @@
+{
+  "contracts": {
+    "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84": "OssifiableProxy",
+    "0x442af784A788A5bd6F42A01Ebe9F287a871243fb": "StakingRouter",
+    "0xe561152e8d3f618b386ef4dd6e3fb980eb2f9e61": "TransparentUpgradeableProxy",
+    "0xcc6DD2e2341C5b09A6f4F481670E3C39B83810C3": "ProxyAdmin"
+  },
+  "explorer_hostname": "api.etherscan.io",
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+  "explorer_hostname_env_var": "L1_EXPLORER_API_HOSTNAME",
+  "explorer_chain_id": 1,
+  "audit_url": "https://github.com/example-org/audits/blob/main/2024-07-audit.pdf",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/core",
+    "commit": "c9ef333e28b51cca9741241d4aceab77a414cb85",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "fa64a1ced0b70ab89073d5d0b6e01b0778f7e7d6",
+      "relative_root": "contracts"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable",
+      "commit": "60b305a8f3ff0c7688f02ac470417b6bbf1c4d27",
+      "relative_root": "contracts"
+    }
+  },
+  "fail_on_bytecode_comparison_error": true,
+  "bytecode_comparison": {
+    "hardhat_config_name": "mainnet_hardhat_config.js",
+    "constructor_calldata": {
+      "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84": "0x1234abcd"
+    },
+    "constructor_args": {
+      "0xe561152e8d3f618b386ef4dd6e3fb980eb2f9e61": [
+        "0x03df929510a52c97bb1b3e5f33ea5d9735a50280",
+        "0x13Ac97663d19fF20fe467BFa580748505e664beB",
+        "0x2cd77a5a"
+      ],
+      "0xcc6DD2e2341C5b09A6f4F481670E3C39B83810C3": [
+        "0x13Ac97663d19fF20fe467BFa580748505e664beB"
+      ],
+      "0x442af784A788A5bd6F42A01Ebe9F287a871243fb": [
+        "00000000000000000000000000000000219ab540356cbb839cbe05303d7705fa"
+      ]
+    },
+    "libraries": {
+      "contracts/common/lib/MinFirstAllocationStrategy.sol": {
+        "MinFirstAllocationStrategy": "0x7e70De6D1877B3711b2bEDa7BA00013C7142d993"
+      }
+    }
+  },
+  "metadata": {
+    "chain_name": "ethereum",
+    "deployment_date": "2025-11-16",
+    "timelock_address": "0x13Ac97663d19fF20fe467BFa580748505e664beB",
+    "timelock_requirements": {
+      "minimum_delay_seconds": 1
+    }
+  }
+}
