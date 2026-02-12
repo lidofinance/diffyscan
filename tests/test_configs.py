@@ -1,4 +1,5 @@
 import json
+import yaml
 from pathlib import Path
 
 CONFIG_DIR = Path("config_samples")
@@ -6,11 +7,16 @@ REQUIRED_GITHUB_KEYS = {"url", "commit", "relative_root"}
 
 
 def config_paths():
-    return [p for p in CONFIG_DIR.rglob("*.json")]
+    paths = []
+    for ext in ("*.json", "*.yaml", "*.yml"):
+        paths.extend(CONFIG_DIR.rglob(ext))
+    return paths
 
 
 def load(path):
     with open(path) as f:
+        if path.suffix in (".yaml", ".yml"):
+            return yaml.safe_load(f)
         return json.load(f)
 
 

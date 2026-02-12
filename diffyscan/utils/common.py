@@ -5,6 +5,7 @@ import subprocess
 import tempfile
 import requests
 import uuid
+import yaml
 
 from urllib.parse import urlparse
 
@@ -48,8 +49,14 @@ def load_env(
 
 
 def load_config(path: str) -> Config:
+    ext = os.path.splitext(path)[1].lower()
     with open(path, mode="r") as config_file:
-        return json.load(config_file)
+        if ext in (".yaml", ".yml"):
+            return yaml.safe_load(config_file)
+        elif ext == ".json":
+            return json.load(config_file)
+        else:
+            raise ValueError(f"Unsupported config file extension: {ext}")
 
 
 def _handle_request_errors(error_class: type[BaseException]):

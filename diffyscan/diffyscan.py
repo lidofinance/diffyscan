@@ -753,9 +753,12 @@ def main() -> None:
         )
         all_results.append(result)
     elif os.path.isdir(args.path):
+        supported_extensions = (".json", ".yaml", ".yml")
         for filename in os.listdir(args.path):
             config_path = os.path.join(args.path, filename)
-            if os.path.isfile(config_path):
+            if os.path.isfile(config_path) and filename.lower().endswith(
+                supported_extensions
+            ):
                 result = process_config(
                     config_path,
                     args.hardhat_path,
