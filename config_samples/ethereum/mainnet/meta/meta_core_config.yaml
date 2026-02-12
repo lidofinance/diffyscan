@@ -2,10 +2,6 @@
 # https://docs.mellow.finance/core-vaults/core-deployments
 
 contracts:
-  # Vault
-  "0x4E38F679e46B3216f0bd4B314E9C429AFfB1dEE3": TransparentUpgradeableProxy
-  "0x0000000615B2771511dAa693aC07BE5622869E01": Vault
-
   # Factory
   "0x0000000f9686896836C39cf721141922Ce42639f": TransparentUpgradeableProxy
   "0x0000000397b71C8f3182Fd40D247330D218fdC72": Factory
@@ -20,28 +16,27 @@ contracts:
   "0x000000002E2aeaC5Fe65AaB6fE2E6AE0e44F1A3A": SyncDepositQueue
   "0x00000003887dfBCEbD1e4097Ad89B690de7eFbf9": SignatureDepositQueue
 
+  # FeeManager
+  "0xF7223356819Ea48f25880b6c2ab3e907CC336D45": TransparentUpgradeableProxy
+  "0x0000000dE74e5D51651326E0A3e1ACA94bEAF6E1": FeeManager
+
+  # Oracle
+  "0x0CdFf250C7a071fdc72340D820C5C8e29507Aaad": TransparentUpgradeableProxy
+  "0x0000000F0d3D1c31b72368366A4049C05E291D58": Oracle
+
   # RedeemQueue
   "0xfe76b5fd238553D65Ce6dd0A572C0fda629F8421": TransparentUpgradeableProxy
   "0x000000000c139266BA06170Ed1DeacA6d11903c1": RedeemQueue
   "0x0000000b2082667589A16c4cF18e9f923781c471": SignatureRedeemQueue
 
-  # Oracle
-  "0x0CdFf250C7a071fdc72340D820C5C8e29507Aaad": TransparentUpgradeableProxy
-  "0x0000000F0d3D1c31b72368366A4049C05E291D58": Oracle
-  "0x000000005F543c38d5ea6D0bF10A50974Eb55E35": OracleHelper
+  # RiskManager
+  "0xa51E4FA916b939Fa451520D2B7600c740d86E5A0": TransparentUpgradeableProxy
+  "0x0000000714cf2851baC1AE2f41871862e9D216fD": RiskManager
 
   # ShareManager
   "0x952f39AA62E94db3Ad0d1C7D1E43C1a8519E45D8": TransparentUpgradeableProxy
   "0x0000000E8eb7173fA1a3ba60eCA325bcB6aaf378": TokenizedShareManager
   "0x00000005564AAE40D88e2F08dA71CBe156767977": BasicShareManager
-
-  # FeeManager
-  "0xF7223356819Ea48f25880b6c2ab3e907CC336D45": TransparentUpgradeableProxy
-  "0x0000000dE74e5D51651326E0A3e1ACA94bEAF6E1": FeeManager
-
-  # RiskManager
-  "0xa51E4FA916b939Fa451520D2B7600c740d86E5A0": TransparentUpgradeableProxy
-  "0x0000000714cf2851baC1AE2f41871862e9D216fD": RiskManager
 
   # Subvault
   "0x75FE0d73d3C64cdC1C6449D9F977Be6857c4d011": TransparentUpgradeableProxy
@@ -50,12 +45,16 @@ contracts:
   # Verifier
   "0x04B30b1e98950e6A13550d84e991bE0d734C2c61": TransparentUpgradeableProxy
   "0x000000047Fc878662006E78D5174FB4285637966": Verifier
-  "0x0000000263Fb29C3D6B0C5837883519eF05ea20A": BitmaskVerifier
-  "0x000000028be48f9E62E13403480B60C4822C5aa5": VaultConfigurator
+
+  # Vault
+  "0x4E38F679e46B3216f0bd4B314E9C429AFfB1dEE3": TransparentUpgradeableProxy
+  "0x0000000615B2771511dAa693aC07BE5622869E01": Vault
 
   # SwapModule
   "0xE3575055a24d8642DFA3a51ec766Ef2db2671659": TransparentUpgradeableProxy
   "0x00000000d681E85e5783588f87A9573Cb97Eda01": SwapModule
+
+  "0x0000000263Fb29C3D6B0C5837883519eF05ea20A": BitmaskVerifier
 
   # EigenLayerVerifier
   "0x77A83AcBf7A6df20f1D681b4810437d74AE790F8": TransparentUpgradeableProxy
@@ -69,10 +68,18 @@ contracts:
   "0x41C443F10a92D597e6c9E271140BC94c10f5159F": TransparentUpgradeableProxy
   "0x00000000cBC6f5d4348496FfA22Cf014b9DA394B": SymbioticVerifier
 
+  "0x000000028be48f9E62E13403480B60C4822C5aa5": VaultConfigurator
+
   # Hooks
   "0x0000000637f1b1ccDA4Af2dB6CDDf5e5Ec45fd93": BasicRedeemHook
   "0x00000004d3B17e5391eb571dDb8fDF95646ca827": RedirectingDepositHook
   "0x000000065d1A7bD71f52886910aaBE6555b7317c": LidoDepositHook
+
+  "0x000000005F543c38d5ea6D0bF10A50974Eb55E35": OracleHelper
+
+  # MellowAccount
+  "0xCa027f59521E808EFdaF6f338D4269833451118A": TransparentUpgradeableProxy
+  "0x00000000028E2Bc6FABc9e8B9c7d5D411982Ff8e": MellowAccountV1
 
 explorer_hostname: api.etherscan.io
 explorer_token_env_var: ETHERSCAN_TOKEN
