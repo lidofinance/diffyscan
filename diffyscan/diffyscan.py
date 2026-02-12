@@ -5,6 +5,8 @@ import argparse
 import os
 import traceback
 
+from dotenv import load_dotenv
+
 from .utils.common import load_config, load_env, prettify_solidity
 from .utils.constants import (
     DIFFS_DIR,
@@ -714,6 +716,7 @@ def print_final_summary(
 
 def main() -> None:
     """Main entry point for the diffyscan application."""
+    load_dotenv()
     args = parse_arguments()
     skip_user_input = args.yes
     if args.version:
