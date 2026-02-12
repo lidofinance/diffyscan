@@ -1,63 +1,85 @@
 # earnUSD, earnUSDe, earnUSDc - Lido Earn USD vaults
 
 contracts:
-  # --- earnUSD ---
-  "0x8FFa4D9FBa523044429D2E51aC055726959942d8": TransparentUpgradeableProxy # earnUSD Vault
-  "0xC6Ff9F9E3Fd2eBDD57EEA6f9300b6391185e92AA": TransparentUpgradeableProxy # earnUSD DepositQueue (USDC)
-  "0x85Bf9D7d1Bbb747C797F45cB4d0f7Db49277ea97": TransparentUpgradeableProxy # earnUSD DepositQueue (USDT)
-  "0xC3EB084401c566ac20962A4f390F575F1D51e50A": TransparentUpgradeableProxy # earnUSD SyncDepositQueue (USDC)
-  "0x47c2d9732cF3cAE5B07A86927c305effb17829e1": TransparentUpgradeableProxy # earnUSD SyncDepositQueue (USDT)
-  "0xD574c925bc7B5281Be0e4EE432DC7e822214F6E9": TransparentUpgradeableProxy # earnUSD RedeemQueue (USDC)
-  "0x2e82daAacB1F56D1880b6c7c2a55a76fEa30b1B2": TransparentUpgradeableProxy # earnUSD Oracle
-  "0x974D2CD0584b22650B1C9617bb209c5196652c1A": TransparentUpgradeableProxy # earnUSD ShareManager
-  "0x5c07011BeD7e946a98787541E50581f424B8aea1": TransparentUpgradeableProxy # earnUSD FeeManager
-  "0xCEFFe01b3e6e98d201EE00397Aa11225024a44fb": TransparentUpgradeableProxy # earnUSD RiskManager
+  # Vault
+  "0x8FFa4D9FBa523044429D2E51aC055726959942d8": TransparentUpgradeableProxy # earnUSD
+  "0x2816f240109845661ba27b3D0148f211c5921553": TransparentUpgradeableProxy # earnUSDe
+  "0x8F281A5fC4Fc588842923DE678ccC48Fc36AB631": TransparentUpgradeableProxy # earnUSDc
+  "0x0000000615B2771511dAa693aC07BE5622869E01": Vault # implementation
+
+  # DepositQueue (USDC)
+  "0xC6Ff9F9E3Fd2eBDD57EEA6f9300b6391185e92AA": TransparentUpgradeableProxy # earnUSD
+  "0x2B1AA4E755Ffa8103FB03A0ee886ce9A2D723024": TransparentUpgradeableProxy # earnUSDe
+  "0x739188DCee93fF298141B6d3d6B63327D8832297": TransparentUpgradeableProxy # earnUSDc
+
+  # DepositQueue (USDT)
+  "0x85Bf9D7d1Bbb747C797F45cB4d0f7Db49277ea97": TransparentUpgradeableProxy # earnUSD
+  "0x8a5B0FF53185eEE20ed07e908e2e35e4ebA69Bac": TransparentUpgradeableProxy # earnUSDe
+  "0x96a042b5B83e574F9dBc2Bc6056aD879FD71FbF1": TransparentUpgradeableProxy # earnUSDc
+  "0x00000006dA9f179BFE250Dd1c51cD2d3581930c8": DepositQueue # implementation
+
+  # SyncDepositQueue (USDC)
+  "0xC3EB084401c566ac20962A4f390F575F1D51e50A": TransparentUpgradeableProxy # earnUSD
+  "0xc611c4506941761aCce51E56f6E5E103562ABda0": TransparentUpgradeableProxy # earnUSDe
+  "0x1fd7315B06eD86736EE319941bC624074274e87a": TransparentUpgradeableProxy # earnUSDc
+
+  # SyncDepositQueue (USDT)
+  "0x47c2d9732cF3cAE5B07A86927c305effb17829e1": TransparentUpgradeableProxy # earnUSD
+  "0x21261537e8a8882dF48bF68DFb600182131e6Eae": TransparentUpgradeableProxy # earnUSDe
+  "0xDb323240e2090F6d286CF610C7407ecBf5C01eEb": TransparentUpgradeableProxy # earnUSDc
+  "0x000000002E2aeaC5Fe65AaB6fE2E6AE0e44F1A3A": SyncDepositQueue # implementation
+
+  # RedeemQueue (USDC)
+  "0xD574c925bc7B5281Be0e4EE432DC7e822214F6E9": TransparentUpgradeableProxy # earnUSD
+  "0xC03691144bf5f0357f982a189ccF58a65d834889": TransparentUpgradeableProxy # earnUSDe
+  "0xaa1634d0f7F2a6263E25b6Ab1A12Ef0C4D9a30dD": TransparentUpgradeableProxy # earnUSDc
+  "0x000000000c139266BA06170Ed1DeacA6d11903c1": RedeemQueue # implementation
+
+  # Oracle
+  "0x2e82daAacB1F56D1880b6c7c2a55a76fEa30b1B2": TransparentUpgradeableProxy # earnUSD
+  "0x57667bAa0e70f2d053FE62eD340735e6b3710633": TransparentUpgradeableProxy # earnUSDe
+  "0x92616e18304a6A6D33A7edd89a9998C0df734AB9": TransparentUpgradeableProxy # earnUSDc
+  "0x0000000F0d3D1c31b72368366A4049C05E291D58": Oracle # implementation
+
+  # ShareManager
+  "0x974D2CD0584b22650B1C9617bb209c5196652c1A": TransparentUpgradeableProxy # earnUSD
+  "0xB7DEDB49cFC2F664B12f80DEDac066c5fc723CF3": TransparentUpgradeableProxy # earnUSDe
+  "0x3341F548cC9D3De05E44b40967f54e19d8889081": TransparentUpgradeableProxy # earnUSDc
+  "0x0000000E8eb7173fA1a3ba60eCA325bcB6aaf378": TokenizedShareManager # implementation
+
+  # FeeManager
+  "0x5c07011BeD7e946a98787541E50581f424B8aea1": TransparentUpgradeableProxy # earnUSD
+  "0x7A05a68857276884D4596c27fDeb4730eb13165B": TransparentUpgradeableProxy # earnUSDe
+  "0x363C6A0AF3917b4f08Cb1D0308eCaEF97b760d7d": TransparentUpgradeableProxy # earnUSDc
+  "0x0000000dE74e5D51651326E0A3e1ACA94bEAF6E1": FeeManager # implementation
+
+  # RiskManager
+  "0xCEFFe01b3e6e98d201EE00397Aa11225024a44fb": TransparentUpgradeableProxy # earnUSD
+  "0x663fDF2a67fc7DF1f144818dE96092ce73E11547": TransparentUpgradeableProxy # earnUSDe
+  "0x98cA76347cdB297d34cAE4F172259378F4627170": TransparentUpgradeableProxy # earnUSDc
+  "0x0000000714cf2851baC1AE2f41871862e9D216fD": RiskManager # implementation
+
+  # Subvault (earnUSD only)
   "0x0428130A1A62F007e2673486bFF52F529221b57A": TransparentUpgradeableProxy # earnUSD Subvault 0
-  "0x9a6302614aF86e92133192667bAa34E5244bF544": TransparentUpgradeableProxy # earnUSD Verifier 0
   "0xfd4667E97887473f8cD917Cf0eC4B29cEdDD75ce": TransparentUpgradeableProxy # earnUSD Subvault 1
+  "0x0000000E535B4E063f8372933A55470e67910a66": Subvault # implementation
+
+  # Verifier (earnUSD only)
+  "0x9a6302614aF86e92133192667bAa34E5244bF544": TransparentUpgradeableProxy # earnUSD Verifier 0
   "0xAC18cD2c0e02E15b3CFe6681352737CcDa4b19C1": TransparentUpgradeableProxy # earnUSD Verifier 1
+  "0x000000047Fc878662006E78D5174FB4285637966": Verifier # implementation
+
+  # Governance - earnUSD
   "0xB72aaB45C796f6dc7f72Eda6Ba7F1111f12884CE": TimelockController # earnUSD
   "0xEF3C091458fc6C9B979fF856aA1c93EAbF6467eE": OracleSubmitter # earnUSD
 
-  # --- earnUSDe ---
-  "0x2816f240109845661ba27b3D0148f211c5921553": TransparentUpgradeableProxy # earnUSDe Vault
-  "0x2B1AA4E755Ffa8103FB03A0ee886ce9A2D723024": TransparentUpgradeableProxy # earnUSDe DepositQueue (USDC)
-  "0x8a5B0FF53185eEE20ed07e908e2e35e4ebA69Bac": TransparentUpgradeableProxy # earnUSDe DepositQueue (USDT)
-  "0xc611c4506941761aCce51E56f6E5E103562ABda0": TransparentUpgradeableProxy # earnUSDe SyncDepositQueue (USDC)
-  "0x21261537e8a8882dF48bF68DFb600182131e6Eae": TransparentUpgradeableProxy # earnUSDe SyncDepositQueue (USDT)
-  "0xC03691144bf5f0357f982a189ccF58a65d834889": TransparentUpgradeableProxy # earnUSDe RedeemQueue (USDC)
-  "0x57667bAa0e70f2d053FE62eD340735e6b3710633": TransparentUpgradeableProxy # earnUSDe Oracle
-  "0xB7DEDB49cFC2F664B12f80DEDac066c5fc723CF3": TransparentUpgradeableProxy # earnUSDe ShareManager
-  "0x7A05a68857276884D4596c27fDeb4730eb13165B": TransparentUpgradeableProxy # earnUSDe FeeManager
-  "0x663fDF2a67fc7DF1f144818dE96092ce73E11547": TransparentUpgradeableProxy # earnUSDe RiskManager
+  # Governance - earnUSDe
   "0xf58221ea16b0D914aC7BdD8554b399f5918b704e": TimelockController # earnUSDe
   "0xD5eeBFc70143ee7A76758c8A80bD5A5939FAc6FC": OracleSubmitter # earnUSDe
 
-  # --- earnUSDc ---
-  "0x8F281A5fC4Fc588842923DE678ccC48Fc36AB631": TransparentUpgradeableProxy # earnUSDc Vault
-  "0x739188DCee93fF298141B6d3d6B63327D8832297": TransparentUpgradeableProxy # earnUSDc DepositQueue (USDC)
-  "0x96a042b5B83e574F9dBc2Bc6056aD879FD71FbF1": TransparentUpgradeableProxy # earnUSDc DepositQueue (USDT)
-  "0x1fd7315B06eD86736EE319941bC624074274e87a": TransparentUpgradeableProxy # earnUSDc SyncDepositQueue (USDC)
-  "0xDb323240e2090F6d286CF610C7407ecBf5C01eEb": TransparentUpgradeableProxy # earnUSDc SyncDepositQueue (USDT)
-  "0xaa1634d0f7F2a6263E25b6Ab1A12Ef0C4D9a30dD": TransparentUpgradeableProxy # earnUSDc RedeemQueue (USDC)
-  "0x92616e18304a6A6D33A7edd89a9998C0df734AB9": TransparentUpgradeableProxy # earnUSDc Oracle
-  "0x3341F548cC9D3De05E44b40967f54e19d8889081": TransparentUpgradeableProxy # earnUSDc ShareManager
-  "0x363C6A0AF3917b4f08Cb1D0308eCaEF97b760d7d": TransparentUpgradeableProxy # earnUSDc FeeManager
-  "0x98cA76347cdB297d34cAE4F172259378F4627170": TransparentUpgradeableProxy # earnUSDc RiskManager
+  # Governance - earnUSDc
   "0x01327Cae0ced4443FBE7681FD3923DD1C43c1408": TimelockController # earnUSDc
   "0x0351e5ebA388bA319dc1a80124B94Bc8bfF4bc38": OracleSubmitter # earnUSDc
-
-  # Shared implementations
-  "0x0000000615B2771511dAa693aC07BE5622869E01": Vault # implementation
-  "0x00000006dA9f179BFE250Dd1c51cD2d3581930c8": DepositQueue # implementation
-  "0x000000002E2aeaC5Fe65AaB6fE2E6AE0e44F1A3A": SyncDepositQueue # implementation
-  "0x000000000c139266BA06170Ed1DeacA6d11903c1": RedeemQueue # implementation
-  "0x0000000F0d3D1c31b72368366A4049C05E291D58": Oracle # implementation
-  "0x0000000E8eb7173fA1a3ba60eCA325bcB6aaf378": TokenizedShareManager # implementation
-  "0x0000000dE74e5D51651326E0A3e1ACA94bEAF6E1": FeeManager # implementation
-  "0x0000000714cf2851baC1AE2f41871862e9D216fD": RiskManager # implementation
-  "0x0000000E535B4E063f8372933A55470e67910a66": Subvault # implementation
-  "0x000000047Fc878662006E78D5174FB4285637966": Verifier # implementation
 
 explorer_hostname: api.etherscan.io
 explorer_token_env_var: ETHERSCAN_TOKEN

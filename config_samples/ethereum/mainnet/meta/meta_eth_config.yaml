@@ -1,57 +1,69 @@
 # earnETH - Lido Earn ETH
 
 contracts:
-  # earnETH Vault
-  "0x6a37725ca7f4CE81c004c955f7280d5C704a249e": TransparentUpgradeableProxy # Vault
-  "0x0000000615B2771511dAa693aC07BE5622869E01": Vault # implementation
+  # Vault
+  "0x6a37725ca7f4CE81c004c955f7280d5C704a249e": TransparentUpgradeableProxy
+  "0x0000000615B2771511dAa693aC07BE5622869E01": Vault
 
-  # DepositQueues
-  "0x1db7094Ef0D994B0b62f6Cd67dB801ad194999A8": TransparentUpgradeableProxy # DepositQueue (ETH)
-  "0x3Fc48660d02e59fBedD0a5Cc18a5580D1f8dD6A4": TransparentUpgradeableProxy # DepositQueue (WETH)
-  "0xe39EED9A454C4918F8d0682062777cB251cd513F": TransparentUpgradeableProxy # DepositQueue (wstETH)
-  "0x411172F1E5310d03b38128F2a294F2e33c691B30": TransparentUpgradeableProxy # DepositQueue (GG)
-  "0x268ea1cc674cdaE200c4609E7b09d03Dc618E663": TransparentUpgradeableProxy # DepositQueue (strETH)
-  "0x4bDd2Ea1E20acb13f2758190c92a84175107A86f": TransparentUpgradeableProxy # DepositQueue (DVstETH)
-  "0x00000006dA9f179BFE250Dd1c51cD2d3581930c8": DepositQueue # implementation
+  # DepositQueue (ETH)
+  "0x1db7094Ef0D994B0b62f6Cd67dB801ad194999A8": TransparentUpgradeableProxy
+  # DepositQueue (WETH)
+  "0x3Fc48660d02e59fBedD0a5Cc18a5580D1f8dD6A4": TransparentUpgradeableProxy
+  # DepositQueue (wstETH)
+  "0xe39EED9A454C4918F8d0682062777cB251cd513F": TransparentUpgradeableProxy
+  # DepositQueue (GG)
+  "0x411172F1E5310d03b38128F2a294F2e33c691B30": TransparentUpgradeableProxy
+  # DepositQueue (strETH)
+  "0x268ea1cc674cdaE200c4609E7b09d03Dc618E663": TransparentUpgradeableProxy
+  # DepositQueue (DVstETH)
+  "0x4bDd2Ea1E20acb13f2758190c92a84175107A86f": TransparentUpgradeableProxy
+  "0x00000006dA9f179BFE250Dd1c51cD2d3581930c8": DepositQueue
 
-  # SyncDepositQueues
-  "0x4a1d5dd96d6AA2Ba82e748E941d4425cb117dE84": TransparentUpgradeableProxy # SyncDepositQueue (ETH)
-  "0x3B374Be4c02D7367a1fDDCcDbc2EAA708BB220a0": TransparentUpgradeableProxy # SyncDepositQueue (WETH)
-  "0xD39ceac8EAfc9c8dBf52319B900CA6623730d4BA": TransparentUpgradeableProxy # SyncDepositQueue (wstETH)
-  "0xDc6D33047F57fCb54A6944889c5A2779EAB355a2": TransparentUpgradeableProxy # SyncDepositQueue (GG)
-  "0x2161D9e85C73e7753f6Be8d0D5afBEAf416A8C58": TransparentUpgradeableProxy # SyncDepositQueue (strETH)
-  "0x07d82e01c73494F9b7965ED12eBDbF58E1057fBb": TransparentUpgradeableProxy # SyncDepositQueue (DVstETH)
-  "0x000000002E2aeaC5Fe65AaB6fE2E6AE0e44F1A3A": SyncDepositQueue # implementation
+  # SyncDepositQueue (ETH)
+  "0x4a1d5dd96d6AA2Ba82e748E941d4425cb117dE84": TransparentUpgradeableProxy
+  # SyncDepositQueue (WETH)
+  "0x3B374Be4c02D7367a1fDDCcDbc2EAA708BB220a0": TransparentUpgradeableProxy
+  # SyncDepositQueue (wstETH)
+  "0xD39ceac8EAfc9c8dBf52319B900CA6623730d4BA": TransparentUpgradeableProxy
+  # SyncDepositQueue (GG)
+  "0xDc6D33047F57fCb54A6944889c5A2779EAB355a2": TransparentUpgradeableProxy
+  # SyncDepositQueue (strETH)
+  "0x2161D9e85C73e7753f6Be8d0D5afBEAf416A8C58": TransparentUpgradeableProxy
+  # SyncDepositQueue (DVstETH)
+  "0x07d82e01c73494F9b7965ED12eBDbF58E1057fBb": TransparentUpgradeableProxy
+  "0x000000002E2aeaC5Fe65AaB6fE2E6AE0e44F1A3A": SyncDepositQueue
 
-  # RedeemQueue
-  "0x095bFAca9f1c6F2B063Cd67C6d6bfcd0c3aaB7b4": TransparentUpgradeableProxy # RedeemQueue (wstETH)
-  "0x000000000c139266BA06170Ed1DeacA6d11903c1": RedeemQueue # implementation
+  # RedeemQueue (wstETH)
+  "0x095bFAca9f1c6F2B063Cd67C6d6bfcd0c3aaB7b4": TransparentUpgradeableProxy
+  "0x000000000c139266BA06170Ed1DeacA6d11903c1": RedeemQueue
 
   # Oracle
-  "0xAda1f4c24603aB2fe5aBd35BCD12370e98A20358": TransparentUpgradeableProxy # Oracle
-  "0x0000000F0d3D1c31b72368366A4049C05E291D58": Oracle # implementation
+  "0xAda1f4c24603aB2fe5aBd35BCD12370e98A20358": TransparentUpgradeableProxy
+  "0x0000000F0d3D1c31b72368366A4049C05E291D58": Oracle
 
   # ShareManager
-  "0xBBFC8683C8fE8cF73777feDE7ab9574935fea0A4": TransparentUpgradeableProxy # ShareManager
-  "0x0000000E8eb7173fA1a3ba60eCA325bcB6aaf378": TokenizedShareManager # implementation
+  "0xBBFC8683C8fE8cF73777feDE7ab9574935fea0A4": TransparentUpgradeableProxy
+  "0x0000000E8eb7173fA1a3ba60eCA325bcB6aaf378": TokenizedShareManager
 
   # FeeManager
-  "0xed4Fac879eE86F3aB0101993A3713e7cAA0488E1": TransparentUpgradeableProxy # FeeManager
-  "0x0000000dE74e5D51651326E0A3e1ACA94bEAF6E1": FeeManager # implementation
+  "0xed4Fac879eE86F3aB0101993A3713e7cAA0488E1": TransparentUpgradeableProxy
+  "0x0000000dE74e5D51651326E0A3e1ACA94bEAF6E1": FeeManager
 
   # RiskManager
-  "0xa2a4C4ecE27229aF51c546844AB752824Ccb557e": TransparentUpgradeableProxy # RiskManager
-  "0x0000000714cf2851baC1AE2f41871862e9D216fD": RiskManager # implementation
+  "0xa2a4C4ecE27229aF51c546844AB752824Ccb557e": TransparentUpgradeableProxy
+  "0x0000000714cf2851baC1AE2f41871862e9D216fD": RiskManager
 
-  # Subvaults
-  "0xC5901C2481ca9C26398A9Da258b13717894bfebF": TransparentUpgradeableProxy # Subvault 0
-  "0x7F515C80fA4C1FCFF34F0329141A9C3b20468FE5": TransparentUpgradeableProxy # Subvault 1
-  "0x0000000E535B4E063f8372933A55470e67910a66": Subvault # implementation
+  # Subvault 0
+  "0xC5901C2481ca9C26398A9Da258b13717894bfebF": TransparentUpgradeableProxy
+  # Subvault 1
+  "0x7F515C80fA4C1FCFF34F0329141A9C3b20468FE5": TransparentUpgradeableProxy
+  "0x0000000E535B4E063f8372933A55470e67910a66": Subvault
 
-  # Verifiers
-  "0xBc46B79d79fCac1F4232D4Da1BA31aCED0AABFE0": TransparentUpgradeableProxy # Verifier 0
-  "0xc0FC0B74923A80Af21B1E49633cAA309f432140F": TransparentUpgradeableProxy # Verifier 1
-  "0x000000047Fc878662006E78D5174FB4285637966": Verifier # implementation
+  # Verifier 0
+  "0xBc46B79d79fCac1F4232D4Da1BA31aCED0AABFE0": TransparentUpgradeableProxy
+  # Verifier 1
+  "0xc0FC0B74923A80Af21B1E49633cAA309f432140F": TransparentUpgradeableProxy
+  "0x000000047Fc878662006E78D5174FB4285637966": Verifier
 
   # Governance
   "0x363Ba8843d06BA5968f55C26aB055162eDd62189": TimelockController
