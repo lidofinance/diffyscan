@@ -174,6 +174,82 @@ dependencies: {}
     assert isinstance(result["explorer_chain_id"], int)
 
 
+def test_yaml_unquoted_hex_address_raises(tmp_path):
+    """Unquoted hex addresses get coerced to int by PyYAML — load_config must catch this."""
+    path = tmp_path / "config.yaml"
+    path.write_text(
+        """\
+contracts:
+  0x00000000000000000000000000000000000000AB: TestContract
+explorer_hostname: api.etherscan.io
+explorer_token_env_var: ETHERSCAN_TOKEN
+github_repo:
+  url: https://github.com/example/repo
+  commit: abc123
+  relative_root: ""
+dependencies: {}
+"""
+    )
+    with pytest.raises(ValueError, match="parsed as integer"):
+        load_config(str(path))
+
+
+def test_empty_yaml_raises(tmp_path):
+    """An empty YAML file (or one with only comments) should raise, not return None."""
+    path = tmp_path / "config.yaml"
+    path.write_text("# just a comment\n")
+    with pytest.raises(ValueError, match="empty or contains only comments"):
+        load_config(str(path))
+
+
+def test_bytecode_comparison_unquoted_hex_raises(tmp_path):
+    """Unquoted hex in bytecode_comparison.constructor_args keys should be caught."""
+    path = tmp_path / "config.yaml"
+    path.write_text(
+        """\
+contracts:
+  "0x0000000000000000000000000000000000000001": TestContract
+explorer_hostname: api.etherscan.io
+explorer_token_env_var: ETHERSCAN_TOKEN
+github_repo:
+  url: https://github.com/example/repo
+  commit: abc123
+  relative_root: ""
+dependencies: {}
+bytecode_comparison:
+  constructor_args:
+    0x00000000000000000000000000000000000000AB:
+      - "0x01"
+"""
+    )
+    with pytest.raises(ValueError, match="bytecode_comparison.constructor_args"):
+        load_config(str(path))
+
+
+def test_bytecode_comparison_library_unquoted_hex_raises(tmp_path):
+    """Unquoted hex in bytecode_comparison.libraries values should be caught."""
+    path = tmp_path / "config.yaml"
+    path.write_text(
+        """\
+contracts:
+  "0x0000000000000000000000000000000000000001": TestContract
+explorer_hostname: api.etherscan.io
+explorer_token_env_var: ETHERSCAN_TOKEN
+github_repo:
+  url: https://github.com/example/repo
+  commit: abc123
+  relative_root: ""
+dependencies: {}
+bytecode_comparison:
+  libraries:
+    "contracts/Foo.sol":
+      MyLib: 0x00000000000000000000000000000000000000AB
+"""
+    )
+    with pytest.raises(ValueError, match="bytecode_comparison.libraries"):
+        load_config(str(path))
+
+
 # --- Full-fixture tests (max properties) ---
 
 

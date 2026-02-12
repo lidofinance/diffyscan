@@ -7,10 +7,8 @@ REQUIRED_GITHUB_KEYS = {"url", "commit", "relative_root"}
 
 
 def config_paths():
-    paths = []
-    for ext in ("*.json", "*.yaml", "*.yml"):
-        paths.extend(CONFIG_DIR.rglob(ext))
-    return paths
+    supported = {".json", ".yaml", ".yml"}
+    return sorted(p for p in CONFIG_DIR.rglob("*") if p.suffix.lower() in supported)
 
 
 def load(path):

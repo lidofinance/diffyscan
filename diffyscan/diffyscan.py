@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 from .utils.common import load_config, load_env, prettify_solidity
 from .utils.constants import (
     DIFFS_DIR,
-    DEFAULT_CONFIG_PATH,
     DEFAULT_HARDHAT_CONFIG_PATH,
     START_TIME,
     DEFAULT_LOCAL_RPC_URL,
@@ -433,6 +432,9 @@ def process_config(
             - 'bytecode_stats': list of per-contract bytecode results
             - 'config_path': path to the config file
     """
+    # Reset exception handler to default before each config
+    ExceptionHandler.initialize(True)
+
     logger.info(f"Loading config {path}...")
     config = load_config(path)
 
@@ -728,55 +730,52 @@ def main() -> None:
     # Binary comparison is enabled by default, unless --skip-binary-comparison is set
     enable_binary_comparison = not args.skip_binary_comparison
 
-    # Collect all results for final summary
-    all_results = []
+    # Resolve config paths
+    config_paths = []
+    supported_extensions = (".json", ".yaml", ".yml")
 
     if args.path is None:
-        result = process_config(
-            DEFAULT_CONFIG_PATH,
-            args.hardhat_path,
-            args.support_brownie,
-            args.prettify,
-            enable_binary_comparison,
-            args.cache_explorer,
-            args.cache_github,
-            skip_user_input,
+        config_path = next(
+            (
+                p
+                for p in ("config.json", "config.yaml", "config.yml")
+                if os.path.isfile(p)
+            ),
+            None,
         )
-        all_results.append(result)
+        if config_path is None:
+            error_msg = "No config file found. Create config.json or config.yaml in the current directory, or specify a path with --path."
+            logger.error(error_msg)
+            raise FileNotFoundError(error_msg)
+        config_paths.append(config_path)
     elif os.path.isfile(args.path):
-        result = process_config(
-            args.path,
-            args.hardhat_path,
-            args.support_brownie,
-            args.prettify,
-            enable_binary_comparison,
-            args.cache_explorer,
-            args.cache_github,
-            skip_user_input,
-        )
-        all_results.append(result)
+        config_paths.append(args.path)
     elif os.path.isdir(args.path):
-        supported_extensions = (".json", ".yaml", ".yml")
-        for filename in os.listdir(args.path):
-            config_path = os.path.join(args.path, filename)
-            if os.path.isfile(config_path) and filename.lower().endswith(
+        for filename in sorted(os.listdir(args.path)):
+            full_path = os.path.join(args.path, filename)
+            if os.path.isfile(full_path) and filename.lower().endswith(
                 supported_extensions
             ):
-                result = process_config(
-                    config_path,
-                    args.hardhat_path,
-                    args.support_brownie,
-                    args.prettify,
-                    enable_binary_comparison,
-                    args.cache_explorer,
-                    args.cache_github,
-                    skip_user_input,
-                )
-                all_results.append(result)
+                config_paths.append(full_path)
     else:
         error_msg = f"Specified config path {args.path} not found"
         logger.error(error_msg)
         raise FileNotFoundError(error_msg)
+
+    # Process all config files
+    all_results = []
+    for config_path in config_paths:
+        result = process_config(
+            config_path,
+            args.hardhat_path,
+            args.support_brownie,
+            args.prettify,
+            enable_binary_comparison,
+            args.cache_explorer,
+            args.cache_github,
+            skip_user_input,
+        )
+        all_results.append(result)
 
     execution_time = time.time() - START_TIME
 
