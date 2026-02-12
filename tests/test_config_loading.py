@@ -28,10 +28,7 @@ ALL_TOP_LEVEL_KEYS = {
 
 @pytest.fixture(autouse=True)
 def fixtures_dir():
-    FIXTURES_DIR.mkdir(exist_ok=True)
     return FIXTURES_DIR
-
-
 SAMPLE_CONFIG = {
     "contracts": {"0x0000000000000000000000000000000000000001": "TestContract"},
     "explorer_hostname": "api.etherscan.io",
