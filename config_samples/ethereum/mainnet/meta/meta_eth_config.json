@@ -40,7 +40,7 @@
   "explorer_chain_id": 1,
   "github_repo": {
     "url": "https://github.com/mellow-finance/flexible-vaults",
-    "commit": "685be8395aef17e41615cf0bfebfbfbd51c3b582",
+    "commit": "6ca2926e5cc2d5a17143c19ede2cb4fd5df58280",
     "relative_root": ""
   },
   "dependencies": {
