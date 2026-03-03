@@ -13,7 +13,7 @@ contracts:
   # DepositQueue
   "0xBB92A7B9695750e1234BaB18F83b73686dd09854": TransparentUpgradeableProxy
   "0x00000006dA9f179BFE250Dd1c51cD2d3581930c8": DepositQueue
-  "0x000000002E2aeaC5Fe65AaB6fE2E6AE0e44F1A3A": SyncDepositQueue
+  "0x000000000b98f77a017b5d3468400c5C597a3Bde": SyncDepositQueue
   "0x00000003887dfBCEbD1e4097Ad89B690de7eFbf9": SignatureDepositQueue
 
   # FeeManager
@@ -37,6 +37,7 @@ contracts:
   "0x952f39AA62E94db3Ad0d1C7D1E43C1a8519E45D8": TransparentUpgradeableProxy
   "0x0000000E8eb7173fA1a3ba60eCA325bcB6aaf378": TokenizedShareManager
   "0x00000005564AAE40D88e2F08dA71CBe156767977": BasicShareManager
+  "0x000000000c79D2B5cD58AE545afc83030233D7B6": BurnableTokenizedShareManager
 
   # Subvault
   "0x75FE0d73d3C64cdC1C6449D9F977Be6857c4d011": TransparentUpgradeableProxy
@@ -87,7 +88,7 @@ explorer_chain_id: 1
 
 github_repo:
   url: https://github.com/mellow-finance/flexible-vaults
-  commit: 6ca2926e5cc2d5a17143c19ede2cb4fd5df58280
+  commit: c9c71818f0a8bead183f9860db3b8bbceb7b8f37
   relative_root: ""
 
 dependencies:

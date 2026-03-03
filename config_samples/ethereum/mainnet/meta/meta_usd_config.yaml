@@ -20,37 +20,45 @@ contracts:
   "0xEF3C091458fc6C9B979fF856aA1c93EAbF6467eE": OracleSubmitter
 
   # earnUSDe
-  "0x2816f240109845661ba27b3D0148f211c5921553": TransparentUpgradeableProxy # Vault
-  "0x2B1AA4E755Ffa8103FB03A0ee886ce9A2D723024": TransparentUpgradeableProxy # DepositQueue (USDC)
-  "0x8a5B0FF53185eEE20ed07e908e2e35e4ebA69Bac": TransparentUpgradeableProxy # DepositQueue (USDT)
-  "0xc611c4506941761aCce51E56f6E5E103562ABda0": TransparentUpgradeableProxy # SyncDepositQueue (USDC)
-  "0x21261537e8a8882dF48bF68DFb600182131e6Eae": TransparentUpgradeableProxy # SyncDepositQueue (USDT)
-  "0xC03691144bf5f0357f982a189ccF58a65d834889": TransparentUpgradeableProxy # RedeemQueue (USDC)
-  "0x57667bAa0e70f2d053FE62eD340735e6b3710633": TransparentUpgradeableProxy # Oracle
-  "0xB7DEDB49cFC2F664B12f80DEDac066c5fc723CF3": TransparentUpgradeableProxy # ShareManager
-  "0x7A05a68857276884D4596c27fDeb4730eb13165B": TransparentUpgradeableProxy # FeeManager
-  "0x663fDF2a67fc7DF1f144818dE96092ce73E11547": TransparentUpgradeableProxy # RiskManager
-  "0xf58221ea16b0D914aC7BdD8554b399f5918b704e": TimelockController
-  "0xD5eeBFc70143ee7A76758c8A80bD5A5939FAc6FC": OracleSubmitter
+  "0xB6DB39C23158fE36B963d606daA0f59508566DC9": TransparentUpgradeableProxy # Vault
+  "0xd3e2091c3013d7B2768645e2978a094d7A0Ba869": TransparentUpgradeableProxy # SyncDepositQueue (USDC)
+  "0xda590Dc5E088155b9C08a6FbdA78D5473061450c": TransparentUpgradeableProxy # SyncDepositQueue (USDT)
+  "0xf77093771a42F7079206bFb6f803c293856cF961": TransparentUpgradeableProxy # RedeemQueue (USDC)
+  "0x6e1B7c2472a9696C31C7be488A9ECA298943d39C": TransparentUpgradeableProxy # Oracle
+  "0x850CAFf16081d666194dc74A6E838F47102B3DcE": TransparentUpgradeableProxy # ShareManager
+  "0x2Fe25F82f7d6C927132574c707641C7896Cf609D": TransparentUpgradeableProxy # FeeManager
+  "0xfcB5C1BEbFf52B0CA5F5693e4EdBecEF6Ecf76c6": TransparentUpgradeableProxy # RiskManager
+  "0x82419c84fd5E4ae074b798b65f33ed99AaE637b7": TransparentUpgradeableProxy # SwapModule 0
+  "0x0D18b333A11DeD583537eAa9b447A3127A773049": TransparentUpgradeableProxy # Subvault 0
+  "0x71998AaAaFB62fE9028206915e765C289bEDd9A5": TransparentUpgradeableProxy # Verifier 0
+  "0x0e5f73fBaE6800e4b6E7fCEB77Ab514e3cA3379a": TransparentUpgradeableProxy # Subvault 1
+  "0xb224bAf45430E4f7232f8f0EF1D303ad4F964Af0": TransparentUpgradeableProxy # Verifier 1
+  "0x019852c3f94327E5744d67B1cB55B65648DAF3ff": TransparentUpgradeableProxy # Subvault 2
+  "0xd2Ba8e477EA06c75Fdf35A3D64cD97b50019E31a": TransparentUpgradeableProxy # Verifier 2
+  "0x5AAC597e074C449F9F8D75CB53193a796A09e92E": TimelockController
+  "0x6952F3E2561f661c09a05E59A001F6e86B62f62F": OracleSubmitter
 
   # earnUSDc
-  "0x8F281A5fC4Fc588842923DE678ccC48Fc36AB631": TransparentUpgradeableProxy # Vault
-  "0x739188DCee93fF298141B6d3d6B63327D8832297": TransparentUpgradeableProxy # DepositQueue (USDC)
-  "0x96a042b5B83e574F9dBc2Bc6056aD879FD71FbF1": TransparentUpgradeableProxy # DepositQueue (USDT)
-  "0x1fd7315B06eD86736EE319941bC624074274e87a": TransparentUpgradeableProxy # SyncDepositQueue (USDC)
-  "0xDb323240e2090F6d286CF610C7407ecBf5C01eEb": TransparentUpgradeableProxy # SyncDepositQueue (USDT)
-  "0xaa1634d0f7F2a6263E25b6Ab1A12Ef0C4D9a30dD": TransparentUpgradeableProxy # RedeemQueue (USDC)
-  "0x92616e18304a6A6D33A7edd89a9998C0df734AB9": TransparentUpgradeableProxy # Oracle
-  "0x3341F548cC9D3De05E44b40967f54e19d8889081": TransparentUpgradeableProxy # ShareManager
-  "0x363C6A0AF3917b4f08Cb1D0308eCaEF97b760d7d": TransparentUpgradeableProxy # FeeManager
-  "0x98cA76347cdB297d34cAE4F172259378F4627170": TransparentUpgradeableProxy # RiskManager
-  "0x01327Cae0ced4443FBE7681FD3923DD1C43c1408": TimelockController
-  "0x0351e5ebA388bA319dc1a80124B94Bc8bfF4bc38": OracleSubmitter
+  "0xbF9f76bA554eA5DAfBf736320792D87C1eE362aB": TransparentUpgradeableProxy # Vault
+  "0x9E34fa2E73c686D733C83aD67Fe592184D939A08": TransparentUpgradeableProxy # SyncDepositQueue (USDC)
+  "0x5F82eFe079E629761BB4e6b219550237d7305D1F": TransparentUpgradeableProxy # SyncDepositQueue (USDT)
+  "0x6aAFF1f0e803baDEfb0E001c2EA4ED94baF5D589": TransparentUpgradeableProxy # RedeemQueue (USDC)
+  "0xae57a94f678823C4124c175376B4b3664c3D8FaD": TransparentUpgradeableProxy # Oracle
+  "0x7B5890a68b07d5089E817fD1D710804377E110a5": TransparentUpgradeableProxy # ShareManager
+  "0x2bf76Fcf9060feB355Dc0Cf9bEF69e340Ead338C": TransparentUpgradeableProxy # FeeManager
+  "0x793858a7cEFc693643b57BF3F3F58Ec692d46774": TransparentUpgradeableProxy # RiskManager
+  "0x53E137244d97C8262e0c307363860947623a2237": TransparentUpgradeableProxy # SwapModule 0
+  "0xCFdE79D2fcCBaC4E9917B902272520868a2Ca914": TransparentUpgradeableProxy # Subvault 0
+  "0xAF8a14D83ea4cc213e4CA67fAaDaF65515e491a2": TransparentUpgradeableProxy # Verifier 0
+  "0x492fd2a675F9D8363B9E9314Dc957E4bBf94457c": TransparentUpgradeableProxy # Subvault 1
+  "0xe265aAD364ba552011A8092c0D56dd8c45626ea9": TransparentUpgradeableProxy # Verifier 1
+  "0x50Ea394B8836A21b92287d743FA2428C24163e32": TimelockController
+  "0xcc1A2373c443670f14D703c8Df20D7AF778cAf9b": OracleSubmitter
 
   # Shared implementations
   "0x0000000615B2771511dAa693aC07BE5622869E01": Vault
   "0x00000006dA9f179BFE250Dd1c51cD2d3581930c8": DepositQueue
-  "0x000000002E2aeaC5Fe65AaB6fE2E6AE0e44F1A3A": SyncDepositQueue
+  "0x000000000b98f77a017b5d3468400c5C597a3Bde": SyncDepositQueue
   "0x000000000c139266BA06170Ed1DeacA6d11903c1": RedeemQueue
   "0x0000000F0d3D1c31b72368366A4049C05E291D58": Oracle
   "0x0000000E8eb7173fA1a3ba60eCA325bcB6aaf378": TokenizedShareManager
@@ -58,6 +66,7 @@ contracts:
   "0x0000000714cf2851baC1AE2f41871862e9D216fD": RiskManager
   "0x0000000E535B4E063f8372933A55470e67910a66": Subvault
   "0x000000047Fc878662006E78D5174FB4285637966": Verifier
+  "0x00000000d681E85e5783588f87A9573Cb97Eda01": SwapModule
 
 explorer_hostname: api.etherscan.io
 explorer_token_env_var: ETHERSCAN_TOKEN
@@ -65,7 +74,7 @@ explorer_chain_id: 1
 
 github_repo:
   url: https://github.com/mellow-finance/flexible-vaults
-  commit: 6ca2926e5cc2d5a17143c19ede2cb4fd5df58280
+  commit: c9c71818f0a8bead183f9860db3b8bbceb7b8f37
   relative_root: ""
 
 dependencies:
@@ -79,3 +88,7 @@ dependencies:
     commit: 60b305a8f3ff0c7688f02ac470417b6bbf1c4d27
     relative_root: contracts
     # version 5.3.0
+  lib/contracts/src/contracts:
+    url: https://github.com/cowprotocol/contracts
+    commit: c94c595a791681cf8ba7495117dcde397b932885
+    relative_root: src/contracts

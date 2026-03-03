@@ -21,7 +21,7 @@ contracts:
   "0xDc6D33047F57fCb54A6944889c5A2779EAB355a2": TransparentUpgradeableProxy # GG
   "0x2161D9e85C73e7753f6Be8d0D5afBEAf416A8C58": TransparentUpgradeableProxy # strETH
   "0x07d82e01c73494F9b7965ED12eBDbF58E1057fBb": TransparentUpgradeableProxy # DVstETH
-  "0x000000002E2aeaC5Fe65AaB6fE2E6AE0e44F1A3A": SyncDepositQueue
+  "0x000000000b98f77a017b5d3468400c5C597a3Bde": SyncDepositQueue
 
   # RedeemQueue
   "0x095bFAca9f1c6F2B063Cd67C6d6bfcd0c3aaB7b4": TransparentUpgradeableProxy # wstETH
@@ -63,7 +63,7 @@ explorer_chain_id: 1
 
 github_repo:
   url: https://github.com/mellow-finance/flexible-vaults
-  commit: 6ca2926e5cc2d5a17143c19ede2cb4fd5df58280
+  commit: c9c71818f0a8bead183f9860db3b8bbceb7b8f37
   relative_root: ""
 
 dependencies:
