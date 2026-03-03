@@ -28,7 +28,6 @@ ALL_TOP_LEVEL_KEYS = {
 
 @pytest.fixture(autouse=True)
 def fixtures_dir():
-    FIXTURES_DIR.mkdir(exist_ok=True)
     return FIXTURES_DIR
 
 
