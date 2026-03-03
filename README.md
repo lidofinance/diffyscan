@@ -13,6 +13,8 @@ Key features:
 
 - retrieve and diff sources from the GitHub repo against the queried ones from a blockscan service (e.g. Etherscan)
 - compare the bytecode compiled and deployed on the forked network locally against remote (see section 'bytecode_comparison' in `./config_samples/lido_dao_sepolia_config.json` as an example) - enabled by default
+- supports both **JSON and YAML** configuration files (`.json`, `.yaml`, `.yml`)
+- automatic environment variable loading from `.env` files
 - cache sources from blockchain explorers (option `--cache-explorer`) and GitHub files (option `--cache-github`) to avoid re-fetching on repeated runs
 - preprocess solidity sourcecode by means of prettier solidity plugin before comparing the sources (option `--prettify`) if needed.
 - preprocess imports to flat paths for Brownie compatibility (option `--support-brownie`)
@@ -33,28 +35,19 @@ npm install
 
 ## Usage
 
-Set your Etherscan token to fetch verified source code,
+Copy the example environment file and fill in your values:
+
+```bash
+cp .env.example .env
+```
+
+Or set environment variables directly:
 
 ```bash
 export ETHERSCAN_EXPLORER_TOKEN=<your-etherscan-token>
-```
-
-Set your Github token to query API without strict rate limiting,
-
-```bash
 export GITHUB_API_TOKEN=<your-github-token>
-```
-
-Set remote RPC URL to validate contract bytecode at remote rpc node,
-
-```bash
-export REMOTE_RPC_URL =<remote-rpc-url>
-```
-
-Set local RPC URL to check immutables against the local deployment and provided constructor arguments. If not set, it defaults to `http://127.0.0.1:7545`.
-
-```bash
-export LOCAL_RPC_URL=<local-rpc-url>
+export REMOTE_RPC_URL=<remote-rpc-url>
+export LOCAL_RPC_URL=<local-rpc-url>  # defaults to http://127.0.0.1:7545
 ```
 
 Start script with one of the examples provided (or entire folder of configs)
@@ -63,7 +56,11 @@ Start script with one of the examples provided (or entire folder of configs)
 diffyscan config_samples/lido_dao_sepolia_config.json
 ```
 
-Alternatively, create a new config file named `config.json` near the diffyscan.py,
+When no path is given, diffyscan looks for `config.json`, `config.yaml`, or `config.yml` in the current directory. When a directory is given, all `.json`, `.yaml`, and `.yml` files inside it are processed.
+
+Alternatively, create a new config file near the diffyscan.py. Configs can be written in JSON or YAML:
+
+**JSON** (`config.json`):
 
 ```json
 {
@@ -115,6 +112,31 @@ Alternatively, create a new config file named `config.json` near the diffyscan.p
 }
 ```
 
+**YAML** (`config.yaml`):
+
+```yaml
+contracts:
+  "0x28FAB2059C713A7F9D8c86Db49f9bb0e96Af1ef8": OssifiableProxy
+  "0xDba5Ad530425bb1b14EECD76F1b4a517780de537": LidoLocator
+
+explorer_hostname: api.etherscan.io
+explorer_chain_id: 17000
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+
+github_repo:
+  url: https://github.com/lidofinance/lido-dao
+  commit: cadffa46a2b8ed6cfa1127fca2468bae1a82d6bf
+  relative_root: ""
+
+dependencies:
+  "@openzeppelin/contracts-v4.4":
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: 6bd6b76d1156e20e45d1016f355d154141c7e5b9
+    relative_root: contracts
+```
+
+> **Important:** In YAML configs, always quote contract addresses (e.g. `"0x1234..."`). Unquoted hex values will be parsed as integers by YAML, and diffyscan will raise an error if this happens.
+
 then create a new Hardhat config file named `hardhat_config.ts` near the diffyscan.py
 
 ```ts
@@ -143,12 +165,13 @@ Start the script
 
 ```bash
 diffyscan /path/to/config.json --hardhat-path /path/to/hardhat_config.ts
+diffyscan /path/to/config.yaml --hardhat-path /path/to/hardhat_config.ts
 ```
 
 To skip binary comparison (which is enabled by default):
 
 ```bash
-diffyscan /path/to/config.json --hardhat-path /path/to/hardhat_config.ts --skip-binary-comparison
+diffyscan /path/to/config.json --skip-binary-comparison
 ```
 
 > Note: Brownie verification tooling might rewrite the imports in the source submission. It transforms relative paths to imported contracts into flat paths ('./folder/contract.sol' -> 'contract.sol'), which makes Diffyscan unable to find a contract for verification.
