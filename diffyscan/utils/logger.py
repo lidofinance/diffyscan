@@ -17,9 +17,16 @@ UNDERLINE = "\033[4m"
 END = "\033[0m"
 
 
+LOG_LEVELS = {"info": 0, "okay": 1, "warn": 2, "error": 3}
+
+
 class Logger:
     def __init__(self, log_file):
         self.log_file = log_file
+        self.level = LOG_LEVELS["info"]
+
+    def set_level(self, level_name: str):
+        self.level = LOG_LEVELS.get(level_name.lower(), 0)
 
     # log to file
     def log(self, text):
@@ -41,7 +48,8 @@ class Logger:
             stdout_text = self.cln(stdout_text, self.hl(value, BOLD))
 
         self.log(log_text)
-        self.stdout(stdout_text)
+        if self.level <= LOG_LEVELS["info"]:
+            self.stdout(stdout_text)
 
     def update_info(self, text, value=None):
         log_text = "🔵 [INFO] " + text
@@ -52,7 +60,8 @@ class Logger:
             stdout_text = self.cln(stdout_text, self.hl(value, BOLD))
 
         self.log(log_text)
-        self.stdout(stdout_text + (" " * 100), overwrite=True)
+        if self.level <= LOG_LEVELS["info"]:
+            self.stdout(stdout_text + (" " * 100), overwrite=True)
 
     def okay(self, text, value=None):
         log_text = "🟢 [OKAY] " + text
@@ -63,7 +72,8 @@ class Logger:
             stdout_text += ": " + self.hl(value, BOLD)
 
         self.log(log_text)
-        self.stdout(stdout_text)
+        if self.level <= LOG_LEVELS["okay"]:
+            self.stdout(stdout_text)
 
     def warn(self, text, value=None):
         log_text = "🟠 [WARN] " + text
@@ -74,7 +84,8 @@ class Logger:
             stdout_text += ": " + self.hl(value, BOLD)
 
         self.log(log_text)
-        self.stdout(stdout_text)
+        if self.level <= LOG_LEVELS["warn"]:
+            self.stdout(stdout_text)
 
     def error(self, text, value=None):
         log_text = "🔴 [ERROR] " + text
@@ -85,7 +96,8 @@ class Logger:
             stdout_text += ": " + self.hl(value, BOLD)
 
         self.log(log_text)
-        self.stdout(stdout_text)
+        if self.level <= LOG_LEVELS["error"]:
+            self.stdout(stdout_text)
 
     def report_table(self, table):
         log_table = termtables.to_string(
@@ -134,7 +146,8 @@ class Logger:
 
     def divider(self):
         self.log(" - +" * 20)
-        self.stdout((self.hlred(" -") + self.hlgreen(" +")) * 20)
+        if self.level <= LOG_LEVELS["info"]:
+            self.stdout((self.hlred(" -") + self.hlgreen(" +")) * 20)
 
 
 logger = Logger(LOGS_PATH)

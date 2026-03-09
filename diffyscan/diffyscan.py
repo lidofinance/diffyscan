@@ -438,6 +438,13 @@ def process_config(
     logger.info(f"Loading config {path}...")
     config = load_config(path)
 
+    # Resolve hardhat config path: CLI arg > config value > default
+    if hardhat_config_path is None:
+        bytecode_comparison = config.get("bytecode_comparison", {})
+        hardhat_config_path = bytecode_comparison.get(
+            "hardhat_config_name", DEFAULT_HARDHAT_CONFIG_PATH
+        )
+
     # Load tokens and validate
     explorer_token = _load_explorer_token(config)
     github_api_token = _validate_github_token()
@@ -572,7 +579,7 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "--hardhat-path",
-        default=DEFAULT_HARDHAT_CONFIG_PATH,
+        default=None,
         help="Path to Hardhat config",
     )
     parser.add_argument(
@@ -623,6 +630,18 @@ def parse_arguments() -> argparse.Namespace:
         action="append",
         default=[],
         help="Allow bytecode diffs for a specific contract address (0x...). Can be passed multiple times.",
+    )
+    parser.add_argument(
+        "--log-level",
+        choices=["info", "okay", "warn", "error"],
+        default="info",
+        help="Set log level (default: info). Use 'warn' or 'error' to reduce output.",
+    )
+    parser.add_argument(
+        "--quiet",
+        "-Q",
+        help="Hide info messages, show okay/warn/error (shorthand for --log-level okay)",
+        action="store_true",
     )
     return parser.parse_args()
 
@@ -676,7 +695,7 @@ def print_final_summary(
 
         if contracts_with_diffs:
             logger.divider()
-            logger.info("Contracts with source code differences:")
+            logger.warn("Contracts with source code differences:")
             for contract in contracts_with_diffs:
                 logger.warn(
                     f"  • {contract['name']} ({contract['address']}): "
@@ -708,7 +727,7 @@ def print_final_summary(
 
         if bytecode_mismatches:
             logger.divider()
-            logger.info("Contracts with bytecode differences:")
+            logger.warn("Contracts with bytecode differences:")
             for contract in bytecode_mismatches:
                 logger.warn(f"  • {contract['name']} ({contract['address']})")
 
@@ -721,6 +740,10 @@ def main() -> None:
     load_dotenv()
     args = parse_arguments()
     skip_user_input = args.yes
+    if args.quiet:
+        logger.set_level("okay")
+    else:
+        logger.set_level(args.log_level)
     if args.version:
         print(f"Diffyscan {__version__}")
         return
