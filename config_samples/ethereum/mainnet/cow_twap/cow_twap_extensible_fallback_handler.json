@@ -1,0 +1,35 @@
+{
+  "contracts": {
+    "0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5": "ExtensibleFallbackHandler"
+  },
+  "explorer_hostname": "api.etherscan.io",
+  "explorer_token_env_var": "ETHERSCAN_TOKEN",
+  "explorer_chain_id": 1,
+  "github_repo": {
+    "url": "https://github.com/cowprotocol/composable-cow",
+    "commit": "ab3addad9bc05acdbf5fb040eb5c336209b58e31",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "lib/safe": {
+      "url": "https://github.com/cowdao-grants/extensible-fallback-handler",
+      "commit": "e53ffea42d8547c984c463bf5b7e47f156619a1f",
+      "relative_root": ""
+    },
+    "lib/@openzeppelin": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "fd81a96f01cc42ef1c9a5399364968d0e07e9e90",
+      "relative_root": ""
+    }
+  },
+  "fail_on_bytecode_comparison_error": false,
+  "bytecode_comparison": {
+    "hardhat_config": {
+      "solidity_version": "0.8.19",
+      "optimizer": true,
+      "optimizer_runs": 20000
+    },
+    "constructor_calldata": {},
+    "constructor_args": {}
+  }
+}
