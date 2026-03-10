@@ -28,7 +28,7 @@ from .utils.github import (
 from .utils.helpers import create_dirs
 from .utils.logger import logger
 from .utils.binary_verifier import deep_match_bytecode
-from .utils.hardhat import hardhat
+from .utils.hardhat import hardhat, generate_hardhat_config
 from .utils.node_handler import (
     get_bytecode_from_node,
     get_account,
@@ -434,6 +434,26 @@ def process_config(
     logger.info(f"Loading config {path}...")
     config = load_config(path)
 
+    # Resolve hardhat config: generate from inline settings, or use hardhat_config_name
+    generated_hardhat_config_path = None
+    if hardhat_config_path == DEFAULT_HARDHAT_CONFIG_PATH:
+        bytecode_config = config.get("bytecode_comparison", {})
+        hardhat_settings = bytecode_config.get("hardhat_config")
+        if hardhat_settings and enable_binary_comparison:
+            chain_id = config.get("explorer_chain_id", 1)
+            generated_hardhat_config_path = generate_hardhat_config(
+                hardhat_settings, chain_id
+            )
+            hardhat_config_path = generated_hardhat_config_path
+        else:
+            config_hardhat_name = bytecode_config.get("hardhat_config_name")
+            if config_hardhat_name:
+                candidate = os.path.join("hardhat_configs", config_hardhat_name)
+                if os.path.isfile(candidate):
+                    hardhat_config_path = candidate
+                elif os.path.isfile(config_hardhat_name):
+                    hardhat_config_path = config_hardhat_name
+
     # Load tokens and validate
     explorer_token = _load_explorer_token(config)
     github_api_token = _validate_github_token()
@@ -544,6 +564,11 @@ def process_config(
     finally:
         if enable_binary_comparison:
             hardhat.stop()
+        if generated_hardhat_config_path and os.path.isfile(
+            generated_hardhat_config_path
+        ):
+            os.remove(generated_hardhat_config_path)
+            logger.info("Cleaned up generated Hardhat config")
 
     return {
         "source_stats": source_stats,

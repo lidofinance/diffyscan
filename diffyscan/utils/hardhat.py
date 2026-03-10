@@ -1,6 +1,8 @@
+import json
 import os
 import subprocess
 import signal
+import tempfile
 import time
 import socket
 
@@ -8,6 +10,65 @@ from urllib.parse import urlparse
 from .common import mask_text
 from .logger import logger
 from .custom_exceptions import HardhatError
+
+
+def generate_hardhat_config(hardhat_settings: dict, chain_id: int) -> str:
+    """
+    Generate a temporary Hardhat config file from JSON settings.
+
+    Args:
+        hardhat_settings: Dict with keys like "solidity_version", "optimizer",
+                          "optimizer_runs", "hardfork", "block_gas_limit"
+        chain_id: The chain ID for the hardhat network
+
+    Returns:
+        Path to the generated temporary .ts file
+    """
+    solidity_version = hardhat_settings.get("solidity_version", "0.8.25")
+    optimizer_enabled = hardhat_settings.get("optimizer", False)
+    optimizer_runs = hardhat_settings.get("optimizer_runs", 200)
+    hardfork = hardhat_settings.get("hardfork", "prague")
+    block_gas_limit = hardhat_settings.get("block_gas_limit", 92000000)
+    evm_version = hardhat_settings.get("evm_version")
+
+    if optimizer_enabled:
+        optimizer_settings = json.dumps(
+            {"enabled": True, "runs": optimizer_runs}, indent=6
+        )
+        evm_line = f'\n      evmVersion: "{evm_version}",' if evm_version else ""
+        solidity_block = f"""{{
+    version: "{solidity_version}",
+    settings: {{
+      optimizer: {optimizer_settings},{evm_line}
+    }},
+  }}"""
+    else:
+        solidity_block = f'"{solidity_version}"'
+
+    config_content = f"""import type {{ HardhatUserConfig }} from "hardhat/config";
+
+const config: HardhatUserConfig = {{
+  solidity: {solidity_block},
+  networks: {{
+    hardhat: {{
+      type: "edr-simulated",
+      chainId: {chain_id},
+      blockGasLimit: {block_gas_limit},
+      hardfork: "{hardfork}",
+    }},
+  }},
+}};
+
+export default config;
+"""
+
+    # Write to project root so Hardhat can resolve its dependencies
+    path = os.path.join(os.getcwd(), ".diffyscan_hardhat_config.ts")
+    with open(path, "w") as f:
+        f.write(config_content)
+
+    logger.info(f"Generated temporary Hardhat config: {path}")
+    return path
 
 
 class Hardhat:

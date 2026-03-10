@@ -115,7 +115,21 @@ Alternatively, create a new config file named `config.json` near the diffyscan.p
 }
 ```
 
-then create a new Hardhat config file named `hardhat_config.ts` near the diffyscan.py
+then either embed Hardhat settings directly in the JSON config (recommended):
+
+```json
+{
+  "bytecode_comparison": {
+    "hardhat_config": {
+      "solidity_version": "0.8.25",
+      "optimizer": true,
+      "optimizer_runs": 200
+    }
+  }
+}
+```
+
+or create a separate Hardhat config file named `hardhat_config.ts` near the diffyscan.py
 
 ```ts
 import type { HardhatUserConfig } from "hardhat/config";
@@ -139,7 +153,24 @@ export default config;
 >
 > See also: https://hardhat.org/hardhat-runner/docs/config#configuration
 
+The inline `hardhat_config` supports these fields:
+
+- `solidity_version` (required): Solidity compiler version (e.g. `"0.8.19"`)
+- `optimizer`: Enable optimizer (default: `false`)
+- `optimizer_runs`: Optimizer runs (default: `200`)
+- `evm_version`: EVM target version (optional)
+- `hardfork`: Hardhat hardfork setting (default: `"prague"`)
+- `block_gas_limit`: Block gas limit (default: `92000000`)
+
+The chain ID is automatically taken from `explorer_chain_id` in the config. A temporary Hardhat config file is generated at startup and cleaned up after the run.
+
 Start the script
+
+```bash
+diffyscan /path/to/config.json
+```
+
+Or with a separate Hardhat config file:
 
 ```bash
 diffyscan /path/to/config.json --hardhat-path /path/to/hardhat_config.ts
