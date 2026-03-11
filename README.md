@@ -155,7 +155,7 @@ export default config;
 
 The inline `hardhat_config` supports these fields:
 
-- `solidity_version` (required): Solidity compiler version (e.g. `"0.8.19"`)
+- `solidity_version` (optional, default: `"0.8.25"`): Solidity compiler version (e.g. `"0.8.19"`)
 - `optimizer`: Enable optimizer (default: `false`)
 - `optimizer_runs`: Optimizer runs (default: `200`)
 - `evm_version`: EVM target version (optional)

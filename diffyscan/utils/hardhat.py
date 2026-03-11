@@ -2,7 +2,6 @@ import json
 import os
 import subprocess
 import signal
-import tempfile
 import time
 import socket
 
@@ -31,15 +30,21 @@ def generate_hardhat_config(hardhat_settings: dict, chain_id: int) -> str:
     block_gas_limit = hardhat_settings.get("block_gas_limit", 92000000)
     evm_version = hardhat_settings.get("evm_version")
 
-    if optimizer_enabled:
-        optimizer_settings = json.dumps(
-            {"enabled": True, "runs": optimizer_runs}, indent=6
-        )
-        evm_line = f'\n      evmVersion: "{evm_version}",' if evm_version else ""
+    has_settings = optimizer_enabled or evm_version
+    if has_settings:
+        settings_lines = []
+        if optimizer_enabled:
+            optimizer_settings = json.dumps(
+                {"enabled": True, "runs": optimizer_runs}, indent=6
+            )
+            settings_lines.append(f"      optimizer: {optimizer_settings},")
+        if evm_version:
+            settings_lines.append(f'      evmVersion: "{evm_version}",')
+        settings_block = "\n".join(settings_lines)
         solidity_block = f"""{{
     version: "{solidity_version}",
     settings: {{
-      optimizer: {optimizer_settings},{evm_line}
+{settings_block}
     }},
   }}"""
     else:

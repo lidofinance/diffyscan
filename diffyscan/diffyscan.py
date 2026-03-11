@@ -567,8 +567,15 @@ def process_config(
         if generated_hardhat_config_path and os.path.isfile(
             generated_hardhat_config_path
         ):
-            os.remove(generated_hardhat_config_path)
-            logger.info("Cleaned up generated Hardhat config")
+            try:
+                os.remove(generated_hardhat_config_path)
+                logger.info("Cleaned up generated Hardhat config")
+            except OSError as e:
+                logger.warning(
+                    "Failed to remove generated Hardhat config '%s': %s",
+                    generated_hardhat_config_path,
+                    e,
+                )
 
     return {
         "source_stats": source_stats,
