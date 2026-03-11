@@ -88,6 +88,7 @@ explorer_chain_id: 1
 
 github_repo:
   url: https://github.com/mellow-finance/flexible-vaults
+  # Latest audit: https://2485622279-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FPyujKH9RYkVLASDhGflO%2Fuploads%2F3TMwsLt6Q2z3Wutyewuo%2FNM_0758_Mellow-1.pdf?alt=media&token=187ae9c0-f4fd-44b0-bfd8-d5b003bcd94b
   commit: c9c71818f0a8bead183f9860db3b8bbceb7b8f37
   relative_root: ""
 
