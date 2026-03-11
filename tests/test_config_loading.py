@@ -26,11 +26,6 @@ ALL_TOP_LEVEL_KEYS = {
 }
 
 
-@pytest.fixture(autouse=True)
-def fixtures_dir():
-    return FIXTURES_DIR
-
-
 SAMPLE_CONFIG = {
     "contracts": {"0x0000000000000000000000000000000000000001": "TestContract"},
     "explorer_hostname": "api.etherscan.io",

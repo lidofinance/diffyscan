@@ -57,6 +57,10 @@ def load_config(path: str) -> Config:
                 raise ValueError(
                     f"{path}: YAML file is empty or contains only comments"
                 )
+            if not isinstance(config, dict):
+                raise ValueError(
+                    f"{path}: YAML root must be a mapping, got {type(config).__name__}"
+                )
             _validate_yaml_hex_keys(config, path)
             return config
         elif ext == ".json":

@@ -13,7 +13,7 @@ def config_paths():
 
 def load(path):
     with open(path) as f:
-        if path.suffix in (".yaml", ".yml"):
+        if path.suffix.lower() in (".yaml", ".yml"):
             return yaml.safe_load(f)
         return json.load(f)
 

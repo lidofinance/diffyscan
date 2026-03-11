@@ -415,7 +415,7 @@ def _setup_binary_comparison(config: dict) -> tuple[str, str]:
 
 def process_config(
     path: str,
-    hardhat_config_path: str,
+    hardhat_config_path: str | None,
     recursive_parsing: bool,
     unify_formatting: bool,
     enable_binary_comparison: bool,
