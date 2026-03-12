@@ -5,10 +5,11 @@ import argparse
 import os
 import traceback
 
+from dotenv import load_dotenv
+
 from .utils.common import load_config, load_env, prettify_solidity
 from .utils.constants import (
     DIFFS_DIR,
-    DEFAULT_CONFIG_PATH,
     DEFAULT_HARDHAT_CONFIG_PATH,
     START_TIME,
     DEFAULT_LOCAL_RPC_URL,
@@ -414,7 +415,7 @@ def _setup_binary_comparison(config: dict) -> tuple[str, str]:
 
 def process_config(
     path: str,
-    hardhat_config_path: str,
+    hardhat_config_path: str | None,
     recursive_parsing: bool,
     unify_formatting: bool,
     enable_binary_comparison: bool,
@@ -431,8 +432,18 @@ def process_config(
             - 'bytecode_stats': list of per-contract bytecode results
             - 'config_path': path to the config file
     """
+    # Reset exception handler to default before each config
+    ExceptionHandler.initialize(True)
+
     logger.info(f"Loading config {path}...")
     config = load_config(path)
+
+    # Resolve hardhat config path: CLI arg > config value > default
+    if hardhat_config_path is None:
+        bytecode_comparison = config.get("bytecode_comparison", {})
+        hardhat_config_path = bytecode_comparison.get(
+            "hardhat_config_name", DEFAULT_HARDHAT_CONFIG_PATH
+        )
 
     # Load tokens and validate
     explorer_token = _load_explorer_token(config)
@@ -568,7 +579,7 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "--hardhat-path",
-        default=DEFAULT_HARDHAT_CONFIG_PATH,
+        default=None,
         help="Path to Hardhat config",
     )
     parser.add_argument(
@@ -619,6 +630,18 @@ def parse_arguments() -> argparse.Namespace:
         action="append",
         default=[],
         help="Allow bytecode diffs for a specific contract address (0x...). Can be passed multiple times.",
+    )
+    parser.add_argument(
+        "--log-level",
+        choices=["info", "okay", "warn", "error"],
+        default="info",
+        help="Set log level (default: info). Use 'warn' or 'error' to reduce output.",
+    )
+    parser.add_argument(
+        "--quiet",
+        "-Q",
+        help="Hide info messages, show okay/warn/error (shorthand for --log-level okay)",
+        action="store_true",
     )
     return parser.parse_args()
 
@@ -672,7 +695,7 @@ def print_final_summary(
 
         if contracts_with_diffs:
             logger.divider()
-            logger.info("Contracts with source code differences:")
+            logger.warn("Contracts with source code differences:")
             for contract in contracts_with_diffs:
                 logger.warn(
                     f"  • {contract['name']} ({contract['address']}): "
@@ -704,7 +727,7 @@ def print_final_summary(
 
         if bytecode_mismatches:
             logger.divider()
-            logger.info("Contracts with bytecode differences:")
+            logger.warn("Contracts with bytecode differences:")
             for contract in bytecode_mismatches:
                 logger.warn(f"  • {contract['name']} ({contract['address']})")
 
@@ -714,8 +737,13 @@ def print_final_summary(
 
 def main() -> None:
     """Main entry point for the diffyscan application."""
+    load_dotenv()
     args = parse_arguments()
     skip_user_input = args.yes
+    if args.quiet:
+        logger.set_level("okay")
+    else:
+        logger.set_level(args.log_level)
     if args.version:
         print(f"Diffyscan {__version__}")
         return
@@ -725,52 +753,52 @@ def main() -> None:
     # Binary comparison is enabled by default, unless --skip-binary-comparison is set
     enable_binary_comparison = not args.skip_binary_comparison
 
-    # Collect all results for final summary
-    all_results = []
+    # Resolve config paths
+    config_paths = []
+    supported_extensions = (".json", ".yaml", ".yml")
 
     if args.path is None:
-        result = process_config(
-            DEFAULT_CONFIG_PATH,
-            args.hardhat_path,
-            args.support_brownie,
-            args.prettify,
-            enable_binary_comparison,
-            args.cache_explorer,
-            args.cache_github,
-            skip_user_input,
+        config_path = next(
+            (
+                p
+                for p in ("config.json", "config.yaml", "config.yml")
+                if os.path.isfile(p)
+            ),
+            None,
         )
-        all_results.append(result)
+        if config_path is None:
+            error_msg = "No config file found. Create config.json or config.yaml in the current directory, or specify a path with --path."
+            logger.error(error_msg)
+            raise FileNotFoundError(error_msg)
+        config_paths.append(config_path)
     elif os.path.isfile(args.path):
-        result = process_config(
-            args.path,
-            args.hardhat_path,
-            args.support_brownie,
-            args.prettify,
-            enable_binary_comparison,
-            args.cache_explorer,
-            args.cache_github,
-            skip_user_input,
-        )
-        all_results.append(result)
+        config_paths.append(args.path)
     elif os.path.isdir(args.path):
-        for filename in os.listdir(args.path):
-            config_path = os.path.join(args.path, filename)
-            if os.path.isfile(config_path):
-                result = process_config(
-                    config_path,
-                    args.hardhat_path,
-                    args.support_brownie,
-                    args.prettify,
-                    enable_binary_comparison,
-                    args.cache_explorer,
-                    args.cache_github,
-                    skip_user_input,
-                )
-                all_results.append(result)
+        for filename in sorted(os.listdir(args.path)):
+            full_path = os.path.join(args.path, filename)
+            if os.path.isfile(full_path) and filename.lower().endswith(
+                supported_extensions
+            ):
+                config_paths.append(full_path)
     else:
         error_msg = f"Specified config path {args.path} not found"
         logger.error(error_msg)
         raise FileNotFoundError(error_msg)
+
+    # Process all config files
+    all_results = []
+    for config_path in config_paths:
+        result = process_config(
+            config_path,
+            args.hardhat_path,
+            args.support_brownie,
+            args.prettify,
+            enable_binary_comparison,
+            args.cache_explorer,
+            args.cache_github,
+            skip_user_input,
+        )
+        all_results.append(result)
 
     execution_time = time.time() - START_TIME
 

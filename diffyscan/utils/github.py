@@ -1,4 +1,5 @@
 import base64
+import binascii
 import os
 import hashlib
 
@@ -127,7 +128,11 @@ def get_file_from_github(
         logger.error("No file content")
         return None
 
-    decoded_content = base64.b64decode(file_content).decode()
+    try:
+        decoded_content = base64.b64decode(file_content).decode()
+    except (binascii.Error, UnicodeDecodeError) as e:
+        logger.error(f"Failed to decode GitHub file content: {e}")
+        return None
 
     # Save to cache if enabled
     if use_cache:
@@ -222,7 +227,13 @@ def _get_direct_file(
         if not file_content:
             logger.error(f"No file content in {path_to_file}")
             return None
-        return base64.b64decode(file_content).decode()
+        try:
+            return base64.b64decode(file_content).decode()
+        except (binascii.Error, UnicodeDecodeError) as e:
+            logger.error(
+                f"Failed to decode GitHub file content for {path_to_file}: {e}"
+            )
+            return None
 
     return None
 
@@ -246,7 +257,11 @@ def _recursive_search(
     ).json()
 
     if github_data and isinstance(github_data, dict) and "content" in github_data:
-        return base64.b64decode(github_data["content"]).decode()
+        try:
+            return base64.b64decode(github_data["content"]).decode()
+        except (binascii.Error, UnicodeDecodeError) as e:
+            logger.error(f"Failed to decode GitHub content for {filename}: {e}")
+            return None
 
     github_api_url = get_github_api_url(user_slash_repo, relative_path, None, commit)
     github_data = fetch(

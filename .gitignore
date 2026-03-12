@@ -10,3 +10,4 @@ dist
 .idea
 cache
 .diffyscan_cache
+.env
