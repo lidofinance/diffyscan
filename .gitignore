@@ -9,4 +9,5 @@ dist
 .idea
 cache
 .diffyscan_cache
+.buildx-cache
 .env

@@ -10,6 +10,7 @@ jobs:
   regression:
     runs-on: ubuntu-latest
     env:
+      DEVCONTAINER_BUILD_CACHE_DIR: .buildx-cache
       DEVCONTAINER_IMAGE: diffyscan-regression:${{ github.sha }}
       ETHERSCAN_EXPLORER_TOKEN: ${{ secrets.ETHERSCAN_EXPLORER_TOKEN }}
       ETHERSCAN_TOKEN: ${{ secrets.ETHERSCAN_EXPLORER_TOKEN }}
@@ -98,23 +99,38 @@ jobs:
               --allow-source-diff 0xa11906bBBBaC5207b8FDA4F7F294d7EcB8dcc758
               --allow-source-diff 0xc5dCd2A9642ceA9B71A632BF5b8ff52424Ea1B40
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/checkout@v4
 
       - name: Restore diffyscan caches
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@v4
         with:
           path: .diffyscan_cache
           key: diffyscan-cache-${{ github.ref_name }}-${{ matrix.config }}-${{ github.sha }}
           restore-keys: |
             diffyscan-cache-${{ github.ref_name }}-${{ matrix.config }}-
 
+      - name: Restore devcontainer build cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.DEVCONTAINER_BUILD_CACHE_DIR }}
+          key: devcontainer-buildx-${{ runner.os }}-${{ hashFiles('.devcontainer/Dockerfile', '.dockerignore') }}
+          restore-keys: |
+            devcontainer-buildx-${{ runner.os }}-
+
       - name: Build devcontainer image
         run: |
-          docker build \
+          docker buildx create --use --name diffyscan-builder
+          docker buildx inspect --bootstrap
+          docker buildx build \
             --build-arg UV_VERSION="${UV_VERSION}" \
+            --cache-from "type=local,src=${DEVCONTAINER_BUILD_CACHE_DIR}" \
+            --cache-to "type=local,dest=${DEVCONTAINER_BUILD_CACHE_DIR}-new,mode=max" \
             --file .devcontainer/Dockerfile \
+            --load \
             --tag "${DEVCONTAINER_IMAGE}" \
             .
+          rm -rf "${DEVCONTAINER_BUILD_CACHE_DIR}"
+          mv "${DEVCONTAINER_BUILD_CACHE_DIR}-new" "${DEVCONTAINER_BUILD_CACHE_DIR}"
 
       - name: Run regression in devcontainer
         env:
