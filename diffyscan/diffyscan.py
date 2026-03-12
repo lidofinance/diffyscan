@@ -323,7 +323,7 @@ def _load_explorer_token(config: dict) -> str | None:
 
     token = os.getenv("ETHERSCAN_EXPLORER_TOKEN")
     if token is None:
-        logger.warn('Fallback ETHERSCAN_EXPLORER_TOKEN not set')
+        logger.warn("Fallback ETHERSCAN_EXPLORER_TOKEN not set")
     return token
 
 

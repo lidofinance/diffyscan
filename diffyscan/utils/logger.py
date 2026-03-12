@@ -74,13 +74,21 @@ class Logger:
 
     def report_table(self, table):
         header = ["#", "Filename", "Found", "Diffs", "Origin", "Report"]
-        self.log(termtables.to_string(
-            table, header=header, style=termtables.styles.rounded_double,
-        ))
+        self.log(
+            termtables.to_string(
+                table,
+                header=header,
+                style=termtables.styles.rounded_double,
+            )
+        )
         colored = [self._color_row(row) for row in table]
-        self.stdout(termtables.to_string(
-            colored, header=header, style=termtables.styles.rounded_double,
-        ))
+        self.stdout(
+            termtables.to_string(
+                colored,
+                header=header,
+                style=termtables.styles.rounded_double,
+            )
+        )
 
     def _color_row(self, row):
         color = RED if (not row[2] or (row[3] is not None and row[3] > 0)) else GREEN

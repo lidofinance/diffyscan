@@ -50,7 +50,9 @@ def encode_fixed_bytes(value: str, length: int) -> str:
     raw = value.lower().replace("0x", "")
     max_len = length * 2
     if len(raw) > max_len:
-        raise EncoderError(f"Bytes value exceeds {length} bytes (max {max_len} hex chars)")
+        raise EncoderError(
+            f"Bytes value exceeds {length} bytes (max {max_len} hex chars)"
+        )
     return raw.ljust(max_len, "0").ljust(64, "0")
 
 
@@ -74,7 +76,9 @@ def _encode_static_value(arg_type: str, val) -> str:
 
     if _INT_RE.match(arg_type):
         bits, is_signed = _parse_int_type(arg_type)
-        return encode_int(int(val) if not isinstance(val, str) else val, bits, is_signed)
+        return encode_int(
+            int(val) if not isinstance(val, str) else val, bits, is_signed
+        )
 
     n = _parse_bytesN(arg_type)
     if n is not None:
@@ -178,9 +182,7 @@ def encode_constructor_arguments(
                 compl_data.extend([length_hex, contents])
 
             elif arg_type == "tuple":
-                calldata_parts.append(
-                    encode_tuple(abi_entry["components"], arg_value)
-                )
+                calldata_parts.append(encode_tuple(abi_entry["components"], arg_value))
 
             elif arg_type.endswith("[]"):
                 calldata_parts.append(to_hex_with_alignment((i + 1) * 32))

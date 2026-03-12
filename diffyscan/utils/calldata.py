@@ -35,7 +35,9 @@ def get_calldata(
 
     if has_raw:
         logger.info("Using prepared calldata from config")
-        return normalize_calldata(binary_config["constructor_calldata"][contract_address])
+        return normalize_calldata(
+            binary_config["constructor_calldata"][contract_address]
+        )
 
     if has_args:
         logger.info("Parsing calldata from config constructor_args")
@@ -64,9 +66,7 @@ def get_calldata(
 def normalize_calldata(calldata: str) -> str:
     """Normalize raw calldata to a hex string without the 0x prefix."""
     if not isinstance(calldata, str):
-        raise CalldataError(
-            f"Expected hex string, got {type(calldata).__name__}"
-        )
+        raise CalldataError(f"Expected hex string, got {type(calldata).__name__}")
 
     normalized = calldata.strip().removeprefix("0x")
     if not normalized:
