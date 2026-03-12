@@ -26,20 +26,22 @@ uv tool install git+https://github.com/lidofinance/diffyscan
 
 ## Development setup
 
-### Prerequisites
+### Dev Container (recommended)
 
-- uv
-- Python 3.11
+The fastest way to get a working development environment. Works with VS Code, GitHub Codespaces, and any [Dev Container](https://containers.dev/)-compatible tool.
 
-### Setup
+1. Open this repo in VS Code
+2. When prompted "Reopen in Container", click yes (or run **Dev Containers: Reopen in Container** from the command palette)
+3. Wait for the container to build — dependencies, git hooks, and `.env` are set up automatically
+
+That's it. Run tests with `uv run pytest -q` or the CLI with `uv run diffyscan config_samples/lido_dao_sepolia_config.json`.
+
+### Manual setup
+
+Prerequisites: [uv](https://docs.astral.sh/uv/getting-started/installation/), Python 3.11+
 
 ```bash
 uv sync --group dev
-```
-
-Install git hooks:
-
-```bash
 uv run pre-commit install --hook-type pre-commit --hook-type commit-msg
 ```
 
