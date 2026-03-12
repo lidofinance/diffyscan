@@ -154,21 +154,68 @@ def build_hashed_cache_key(*parts: str) -> str:
     return hashlib.sha256(":".join(parts).encode()).hexdigest()
 
 
+def _serialize_cache_value(value) -> str:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"))
+
+
+def _build_cache_entry(value, metadata: dict | None = None) -> dict:
+    payload = {
+        "version": 1,
+        "value": value,
+        "sha256": hashlib.sha256(_serialize_cache_value(value).encode()).hexdigest(),
+    }
+    if metadata is not None:
+        payload["metadata"] = metadata
+    return payload
+
+
+def _validate_cache_entry(
+    cached_value,
+    expected_metadata: dict | None,
+    cache_kind: str,
+    display_name: str,
+):
+    if not isinstance(cached_value, dict) or cached_value.get("version") != 1:
+        logger.warn(f"Ignoring legacy or malformed {cache_kind} cache: {display_name}")
+        return None
+
+    if (
+        expected_metadata is not None
+        and cached_value.get("metadata") != expected_metadata
+    ):
+        logger.warn(
+            f"Ignoring {cache_kind} cache with mismatched metadata: {display_name}"
+        )
+        return None
+
+    value = cached_value.get("value")
+    actual_sha256 = hashlib.sha256(_serialize_cache_value(value).encode()).hexdigest()
+    if actual_sha256 != cached_value.get("sha256"):
+        logger.warn(f"Ignoring tampered {cache_kind} cache: {display_name}")
+        return None
+
+    return value
+
+
 def load_cache(
     cache_path: str,
     cache_kind: str,
     display_name: str,
-    loader=None,
+    expected_metadata: dict | None = None,
 ):
-    loader = loader or (lambda cache_file: cache_file.read())
-
     if not os.path.exists(cache_path):
         return None
 
     try:
         logger.info(f"Loading {cache_kind} from cache: {display_name}")
         with open(cache_path, "r", encoding="utf-8") as cache_file:
-            return loader(cache_file)
+            cached_value = json.load(cache_file)
+        return _validate_cache_entry(
+            cached_value,
+            expected_metadata,
+            cache_kind,
+            display_name,
+        )
     except Exception as exc:
         logger.warn(f"Failed to load {cache_kind} from cache: {exc}")
         return None
@@ -179,14 +226,17 @@ def save_cache(
     cache_kind: str,
     display_name: str,
     value,
-    writer=None,
+    metadata: dict | None = None,
 ) -> None:
-    writer = writer or (lambda cache_file, cached_value: cache_file.write(cached_value))
-
     try:
         os.makedirs(os.path.dirname(cache_path), exist_ok=True)
         with open(cache_path, "w", encoding="utf-8") as cache_file:
-            writer(cache_file, value)
+            json.dump(
+                _build_cache_entry(value, metadata),
+                cache_file,
+                indent=2,
+                sort_keys=True,
+            )
         logger.info(f"Saved {cache_kind} to cache: {display_name}")
     except Exception as exc:
         logger.warn(f"Failed to save {cache_kind} to cache: {exc}")
@@ -204,7 +254,7 @@ def pull(
     url: str, payload: str | None = None, headers: dict | None = None
 ) -> requests.Response:
     """Post data to a URL with error handling."""
-    logger.log(f"Pull: {url}")
+    logger.log(f"Pull: {mask_text(url)}")
     return requests.post(url, data=payload, headers=headers)
 
 

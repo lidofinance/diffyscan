@@ -5,7 +5,6 @@ on: [workflow_dispatch, push]
 # .github/workflows/ci.yaml
 permissions: # least-privilege principle
   contents: read # widen only if you need more
-  pull-requests: write
 
 jobs:
   regression:
@@ -97,8 +96,8 @@ jobs:
               --allow-source-diff 0xa11906bBBBaC5207b8FDA4F7F294d7EcB8dcc758
               --allow-source-diff 0xc5dCd2A9642ceA9B71A632BF5b8ff52424Ea1B40
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.11"
       - name: Install uv
@@ -110,13 +109,12 @@ jobs:
           python -m uv sync --locked --group dev
 
       - name: Restore diffyscan caches
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: .diffyscan_cache
-          key: diffyscan-cache-${{ matrix.config }}-${{ github.run_id }}
+          key: diffyscan-cache-${{ github.ref_name }}-${{ matrix.config }}-${{ github.sha }}
           restore-keys: |
-            diffyscan-cache-${{ matrix.config }}-
-            diffyscan-cache-
+            diffyscan-cache-${{ github.ref_name }}-${{ matrix.config }}-
 
       - name: Run unit tests
         run: |

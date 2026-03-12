@@ -21,7 +21,8 @@ Key features:
 ## Install
 
 ```bash
-uv tool install git+https://github.com/lidofinance/diffyscan
+# Pin a tag or commit instead of floating HEAD for reproducible installs.
+uv tool install git+https://github.com/lidofinance/diffyscan@<tag-or-commit>
 ```
 
 ## Development setup
@@ -41,7 +42,7 @@ That's it. Run tests with `uv run pytest -q` or the CLI with `uv run diffyscan c
 Prerequisites: [uv](https://docs.astral.sh/uv/getting-started/installation/), Python 3.11+
 
 ```bash
-uv sync --group dev
+uv sync --locked --group dev
 uv run pre-commit install --hook-type pre-commit --hook-type commit-msg
 ```
 

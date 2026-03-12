@@ -1,8 +1,12 @@
 {
   "name": "diffyscan",
-  "image": "mcr.microsoft.com/devcontainers/python:3.11",
-  "features": {
-    "ghcr.io/devcontainers-extra/features/uv:1": {}
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "..",
+    "args": {
+      "DEVCONTAINER_BASE_IMAGE": "mcr.microsoft.com/devcontainers/python:3.11@sha256:f46978552419eb3cbf3bcf662ba0dca1639b07307f64447a3fcbe46110710b27",
+      "UV_VERSION": "0.10.9"
+    }
   },
   "postCreateCommand": "bash .devcontainer/post-create.sh",
   "customizations": {

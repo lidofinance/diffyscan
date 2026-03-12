@@ -1,6 +1,5 @@
 import time
 import os
-import tempfile
 
 DIGEST_DIR = "digest"
 START_TIME = time.time()
@@ -8,7 +7,20 @@ START_TIME_INT = int(START_TIME)
 DIFFS_DIR = f"{DIGEST_DIR}/{START_TIME_INT}/diffs"
 LOGS_PATH = f"{DIGEST_DIR}/{START_TIME_INT}/logs.txt"
 
-SOLC_DIR = os.path.join(tempfile.gettempdir(), "solc_builds")
+
+def _get_cache_home() -> str:
+    if os.name == "nt":
+        return os.getenv("LOCALAPPDATA") or os.path.join(
+            os.path.expanduser("~"),
+            "AppData",
+            "Local",
+        )
+    return os.getenv("XDG_CACHE_HOME") or os.path.join(
+        os.path.expanduser("~"), ".cache"
+    )
+
+
+SOLC_DIR = os.path.join(_get_cache_home(), "diffyscan", "solc")
 
 # fmt: off
 OPCODES = {

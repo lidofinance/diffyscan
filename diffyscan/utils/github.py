@@ -15,6 +15,21 @@ from .logger import logger
 GITHUB_CACHE_DIR = os.path.join(os.getcwd(), ".diffyscan_cache", "github")
 
 
+def _get_github_cache_metadata(
+    user_slash_repo: str,
+    commit: str,
+    relative_root: str,
+    path_to_file: str,
+) -> dict[str, str]:
+    return {
+        "schema": "github-file",
+        "repo": user_slash_repo,
+        "commit": commit,
+        "relative_root": relative_root,
+        "path": path_to_file,
+    }
+
+
 def _get_github_cache_path(
     user_slash_repo: str,
     commit: str,
@@ -27,7 +42,7 @@ def _get_github_cache_path(
         relative_root,
         path_to_file,
     )
-    return os.path.join(GITHUB_CACHE_DIR, f"{cache_key}.txt")
+    return os.path.join(GITHUB_CACHE_DIR, f"{cache_key}.json")
 
 
 def _build_repo_file_request(
@@ -144,9 +159,20 @@ def _get_file_from_github_with_cache(
         relative_root,
         path_to_file,
     )
+    cache_metadata = _get_github_cache_metadata(
+        user_slash_repo,
+        commit,
+        relative_root,
+        path_to_file,
+    )
 
     if use_cache:
-        cached_content = load_cache(cache_path, "GitHub file", path_to_file)
+        cached_content = load_cache(
+            cache_path,
+            "GitHub file",
+            path_to_file,
+            cache_metadata,
+        )
         if cached_content is not None:
             return cached_content
 
@@ -159,7 +185,13 @@ def _get_file_from_github_with_cache(
     )
 
     if use_cache and content is not None:
-        save_cache(cache_path, "GitHub file", path_to_file, content)
+        save_cache(
+            cache_path,
+            "GitHub file",
+            path_to_file,
+            content,
+            cache_metadata,
+        )
 
     return content
 

@@ -1,4 +1,5 @@
 import base64
+import json
 
 from diffyscan.utils.github import (
     get_file_from_github,
@@ -127,3 +128,36 @@ def test_get_file_from_github_uses_cache(monkeypatch, tmp_path):
 
     assert first == second == "contract Cached {}"
     assert calls["count"] == 1
+
+
+def test_get_file_from_github_ignores_tampered_cache(monkeypatch, tmp_path):
+    calls = {"count": 0}
+
+    def fake_fetch(url, headers=None):
+        calls["count"] += 1
+        payload = {"content": base64.b64encode(b"contract Cached {}").decode()}
+        return DummyResponse(payload)
+
+    monkeypatch.setattr("diffyscan.utils.github.GITHUB_CACHE_DIR", str(tmp_path))
+    monkeypatch.setattr("diffyscan.utils.github.fetch", fake_fetch)
+
+    repo = {
+        "url": "https://github.com/user/repo",
+        "commit": "abc123",
+        "relative_root": "src",
+    }
+    first = get_file_from_github(
+        "github-token", repo, "contracts/Cached.sol", None, True
+    )
+
+    cache_path = next(tmp_path.iterdir())
+    tampered = json.loads(cache_path.read_text())
+    tampered["value"] = "contract Tampered {}"
+    cache_path.write_text(json.dumps(tampered))
+
+    second = get_file_from_github(
+        "github-token", repo, "contracts/Cached.sol", None, True
+    )
+
+    assert first == second == "contract Cached {}"
+    assert calls["count"] == 2

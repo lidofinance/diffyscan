@@ -70,6 +70,16 @@ def prepare_compiler(
     except OSError as exc:
         raise CompileError(f"Error writing to file: {exc}") from exc
 
+    verify_compiler_integrity(compiler_path, build_info)
+
+
+def verify_compiler_integrity(compiler_path: str, build_info: dict) -> None:
+    try:
+        with open(compiler_path, "rb") as compiler_file:
+            compiler_binary = compiler_file.read()
+    except OSError as exc:
+        raise CompileError(f"Error reading compiler file: {exc}") from exc
+
     valid_checksum = build_info["sha256"].removeprefix("0x")
     compiler_checksum = hashlib.sha256(compiler_binary).hexdigest()
     if compiler_checksum != valid_checksum:

@@ -3,7 +3,7 @@ import json
 import pytest
 
 from diffyscan.utils.calldata import get_calldata
-from diffyscan.utils.custom_exceptions import CalldataError, NodeError
+from diffyscan.utils.custom_exceptions import CalldataError, CompileError, NodeError
 from diffyscan.utils.explorer import (
     _get_contract_from_blockscout,
     _get_contract_from_etherscan,
@@ -240,6 +240,10 @@ def test_compile_contract_from_explorer_merges_libraries_and_evm_version(monkeyp
         lambda compiler_path: True,
     )
     monkeypatch.setattr(
+        "diffyscan.utils.explorer.verify_compiler_integrity",
+        lambda compiler_path, build_info: None,
+    )
+    monkeypatch.setattr(
         "diffyscan.utils.explorer.prepare_compiler",
         lambda *args, **kwargs: None,
     )
@@ -285,3 +289,61 @@ def test_compile_contract_from_explorer_merges_libraries_and_evm_version(monkeyp
             }
         }
     }
+
+
+def test_compile_contract_from_explorer_redownloads_tampered_cached_compiler(
+    monkeypatch,
+):
+    calls = {"prepare": 0}
+    contract_code = {
+        "name": "Demo",
+        "compiler": "v0.8.25+commit.b61c2a91",
+        "solcInput": {
+            "language": "Solidity",
+            "sources": {"contracts/Demo.sol": {"content": "contract Demo {}"}},
+            "settings": {},
+        },
+    }
+
+    monkeypatch.setattr(
+        "diffyscan.utils.explorer.get_solc_native_platform_from_os",
+        lambda: "linux-amd64",
+    )
+    monkeypatch.setattr(
+        "diffyscan.utils.explorer.get_compiler_info",
+        lambda required_platform, build_name: {"path": "solc-linux-amd64-v0.8.25"},
+    )
+    monkeypatch.setattr(
+        "diffyscan.utils.explorer.os.path.isfile",
+        lambda compiler_path: True,
+    )
+
+    def fake_verify(compiler_path, build_info):
+        raise CompileError("Compiler checksum mismatch")
+
+    def fake_prepare(required_platform, build_info, compiler_path):
+        calls["prepare"] += 1
+
+    monkeypatch.setattr(
+        "diffyscan.utils.explorer.verify_compiler_integrity",
+        fake_verify,
+    )
+    monkeypatch.setattr(
+        "diffyscan.utils.explorer.prepare_compiler",
+        fake_prepare,
+    )
+    monkeypatch.setattr(
+        "diffyscan.utils.explorer.compile_contracts",
+        lambda compiler_path, input_settings: {
+            "contracts": {"contracts/Demo.sol": {"Demo": {"abi": [], "evm": {}}}}
+        },
+    )
+    monkeypatch.setattr(
+        "diffyscan.utils.explorer.get_target_compiled_contract",
+        lambda compiled_contracts, target_name: {"abi": [], "evm": {}},
+    )
+
+    result = compile_contract_from_explorer(contract_code)
+
+    assert result == {"abi": [], "evm": {}}
+    assert calls["prepare"] == 1

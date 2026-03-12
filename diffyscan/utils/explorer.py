@@ -9,11 +9,12 @@ from .compiler import (
     get_solc_native_platform_from_os,
     get_compiler_info,
     prepare_compiler,
+    verify_compiler_integrity,
     compile_contracts,
     get_target_compiled_contract,
 )
 from .constants import SOLC_DIR
-from .custom_exceptions import ExplorerError
+from .custom_exceptions import CompileError, ExplorerError
 
 # Cache directory for storing Etherscan sources
 CACHE_DIR = os.path.join(os.getcwd(), ".diffyscan_cache")
@@ -131,6 +132,21 @@ def _get_cache_key(contract_address: str, chain_id: int | None) -> str:
 
 def _get_cache_path(cache_key: str) -> str:
     return os.path.join(CACHE_DIR, f"{cache_key}.json")
+
+
+def _get_cache_metadata(
+    explorer_hostname: str,
+    contract_address: str,
+    contract_name: str,
+    chain_id: int | None,
+) -> dict[str, str | int | None]:
+    return {
+        "schema": "explorer-contract",
+        "explorer_hostname": explorer_hostname,
+        "contract_address": contract_address.lower(),
+        "contract_name": contract_name,
+        "chain_id": chain_id,
+    }
 
 
 def _get_contract_from_etherscan(
@@ -558,14 +574,21 @@ def get_contract_from_explorer(
     chain_id: int | None = None,
     use_cache: bool = False,
 ) -> dict:
+    cache_key = _get_cache_key(contract_address, chain_id)
+    cache_metadata = _get_cache_metadata(
+        explorer_hostname,
+        contract_address,
+        contract_name_from_config,
+        chain_id,
+    )
+
     # Try to load from cache if enabled
     if use_cache:
-        cache_key = _get_cache_key(contract_address, chain_id)
         cached_result = load_cache(
             _get_cache_path(cache_key),
             "contract",
             cache_key,
-            json.load,
+            cache_metadata,
         )
         if cached_result is not None:
             _validate_contract_name(
@@ -600,11 +623,7 @@ def get_contract_from_explorer(
             "contract",
             cache_key,
             result,
-            lambda cache_file, cached_value: json.dump(
-                cached_value,
-                cache_file,
-                indent=2,
-            ),
+            cache_metadata,
         )
 
     return result
@@ -620,9 +639,16 @@ def compile_contract_from_explorer(
     build_info = get_compiler_info(required_platform, build_name)
     compiler_path = os.path.join(SOLC_DIR, build_info["path"])
 
-    is_compiler_already_prepared = os.path.isfile(compiler_path)
-
-    if not is_compiler_already_prepared:
+    if os.path.isfile(compiler_path):
+        try:
+            verify_compiler_integrity(compiler_path, build_info)
+        except CompileError:
+            logger.warn(
+                "Cached compiler failed integrity check; re-downloading",
+                build_info["path"],
+            )
+            prepare_compiler(required_platform, build_info, compiler_path)
+    else:
         prepare_compiler(required_platform, build_info, compiler_path)
 
     solc_input = copy.deepcopy(contract_code["solcInput"])
