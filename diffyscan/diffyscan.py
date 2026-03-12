@@ -773,7 +773,7 @@ def is_standard_json_contract(source_files: dict) -> bool:
     keys = list(source_files)
     if len(keys) != 1:
         return True
-    first_key = keys[0] if isinstance(keys[0], str) else keys[0][0]
+    first_key = keys[0]
     return ".sol" in first_key or "/" in first_key
 
 

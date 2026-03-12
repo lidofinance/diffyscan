@@ -5,11 +5,10 @@ import sys
 
 
 def main(paths: list[str]) -> int:
-    for path in paths:
-        result = subprocess.run([sys.executable, "-m", "black", path], check=False)
-        if result.returncode:
-            return result.returncode
-    return 0
+    if not paths:
+        return 0
+    result = subprocess.run([sys.executable, "-m", "black", *paths], check=False)
+    return result.returncode
 
 
 if __name__ == "__main__":
