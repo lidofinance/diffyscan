@@ -18,6 +18,7 @@ jobs:
       UV_VERSION: "0.10.9"
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         include:
           - config: config_samples/ethereum/mainnet/safe_harbor/safe_harbor.json

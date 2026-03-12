@@ -154,6 +154,45 @@ def test_get_contract_from_etherscan_extracts_metadata(monkeypatch):
     }
 
 
+def test_get_contract_from_etherscan_retries_rate_limit(monkeypatch):
+    responses = iter(
+        [
+            {
+                "message": "NOTOK",
+                "result": "Max calls per sec rate limit reached (3/sec)",
+            },
+            {
+                "message": "OK",
+                "result": [
+                    {
+                        "ContractName": "Demo",
+                        "CompilerVersion": "v0.8.25+commit.b61c2a91",
+                        "SourceCode": "contract Demo {}",
+                        "OptimizationUsed": "1",
+                        "Runs": "200",
+                    }
+                ],
+            },
+        ]
+    )
+    sleeps = []
+
+    def fake_fetch(url):
+        return DummyResponse(next(responses))
+
+    monkeypatch.setattr("diffyscan.utils.explorer.fetch", fake_fetch)
+    monkeypatch.setattr("diffyscan.utils.explorer.time.sleep", sleeps.append)
+
+    contract = _get_contract_from_etherscan(
+        None,
+        "api.etherscan.io",
+        "0x0000000000000000000000000000000000000001",
+    )
+
+    assert contract["name"] == "Demo"
+    assert sleeps == [1.0]
+
+
 def test_get_contract_from_blockscout_extracts_and_merges_metadata(monkeypatch):
     def fake_fetch(url):
         return DummyResponse(

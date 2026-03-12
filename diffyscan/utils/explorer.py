@@ -2,6 +2,7 @@ import json
 import os
 import copy
 import re
+import time
 
 from .common import fetch, load_cache, save_cache
 from .logger import logger
@@ -20,6 +21,8 @@ from .custom_exceptions import CompileError, ExplorerError
 CACHE_DIR = os.path.join(os.getcwd(), ".diffyscan_cache")
 HEX_ADDRESS_RE = re.compile(r"^0x[a-fA-F0-9]{40}$")
 LIBRARY_REFERENCE_RE = re.compile(r"\blibrary\s+([A-Za-z_][A-Za-z0-9_]*)\b")
+ETHERSCAN_RATE_LIMIT_RETRY_COUNT = 5
+ETHERSCAN_RATE_LIMIT_RETRY_DELAY_SECONDS = 1.0
 
 
 def _default_output_selection() -> dict:
@@ -149,6 +152,32 @@ def _get_cache_metadata(
     }
 
 
+def _is_etherscan_rate_limited(response: dict) -> bool:
+    return (
+        response.get("message") == "NOTOK"
+        and "rate limit" in str(response.get("result", "")).lower()
+    )
+
+
+def _fetch_etherscan_response(etherscan_link: str, contract: str) -> dict:
+    for attempt in range(ETHERSCAN_RATE_LIMIT_RETRY_COUNT + 1):
+        response = fetch(etherscan_link).json()
+        if not _is_etherscan_rate_limited(response):
+            return response
+
+        if attempt == ETHERSCAN_RATE_LIMIT_RETRY_COUNT:
+            return response
+
+        delay = ETHERSCAN_RATE_LIMIT_RETRY_DELAY_SECONDS * (attempt + 1)
+        logger.warn(
+            "Explorer rate limit reached; retrying",
+            f"{contract} in {delay:.1f}s",
+        )
+        time.sleep(delay)
+
+    raise AssertionError("unreachable")
+
+
 def _get_contract_from_etherscan(
     token: str | None,
     etherscan_hostname: str,
@@ -162,7 +191,7 @@ def _get_contract_from_etherscan(
     if token is not None:
         etherscan_link = f"{etherscan_link}&apikey={token}"
 
-    response = fetch(etherscan_link).json()
+    response = _fetch_etherscan_response(etherscan_link, contract)
 
     if response["message"] == "NOTOK":
         raise ExplorerError(f'Received bad response: {response["result"]}')
