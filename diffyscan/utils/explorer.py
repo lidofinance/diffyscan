@@ -37,6 +37,71 @@ def _default_output_selection() -> dict:
     }
 
 
+def _get_solc_sources(solc_input: dict) -> dict:
+    return solc_input.get("sources", solc_input)
+
+
+def _build_source_files(
+    primary_path: str,
+    primary_source: str,
+    additional_sources: list[dict] | None = None,
+    *,
+    path_key: str,
+    content_key: str,
+) -> dict[str, dict[str, str]]:
+    source_files = {primary_path: {"content": primary_source}}
+    for entry in additional_sources or []:
+        source_files[entry[path_key]] = {"content": entry[content_key]}
+    return source_files
+
+
+def _build_solc_input(
+    source_files: dict[str, dict[str, str]],
+    *,
+    optimizer_enabled: bool,
+    optimizer_runs: int | str,
+    settings: dict | None = None,
+) -> dict:
+    solc_settings = copy.deepcopy(settings or {})
+    solc_settings.setdefault(
+        "optimizer",
+        {
+            "enabled": optimizer_enabled,
+            "runs": int(optimizer_runs or 0),
+        },
+    )
+    solc_settings["outputSelection"] = _default_output_selection()
+    return {
+        "language": "Solidity",
+        "sources": source_files,
+        "settings": solc_settings,
+    }
+
+
+def _build_contract_payload(
+    name: str,
+    compiler: str,
+    solc_input: dict,
+    *,
+    constructor_arguments: str | None = None,
+    evm_version: str | None = None,
+    libraries: dict | list | str | None = None,
+) -> dict:
+    contract = {
+        "name": name,
+        "compiler": compiler,
+        "solcInput": solc_input,
+    }
+    _attach_contract_metadata(
+        contract,
+        _get_solc_sources(solc_input),
+        constructor_arguments,
+        evm_version,
+        libraries,
+    )
+    return contract
+
+
 def _error_no_source_code_and_exit(address: str) -> None:
     """Report that source code is not available and raise an exception."""
     error_msg = f"Source code is not verified or an EOA address: {address}"
@@ -150,32 +215,28 @@ def _get_contract_from_etherscan(
         raise ExplorerError(
             f"Unexpected SourceCode type for {contract}: {type(solc_input).__name__}"
         )
-    contract = {
-        "name": result["ContractName"],
-        "compiler": result["CompilerVersion"],
-    }
     if solc_input.startswith("{{"):
-        contract["solcInput"] = json.loads(solc_input[1:-1])
+        parsed_solc_input = json.loads(solc_input[1:-1])
     else:
-        contract["solcInput"] = {
-            "language": "Solidity",
-            "sources": {result["ContractName"]: {"content": solc_input}},
-            "settings": {
-                "optimizer": {
-                    "enabled": result.get("OptimizationUsed") == "1",
-                    "runs": int(result.get("Runs", 0)),
-                },
-                "outputSelection": _default_output_selection(),
-            },
-        }
-    _attach_contract_metadata(
-        contract,
-        contract["solcInput"].get("sources", {}),
-        result.get("ConstructorArguments"),
-        result.get("EVMVersion"),
-        result.get("Library"),
+        source_files = _build_source_files(
+            result["ContractName"],
+            solc_input,
+            path_key="file_path",
+            content_key="source_code",
+        )
+        parsed_solc_input = _build_solc_input(
+            source_files,
+            optimizer_enabled=result.get("OptimizationUsed") == "1",
+            optimizer_runs=result.get("Runs", 0),
+        )
+    return _build_contract_payload(
+        result["ContractName"],
+        result["CompilerVersion"],
+        parsed_solc_input,
+        constructor_arguments=result.get("ConstructorArguments"),
+        evm_version=result.get("EVMVersion"),
+        libraries=result.get("Library"),
     )
-    return contract
 
 
 def _get_contract_from_zksync(zksync_explorer_hostname: str, contract: str) -> dict:
@@ -216,33 +277,26 @@ def _get_contract_from_mantle(mantle_explorer_hostname: str, contract: str) -> d
         _error_no_source_code_and_exit(contract)
 
     # Build source files dictionary from the primary file and additional sources
-    source_files = {data["FileName"]: {"content": data["SourceCode"]}}
-    for entry in data.get("AdditionalSources", []):
-        source_files[entry["Filename"]] = {"content": entry["SourceCode"]}
-
-    result = {
-        "name": data["ContractName"],
-        "solcInput": {
-            "language": "Solidity",
-            "sources": source_files,
-            "settings": {
-                "optimizer": {
-                    "enabled": data.get("OptimizationUsed", "0") == "1",
-                    "runs": int(data.get("Runs", "200")),
-                },
-                "outputSelection": _default_output_selection(),
-            },
-        },
-        "compiler": data["CompilerVersion"],
-    }
-    _attach_contract_metadata(
-        result,
-        source_files,
-        data.get("ConstructorArguments"),
-        data.get("EVMVersion"),
-        data.get("Library"),
+    source_files = _build_source_files(
+        data["FileName"],
+        data["SourceCode"],
+        data.get("AdditionalSources"),
+        path_key="Filename",
+        content_key="SourceCode",
     )
-    return result
+    solc_input = _build_solc_input(
+        source_files,
+        optimizer_enabled=data.get("OptimizationUsed", "0") == "1",
+        optimizer_runs=data.get("Runs", "200"),
+    )
+    return _build_contract_payload(
+        data["ContractName"],
+        data["CompilerVersion"],
+        solc_input,
+        constructor_arguments=data.get("ConstructorArguments"),
+        evm_version=data.get("EVMVersion"),
+        libraries=data.get("Library"),
+    )
 
 
 def _get_contract_from_blockscout(explorer_hostname: str, contract: str) -> dict:
@@ -257,41 +311,32 @@ def _get_contract_from_blockscout(explorer_hostname: str, contract: str) -> dict
             f"Blockscout response missing file_path or source_code for {contract}"
         )
 
-    source_files = {response["file_path"]: {"content": response["source_code"]}}
-
-    for entry in response.get("additional_sources", []):
-        source_files[entry["file_path"]] = {"content": entry["source_code"]}
+    source_files = _build_source_files(
+        response["file_path"],
+        response["source_code"],
+        response.get("additional_sources"),
+        path_key="file_path",
+        content_key="source_code",
+    )
 
     compiler_settings = copy.deepcopy(response.get("compiler_settings") or {})
     optimization_runs = response.get(
         "optimization_runs", response.get("optimizations_runs", 0)
     )
-    compiler_settings.setdefault(
-        "optimizer",
-        {
-            "enabled": response.get("optimization_enabled", False),
-            "runs": int(optimization_runs or 0),
-        },
-    )
-    compiler_settings["outputSelection"] = _default_output_selection()
-
-    contract = {
-        "name": response["name"],
-        "solcInput": {
-            "language": "Solidity",
-            "sources": source_files,
-            "settings": compiler_settings,
-        },
-        "compiler": response["compiler_version"],
-    }
-    _attach_contract_metadata(
-        contract,
+    solc_input = _build_solc_input(
         source_files,
-        response.get("constructor_args"),
-        response.get("evm_version"),
-        response.get("external_libraries"),
+        optimizer_enabled=response.get("optimization_enabled", False),
+        optimizer_runs=optimization_runs,
+        settings=compiler_settings,
     )
-    return contract
+    return _build_contract_payload(
+        response["name"],
+        response["compiler_version"],
+        solc_input,
+        constructor_arguments=response.get("constructor_args"),
+        evm_version=response.get("evm_version"),
+        libraries=response.get("external_libraries"),
+    )
 
 
 def _attach_contract_metadata(

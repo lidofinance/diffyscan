@@ -41,6 +41,27 @@ from .utils.custom_exceptions import (
 )
 
 
+def _get_solc_sources(solc_input: dict) -> dict:
+    return solc_input.get("sources", solc_input)
+
+
+def _fetch_github_source(
+    path_to_file: str,
+    config: dict,
+    github_api_token: str,
+    recursive_parsing: bool,
+    cache_github: bool,
+) -> str | None:
+    repo, dep_name = resolve_dep(path_to_file, config)
+    if not dep_name:
+        repo = config["github_repo"]
+
+    fetcher = (
+        get_file_from_github_recursive if recursive_parsing else get_file_from_github
+    )
+    return fetcher(github_api_token, repo, path_to_file, dep_name, cache_github)
+
+
 def _build_github_solc_input(
     contract_source_code,
     config,
@@ -49,23 +70,18 @@ def _build_github_solc_input(
     cache_github,
 ):
     solc_input = contract_source_code["solcInput"]
-    sources = solc_input.get("sources", solc_input)
+    sources = _get_solc_sources(solc_input)
     updated_sources = {}
     missing = []
 
-    for path_to_file, source in sources.items():
-        repo, dep_name = resolve_dep(path_to_file, config)
-        if not dep_name:
-            repo = config["github_repo"]
-
-        if recursive_parsing:
-            github_file = get_file_from_github_recursive(
-                github_api_token, repo, path_to_file, dep_name, cache_github
-            )
-        else:
-            github_file = get_file_from_github(
-                github_api_token, repo, path_to_file, dep_name, cache_github
-            )
+    for path_to_file in sources:
+        github_file = _fetch_github_source(
+            path_to_file,
+            config,
+            github_api_token,
+            recursive_parsing,
+            cache_github,
+        )
 
         if not github_file:
             missing.append(path_to_file)
@@ -199,11 +215,8 @@ def run_source_diff(
             - 'contract_address': address of the contract
             - 'contract_name': name of the contract
     """
-    source_files = (
-        contract_code["solcInput"].items()
-        if "sources" not in contract_code["solcInput"]
-        else contract_code["solcInput"]["sources"].items()
-    )
+    source_files = _get_solc_sources(contract_code["solcInput"])
+    standard_json_format = is_standard_json_contract(source_files)
 
     explorer_hostname = get_explorer_hostname(config)
     explorer_chain_id = get_explorer_chain_id(config)
@@ -239,46 +252,31 @@ def run_source_diff(
 
     report = []
 
-    for index, (path_to_file, source_code) in enumerate(source_files):
-        if not is_standard_json_contract(source_files):
+    for file_number, (path_to_file, source_code) in enumerate(
+        source_files.items(), start=1
+    ):
+        if not standard_json_format:
             path_to_file = path_to_file + ".sol"
 
-        file_number = index + 1
         split_path_to_file = path_to_file.split("/")
         origin = split_path_to_file[0]
         filename = split_path_to_file[-1]
 
         logger.update_info(f"File {file_number} / { files_count}", filename)
 
-        repo = None
-        dep_name = None
-
-        (repo, dep_name) = resolve_dep(path_to_file, config)
-        if not dep_name:
-            repo = config["github_repo"]
-
         diff_report_filename = None
         diffs_count = None
+        github_file = _fetch_github_source(
+            path_to_file,
+            config,
+            github_api_token,
+            recursive_parsing,
+            cache_github,
+        )
 
-        if not repo:
-            error_msg = f"File not found in any repository: {path_to_file}"
-            logger.error(error_msg)
-            raise ValueError(error_msg)
-
-        file_found = bool(repo)
-
-        if recursive_parsing:
-            github_file = get_file_from_github_recursive(
-                github_api_token, repo, path_to_file, dep_name, cache_github
-            )
-        else:
-            github_file = get_file_from_github(
-                github_api_token, repo, path_to_file, dep_name, cache_github
-            )
-
+        file_found = bool(github_file)
         if not github_file:
             github_file = "<!-- No file content -->"
-            file_found = False
 
         explorer_content = source_code["content"]
 
@@ -310,13 +308,13 @@ def run_source_diff(
 
     logger.divider()
 
-    files_found = len([row for row in report if row[2]])
+    files_found = sum(row[2] for row in report)
     logger.info(f"Files found: {files_found} / {files_count}")
 
-    identical_files = len([row for row in report if row[3] == 0])
+    identical_files = sum(row[3] == 0 for row in report)
     logger.info(f"Identical files: {identical_files} / {files_found}")
 
-    files_with_diffs = len([row for row in report if row[2] and row[3] > 0])
+    files_with_diffs = sum(row[2] and row[3] > 0 for row in report)
 
     logger.report_table(report)
 

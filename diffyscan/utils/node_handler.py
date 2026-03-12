@@ -8,7 +8,7 @@ DEFAULT_CALLER = "0x0000000000000000000000000000000000000000"
 DEPLOYMENT_SIMULATION_GAS_LIMIT = 100_000_000
 
 
-def _rpc_call(rpc_url: str, method: str, params: list) -> dict:
+def _rpc_call(rpc_url: str, method: str, params: list):
     payload = json.dumps(
         {"id": 1, "jsonrpc": "2.0", "method": method, "params": params}
     )
@@ -26,7 +26,7 @@ def _rpc_call(rpc_url: str, method: str, params: list) -> dict:
     if "result" not in response:
         raise NodeError(f"Received bad response for {method}: {response}")
 
-    return response
+    return response["result"]
 
 
 def get_bytecode_from_node(contract_address: str, rpc_url: str) -> str:
@@ -45,14 +45,12 @@ def get_bytecode_from_node(contract_address: str, rpc_url: str) -> str:
     """
     logger.info(f'Receiving the bytecode from "{mask_text(rpc_url)}" ...')
 
-    sources_url_response_in_json = _rpc_call(
-        rpc_url, "eth_getCode", [contract_address, "latest"]
-    )
-    if sources_url_response_in_json["result"] == "0x":
+    deployed_bytecode = _rpc_call(rpc_url, "eth_getCode", [contract_address, "latest"])
+    if deployed_bytecode == "0x":
         raise NodeError(f"Received empty bytecode for contract {contract_address}")
 
     logger.okay("Bytecode was successfully received")
-    return sources_url_response_in_json["result"]
+    return deployed_bytecode
 
 
 def get_chain_id(rpc_url: str) -> int:
@@ -70,12 +68,9 @@ def get_chain_id(rpc_url: str) -> int:
     """
     logger.info(f'Receiving the chain ID from "{mask_text(rpc_url)}" ...')
 
-    chain_id_response = _rpc_call(rpc_url, "eth_chainId", [])
-
+    chain_id = int(_rpc_call(rpc_url, "eth_chainId", []), 16)
     logger.okay("Chain ID was successfully received")
 
-    # Convert hex string to decimal integer
-    chain_id = int(chain_id_response["result"], 16)
     return chain_id
 
 
@@ -87,7 +82,7 @@ def simulate_deployment(data: str, rpc_url: str, caller: str = DEFAULT_CALLER) -
         f'Simulating contract deployment via eth_call on "{mask_text(rpc_url)}" ...'
     )
 
-    response = _rpc_call(
+    result = _rpc_call(
         rpc_url,
         "eth_call",
         [
@@ -101,7 +96,6 @@ def simulate_deployment(data: str, rpc_url: str, caller: str = DEFAULT_CALLER) -
         ],
     )
 
-    result = response["result"]
     if not isinstance(result, str) or result == "0x":
         raise NodeError("eth_call returned empty runtime bytecode")
 
