@@ -47,9 +47,5 @@ OPCODES = {
 # fmt: on
 
 
-def get_key_from_value(dictionary: dict, value: str):
-    return next((k for k, v in dictionary.items() if v == value), None)
-
-
-PUSH0 = get_key_from_value(OPCODES, "PUSH0")
-PUSH32 = get_key_from_value(OPCODES, "PUSH32")
+PUSH0 = 0x5F
+PUSH32 = 0x7F

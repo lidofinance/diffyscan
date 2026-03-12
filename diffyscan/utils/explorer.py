@@ -37,7 +37,7 @@ def _default_output_selection() -> dict:
     }
 
 
-def _get_solc_sources(solc_input: dict) -> dict:
+def get_solc_sources(solc_input: dict) -> dict:
     return solc_input.get("sources", solc_input)
 
 
@@ -94,7 +94,7 @@ def _build_contract_payload(
     }
     _attach_contract_metadata(
         contract,
-        _get_solc_sources(solc_input),
+        get_solc_sources(solc_input),
         constructor_arguments,
         evm_version,
         libraries,
@@ -361,7 +361,7 @@ def _attach_contract_metadata(
         contract["evm_version"] = normalized_evm_version
 
     settings_libraries = settings.get("libraries")
-    normalized_libraries = _merge_libraries(
+    normalized_libraries = merge_libraries(
         _parse_libraries(settings_libraries, source_files),
         _parse_libraries(libraries, source_files),
     )
@@ -540,7 +540,7 @@ def _normalize_library_address(address: str) -> str:
     return normalized
 
 
-def _merge_libraries(
+def merge_libraries(
     *library_sets: dict[str, dict[str, str]] | None,
 ) -> dict[str, dict[str, str]] | None:
     merged = {}

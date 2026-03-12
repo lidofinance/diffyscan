@@ -19,6 +19,8 @@ from .utils.explorer import (
     parse_compiled_contract,
     get_explorer_hostname,
     get_explorer_chain_id,
+    merge_libraries,
+    get_solc_sources,
 )
 from .utils.github import (
     get_file_from_github,
@@ -39,10 +41,6 @@ from .utils.custom_exceptions import (
     BaseCustomException,
     CompileError,
 )
-
-
-def _get_solc_sources(solc_input: dict) -> dict:
-    return solc_input.get("sources", solc_input)
 
 
 def _fetch_github_source(
@@ -70,7 +68,7 @@ def _build_github_solc_input(
     cache_github,
 ):
     solc_input = contract_source_code["solcInput"]
-    sources = _get_solc_sources(solc_input)
+    sources = get_solc_sources(solc_input)
     updated_sources = {}
     missing = []
 
@@ -108,19 +106,14 @@ def run_bytecode_diff(
     cache_github,
     remote_rpc_url,
 ):
-    """
-    Run bytecode comparison for a contract.
-
-    Returns:
-        bool: True if bytecodes match (fully or only in immutables), False if there are differences
-    """
+    """Run bytecode comparison. Returns True if bytecodes match."""
     address_name = f"{contract_address_from_config} : {contract_name_from_config}"
     logger.divider()
     logger.info(f"Binary bytecode comparison started for {address_name}")
 
     explorer_libraries = contract_source_code.get("libraries")
     manual_libraries = config.get("bytecode_comparison", {}).get("libraries")
-    libraries = _merge_library_overrides(explorer_libraries, manual_libraries)
+    libraries = merge_libraries(explorer_libraries, manual_libraries)
     evm_version = contract_source_code.get("evm_version")
     explorer_constructor_arguments = contract_source_code.get("constructor_arguments")
 
@@ -203,19 +196,8 @@ def run_source_diff(
     cache_github=False,
     skip_user_input=False,
 ):
-    """
-    Run source code diff for a contract.
-
-    Returns:
-        dict: Statistics with keys:
-            - 'files_count': total number of files
-            - 'files_found': number of files found
-            - 'identical_files': number of files with no diffs
-            - 'files_with_diffs': number of files with non-zero diffs
-            - 'contract_address': address of the contract
-            - 'contract_name': name of the contract
-    """
-    source_files = _get_solc_sources(contract_code["solcInput"])
+    """Run source code diff for a contract. Returns a stats dict."""
+    source_files = get_solc_sources(contract_code["solcInput"])
     standard_json_format = is_standard_json_contract(source_files)
 
     explorer_hostname = get_explorer_hostname(config)
@@ -329,82 +311,27 @@ def run_source_diff(
 
 
 def _load_explorer_token(config: dict) -> str | None:
-    """
-    Load explorer token from config or environment.
-
-    Args:
-        config: The configuration dictionary
-
-    Returns:
-        str or None: The explorer token if found
-    """
-    # Try config first
-    if "explorer_token_env_var" in config:
-        token = load_env(config["explorer_token_env_var"], masked=True, required=False)
+    """Load explorer token from config env var name, falling back to ETHERSCAN_EXPLORER_TOKEN."""
+    env_var = config.get("explorer_token_env_var")
+    if env_var:
+        token = load_env(env_var, masked=True, required=False)
         if token:
             return token
-        logger.warn(
-            f'Failed to find explorer token in env ("{config["explorer_token_env_var"]}")'
-        )
+        logger.warn(f'Explorer token not found in env ("{env_var}")')
     else:
-        logger.warn(
-            'Failed to find an explorer token in the config ("explorer_token_env_var")'
-        )
+        logger.warn('Config missing "explorer_token_env_var"')
 
-    # Fall back to default environment variable
-    token = os.getenv("ETHERSCAN_EXPLORER_TOKEN", default=None)
+    token = os.getenv("ETHERSCAN_EXPLORER_TOKEN")
     if token is None:
-        logger.warn('Failed to find explorer token in env ("ETHERSCAN_EXPLORER_TOKEN")')
-
+        logger.warn('Fallback ETHERSCAN_EXPLORER_TOKEN not set')
     return token
 
 
-def _validate_github_token() -> str:
-    """
-    Validate that GitHub API token is set.
-
-    Returns:
-        The GitHub API token
-
-    Raises:
-        ValueError: If the token is not set
-    """
-    return load_env("GITHUB_API_TOKEN", masked=True, required=True)
-
-
 def _setup_binary_comparison(config: dict) -> str:
-    """
-    Setup and validate binary comparison configuration.
-
-    Args:
-        config: The configuration dictionary
-
-    Returns:
-        The remote RPC URL
-
-    Raises:
-        ValueError: If required configuration is missing
-    """
+    """Load REMOTE_RPC_URL and configure exception handling for bytecode comparison."""
     remote_rpc_url = load_env("REMOTE_RPC_URL", masked=True, required=True)
-
     ExceptionHandler.initialize(config.get("fail_on_bytecode_comparison_error", True))
-
     return remote_rpc_url
-
-
-def _merge_library_overrides(
-    explorer_libraries: dict | None,
-    manual_libraries: dict | None,
-) -> dict | None:
-    merged = {}
-    for library_set in (explorer_libraries, manual_libraries):
-        if not library_set:
-            continue
-        for path, libraries in library_set.items():
-            merged.setdefault(path, {})
-            merged[path].update(libraries)
-
-    return merged or None
 
 
 def _append_calldata(creation_code: str, calldata: str | None) -> str:
@@ -461,15 +388,7 @@ def process_config(
     cache_github: bool,
     skip_user_input: bool = False,
 ):
-    """
-    Process a config file and run comparisons.
-
-    Returns:
-        dict: Summary statistics with keys:
-            - 'source_stats': list of per-contract source statistics
-            - 'bytecode_stats': list of per-contract bytecode results
-            - 'config_path': path to the config file
-    """
+    """Process a config file and run source + bytecode comparisons."""
     # Reset exception handler to default before each config
     ExceptionHandler.initialize(True)
 
@@ -479,7 +398,7 @@ def process_config(
 
     # Load tokens and validate
     explorer_token = _load_explorer_token(config)
-    github_api_token = _validate_github_token()
+    github_api_token = load_env("GITHUB_API_TOKEN", masked=True, required=True)
 
     # Setup binary comparison if enabled
     remote_rpc_url = None
@@ -570,12 +489,6 @@ def process_config(
 
 
 def parse_arguments() -> argparse.Namespace:
-    """
-    Parse command-line arguments.
-
-    Returns:
-        Parsed arguments
-    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--version", "-V", action="store_true", help="Display version information"
@@ -651,14 +564,6 @@ def print_final_summary(
     enable_source_comparison: bool,
     enable_binary_comparison: bool,
 ) -> None:
-    """
-    Print a final summary of all comparisons performed.
-
-    Args:
-        all_results: List of dictionaries with 'source_stats' and 'bytecode_stats'
-        enable_source_comparison: Whether source comparison was enabled
-        enable_binary_comparison: Whether bytecode comparison was enabled
-    """
     logger.divider()
     logger.divider()
     logger.info("=" * 80)
@@ -864,39 +769,12 @@ def main() -> None:
 
 
 def is_standard_json_contract(source_files: dict) -> bool:
-    """
-    Determines if the contract source code is in Standard JSON format.
-
-    Etherscan provides contract source code in two formats:
-    1. Standard JSON - source files are organized in directories with dependencies,
-       each file has proper path and .sol extension
-    2. Single file - contract code is provided as a single string without dependencies,
-       the file identifier is just a contract name without path or extension
-
-    Examples:
-        Single file format (no dependencies):
-            source_files = dict_items([
-                ('Contract', {'content': 'contract Contract { ... }'})
-            ])
-
-        Standard JSON format (with dependencies):
-            source_files = dict_items([
-                ('src/Contract.sol', {'content': 'contract Contract { ... }'}),
-                ('src/Dependency.sol', {'content': 'contract Dependency { ... }'})
-            ])
-
-    Args:
-        source_files: Dictionary of contract source files from Etherscan
-
-    Returns:
-        bool: True if the contract is in Standard JSON format, False if it's a single file
-    """
-    files = list(source_files)
-    if len(files) != 1:
+    """True if source uses Standard JSON format (paths with .sol or /), not single-file."""
+    keys = list(source_files)
+    if len(keys) != 1:
         return True
-
-    filename, _ = files[0]
-    return ".sol" in filename or "/" in filename
+    first_key = keys[0] if isinstance(keys[0], str) else keys[0][0]
+    return ".sol" in first_key or "/" in first_key
 
 
 if __name__ == "__main__":

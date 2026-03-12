@@ -15,31 +15,17 @@ from .custom_exceptions import NodeError, ExplorerError
 def load_env(
     variable_name: str, required: bool = True, masked: bool = False
 ) -> str | None:
-    """
-    Load an environment variable with optional masking and requirement checking.
-
-    Args:
-        variable_name: Name of the environment variable
-        required: If True, raise ValueError when variable is not set
-        masked: If True, mask the value when logging
-
-    Returns:
-        The environment variable value or None if not set and not required
-
-    Raises:
-        ValueError: If required=True and variable is not set
-    """
-    value = os.getenv(variable_name, default=None)
+    """Load an environment variable with optional masking and requirement checking."""
+    value = os.getenv(variable_name)
 
     if required and not value:
-        error_msg = f"Required environment variable not found: {variable_name}"
-        logger.error(error_msg)
-        raise ValueError(error_msg)
+        msg = f"Required environment variable not found: {variable_name}"
+        logger.error(msg)
+        raise ValueError(msg)
 
-    printable_value = mask_text(value) if masked and value is not None else str(value)
-
-    if printable_value:
-        logger.okay(f"{variable_name}", printable_value)
+    if value:
+        display = mask_text(value) if masked else value
+        logger.okay(variable_name, display)
     else:
         logger.info(f"{variable_name} var is not set")
 
@@ -138,7 +124,7 @@ def _validate_yaml_hex_keys(config: dict, path: str) -> None:
 
 
 def _handle_request_errors(error_class: type[BaseException]):
-    """Decorator to handle common HTTP request errors and convert them to custom exceptions."""
+    """Decorator to handle HTTP request errors and convert them to custom exceptions."""
 
     def decorator(func):
         @wraps(func)
@@ -147,21 +133,16 @@ def _handle_request_errors(error_class: type[BaseException]):
                 response = func(*args, **kwargs)
                 response.raise_for_status()
                 return response
-            except requests.exceptions.HTTPError as http_err:
-                # Include response body for better debugging
-                response_body = ""
-                if http_err.response is not None:
+            except requests.exceptions.HTTPError as exc:
+                body = ""
+                if exc.response is not None:
                     try:
-                        response_body = f" Response: {http_err.response.text}"
+                        body = f" Response: {exc.response.text}"
                     except Exception:
                         pass
-                raise error_class(f"HTTP error occurred: {http_err}{response_body}")
-            except requests.exceptions.ConnectionError as conn_err:
-                raise error_class(f"Connection error occurred: {conn_err}")
-            except requests.exceptions.Timeout as timeout_err:
-                raise error_class(f"Timeout error occurred: {timeout_err}")
-            except requests.exceptions.RequestException as req_err:
-                raise error_class(f"Request exception occurred: {req_err}")
+                raise error_class(f"HTTP error: {exc}{body}")
+            except requests.exceptions.RequestException as exc:
+                raise error_class(str(exc))
 
         return wrapper
 
@@ -184,34 +165,13 @@ def pull(
     return requests.post(url, data=payload, headers=headers)
 
 
-def mask_text(text: str, mask_start: int = 3, mask_end: int = 3) -> str:
-    """
-    Mask a text string, showing only the beginning and end.
-
-    Args:
-        text: The text to mask
-        mask_start: Number of characters to show at the start
-        mask_end: Number of characters to show at the end
-
-    Returns:
-        The masked text
-    """
-    text_length = len(text)
-    mask = "*" * (text_length - mask_start - mask_end)
-    return text[:mask_start] + mask + text[text_length - mask_end :]
+def mask_text(text: str, show_start: int = 3, show_end: int = 3) -> str:
+    """Mask a text string, showing only the first and last few characters."""
+    hidden = len(text) - show_start - show_end
+    return text[:show_start] + "*" * max(hidden, 0) + text[len(text) - show_end :]
 
 
 def parse_repo_link(repo_link: str) -> str:
-    """
-    Parse a GitHub repository link to extract user/repo.
-
-    Args:
-        repo_link: The full GitHub repository URL
-
-    Returns:
-        The user/repo part of the URL
-    """
-    parse_result = urlparse(repo_link)
-    repo_location = [item.strip("/") for item in parse_result.path.split("tree")]
-    user_slash_repo = repo_location[0]
-    return user_slash_repo
+    """Extract user/repo from a GitHub repository URL."""
+    path = urlparse(repo_link).path
+    return path.split("tree")[0].strip("/")
