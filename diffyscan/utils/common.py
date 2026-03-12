@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 from functools import wraps
@@ -147,6 +148,48 @@ def _handle_request_errors(error_class: type[BaseException]):
         return wrapper
 
     return decorator
+
+
+def build_hashed_cache_key(*parts: str) -> str:
+    return hashlib.sha256(":".join(parts).encode()).hexdigest()
+
+
+def load_cache(
+    cache_path: str,
+    cache_kind: str,
+    display_name: str,
+    loader=None,
+):
+    loader = loader or (lambda cache_file: cache_file.read())
+
+    if not os.path.exists(cache_path):
+        return None
+
+    try:
+        logger.info(f"Loading {cache_kind} from cache: {display_name}")
+        with open(cache_path, "r", encoding="utf-8") as cache_file:
+            return loader(cache_file)
+    except Exception as exc:
+        logger.warn(f"Failed to load {cache_kind} from cache: {exc}")
+        return None
+
+
+def save_cache(
+    cache_path: str,
+    cache_kind: str,
+    display_name: str,
+    value,
+    writer=None,
+) -> None:
+    writer = writer or (lambda cache_file, cached_value: cache_file.write(cached_value))
+
+    try:
+        os.makedirs(os.path.dirname(cache_path), exist_ok=True)
+        with open(cache_path, "w", encoding="utf-8") as cache_file:
+            writer(cache_file, value)
+        logger.info(f"Saved {cache_kind} to cache: {display_name}")
+    except Exception as exc:
+        logger.warn(f"Failed to save {cache_kind} to cache: {exc}")
 
 
 @_handle_request_errors(ExplorerError)

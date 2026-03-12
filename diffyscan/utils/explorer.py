@@ -1,10 +1,9 @@
 import json
-import sys
 import os
 import copy
 import re
 
-from .common import fetch
+from .common import fetch, load_cache, save_cache
 from .logger import logger
 from .compiler import (
     get_solc_native_platform_from_os,
@@ -131,58 +130,7 @@ def _get_cache_key(contract_address: str, chain_id: int | None) -> str:
 
 
 def _get_cache_path(cache_key: str) -> str:
-    """Get the file path for a cache key."""
     return os.path.join(CACHE_DIR, f"{cache_key}.json")
-
-
-def _load_from_cache(contract_address: str, chain_id: int | None) -> dict | None:
-    """
-    Load contract data from cache if available.
-
-    Args:
-        contract_address: The contract address
-        chain_id: The chain ID
-
-    Returns:
-        Cached contract data or None if not found
-    """
-    cache_key = _get_cache_key(contract_address, chain_id)
-    cache_path = _get_cache_path(cache_key)
-
-    if os.path.exists(cache_path):
-        try:
-            logger.info(f"Loading contract from cache: {cache_key}")
-            with open(cache_path, "r") as f:
-                return json.load(f)
-        except Exception as e:
-            logger.warn(f"Failed to load from cache: {e}")
-            return None
-    return None
-
-
-def _save_to_cache(
-    contract_address: str, chain_id: int | None, contract_data: dict
-) -> None:
-    """
-    Save contract data to cache.
-
-    Args:
-        contract_address: The contract address
-        chain_id: The chain ID
-        contract_data: The contract data to cache
-    """
-    cache_key = _get_cache_key(contract_address, chain_id)
-    cache_path = _get_cache_path(cache_key)
-
-    try:
-        # Create cache directory if it doesn't exist
-        os.makedirs(CACHE_DIR, exist_ok=True)
-
-        with open(cache_path, "w") as f:
-            json.dump(contract_data, f, indent=2)
-        logger.info(f"Saved contract to cache: {cache_key}")
-    except Exception as e:
-        logger.warn(f"Failed to save to cache: {e}")
 
 
 def _get_contract_from_etherscan(
@@ -612,7 +560,13 @@ def get_contract_from_explorer(
 ) -> dict:
     # Try to load from cache if enabled
     if use_cache:
-        cached_result = _load_from_cache(contract_address, chain_id)
+        cache_key = _get_cache_key(contract_address, chain_id)
+        cached_result = load_cache(
+            _get_cache_path(cache_key),
+            "contract",
+            cache_key,
+            json.load,
+        )
         if cached_result is not None:
             _validate_contract_name(
                 contract_address,
@@ -641,7 +595,17 @@ def get_contract_from_explorer(
 
     # Save to cache if enabled
     if use_cache:
-        _save_to_cache(contract_address, chain_id, result)
+        save_cache(
+            _get_cache_path(cache_key),
+            "contract",
+            cache_key,
+            result,
+            lambda cache_file, cached_value: json.dump(
+                cached_value,
+                cache_file,
+                indent=2,
+            ),
+        )
 
     return result
 

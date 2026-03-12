@@ -96,3 +96,34 @@ def test_get_file_from_github_recursive_searches_nested_directories(monkeypatch)
     )
 
     assert content == "contract Nested {}"
+
+
+def test_get_file_from_github_uses_cache(monkeypatch, tmp_path):
+    calls = {"count": 0}
+
+    def fake_fetch(url, headers=None):
+        calls["count"] += 1
+        payload = {"content": base64.b64encode(b"contract Cached {}").decode()}
+        return DummyResponse(payload)
+
+    monkeypatch.setattr("diffyscan.utils.github.GITHUB_CACHE_DIR", str(tmp_path))
+    monkeypatch.setattr("diffyscan.utils.github.fetch", fake_fetch)
+
+    repo = {
+        "url": "https://github.com/user/repo",
+        "commit": "abc123",
+        "relative_root": "src",
+    }
+    first = get_file_from_github(
+        "github-token", repo, "contracts/Cached.sol", None, True
+    )
+    second = get_file_from_github(
+        "github-token",
+        repo,
+        "contracts/Cached.sol",
+        None,
+        True,
+    )
+
+    assert first == second == "contract Cached {}"
+    assert calls["count"] == 1

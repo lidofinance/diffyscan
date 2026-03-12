@@ -1,89 +1,33 @@
 import base64
 import binascii
 import os
-import hashlib
 
-from .common import fetch, parse_repo_link
+from .common import (
+    build_hashed_cache_key,
+    fetch,
+    load_cache,
+    parse_repo_link,
+    save_cache,
+)
 from .logger import logger
 
 # Cache directory for storing GitHub files
 GITHUB_CACHE_DIR = os.path.join(os.getcwd(), ".diffyscan_cache", "github")
 
 
-def _get_github_cache_key(user_slash_repo, commit, relative_root, path_to_file):
-    """
-    Generate a unique cache key for a GitHub file.
-
-    Args:
-        user_slash_repo: Repository in format "user/repo"
-        commit: Git commit hash
-        relative_root: Relative root path in the repo
-        path_to_file: Path to the file
-
-    Returns:
-        A string cache key (hash)
-    """
-    # Combine all parts to create unique identifier
-    cache_string = f"{user_slash_repo}:{commit}:{relative_root}:{path_to_file}"
-    # Use SHA256 hash for consistent, filesystem-safe cache keys
-    return hashlib.sha256(cache_string.encode()).hexdigest()
-
-
-def _get_github_cache_path(cache_key):
-    """Get the file path for a GitHub cache key."""
+def _get_github_cache_path(
+    user_slash_repo: str,
+    commit: str,
+    relative_root: str,
+    path_to_file: str,
+) -> str:
+    cache_key = build_hashed_cache_key(
+        user_slash_repo,
+        commit,
+        relative_root,
+        path_to_file,
+    )
     return os.path.join(GITHUB_CACHE_DIR, f"{cache_key}.txt")
-
-
-def _load_from_github_cache(user_slash_repo, commit, relative_root, path_to_file):
-    """
-    Load file content from GitHub cache if available.
-
-    Returns:
-        Cached file content or None if not found
-    """
-    cache_key = _get_github_cache_key(
-        user_slash_repo, commit, relative_root, path_to_file
-    )
-    cache_path = _get_github_cache_path(cache_key)
-
-    if os.path.exists(cache_path):
-        try:
-            logger.info(f"Loading GitHub file from cache: {path_to_file}")
-            with open(cache_path, "r", encoding="utf-8") as f:
-                return f.read()
-        except Exception as e:
-            logger.warn(f"Failed to load from GitHub cache: {e}")
-            return None
-    return None
-
-
-def _save_to_github_cache(
-    user_slash_repo, commit, relative_root, path_to_file, content
-):
-    """
-    Save file content to GitHub cache.
-
-    Args:
-        user_slash_repo: Repository in format "user/repo"
-        commit: Git commit hash
-        relative_root: Relative root path in the repo
-        path_to_file: Path to the file
-        content: File content to cache
-    """
-    cache_key = _get_github_cache_key(
-        user_slash_repo, commit, relative_root, path_to_file
-    )
-    cache_path = _get_github_cache_path(cache_key)
-
-    try:
-        # Create cache directory if it doesn't exist
-        os.makedirs(GITHUB_CACHE_DIR, exist_ok=True)
-
-        with open(cache_path, "w", encoding="utf-8") as f:
-            f.write(content)
-        logger.info(f"Saved GitHub file to cache: {path_to_file}")
-    except Exception as e:
-        logger.warn(f"Failed to save to GitHub cache: {e}")
 
 
 def _build_repo_file_request(
@@ -194,14 +138,15 @@ def _get_file_from_github_with_cache(
         path_to_file,
         dep_name,
     )
+    cache_path = _get_github_cache_path(
+        user_slash_repo,
+        commit,
+        relative_root,
+        path_to_file,
+    )
 
     if use_cache:
-        cached_content = _load_from_github_cache(
-            user_slash_repo,
-            commit,
-            relative_root,
-            path_to_file,
-        )
+        cached_content = load_cache(cache_path, "GitHub file", path_to_file)
         if cached_content is not None:
             return cached_content
 
@@ -214,13 +159,7 @@ def _get_file_from_github_with_cache(
     )
 
     if use_cache and content is not None:
-        _save_to_github_cache(
-            user_slash_repo,
-            commit,
-            relative_root,
-            path_to_file,
-            content,
-        )
+        save_cache(cache_path, "GitHub file", path_to_file, content)
 
     return content
 
@@ -259,19 +198,6 @@ def get_file_from_github_recursive(
     )
 
 
-def _get_direct_file(
-    github_api_token, user_slash_repo, relative_root, path_to_file, commit
-):
-    return _fetch_exact_github_file(
-        github_api_token,
-        user_slash_repo,
-        relative_root,
-        path_to_file,
-        commit,
-        require_file_type=True,
-    )
-
-
 def _recursive_search(
     github_api_token,
     user_slash_repo,
@@ -282,12 +208,13 @@ def _recursive_search(
 ):
     checked_dirs = checked_dirs or set()
 
-    direct_file_content = _get_direct_file(
+    direct_file_content = _fetch_exact_github_file(
         github_api_token,
         user_slash_repo,
         relative_path,
         filename,
         commit,
+        require_file_type=True,
     )
     if direct_file_content is not None:
         return direct_file_content
@@ -345,13 +272,7 @@ def path_to_file_without_dependency(path_to_file: str, dep_name: str | None) -> 
     Returns:
         The file path without the dependency prefix
     """
-    if not dep_name:
-        return path_to_file
-
-    dep_name_and_slash_length = len(dep_name) + 1
-    path_to_file_without_dependency = path_to_file[dep_name_and_slash_length:]
-
-    return path_to_file_without_dependency
+    return path_to_file if not dep_name else path_to_file[len(dep_name) + 1 :]
 
 
 def resolve_dep(path_to_file: str, config: dict) -> tuple[dict | None, str | None]:
@@ -368,15 +289,11 @@ def resolve_dep(path_to_file: str, config: dict) -> tuple[dict | None, str | Non
     Returns:
         A tuple of (dependency_config, dep_name) or (None, None)
     """
-    dep_names = sorted(
-        list(config.get("dependencies", {}).keys()), key=len, reverse=True
-    )
-
-    for dep_name in dep_names:
+    for dep_name in sorted(config.get("dependencies", {}), key=len, reverse=True):
         if path_to_file.startswith(f"{dep_name}/"):
-            return (config["dependencies"][dep_name], dep_name)
+            return config["dependencies"][dep_name], dep_name
 
-    return (None, None)
+    return None, None
 
 
 def get_github_api_url(
