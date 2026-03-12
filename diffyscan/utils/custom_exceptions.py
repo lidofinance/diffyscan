@@ -14,9 +14,7 @@ class CompileError(BaseCustomException):
 
 class NodeError(BaseCustomException):
     def __init__(self, reason: str):
-        super().__init__(
-            f"Failed to receive bytecode from node: {reason}, please check hardhat config and fork chain_id"
-        )
+        super().__init__(f"Failed to communicate with RPC node: {reason}")
 
 
 class CalldataError(BaseCustomException):
@@ -27,11 +25,6 @@ class CalldataError(BaseCustomException):
 class EncoderError(BaseCustomException):
     def __init__(self, reason: str):
         super().__init__(f"Failed to encode calldata arguments: {reason}")
-
-
-class HardhatError(BaseCustomException):
-    def __init__(self, reason: str):
-        super().__init__(f"Failed to start Hardhat: {reason}")
 
 
 class ExplorerError(BaseCustomException):

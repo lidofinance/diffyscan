@@ -13,7 +13,6 @@
   "dependencies": {},
   "fail_on_bytecode_comparison_error": true,
   "bytecode_comparison": {
-    "hardhat_config_name": "hoodi_hardhat_config.js",
     "constructor_calldata": {},
     "constructor_args": {
       "0x397206ecdbdcb1A55A75e60Fc4D054feC72E5f63": [

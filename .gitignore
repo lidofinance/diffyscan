@@ -4,7 +4,6 @@ digest
 config.json
 __pycache__
 .vscode
-node_modules
 dist
 */cache/
 .idea

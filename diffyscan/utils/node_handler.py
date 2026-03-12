@@ -4,6 +4,30 @@ from .common import pull, mask_text
 from .logger import logger
 from .custom_exceptions import NodeError
 
+DEFAULT_CALLER = "0x0000000000000000000000000000000000000000"
+DEPLOYMENT_SIMULATION_GAS_LIMIT = 100_000_000
+
+
+def _rpc_call(rpc_url: str, method: str, params: list) -> dict:
+    payload = json.dumps(
+        {"id": 1, "jsonrpc": "2.0", "method": method, "params": params}
+    )
+    headers = {"Content-Type": "application/json"}
+    response = pull(rpc_url, payload, headers).json()
+
+    if "error" in response:
+        error = response["error"]
+        message = error.get("message", "unknown RPC error")
+        data = error.get("data")
+        if data is not None:
+            message = f"{message}. data={data}"
+        raise NodeError(message)
+
+    if "result" not in response:
+        raise NodeError(f"Received bad response for {method}: {response}")
+
+    return response
+
 
 def get_bytecode_from_node(contract_address: str, rpc_url: str) -> str:
     """
@@ -21,22 +45,11 @@ def get_bytecode_from_node(contract_address: str, rpc_url: str) -> str:
     """
     logger.info(f'Receiving the bytecode from "{mask_text(rpc_url)}" ...')
 
-    payload = json.dumps(
-        {
-            "id": 1,
-            "jsonrpc": "2.0",
-            "method": "eth_getCode",
-            "params": [contract_address, "latest"],
-        }
+    sources_url_response_in_json = _rpc_call(
+        rpc_url, "eth_getCode", [contract_address, "latest"]
     )
-
-    headers = {"Content-Type": "application/json"}
-    sources_url_response_in_json = pull(rpc_url, payload, headers).json()
-    if (
-        "result" not in sources_url_response_in_json
-        or sources_url_response_in_json["result"] == "0x"
-    ):
-        raise NodeError(f"Received bad response: {sources_url_response_in_json}")
+    if sources_url_response_in_json["result"] == "0x":
+        raise NodeError(f"Received empty bytecode for contract {contract_address}")
 
     logger.okay("Bytecode was successfully received")
     return sources_url_response_in_json["result"]
@@ -57,15 +70,7 @@ def get_chain_id(rpc_url: str) -> int:
     """
     logger.info(f'Receiving the chain ID from "{mask_text(rpc_url)}" ...')
 
-    payload = json.dumps(
-        {"id": 1, "jsonrpc": "2.0", "method": "eth_chainId", "params": []}
-    )
-
-    headers = {"Content-Type": "application/json"}
-    chain_id_response = pull(rpc_url, payload, headers).json()
-
-    if "result" not in chain_id_response:
-        raise NodeError(f"Failed to retrieve chain ID: {chain_id_response}")
+    chain_id_response = _rpc_call(rpc_url, "eth_chainId", [])
 
     logger.okay("Chain ID was successfully received")
 
@@ -74,101 +79,36 @@ def get_chain_id(rpc_url: str) -> int:
     return chain_id
 
 
-def get_account(rpc_url: str) -> str:
+def simulate_deployment(data: str, rpc_url: str, caller: str = DEFAULT_CALLER) -> str:
     """
-    Get the first account from an RPC node.
-
-    Args:
-        rpc_url: The RPC URL
-
-    Returns:
-        The account address
-
-    Raises:
-        NodeError: If no account is available
+    Simulate contract deployment via eth_call and return the deployed runtime bytecode.
     """
-    logger.info(f'Receiving the account from "{rpc_url}" ...')
-
-    payload = json.dumps(
-        {"id": 42, "jsonrpc": "2.0", "method": "eth_accounts", "params": []}
+    logger.info(
+        f'Simulating contract deployment via eth_call on "{mask_text(rpc_url)}" ...'
     )
 
-    headers = {"Content-Type": "application/json"}
-    account_address_response = pull(rpc_url, payload, headers).json()
-
-    if "result" not in account_address_response:
-        raise NodeError("The deployer account isn't set")
-
-    logger.okay("The account was successfully received")
-
-    return account_address_response["result"][0]
-
-
-def deploy_contract(rpc_url: str, deployer: str, data: str) -> str:
-    """
-    Deploy a contract and return its address.
-
-    Args:
-        rpc_url: The RPC URL
-        deployer: The deployer account address
-        data: The contract creation bytecode
-
-    Returns:
-        The deployed contract address
-
-    Raises:
-        NodeError: If deployment fails
-    """
-    logger.info(f'Trying to deploy transaction to "{rpc_url}" ...')
-
-    payload_sendTransaction = json.dumps(
-        {
-            "jsonrpc": "2.0",
-            "method": "eth_sendTransaction",
-            "params": [
-                {
-                    "from": deployer,
-                    "gas": 9000000,
-                    "gasPrice": 100 * 10**9,
-                    "input": data,
-                }
-            ],
-            "id": 1,
-        }
+    response = _rpc_call(
+        rpc_url,
+        "eth_call",
+        [
+            {
+                "from": caller,
+                "to": None,
+                "gas": hex(DEPLOYMENT_SIMULATION_GAS_LIMIT),
+                "data": data,
+            },
+            "latest",
+        ],
     )
-    headers = {"Content-Type": "application/json"}
-    response_sendTransaction = pull(rpc_url, payload_sendTransaction, headers).json()
 
-    if "error" in response_sendTransaction:
-        raise NodeError(response_sendTransaction["error"]["message"])
+    result = response["result"]
+    if not isinstance(result, str) or result == "0x":
+        raise NodeError("eth_call returned empty runtime bytecode")
 
-    logger.okay("Transaction was successfully deployed")
-
-    tx_hash = response_sendTransaction["result"]
-
-    payload_getTransactionReceipt = json.dumps(
-        {
-            "id": 1,
-            "jsonrpc": "2.0",
-            "method": "eth_getTransactionReceipt",
-            "params": [tx_hash],
-        }
+    logger.okay(
+        "eth_call returned deployed runtime bytecode",
+        f"{len(result[2:]) // 2} bytes",
     )
-    response_getTransactionReceipt = pull(rpc_url, payload_getTransactionReceipt).json()
+    logger.info("eth_call bytecode preview", f"{result[:18]}...{result[-16:]}")
 
-    if (
-        "result" not in response_getTransactionReceipt
-        or "contractAddress" not in response_getTransactionReceipt["result"]
-        or "status" not in response_getTransactionReceipt["result"]
-    ):
-        raise NodeError("Failed to receive transaction receipt")
-
-    if response_getTransactionReceipt["result"]["status"] != "0x1":
-        raise NodeError(
-            "Failed to receive transaction receipt. \
-  Transaction has been reverted (status 0x0). Input mismatch?",
-        )
-
-    contract_address = response_getTransactionReceipt["result"]["contractAddress"]
-
-    return contract_address
+    return result

@@ -14,7 +14,6 @@
   "dependencies": {},
   "fail_on_bytecode_comparison_error": true,
   "bytecode_comparison": {
-    "hardhat_config_name": "mainnet_hardhat_config.js",
     "constructor_calldata": {},
     "constructor_args": {
       "0x8aa34dAaF0fC263203A15Bcfa0Ed926D466e59F3": [

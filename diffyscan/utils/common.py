@@ -1,8 +1,6 @@
 import json
 import os
 import sys
-import subprocess
-import tempfile
 import requests
 import uuid
 import yaml
@@ -186,56 +184,3 @@ def parse_repo_link(repo_link: str) -> str:
     repo_location = [item.strip("/") for item in parse_result.path.split("tree")]
     user_slash_repo = repo_location[0]
     return user_slash_repo
-
-
-def prettify_solidity(solidity_contract_content: str) -> str:
-    """
-    Prettify Solidity code using prettier.
-
-    Args:
-        solidity_contract_content: The Solidity source code to prettify
-
-    Returns:
-        The prettified Solidity source code
-
-    Raises:
-        RuntimeError: If prettier fails or times out
-    """
-    # Use tempfile.NamedTemporaryFile for secure temp file handling
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".sol", delete=False, encoding="utf-8"
-    ) as fp:
-        github_file_name = fp.name
-        fp.write(solidity_contract_content)
-
-    try:
-        subprocess.run(
-            [
-                "npx",
-                "prettier",
-                "--plugin=prettier-plugin-solidity",
-                "--write",
-                github_file_name,
-            ],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.PIPE,
-            check=True,
-            timeout=30,
-        )
-
-        with open(github_file_name, "r", encoding="utf-8") as fp:
-            return fp.read()
-    except subprocess.CalledProcessError as e:
-        error_msg = f"Prettier/npx subprocess failed: {e.stderr.decode() if e.stderr else str(e)}"
-        logger.error(error_msg)
-        raise RuntimeError(error_msg) from e
-    except subprocess.TimeoutExpired as e:
-        error_msg = "Prettier/npx subprocess timed out after 30 seconds"
-        logger.error(error_msg)
-        raise RuntimeError(error_msg) from e
-    finally:
-        # Always clean up the temp file
-        try:
-            os.unlink(github_file_name)
-        except OSError:
-            pass

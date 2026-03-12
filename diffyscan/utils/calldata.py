@@ -35,20 +35,14 @@ def _check_calldata_config(
             f"Contract {contract_address} found in both 'constructor_args' and 'constructor_calldata' in config"
         )
 
-    # Validate: must have at least one
-    if not has_raw and not has_args:
-        raise CalldataError(
-            f"Contract {contract_address} not found in 'constructor_args' or 'constructor_calldata' in config, "
-            "but ABI has a constructor"
-        )
-
     return has_raw, has_args
 
 
 def get_calldata(
     contract_address_from_config: str,
     target_compiled_contract: dict,
-    binary_config: dict,
+    binary_config: dict | None = None,
+    explorer_constructor_arguments: str | None = None,
 ) -> str | None:
     """
     Get constructor calldata from config or encode from constructor arguments.
@@ -74,6 +68,8 @@ def get_calldata(
 
     logger.okay("Constructor in ABI successfully found")
 
+    binary_config = binary_config or {}
+
     has_raw, has_args = _check_calldata_config(
         contract_address_from_config, binary_config
     )
@@ -81,11 +77,25 @@ def get_calldata(
     if has_raw:
         return get_raw_calldata_from_config(contract_address_from_config, binary_config)
 
-    # Must have args if we got here (validation ensures one or the other)
-    return parse_calldata_from_config(
-        contract_address_from_config,
-        binary_config["constructor_args"],
-        constructor_abi,
+    if has_args:
+        return parse_calldata_from_config(
+            contract_address_from_config,
+            binary_config["constructor_args"],
+            constructor_abi,
+        )
+
+    if explorer_constructor_arguments is not None:
+        logger.info("Trying to use constructor calldata from explorer metadata")
+        normalized = normalize_calldata(explorer_constructor_arguments)
+        if not normalized:
+            raise CalldataError(
+                f"Explorer metadata doesn't contain constructor calldata for {contract_address_from_config}"
+            )
+        return normalized
+
+    raise CalldataError(
+        f"Contract {contract_address_from_config} not found in 'constructor_args' or 'constructor_calldata' in config, "
+        "and explorer metadata doesn't contain constructor calldata"
     )
 
 
@@ -120,7 +130,7 @@ def get_raw_calldata_from_config(
 
     calldata_field = binary_config["constructor_calldata"]
     prepared_calldata_from_config = calldata_field[contract_address_from_config]
-    return prepared_calldata_from_config
+    return normalize_calldata(prepared_calldata_from_config)
 
 
 def parse_calldata_from_config(
@@ -159,3 +169,30 @@ def parse_calldata_from_config(
         raise CalldataError("Contract calldata is empty")
 
     return calldata
+
+
+def normalize_calldata(calldata: str) -> str:
+    """Normalize raw calldata to a hex string without the 0x prefix."""
+    if not isinstance(calldata, str):
+        raise CalldataError(
+            f"Expected constructor calldata to be a hex string, got {type(calldata).__name__}"
+        )
+
+    normalized = calldata.strip()
+    if normalized.startswith("0x"):
+        normalized = normalized[2:]
+
+    if not normalized:
+        return ""
+
+    try:
+        int(normalized, 16)
+    except ValueError as exc:
+        raise CalldataError("Constructor calldata is not valid hex") from exc
+
+    if len(normalized) % 2 != 0:
+        raise CalldataError(
+            "Constructor calldata must have an even number of hex chars"
+        )
+
+    return normalized

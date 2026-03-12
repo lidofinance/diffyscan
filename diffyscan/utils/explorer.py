@@ -1,8 +1,10 @@
 import json
 import sys
 import os
+import copy
+import re
 
-from .common import fetch, load_env
+from .common import fetch
 from .logger import logger
 from .compiler import (
     get_solc_native_platform_from_os,
@@ -16,6 +18,23 @@ from .custom_exceptions import ExplorerError
 
 # Cache directory for storing Etherscan sources
 CACHE_DIR = os.path.join(os.getcwd(), ".diffyscan_cache")
+HEX_ADDRESS_RE = re.compile(r"^0x[a-fA-F0-9]{40}$")
+LIBRARY_REFERENCE_RE = re.compile(r"\blibrary\s+([A-Za-z_][A-Za-z0-9_]*)\b")
+
+
+def _default_output_selection() -> dict:
+    return {
+        "*": {
+            "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+            ],
+            "": ["ast"],
+        }
+    }
 
 
 def _error_no_source_code_and_exit(address: str) -> None:
@@ -146,20 +165,16 @@ def _get_contract_from_etherscan(
                     "enabled": result.get("OptimizationUsed") == "1",
                     "runs": int(result.get("Runs", 0)),
                 },
-                "outputSelection": {
-                    "*": {
-                        "*": [
-                            "abi",
-                            "evm.bytecode",
-                            "evm.deployedBytecode",
-                            "evm.methodIdentifiers",
-                            "metadata",
-                        ],
-                        "": ["ast"],
-                    }
-                },
+                "outputSelection": _default_output_selection(),
             },
         }
+    _attach_contract_metadata(
+        contract,
+        contract["solcInput"].get("sources", {}),
+        result.get("ConstructorArguments"),
+        result.get("EVMVersion"),
+        result.get("Library"),
+    )
     return contract
 
 
@@ -215,22 +230,18 @@ def _get_contract_from_mantle(mantle_explorer_hostname: str, contract: str) -> d
                     "enabled": data.get("OptimizationUsed", "0") == "1",
                     "runs": int(data.get("Runs", "200")),
                 },
-                "outputSelection": {
-                    "*": {
-                        "*": [
-                            "abi",
-                            "evm.bytecode",
-                            "evm.deployedBytecode",
-                            "evm.methodIdentifiers",
-                            "metadata",
-                        ],
-                        "": ["ast"],
-                    }
-                },
+                "outputSelection": _default_output_selection(),
             },
         },
         "compiler": data["CompilerVersion"],
     }
+    _attach_contract_metadata(
+        result,
+        source_files,
+        data.get("ConstructorArguments"),
+        data.get("EVMVersion"),
+        data.get("Library"),
+    )
     return result
 
 
@@ -251,33 +262,251 @@ def _get_contract_from_blockscout(explorer_hostname: str, contract: str) -> dict
     for entry in response.get("additional_sources", []):
         source_files[entry["file_path"]] = {"content": entry["source_code"]}
 
+    compiler_settings = copy.deepcopy(response.get("compiler_settings") or {})
+    optimization_runs = response.get(
+        "optimization_runs", response.get("optimizations_runs", 0)
+    )
+    compiler_settings.setdefault(
+        "optimizer",
+        {
+            "enabled": response.get("optimization_enabled", False),
+            "runs": int(optimization_runs or 0),
+        },
+    )
+    compiler_settings["outputSelection"] = _default_output_selection()
+
     contract = {
         "name": response["name"],
         "solcInput": {
             "language": "Solidity",
             "sources": source_files,
-            "settings": {
-                "optimizer": {
-                    "enabled": response["optimization_enabled"],
-                    "runs": int(response["optimization_runs"]),
-                },
-                "outputSelection": {
-                    "*": {
-                        "*": [
-                            "abi",
-                            "evm.bytecode",
-                            "evm.deployedBytecode",
-                            "evm.methodIdentifiers",
-                            "metadata",
-                        ],
-                        "": ["ast"],
-                    }
-                },
-            },
+            "settings": compiler_settings,
         },
         "compiler": response["compiler_version"],
     }
+    _attach_contract_metadata(
+        contract,
+        source_files,
+        response.get("constructor_args"),
+        response.get("evm_version"),
+        response.get("external_libraries"),
+    )
     return contract
+
+
+def _attach_contract_metadata(
+    contract: dict,
+    source_files: dict,
+    constructor_arguments: str | None,
+    evm_version: str | None,
+    libraries: dict | list | str | None,
+) -> None:
+    settings = contract.get("solcInput", {}).get("settings", {})
+
+    normalized_constructor_arguments = _normalize_hex_string(
+        constructor_arguments, prefix=False
+    )
+    if normalized_constructor_arguments is not None:
+        contract["constructor_arguments"] = normalized_constructor_arguments
+
+    normalized_evm_version = _normalize_evm_version(
+        evm_version or settings.get("evmVersion")
+    )
+    if normalized_evm_version:
+        contract["evm_version"] = normalized_evm_version
+
+    settings_libraries = settings.get("libraries")
+    normalized_libraries = _merge_libraries(
+        _parse_libraries(settings_libraries, source_files),
+        _parse_libraries(libraries, source_files),
+    )
+    if normalized_libraries:
+        contract["libraries"] = normalized_libraries
+
+
+def _normalize_hex_string(value: str | None, prefix: bool = True) -> str | None:
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        raise ExplorerError(
+            f"Expected explorer hex field to be a string, got {type(value).__name__}"
+        )
+
+    normalized = value.strip()
+    if normalized.startswith("0x"):
+        normalized = normalized[2:]
+
+    if normalized == "":
+        return ""
+
+    try:
+        int(normalized, 16)
+    except ValueError as exc:
+        raise ExplorerError(f"Explorer metadata is not valid hex: {value}") from exc
+
+    if len(normalized) % 2 != 0:
+        normalized = f"0{normalized}"
+
+    return f"0x{normalized}" if prefix else normalized
+
+
+def _normalize_evm_version(value: str | None) -> str | None:
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        raise ExplorerError(
+            f"Expected evm version to be a string, got {type(value).__name__}"
+        )
+
+    normalized = value.strip()
+    if not normalized or normalized.lower() == "default":
+        return None
+    return normalized
+
+
+def _parse_libraries(
+    raw_libraries: dict | list | str | None, source_files: dict
+) -> dict[str, dict[str, str]] | None:
+    if raw_libraries in (None, "", [], {}):
+        return None
+
+    if isinstance(raw_libraries, dict):
+        parsed = {}
+        for key, value in raw_libraries.items():
+            if isinstance(value, dict):
+                parsed.setdefault(key, {})
+                for lib_name, address in value.items():
+                    parsed[key][lib_name] = _normalize_library_address(address)
+                continue
+
+            path, lib_name = _parse_qualified_library_name(str(key), source_files)
+            parsed.setdefault(path, {})
+            parsed[path][lib_name] = _normalize_library_address(value)
+        return parsed or None
+
+    if isinstance(raw_libraries, list):
+        parsed = {}
+        for item in raw_libraries:
+            if not isinstance(item, dict):
+                raise ExplorerError(
+                    f"Unsupported explorer library entry type: {type(item).__name__}"
+                )
+
+            library_name = (
+                item.get("name")
+                or item.get("library_name")
+                or item.get("contract_name")
+            )
+            file_path = item.get("file_path") or item.get("path")
+            address = item.get("address") or item.get("contract_address")
+
+            if not library_name or not address:
+                raise ExplorerError(
+                    f"Explorer library entry is missing name/address: {item}"
+                )
+
+            if not file_path:
+                file_path = _infer_library_path(str(library_name), source_files)
+
+            parsed.setdefault(str(file_path), {})
+            parsed[str(file_path)][str(library_name)] = _normalize_library_address(
+                address
+            )
+        return parsed or None
+
+    if isinstance(raw_libraries, str):
+        stripped = raw_libraries.strip()
+        if not stripped:
+            return None
+
+        if stripped[0] in "[{":
+            try:
+                decoded = json.loads(stripped)
+            except json.JSONDecodeError:
+                decoded = None
+            if decoded is not None:
+                return _parse_libraries(decoded, source_files)
+
+        parsed = {}
+        for part in [
+            chunk.strip() for chunk in re.split(r"[;,]", stripped) if chunk.strip()
+        ]:
+            if "=" in part:
+                qualified_name, address = part.rsplit("=", 1)
+            elif ":" in part:
+                qualified_name, address = part.rsplit(":", 1)
+            else:
+                raise ExplorerError(f"Unsupported library entry: {part}")
+
+            path, lib_name = _parse_qualified_library_name(qualified_name, source_files)
+            parsed.setdefault(path, {})
+            parsed[path][lib_name] = _normalize_library_address(address)
+
+        return parsed or None
+
+    raise ExplorerError(
+        f"Unsupported explorer libraries type: {type(raw_libraries).__name__}"
+    )
+
+
+def _parse_qualified_library_name(
+    qualified_name: str, source_files: dict
+) -> tuple[str, str]:
+    normalized = qualified_name.strip()
+    if not normalized:
+        raise ExplorerError("Explorer library name is empty")
+
+    if ":" in normalized:
+        maybe_path, maybe_lib_name = normalized.rsplit(":", 1)
+        if maybe_path in source_files:
+            return maybe_path, maybe_lib_name
+        if "/" in maybe_path or maybe_path.endswith(".sol"):
+            return maybe_path, maybe_lib_name
+
+    return _infer_library_path(normalized, source_files), normalized
+
+
+def _infer_library_path(library_name: str, source_files: dict) -> str:
+    matches = []
+    for path, source in source_files.items():
+        content = source.get("content", "")
+        if not isinstance(content, str):
+            continue
+        for declared_library_name in LIBRARY_REFERENCE_RE.findall(content):
+            if declared_library_name == library_name:
+                matches.append(path)
+                break
+
+    if len(matches) == 1:
+        return matches[0]
+    if not matches:
+        raise ExplorerError(
+            f"Failed to infer source path for library '{library_name}' from explorer metadata"
+        )
+    raise ExplorerError(
+        f"Multiple source files declare library '{library_name}': {matches}"
+    )
+
+
+def _normalize_library_address(address: str) -> str:
+    normalized = _normalize_hex_string(str(address), prefix=True)
+    if normalized is None or not HEX_ADDRESS_RE.match(normalized):
+        raise ExplorerError(f"Invalid library address in explorer metadata: {address}")
+    return normalized
+
+
+def _merge_libraries(
+    *library_sets: dict[str, dict[str, str]] | None,
+) -> dict[str, dict[str, str]] | None:
+    merged = {}
+    for library_set in library_sets:
+        if not library_set:
+            continue
+        for path, libraries in library_set.items():
+            merged.setdefault(path, {})
+            merged[path].update(libraries)
+
+    return merged or None
 
 
 def _get_explorer_fetcher(explorer_hostname: str) -> tuple:
@@ -373,7 +602,9 @@ def get_contract_from_explorer(
 
 
 def compile_contract_from_explorer(
-    contract_code: dict, libraries: dict | None = None
+    contract_code: dict,
+    libraries: dict | None = None,
+    evm_version: str | None = None,
 ) -> dict:
     required_platform = get_solc_native_platform_from_os()
     build_name = contract_code["compiler"][1:]
@@ -385,16 +616,23 @@ def compile_contract_from_explorer(
     if not is_compiler_already_prepared:
         prepare_compiler(required_platform, build_info, compiler_path)
 
-    solc_input = contract_code["solcInput"]
+    solc_input = copy.deepcopy(contract_code["solcInput"])
+
+    if "settings" not in solc_input:
+        solc_input["settings"] = {}
 
     # Add libraries to solc input before compilation if provided
     if libraries:
         logger.okay(f"Adding libraries to solc input: {libraries}")
-        if "settings" not in solc_input:
-            solc_input["settings"] = {}
         if "libraries" not in solc_input["settings"]:
             solc_input["settings"]["libraries"] = {}
-        solc_input["settings"]["libraries"].update(libraries)
+        for path, library_map in libraries.items():
+            solc_input["settings"]["libraries"].setdefault(path, {})
+            solc_input["settings"]["libraries"][path].update(library_map)
+
+    if evm_version:
+        logger.okay("Using EVM version from explorer metadata", evm_version)
+        solc_input["settings"]["evmVersion"] = evm_version
 
     input_settings = json.dumps(solc_input)
     compiled_contracts = compile_contracts(compiler_path, input_settings)[

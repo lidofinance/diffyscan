@@ -7,12 +7,11 @@ import traceback
 
 from dotenv import load_dotenv
 
-from .utils.common import load_config, load_env, prettify_solidity
+from . import __version__
+from .utils.common import load_config, load_env
 from .utils.constants import (
     DIFFS_DIR,
-    DEFAULT_HARDHAT_CONFIG_PATH,
     START_TIME,
-    DEFAULT_LOCAL_RPC_URL,
 )
 from .utils.explorer import (
     get_contract_from_explorer,
@@ -29,22 +28,17 @@ from .utils.github import (
 from .utils.helpers import create_dirs
 from .utils.logger import logger
 from .utils.binary_verifier import deep_match_bytecode
-from .utils.hardhat import hardhat
 from .utils.node_handler import (
     get_bytecode_from_node,
-    get_account,
-    deploy_contract,
     get_chain_id,
+    simulate_deployment,
 )
 from .utils.calldata import get_calldata
 from .utils.custom_exceptions import (
     ExceptionHandler,
     BaseCustomException,
-    BinVerifierError,
     CompileError,
 )
-
-__version__ = "0.0.0"
 
 
 def _build_github_solc_input(
@@ -96,8 +90,6 @@ def run_bytecode_diff(
     github_api_token,
     recursive_parsing,
     cache_github,
-    deployer_account,
-    local_rpc_url,
     remote_rpc_url,
 ):
     """
@@ -110,8 +102,19 @@ def run_bytecode_diff(
     logger.divider()
     logger.info(f"Binary bytecode comparison started for {address_name}")
 
-    # Get libraries from config if they exist
-    libraries = config.get("bytecode_comparison", {}).get("libraries", None)
+    explorer_libraries = contract_source_code.get("libraries")
+    manual_libraries = config.get("bytecode_comparison", {}).get("libraries")
+    libraries = _merge_library_overrides(explorer_libraries, manual_libraries)
+    evm_version = contract_source_code.get("evm_version")
+    explorer_constructor_arguments = contract_source_code.get("constructor_arguments")
+
+    _log_explorer_bytecode_metadata(
+        explorer_constructor_arguments,
+        evm_version,
+        explorer_libraries,
+        manual_libraries,
+    )
+
     github_solc_input, missing_sources = _build_github_solc_input(
         contract_source_code,
         config,
@@ -132,7 +135,7 @@ def run_bytecode_diff(
     github_contract_source = dict(contract_source_code)
     github_contract_source["solcInput"] = github_solc_input
     target_compiled_contract = compile_contract_from_explorer(
-        github_contract_source, libraries
+        github_contract_source, libraries, evm_version
     )
     logger.okay("Compiled contract for bytecode comparison using GitHub sources")
 
@@ -150,26 +153,17 @@ def run_bytecode_diff(
         logger.okay("Bytecodes fully match")
         return True
 
-    logger.info(
-        "Static bytecodes not match, trying local deployment to bind immutables"
-    )
+    logger.info("Static bytecodes do not match, simulating constructor via eth_call")
 
     calldata = get_calldata(
         contract_address_from_config,
         target_compiled_contract,
-        config["bytecode_comparison"],
+        config.get("bytecode_comparison"),
+        explorer_constructor_arguments,
     )
 
-    if calldata:
-        contract_creation_code += calldata
-
-    local_contract_address = deploy_contract(
-        local_rpc_url, deployer_account, contract_creation_code
-    )
-
-    local_deployed_bytecode = get_bytecode_from_node(
-        local_contract_address, local_rpc_url
-    )
+    deployment_call_data = _append_calldata(contract_creation_code, calldata)
+    local_deployed_bytecode = simulate_deployment(deployment_call_data, remote_rpc_url)
 
     is_fully_matched = local_deployed_bytecode == remote_deployed_bytecode
 
@@ -190,7 +184,6 @@ def run_source_diff(
     config,
     github_api_token,
     recursive_parsing=False,
-    prettify=False,
     cache_github=False,
     skip_user_input=False,
 ):
@@ -289,10 +282,6 @@ def run_source_diff(
 
         explorer_content = source_code["content"]
 
-        if prettify:
-            github_file = prettify_solidity(github_file)
-            explorer_content = prettify_solidity(explorer_content)
-
         github_lines = github_file.splitlines()
         explorer_lines = explorer_content.splitlines()
 
@@ -385,7 +374,7 @@ def _validate_github_token() -> str:
     return load_env("GITHUB_API_TOKEN", masked=True, required=True)
 
 
-def _setup_binary_comparison(config: dict) -> tuple[str, str]:
+def _setup_binary_comparison(config: dict) -> str:
     """
     Setup and validate binary comparison configuration.
 
@@ -393,31 +382,82 @@ def _setup_binary_comparison(config: dict) -> tuple[str, str]:
         config: The configuration dictionary
 
     Returns:
-        tuple: (local_rpc_url, remote_rpc_url)
+        The remote RPC URL
 
     Raises:
         ValueError: If required configuration is missing
     """
-    if "bytecode_comparison" not in config:
-        raise ValueError('Failed to find "bytecode_comparison" section in config')
-
-    # LOCAL_RPC_URL may be empty; default to localhost Ganache/Hardhat-compatible URL
-    local_rpc_url = load_env("LOCAL_RPC_URL", masked=False, required=False)
-    if not local_rpc_url:
-        local_rpc_url = DEFAULT_LOCAL_RPC_URL
-        logger.okay("LOCAL_RPC_URL (default)", local_rpc_url)
     remote_rpc_url = load_env("REMOTE_RPC_URL", masked=True, required=True)
 
     ExceptionHandler.initialize(config.get("fail_on_bytecode_comparison_error", True))
 
-    return local_rpc_url, remote_rpc_url
+    return remote_rpc_url
+
+
+def _merge_library_overrides(
+    explorer_libraries: dict | None,
+    manual_libraries: dict | None,
+) -> dict | None:
+    merged = {}
+    for library_set in (explorer_libraries, manual_libraries):
+        if not library_set:
+            continue
+        for path, libraries in library_set.items():
+            merged.setdefault(path, {})
+            merged[path].update(libraries)
+
+    return merged or None
+
+
+def _append_calldata(creation_code: str, calldata: str | None) -> str:
+    if not calldata:
+        return creation_code
+    return creation_code + calldata
+
+
+def _log_explorer_bytecode_metadata(
+    constructor_arguments: str | None,
+    evm_version: str | None,
+    explorer_libraries: dict | None,
+    manual_libraries: dict | None,
+) -> None:
+    constructor_length = (
+        "missing"
+        if constructor_arguments is None
+        else f"{len(constructor_arguments) // 2} bytes"
+    )
+    logger.okay("Explorer constructor calldata", constructor_length)
+    logger.okay("Explorer EVM version", evm_version or "default")
+    logger.okay(
+        "Explorer library count",
+        sum(len(libraries) for libraries in (explorer_libraries or {}).values()),
+    )
+    if manual_libraries:
+        logger.warn(
+            "Manual libraries override explorer metadata",
+            sum(len(libraries) for libraries in manual_libraries.values()),
+        )
+
+
+def _warn_deprecated_hardhat_settings(
+    config: dict, hardhat_config_path: str | None
+) -> None:
+    if hardhat_config_path:
+        logger.warn("--hardhat-path is deprecated and ignored")
+
+    bytecode_comparison = config.get("bytecode_comparison", {})
+    if isinstance(bytecode_comparison, dict) and bytecode_comparison.get(
+        "hardhat_config_name"
+    ):
+        logger.warn(
+            'Config key "bytecode_comparison.hardhat_config_name" is deprecated and ignored'
+        )
 
 
 def process_config(
     path: str,
     hardhat_config_path: str | None,
     recursive_parsing: bool,
-    unify_formatting: bool,
     enable_binary_comparison: bool,
     cache_explorer: bool,
     cache_github: bool,
@@ -437,23 +477,16 @@ def process_config(
 
     logger.info(f"Loading config {path}...")
     config = load_config(path)
-
-    # Resolve hardhat config path: CLI arg > config value > default
-    if hardhat_config_path is None:
-        bytecode_comparison = config.get("bytecode_comparison", {})
-        hardhat_config_path = bytecode_comparison.get(
-            "hardhat_config_name", DEFAULT_HARDHAT_CONFIG_PATH
-        )
+    _warn_deprecated_hardhat_settings(config, hardhat_config_path)
 
     # Load tokens and validate
     explorer_token = _load_explorer_token(config)
     github_api_token = _validate_github_token()
 
     # Setup binary comparison if enabled
-    local_rpc_url = None
     remote_rpc_url = None
     if enable_binary_comparison:
-        local_rpc_url, remote_rpc_url = _setup_binary_comparison(config)
+        remote_rpc_url = _setup_binary_comparison(config)
 
     # Check if source comparison is enabled
     enable_source_comparison = config.get("source_comparison", True)
@@ -471,24 +504,6 @@ def process_config(
             logger.info("Getting remote chain ID...")
             remote_chain_id = get_chain_id(remote_rpc_url)
             logger.okay("Remote chain ID", remote_chain_id)
-
-            hardhat.start(
-                hardhat_config_path,
-                local_rpc_url,
-                remote_rpc_url,
-                remote_chain_id,
-            )
-            logger.divider()
-            logger.info("Getting local chain ID and deployer account...")
-            deployer_account = get_account(local_rpc_url)
-            local_chain_id = get_chain_id(local_rpc_url)
-
-            logger.okay("Local chain ID", local_chain_id)
-
-            if remote_chain_id != local_chain_id:
-                raise ValueError(
-                    f"Remote chain ID {remote_chain_id} does not match local chain ID {local_chain_id}"
-                )
 
         for contract_address, contract_name in config["contracts"].items():
             try:
@@ -508,7 +523,6 @@ def process_config(
                         config,
                         github_api_token,
                         recursive_parsing,
-                        unify_formatting,
                         cache_github,
                         skip_user_input,
                     )
@@ -524,8 +538,6 @@ def process_config(
                             github_api_token,
                             recursive_parsing,
                             cache_github,
-                            deployer_account,
-                            local_rpc_url,
                             remote_rpc_url,
                         )
                         bytecode_stats.append(
@@ -552,10 +564,6 @@ def process_config(
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt by user")
 
-    finally:
-        if enable_binary_comparison:
-            hardhat.stop()
-
     return {
         "source_stats": source_stats,
         "bytecode_stats": bytecode_stats,
@@ -580,7 +588,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--hardhat-path",
         default=None,
-        help="Path to Hardhat config",
+        help=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--yes",
@@ -592,12 +600,6 @@ def parse_arguments() -> argparse.Namespace:
         "--support-brownie",
         help="Support recursive retrieving for contracts. It may be useful for contracts whose sources have been verified by the brownie tooling, which automatically replaces relative paths to contracts in imports with plain contract names.",
         action=argparse.BooleanOptionalAction,
-    )
-    parser.add_argument(
-        "--prettify",
-        "-P",
-        help="Unify formatting by prettier before comparing",
-        action="store_true",
     )
     parser.add_argument(
         "--skip-binary-comparison",
@@ -792,7 +794,6 @@ def main() -> None:
             config_path,
             args.hardhat_path,
             args.support_brownie,
-            args.prettify,
             enable_binary_comparison,
             args.cache_explorer,
             args.cache_github,

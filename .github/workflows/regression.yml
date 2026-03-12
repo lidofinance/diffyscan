@@ -15,19 +15,15 @@ jobs:
       matrix:
         include:
           - config: config_samples/ethereum/mainnet/safe_harbor/safe_harbor.json
-            hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
             flags: ""
           - config: config_samples/ethereum/mainnet/vaults/vaults_config.json
-            hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
             flags: ""
           - config: config_samples/ethereum/mainnet/vaults/vaults_voting_config.json
-            hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
             flags: ""
           - config: config_samples/ethereum/mainnet/vaults/vaults_easy_track_config.json
-            hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
             flags: >
               --allow-source-diff 0x194A46DA1947E98c9D79af13E06Cfbee0D8610cC
@@ -44,35 +40,28 @@ jobs:
               --allow-source-diff 0xaf35A63a4114B7481589fDD9FDB3e35Fd65fAed7
               --allow-source-diff 0x647DeE7bF33e44829e6430F7A08F63b3319694f0
           - config: config_samples/ethereum/mainnet/vaults-wrapper/vaults_wrapper_factory_config.json
-            hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
             flags: >
               --allow-bytecode-diff 0x3f221b8E5bC098cC6C23611BEeacaeCfD77e1587
           - config: config_samples/ethereum/mainnet/gualGovernance/dual_governance_mainnet_config.json
-            hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
             flags: >
               --allow-bytecode-diff 0xd6A67636c05BeB5B4a5c90D408b03A63c4e39426
           - config: config_samples/ethereum/mainnet/gualGovernance/dual_governance_mainnet_voting_config.json
-            hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
             flags: ""
           - config: config_samples/ethereum/mainnet/gualGovernance/dual_governance_mainnet_upgrade_voting_config.json
-            hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
             flags: ""
           - config: config_samples/ethereum/mainnet/tw/tw_config.json
-            hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
             flags: ""
           - config: config_samples/ethereum/mainnet/tw/tw_easy_track_config.json
-            hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
             flags: >
               --allow-source-diff 0x8aa34dAaF0fC263203A15Bcfa0Ed926D466e59F3
               --allow-source-diff 0xB7668B5485d0f826B86a75b0115e088bB9ee03eE
           - config: config_samples/ethereum/hoodi/vaults/hoodi_vaults_testnet_config.json
-            hardhat: hardhat_configs/hoodi_hardhat_config.ts
             network: hoodi
             flags: >
               --allow-source-diff 0x1d10DB6a66EF8D2A6f6D36Ad4dc7092Ef7C12569
@@ -89,7 +78,6 @@ jobs:
               --allow-bytecode-diff 0xE22486EA7cE77daE718fFa7B7114fD50CF73Cbac
               --allow-bytecode-diff 0xd253b0ca059343e70474e685Beb2974F10CCFa67
           - config: config_samples/ethereum/hoodi/vaults/hoodi_vaults_easy_track_config.json
-            hardhat: hardhat_configs/hoodi_hardhat_config.ts
             network: hoodi
             flags: >
               --allow-source-diff 0xfEF8B796Fea42b3C68E342364Adcf88F1d6145a6
@@ -106,23 +94,15 @@ jobs:
       ETHERSCAN_EXPLORER_TOKEN: ${{ secrets.ETHERSCAN_EXPLORER_TOKEN }}
       ETHERSCAN_TOKEN: ${{ secrets.ETHERSCAN_EXPLORER_TOKEN }}
       GITHUB_API_TOKEN: ${{ github.token }}
-      LOCAL_RPC_URL: "http://127.0.0.1:7545"
       REMOTE_RPC_URL: ${{ matrix.network == 'mainnet' && secrets['REMOTE_RPC_URL_MAINNET'] || secrets['REMOTE_RPC_URL_HOODI'] }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v7.4.0
         with:
-          python-version: "3.12"
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-      - name: Install Poetry
-        run: |
-          pip install poetry~=2.2
+          python-version: "3.11"
       - name: Install dependencies
         run: |
-          poetry install --no-interaction
-          npm ci
+          uv sync --locked --group dev
 
       - name: Restore diffyscan caches
         uses: actions/cache@v4
@@ -135,9 +115,13 @@ jobs:
 
       - name: Run unit tests
         run: |
-          poetry run pytest -q
+          uv run pytest -q
+
+      - name: Run hook checks
+        run: |
+          uv run pre-commit run --all-files
 
       - name: Run diffyscan
         run: |
           FLAGS="${{ matrix.flags }}"
-          poetry run diffyscan --hardhat-path ${{ matrix.hardhat }} -Y -E -G ${{ matrix.config }} ${FLAGS}
+          uv run diffyscan -Y -E -G ${{ matrix.config }} ${FLAGS}
