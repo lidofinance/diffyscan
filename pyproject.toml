@@ -24,8 +24,11 @@ diffyscan = "diffyscan.diffyscan:main"
 dev = [
     "black>=25.9.0,<26",
     "gitlint>=0.19,<1",
+    "mypy>=1.15,<2",
     "pre-commit>=4.3,<5",
     "pytest>=8.4.2,<9",
+    "types-pyyaml>=6.0,<7",
+    "types-requests>=2.32,<3",
 ]
 
 [build-system]
@@ -37,3 +40,16 @@ packages = ["diffyscan"]
 
 [tool.hatch.build.targets.sdist]
 exclude = ["config_samples"]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["diffyscan"]
+strict = false
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = ["termtables.*", "dotenv.*"]
+ignore_missing_imports = true

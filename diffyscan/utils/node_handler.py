@@ -33,7 +33,7 @@ def get_bytecode_from_node(contract_address: str, rpc_url: str) -> str:
     if result == "0x":
         raise NodeError(f"Empty bytecode for contract {contract_address}")
     logger.okay("Bytecode received")
-    return result
+    return str(result)
 
 
 def get_chain_id(rpc_url: str) -> int:

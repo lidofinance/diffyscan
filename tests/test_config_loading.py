@@ -20,6 +20,7 @@ ALL_TOP_LEVEL_KEYS = {
     "explorer_hostname_env_var",
     "explorer_chain_id",
     "bytecode_comparison",
+    "allowed_diffs",
     "fail_on_bytecode_comparison_error",
     "audit_url",
     "metadata",
@@ -244,6 +245,161 @@ bytecode_comparison:
         load_config(str(path))
 
 
+def test_allowed_diffs_unknown_address_raises(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text(
+        json.dumps(
+            {
+                **SAMPLE_CONFIG,
+                "allowed_diffs": {
+                    "bytecode": {
+                        "0x00000000000000000000000000000000000000AB": [
+                            {"reason": "bad", "any": True}
+                        ]
+                    }
+                },
+            }
+        )
+    )
+    with pytest.raises(ValueError, match="is not present in contracts"):
+        load_config(str(path))
+
+
+def test_allowed_diffs_any_cannot_be_combined(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text(
+        json.dumps(
+            {
+                **SAMPLE_CONFIG,
+                "allowed_diffs": {
+                    "bytecode": {
+                        "0x0000000000000000000000000000000000000001": [
+                            {
+                                "reason": "bad",
+                                "any": True,
+                                "cbor_metadata": True,
+                            }
+                        ]
+                    }
+                },
+            }
+        )
+    )
+    with pytest.raises(ValueError, match="cannot combine any"):
+        load_config(str(path))
+
+
+def test_allowed_diffs_constructor_args_and_calldata_are_mutually_exclusive(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text(
+        json.dumps(
+            {
+                **SAMPLE_CONFIG,
+                "allowed_diffs": {
+                    "bytecode": {
+                        "0x0000000000000000000000000000000000000001": [
+                            {
+                                "reason": "bad",
+                                "constructor_args": ["0x01"],
+                                "constructor_calldata": "0x01",
+                            }
+                        ]
+                    }
+                },
+            }
+        )
+    )
+    with pytest.raises(
+        ValueError,
+        match="cannot include both constructor_args and constructor_calldata",
+    ):
+        load_config(str(path))
+
+
+def test_allowed_diffs_source_line_ranges_shape_is_validated(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text(
+        json.dumps(
+            {
+                **SAMPLE_CONFIG,
+                "allowed_diffs": {
+                    "source": {
+                        "0x0000000000000000000000000000000000000001": [
+                            {
+                                "reason": "bad",
+                                "line_ranges": [
+                                    {
+                                        "file": "contracts/Foo.sol",
+                                        "github": {"start": 0, "count": 1},
+                                        "explorer": {"start": 1, "count": 1},
+                                    }
+                                ],
+                            }
+                        ]
+                    }
+                },
+            }
+        )
+    )
+    with pytest.raises(ValueError, match="github.start must be an integer >= 1"):
+        load_config(str(path))
+
+
+def test_allowed_diffs_yaml_unquoted_address_raises(tmp_path):
+    path = tmp_path / "config.yaml"
+    path.write_text(
+        """\
+contracts:
+  "0x0000000000000000000000000000000000000001": TestContract
+explorer_hostname: api.etherscan.io
+explorer_token_env_var: ETHERSCAN_TOKEN
+github_repo:
+  url: https://github.com/example/repo
+  commit: abc123
+  relative_root: ""
+dependencies: {}
+allowed_diffs:
+  source:
+    0x0000000000000000000000000000000000000001:
+      - reason: generated file differs
+        any: true
+"""
+    )
+    with pytest.raises(
+        ValueError, match="allowed_diffs.source address was parsed as integer"
+    ):
+        load_config(str(path))
+
+
+def test_allowed_diffs_yaml_unquoted_immutable_hex_raises(tmp_path):
+    path = tmp_path / "config.yaml"
+    path.write_text(
+        """\
+contracts:
+  "0x0000000000000000000000000000000000000001": TestContract
+explorer_hostname: api.etherscan.io
+explorer_token_env_var: ETHERSCAN_TOKEN
+github_repo:
+  url: https://github.com/example/repo
+  commit: abc123
+  relative_root: ""
+dependencies: {}
+allowed_diffs:
+  bytecode:
+    "0x0000000000000000000000000000000000000001":
+      - reason: immutable differs
+        immutables:
+          - offset: 0
+            value: 0x0000000000000000000000000000000000000001
+"""
+    )
+    with pytest.raises(
+        ValueError,
+        match="allowed_diffs.bytecode.0x0000000000000000000000000000000000000001\\[1\\].immutables\\[1\\].value",
+    ):
+        load_config(str(path))
+
+
 # --- Full-fixture tests (max properties) ---
 
 
@@ -297,6 +453,21 @@ def test_full_fixture_nested_types():
             assert isinstance(lib_name, str)
             assert isinstance(lib_addr, str) and lib_addr.startswith("0x")
 
+    for addr, rules in result["allowed_diffs"]["bytecode"].items():
+        assert isinstance(addr, str) and addr.startswith("0x")
+        assert isinstance(rules, list)
+        for rule in rules:
+            assert isinstance(rule["reason"], str)
+
+    for rule in result["allowed_diffs"]["source"][
+        "0x442af784A788A5bd6F42A01Ebe9F287a871243fb"
+    ]:
+        assert isinstance(rule["reason"], str)
+        if "line_ranges" in rule:
+            for line_range in rule["line_ranges"]:
+                assert line_range["github"]["start"] >= 1
+                assert line_range["explorer"]["count"] >= 0
+
     # metadata.timelock_requirements.minimum_delay_seconds stays int
     assert result["metadata"]["timelock_requirements"]["minimum_delay_seconds"] == 1
     assert isinstance(result["metadata"]["deployment_date"], str)
@@ -319,3 +490,203 @@ def test_full_fixture_yaml_comments_dont_create_extra_keys():
                 check_no_comment_keys(item, f"{path}[{i}]")
 
     check_no_comment_keys(result)
+
+
+# --- allowed_diffs validation edge cases ---
+
+
+def test_allowed_diffs_empty_immutables_list_raises(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text(
+        json.dumps(
+            {
+                **SAMPLE_CONFIG,
+                "allowed_diffs": {
+                    "bytecode": {
+                        "0x0000000000000000000000000000000000000001": [
+                            {"reason": "empty", "immutables": []}
+                        ]
+                    }
+                },
+            }
+        )
+    )
+    with pytest.raises(ValueError, match="immutables must be a non-empty list"):
+        load_config(str(path))
+
+
+def test_allowed_diffs_byte_ranges_zero_length_raises(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text(
+        json.dumps(
+            {
+                **SAMPLE_CONFIG,
+                "allowed_diffs": {
+                    "bytecode": {
+                        "0x0000000000000000000000000000000000000001": [
+                            {
+                                "reason": "bad range",
+                                "byte_ranges": [{"offset": 0, "length": 0}],
+                            }
+                        ]
+                    }
+                },
+            }
+        )
+    )
+    with pytest.raises(ValueError, match="length must be a positive integer"):
+        load_config(str(path))
+
+
+def test_allowed_diffs_unknown_keys_in_bytecode_entry_raises(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text(
+        json.dumps(
+            {
+                **SAMPLE_CONFIG,
+                "allowed_diffs": {
+                    "bytecode": {
+                        "0x0000000000000000000000000000000000000001": [
+                            {"reason": "bad", "cbor_metadata": True, "bogus_field": 1}
+                        ]
+                    }
+                },
+            }
+        )
+    )
+    with pytest.raises(ValueError, match="unsupported keys"):
+        load_config(str(path))
+
+
+def test_allowed_diffs_unknown_keys_in_source_entry_raises(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text(
+        json.dumps(
+            {
+                **SAMPLE_CONFIG,
+                "allowed_diffs": {
+                    "source": {
+                        "0x0000000000000000000000000000000000000001": [
+                            {"reason": "bad", "files": ["A.sol"], "extra": "nope"}
+                        ]
+                    }
+                },
+            }
+        )
+    )
+    with pytest.raises(ValueError, match="unsupported keys"):
+        load_config(str(path))
+
+
+def test_allowed_diffs_missing_reason_raises(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text(
+        json.dumps(
+            {
+                **SAMPLE_CONFIG,
+                "allowed_diffs": {
+                    "bytecode": {
+                        "0x0000000000000000000000000000000000000001": [
+                            {"cbor_metadata": True}
+                        ]
+                    }
+                },
+            }
+        )
+    )
+    with pytest.raises(ValueError, match="reason must be a non-empty string"):
+        load_config(str(path))
+
+
+def test_allowed_diffs_no_facet_raises(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text(
+        json.dumps(
+            {
+                **SAMPLE_CONFIG,
+                "allowed_diffs": {
+                    "source": {
+                        "0x0000000000000000000000000000000000000001": [
+                            {"reason": "nothing else"}
+                        ]
+                    }
+                },
+            }
+        )
+    )
+    with pytest.raises(ValueError, match="must declare at least one allowlist facet"):
+        load_config(str(path))
+
+
+def test_allowed_diffs_duplicate_immutable_offsets_raises(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text(
+        json.dumps(
+            {
+                **SAMPLE_CONFIG,
+                "allowed_diffs": {
+                    "bytecode": {
+                        "0x0000000000000000000000000000000000000001": [
+                            {
+                                "reason": "dup",
+                                "immutables": [
+                                    {"offset": 10, "value": "0xab"},
+                                    {"offset": 10, "value": "0xcd"},
+                                ],
+                            }
+                        ]
+                    }
+                },
+            }
+        )
+    )
+    with pytest.raises(ValueError, match="duplicate offset 10"):
+        load_config(str(path))
+
+
+def test_allowed_diffs_unsupported_diff_kind_raises(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text(
+        json.dumps(
+            {
+                **SAMPLE_CONFIG,
+                "allowed_diffs": {
+                    "storage": {
+                        "0x0000000000000000000000000000000000000001": [
+                            {"reason": "bad kind", "any": True}
+                        ]
+                    }
+                },
+            }
+        )
+    )
+    with pytest.raises(ValueError, match="is not supported"):
+        load_config(str(path))
+
+
+# --- Boolean field validation ---
+
+
+def test_source_comparison_string_raises(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text(json.dumps({**SAMPLE_CONFIG, "source_comparison": "false"}))
+    with pytest.raises(ValueError, match="source_comparison must be a boolean"):
+        load_config(str(path))
+
+
+def test_fail_on_bytecode_comparison_error_int_raises(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text(
+        json.dumps({**SAMPLE_CONFIG, "fail_on_bytecode_comparison_error": 1})
+    )
+    with pytest.raises(
+        ValueError, match="fail_on_bytecode_comparison_error must be a boolean"
+    ):
+        load_config(str(path))
+
+
+def test_source_comparison_bool_accepted(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text(json.dumps({**SAMPLE_CONFIG, "source_comparison": False}))
+    result = load_config(str(path))
+    assert result["source_comparison"] is False

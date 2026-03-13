@@ -1,26 +1,42 @@
+import argparse
 import difflib
+import json
+import os
 import sys
 import time
-import argparse
-import os
 import traceback
 
 from dotenv import load_dotenv
 
 from . import __version__
+from .utils.allowed_diffs import (
+    build_bytecode_suggestion_entry,
+    build_effective_allowed_diffs,
+    build_source_suggestion_entry,
+    evaluate_bytecode_rules,
+    evaluate_source_rules,
+    normalize_source_hunks,
+    render_suggestion_snippet,
+    summarize_bytecode_uncovered,
+    summarize_source_uncovered_hunks,
+)
+from .utils.binary_verifier import analyze_bytecode_diff, log_bytecode_diff_analysis
+from .utils.calldata import get_calldata
 from .utils.common import load_config, load_env
-from .utils.constants import (
-    DIFFS_DIR,
-    START_TIME,
+from .utils.constants import DIFFS_DIR, START_TIME
+from .utils.custom_exceptions import (
+    BaseCustomException,
+    CompileError,
+    ExceptionHandler,
 )
 from .utils.explorer import (
-    get_contract_from_explorer,
     compile_contract_from_explorer,
-    parse_compiled_contract,
-    get_explorer_hostname,
+    get_contract_from_explorer,
     get_explorer_chain_id,
-    merge_libraries,
+    get_explorer_hostname,
     get_solc_sources,
+    merge_libraries,
+    parse_compiled_contract,
 )
 from .utils.github import (
     get_file_from_github,
@@ -29,17 +45,10 @@ from .utils.github import (
 )
 from .utils.helpers import create_dirs
 from .utils.logger import logger
-from .utils.binary_verifier import deep_match_bytecode
 from .utils.node_handler import (
     get_bytecode_from_node,
     get_chain_id,
     simulate_deployment,
-)
-from .utils.calldata import get_calldata
-from .utils.custom_exceptions import (
-    ExceptionHandler,
-    BaseCustomException,
-    CompileError,
 )
 
 
@@ -54,6 +63,7 @@ def _fetch_github_source(
     if not dep_name:
         repo = config["github_repo"]
 
+    assert repo is not None
     fetcher = (
         get_file_from_github_recursive if recursive_parsing else get_file_from_github
     )
@@ -105,8 +115,8 @@ def run_bytecode_diff(
     recursive_parsing,
     cache_github,
     remote_rpc_url,
+    allowed_rules,
 ):
-    """Run bytecode comparison. Returns True if bytecodes match."""
     address_name = f"{contract_address_from_config} : {contract_name_from_config}"
     logger.divider()
     logger.info(f"Binary bytecode comparison started for {address_name}")
@@ -156,11 +166,18 @@ def run_bytecode_diff(
         contract_address_from_config, remote_rpc_url
     )
 
-    is_fully_matched = local_compiled_bytecode == remote_deployed_bytecode
-
-    if is_fully_matched:
+    if local_compiled_bytecode == remote_deployed_bytecode:
         logger.okay("Bytecodes fully match")
-        return True
+        return {
+            "contract_address": contract_address_from_config,
+            "contract_name": contract_name_from_config,
+            "status": "exact",
+            "match": True,
+            "has_diff": False,
+            "matched_rule": None,
+            "matched_facets": [],
+            "suggestion_entry": None,
+        }
 
     logger.info("Static bytecodes do not match, simulating constructor via eth_call")
 
@@ -170,21 +187,85 @@ def run_bytecode_diff(
         config.get("bytecode_comparison"),
         explorer_constructor_arguments,
     )
-
     deployment_call_data = _append_calldata(contract_creation_code, calldata)
     local_deployed_bytecode = simulate_deployment(deployment_call_data, remote_rpc_url)
 
-    is_fully_matched = local_deployed_bytecode == remote_deployed_bytecode
-
-    if is_fully_matched:
+    if local_deployed_bytecode == remote_deployed_bytecode:
         logger.okay("Bytecodes fully match")
-        return True
+        return {
+            "contract_address": contract_address_from_config,
+            "contract_name": contract_name_from_config,
+            "status": "exact",
+            "match": True,
+            "has_diff": False,
+            "matched_rule": None,
+            "matched_facets": [],
+            "suggestion_entry": None,
+        }
 
-    return deep_match_bytecode(
+    base_analysis = analyze_bytecode_diff(
         local_deployed_bytecode,
         remote_deployed_bytecode,
         immutables,
     )
+    analysis_cache: dict[str, dict] = {}
+
+    def analysis_provider(rule: dict) -> dict:
+        if "constructor_args" not in rule and "constructor_calldata" not in rule:
+            return base_analysis
+
+        cache_key = _constructor_rule_cache_key(rule)
+        if cache_key in analysis_cache:
+            return analysis_cache[cache_key]
+
+        override_binary_config = _build_constructor_override_binary_config(
+            contract_address_from_config,
+            rule,
+        )
+        override_calldata = get_calldata(
+            contract_address_from_config,
+            target_compiled_contract,
+            override_binary_config,
+            None,
+        )
+        override_call_data = _append_calldata(
+            contract_creation_code,
+            override_calldata,
+        )
+        override_deployed_bytecode = simulate_deployment(
+            override_call_data,
+            remote_rpc_url,
+        )
+        analysis_cache[cache_key] = analyze_bytecode_diff(
+            override_deployed_bytecode,
+            remote_deployed_bytecode,
+            immutables,
+        )
+        return analysis_cache[cache_key]
+
+    evaluation = evaluate_bytecode_rules(
+        base_analysis, allowed_rules, analysis_provider
+    )
+
+    suggestion_entry = None
+    if evaluation["status"] == "allowed":
+        _log_allowed_diff("bytecode", address_name, evaluation)
+    else:
+        best_analysis = evaluation["best_analysis"]
+        log_bytecode_diff_analysis(best_analysis)
+        _log_uncovered_bytecode_diff(best_analysis)
+        suggestion_entry = build_bytecode_suggestion_entry(best_analysis)
+
+    return {
+        "contract_address": contract_address_from_config,
+        "contract_name": contract_name_from_config,
+        "status": evaluation["status"],
+        "match": evaluation["status"] != "failed",
+        "has_diff": True,
+        "matched_rule": evaluation["matched_rule"],
+        "matched_facets": evaluation["matched_facets"],
+        "suggestion_entry": suggestion_entry,
+    }
 
 
 def run_source_diff(
@@ -192,11 +273,11 @@ def run_source_diff(
     contract_code,
     config,
     github_api_token,
+    allowed_rules,
     recursive_parsing=False,
     cache_github=False,
     skip_user_input=False,
 ):
-    """Run source code diff for a contract. Returns a stats dict."""
     source_files = get_solc_sources(contract_code["solcInput"])
     standard_json_format = is_standard_json_contract(source_files)
 
@@ -214,7 +295,6 @@ def run_source_diff(
     logger.okay("Repo relative root", config["github_repo"]["relative_root"])
 
     logger.divider()
-
     logger.info(
         f"Fetching source code from blockchain explorer {explorer_hostname} ..."
     )
@@ -232,24 +312,20 @@ def run_source_diff(
 
     logger.info("Diffing...")
 
-    report = []
+    file_results = []
+    report_table = []
 
     for file_number, (path_to_file, source_code) in enumerate(
         source_files.items(), start=1
     ):
-        if not standard_json_format:
-            path_to_file = path_to_file + ".sol"
+        source_path = path_to_file if standard_json_format else f"{path_to_file}.sol"
+        filename = source_path.split("/")[-1]
+        origin = source_path.split("/")[0]
 
-        split_path_to_file = path_to_file.split("/")
-        origin = split_path_to_file[0]
-        filename = split_path_to_file[-1]
+        logger.update_info(f"File {file_number} / {files_count}", filename)
 
-        logger.update_info(f"File {file_number} / { files_count}", filename)
-
-        diff_report_filename = None
-        diffs_count = None
         github_file = _fetch_github_source(
-            path_to_file,
+            source_path,
             config,
             github_api_token,
             recursive_parsing,
@@ -257,61 +333,91 @@ def run_source_diff(
         )
 
         file_found = bool(github_file)
-        if not github_file:
-            github_file = "<!-- No file content -->"
-
+        github_content = github_file or ""
         explorer_content = source_code["content"]
 
-        github_lines = github_file.splitlines()
+        github_lines = github_content.splitlines()
         explorer_lines = explorer_content.splitlines()
-
-        diff_html = difflib.HtmlDiff().make_file(github_lines, explorer_lines)
         diff_report_filename = (
             f"{DIFFS_DIR}/{contract_address_from_config}/{filename}.html"
         )
-
+        diff_html = difflib.HtmlDiff().make_file(github_lines, explorer_lines)
         create_dirs(diff_report_filename)
-        with open(diff_report_filename, "w") as f:
-            f.write(diff_html)
+        with open(diff_report_filename, "w", encoding="utf-8") as report_file:
+            report_file.write(diff_html)
 
-        diffs = difflib.unified_diff(github_lines, explorer_lines)
-        diffs_count = len(list(diffs))
+        diff_lines = list(difflib.unified_diff(github_lines, explorer_lines))
+        hunks = normalize_source_hunks(github_lines, explorer_lines)
 
-        report_data = [
-            file_number,
-            filename,
-            file_found,
-            diffs_count,
-            origin,
-            diff_report_filename,
-        ]
-
-        report.append(report_data)
+        file_result = {
+            "path": source_path,
+            "filename": filename,
+            "origin": origin,
+            "file_found": file_found,
+            "diff_report_filename": diff_report_filename,
+            "diffs_count": len(diff_lines),
+            "hunks": hunks,
+            "github_line_count": len(github_lines),
+            "explorer_line_count": len(explorer_lines),
+        }
+        file_results.append(file_result)
+        report_table.append(
+            [
+                file_number,
+                filename,
+                file_found,
+                len(diff_lines),
+                origin,
+                diff_report_filename,
+            ]
+        )
 
     logger.divider()
 
-    files_found = sum(row[2] for row in report)
+    files_found = sum(bool(file_result["file_found"]) for file_result in file_results)
     logger.info(f"Files found: {files_found} / {files_count}")
 
-    identical_files = sum(row[3] == 0 for row in report)
+    identical_files = sum(
+        bool(file_result["file_found"] and not file_result["hunks"])
+        for file_result in file_results
+    )
     logger.info(f"Identical files: {identical_files} / {files_found}")
 
-    files_with_diffs = sum(row[2] and row[3] > 0 for row in report)
+    files_with_diffs = sum(bool(file_result["hunks"]) for file_result in file_results)
+    logger.report_table(report_table)
 
-    logger.report_table(report)
-
-    return {
+    source_result = {
         "files_count": files_count,
         "files_found": files_found,
         "identical_files": identical_files,
         "files_with_diffs": files_with_diffs,
         "contract_address": contract_address_from_config,
         "contract_name": contract_code["name"],
+        "files": file_results,
+        "has_diff": files_with_diffs > 0,
     }
+
+    evaluation = evaluate_source_rules(source_result, allowed_rules)
+    suggestion_entry = None
+
+    if evaluation["status"] == "allowed":
+        _log_allowed_diff("source", contract_address_from_config, evaluation)
+    elif evaluation["status"] == "failed":
+        _log_uncovered_source_diff(source_result)
+        suggestion_entry = build_source_suggestion_entry(source_result)
+
+    source_result.update(
+        {
+            "status": evaluation["status"],
+            "matched_rule": evaluation["matched_rule"],
+            "matched_facets": evaluation["matched_facets"],
+            "suggestion_entry": suggestion_entry,
+        }
+    )
+    return source_result
 
 
 def _load_explorer_token(config: dict) -> str | None:
-    """Load explorer token from config env var name, falling back to ETHERSCAN_EXPLORER_TOKEN."""
     env_var = config.get("explorer_token_env_var")
     if env_var:
         token = load_env(env_var, masked=True, required=False)
@@ -328,8 +434,8 @@ def _load_explorer_token(config: dict) -> str | None:
 
 
 def _setup_binary_comparison(config: dict) -> str:
-    """Load REMOTE_RPC_URL and configure exception handling for bytecode comparison."""
     remote_rpc_url = load_env("REMOTE_RPC_URL", masked=True, required=True)
+    assert remote_rpc_url is not None  # guaranteed by required=True
     ExceptionHandler.initialize(config.get("fail_on_bytecode_comparison_error", True))
     return remote_rpc_url
 
@@ -365,7 +471,8 @@ def _log_explorer_bytecode_metadata(
 
 
 def _warn_deprecated_hardhat_settings(
-    config: dict, hardhat_config_path: str | None
+    config: dict,
+    hardhat_config_path: str | None,
 ) -> None:
     if hardhat_config_path:
         logger.warn("--hardhat-path is deprecated and ignored")
@@ -386,51 +493,62 @@ def process_config(
     enable_binary_comparison: bool,
     cache_explorer: bool,
     cache_github: bool,
+    cli_allowed_source_diffs: list[str] | None,
+    cli_allowed_bytecode_diffs: list[str] | None,
     skip_user_input: bool = False,
 ):
-    """Process a config file and run source + bytecode comparisons."""
-    # Reset exception handler to default before each config
     ExceptionHandler.initialize(True)
 
     logger.info(f"Loading config {path}...")
-    config = load_config(path)
+    config: dict = load_config(path)  # type: ignore[assignment]
     _warn_deprecated_hardhat_settings(config, hardhat_config_path)
+    effective_allowed_diffs = build_effective_allowed_diffs(
+        config,
+        cli_allowed_source_diffs,
+        cli_allowed_bytecode_diffs,
+    )
 
-    # Load tokens and validate
     explorer_token = _load_explorer_token(config)
     github_api_token = load_env("GITHUB_API_TOKEN", masked=True, required=True)
 
-    # Setup binary comparison if enabled
     remote_rpc_url = None
     if enable_binary_comparison:
         remote_rpc_url = _setup_binary_comparison(config)
 
-    # Check if source comparison is enabled
     enable_source_comparison = config.get("source_comparison", True)
     if not enable_source_comparison:
         logger.warn(
             f'Source code comparison is disabled in {path}. To enable, set "source_comparison": true in the config'
         )
 
-    # Statistics tracking
     source_stats = []
     bytecode_stats = []
 
     try:
         if enable_binary_comparison:
+            assert remote_rpc_url is not None
             logger.info("Getting remote chain ID...")
             remote_chain_id = get_chain_id(remote_rpc_url)
             logger.okay("Remote chain ID", remote_chain_id)
+
+        explorer_hostname = get_explorer_hostname(config)
+        assert explorer_hostname is not None, "explorer_hostname is required"
 
         for contract_address, contract_name in config["contracts"].items():
             try:
                 contract_code = get_contract_from_explorer(
                     explorer_token,
-                    get_explorer_hostname(config),
+                    explorer_hostname,
                     contract_address,
                     contract_name,
                     get_explorer_chain_id(config),
                     cache_explorer,
+                )
+
+                address_key = contract_address.lower()
+                source_rules = effective_allowed_diffs["source"].get(address_key, [])
+                bytecode_rules = effective_allowed_diffs["bytecode"].get(
+                    address_key, []
                 )
 
                 if enable_source_comparison:
@@ -439,6 +557,7 @@ def process_config(
                         contract_code,
                         config,
                         github_api_token,
+                        source_rules,
                         recursive_parsing,
                         cache_github,
                         skip_user_input,
@@ -447,7 +566,7 @@ def process_config(
 
                 if enable_binary_comparison:
                     try:
-                        bytecode_match = run_bytecode_diff(
+                        bytecode_result = run_bytecode_diff(
                             contract_address,
                             contract_name,
                             contract_code,
@@ -456,23 +575,21 @@ def process_config(
                             recursive_parsing,
                             cache_github,
                             remote_rpc_url,
+                            bytecode_rules,
                         )
-                        bytecode_stats.append(
-                            {
-                                "contract_address": contract_address,
-                                "contract_name": contract_name,
-                                "match": bytecode_match,
-                            }
-                        )
+                        bytecode_stats.append(bytecode_result)
                     except BaseCustomException as exc:
-                        # Treat bytecode comparison errors as reportable diffs; final
-                        # allowlist handling happens after all contracts are processed.
                         logger.error(str(exc))
                         bytecode_stats.append(
                             {
                                 "contract_address": contract_address,
                                 "contract_name": contract_name,
+                                "status": "failed",
                                 "match": False,
+                                "has_diff": True,
+                                "matched_rule": None,
+                                "matched_facets": [],
+                                "suggestion_entry": None,
                             }
                         )
             except BaseCustomException as custom_exc:
@@ -491,10 +608,16 @@ def process_config(
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--version", "-V", action="store_true", help="Display version information"
+        "--version",
+        "-V",
+        action="store_true",
+        help="Display version information",
     )
     parser.add_argument(
-        "path", nargs="?", default=None, help="Path to config or directory with configs"
+        "path",
+        nargs="?",
+        default=None,
+        help="Path to config or directory with configs",
     )
     parser.add_argument(
         "--hardhat-path",
@@ -571,108 +694,52 @@ def print_final_summary(
     logger.info("=" * 80)
 
     if enable_source_comparison:
-        # Aggregate source code statistics
-        total_contracts = 0
-        contracts_with_diffs = []
-        total_files_with_diffs = 0
-
-        for result in all_results:
-            for stat in result["source_stats"]:
-                total_contracts += 1
-                if stat["files_with_diffs"] > 0:
-                    contracts_with_diffs.append(
-                        {
-                            "address": stat["contract_address"],
-                            "name": stat["contract_name"],
-                            "files_with_diffs": stat["files_with_diffs"],
-                            "total_files": stat["files_found"],
-                        }
-                    )
-                    total_files_with_diffs += stat["files_with_diffs"]
-
-        logger.divider()
-        logger.info("SOURCE CODE COMPARISON SUMMARY:")
-        logger.okay(f"Total contracts analyzed: {total_contracts}")
-        logger.okay(
-            f"Contracts with non-zero source diffs: {len(contracts_with_diffs)}"
-        )
-        logger.okay(f"Total files with non-zero diffs: {total_files_with_diffs}")
-
-        if contracts_with_diffs:
-            logger.divider()
-            logger.warn("Contracts with source code differences:")
-            for contract in contracts_with_diffs:
-                logger.warn(
-                    f"  • {contract['name']} ({contract['address']}): "
-                    f"{contract['files_with_diffs']} file(s) with diffs out of {contract['total_files']}"
-                )
+        _print_source_summary(all_results)
 
     if enable_binary_comparison:
-        # Aggregate bytecode statistics
-        total_bytecode_checks = 0
-        bytecode_mismatches = []
+        _print_bytecode_summary(all_results)
 
-        for result in all_results:
-            for stat in result["bytecode_stats"]:
-                total_bytecode_checks += 1
-                if not stat["match"]:
-                    bytecode_mismatches.append(
-                        {
-                            "address": stat["contract_address"],
-                            "name": stat["contract_name"],
-                        }
-                    )
-
-        logger.divider()
-        logger.info("BYTECODE COMPARISON SUMMARY:")
-        logger.okay(f"Total contracts analyzed: {total_bytecode_checks}")
-        logger.okay(
-            f"Contracts with non-zero bytecode diffs: {len(bytecode_mismatches)}"
-        )
-
-        if bytecode_mismatches:
-            logger.divider()
-            logger.warn("Contracts with bytecode differences:")
-            for contract in bytecode_mismatches:
-                logger.warn(f"  • {contract['name']} ({contract['address']})")
+    _print_allowlist_suggestions(all_results)
 
     logger.divider()
     logger.info("=" * 80)
 
 
 def main() -> None:
-    """Main entry point for the diffyscan application."""
     load_dotenv()
     args = parse_arguments()
     skip_user_input = args.yes
+
     if args.quiet:
         logger.set_level("okay")
     else:
         logger.set_level(args.log_level)
+
     if args.version:
         print(f"Diffyscan {__version__}")
         return
+
     logger.info("Welcome to Diffyscan!")
     logger.divider()
 
-    # Binary comparison is enabled by default, unless --skip-binary-comparison is set
     enable_binary_comparison = not args.skip_binary_comparison
-
-    # Resolve config paths
     config_paths = []
     supported_extensions = (".json", ".yaml", ".yml")
 
     if args.path is None:
         config_path = next(
             (
-                p
-                for p in ("config.json", "config.yaml", "config.yml")
-                if os.path.isfile(p)
+                candidate
+                for candidate in ("config.json", "config.yaml", "config.yml")
+                if os.path.isfile(candidate)
             ),
             None,
         )
         if config_path is None:
-            error_msg = "No config file found. Create config.json or config.yaml in the current directory, or specify a path with --path."
+            error_msg = (
+                "No config file found. Create config.json or config.yaml in the current "
+                "directory, or specify a path with --path."
+            )
             logger.error(error_msg)
             raise FileNotFoundError(error_msg)
         config_paths.append(config_path)
@@ -690,7 +757,6 @@ def main() -> None:
         logger.error(error_msg)
         raise FileNotFoundError(error_msg)
 
-    # Process all config files
     all_results = []
     for config_path in config_paths:
         result = process_config(
@@ -700,81 +766,217 @@ def main() -> None:
             enable_binary_comparison,
             args.cache_explorer,
             args.cache_github,
+            args.allow_source_diff,
+            args.allow_bytecode_diff,
             skip_user_input,
         )
         all_results.append(result)
 
     execution_time = time.time() - START_TIME
+    enable_source_comparison = any(result["source_stats"] for result in all_results)
 
-    # Determine what comparisons were enabled (check first result)
-    enable_source_comparison = any(len(r["source_stats"]) > 0 for r in all_results)
-
-    # Print final summary
     print_final_summary(all_results, enable_source_comparison, enable_binary_comparison)
 
-    # Prepare allowlists (lowercased addresses)
-    allowed_source_addrs = set(addr.lower() for addr in (args.allow_source_diff or []))
-    allowed_bytecode_addrs = set(
-        addr.lower() for addr in (args.allow_bytecode_diff or [])
+    has_unallowed_diffs = any(
+        stat["status"] == "failed"
+        for result in all_results
+        for stat in result["source_stats"] + result["bytecode_stats"]
     )
-
-    # Compute unallowed diffs
-    unallowed_source_diffs = 0
-    if enable_source_comparison:
-        for result in all_results:
-            for stat in result["source_stats"]:
-                if (
-                    stat["files_with_diffs"] > 0
-                    and stat["contract_address"].lower() not in allowed_source_addrs
-                ):
-                    unallowed_source_diffs += 1
-
-    unallowed_bytecode_diffs = 0
-    if enable_binary_comparison:
-        for result in all_results:
-            for stat in result["bytecode_stats"]:
-                if (not stat["match"]) and stat[
-                    "contract_address"
-                ].lower() not in allowed_bytecode_addrs:
-                    unallowed_bytecode_diffs += 1
-
-    # Report allowlisted diffs for visibility
-    if allowed_source_addrs or allowed_bytecode_addrs:
-        logger.divider()
-        if allowed_source_addrs:
-            logger.warn(
-                "Allowed source diffs for addresses",
-                ", ".join(sorted(allowed_source_addrs)),
-            )
-        if allowed_bytecode_addrs:
-            logger.warn(
-                "Allowed bytecode diffs for addresses",
-                ", ".join(sorted(allowed_bytecode_addrs)),
-            )
-
-    # Decide exit code: non-zero if any unallowed diffs exist
-    has_unallowed_diffs = (unallowed_source_diffs > 0) or (unallowed_bytecode_diffs > 0)
 
     logger.okay(f"Done in {round(execution_time, 3)}s ✨" + " " * 100)
 
     if has_unallowed_diffs:
-        # Explicitly log a final line explaining failure condition
+        source_failures = sum(
+            stat["status"] == "failed"
+            for result in all_results
+            for stat in result["source_stats"]
+        )
+        bytecode_failures = sum(
+            stat["status"] == "failed"
+            for result in all_results
+            for stat in result["bytecode_stats"]
+        )
         logger.error(
             "Exiting with non-zero code due to unallowed diffs",
-            f"source={unallowed_source_diffs}, bytecode={unallowed_bytecode_diffs}",
+            f"source={source_failures}, bytecode={bytecode_failures}",
         )
         sys.exit(1)
-    else:
-        sys.exit(0)
+
+    sys.exit(0)
 
 
 def is_standard_json_contract(source_files: dict) -> bool:
-    """True if source uses Standard JSON format (paths with .sol or /), not single-file."""
     keys = list(source_files)
     if len(keys) != 1:
         return True
     first_key = keys[0]
     return ".sol" in first_key or "/" in first_key
+
+
+def _log_allowed_diff(diff_kind: str, contract_label: str, evaluation: dict) -> None:
+    matched_rule = evaluation["matched_rule"] or {}
+    facets = ", ".join(
+        evaluation["matched_facets"] or _present_rule_facets(matched_rule)
+    )
+    logger.warn(f"Allowed {diff_kind} diff", contract_label)
+    logger.warn("Matched allowlist rule", matched_rule.get("reason"))
+    if facets:
+        logger.okay("Matched facets", facets)
+    if matched_rule.get("any"):
+        logger.warn(
+            "Blanket allowlist matched",
+            "consider replacing it with granular allowed_diffs rules",
+        )
+
+
+def _log_uncovered_source_diff(source_result: dict) -> None:
+    logger.warn(
+        "Source diff is not covered by allowlist",
+        source_result["contract_address"],
+    )
+    for summary in summarize_source_uncovered_hunks(source_result):
+        logger.warn("Uncovered source hunk", summary)
+
+
+def _log_uncovered_bytecode_diff(analysis: dict) -> None:
+    for summary in summarize_bytecode_uncovered(analysis):
+        logger.warn("Uncovered bytecode diff", summary)
+    for observed in analysis["immutable_observations"]:
+        if observed["differs"]:
+            logger.warn(
+                "Observed immutable value",
+                f"offset={observed['offset']} value={observed['remote_value']}",
+            )
+
+
+def _present_rule_facets(rule: dict) -> list[str]:
+    facets = []
+    for field in (
+        "any",
+        "immutables",
+        "cbor_metadata",
+        "byte_ranges",
+        "constructor_args",
+        "constructor_calldata",
+        "files",
+        "line_ranges",
+    ):
+        value = rule.get(field)
+        if value not in (None, False, [], {}):
+            facets.append(field)
+    return facets
+
+
+def _constructor_rule_cache_key(rule: dict) -> str:
+    if "constructor_calldata" in rule:
+        return f"constructor_calldata:{rule['constructor_calldata']}"
+    return "constructor_args:" + json.dumps(rule["constructor_args"], sort_keys=True)
+
+
+def _build_constructor_override_binary_config(
+    contract_address: str,
+    rule: dict,
+) -> dict:
+    if "constructor_calldata" in rule:
+        return {
+            "constructor_calldata": {contract_address: rule["constructor_calldata"]}
+        }
+    return {"constructor_args": {contract_address: rule["constructor_args"]}}
+
+
+def _print_source_summary(all_results: list[dict]) -> None:
+    source_stats = [
+        stat for result in all_results for stat in result.get("source_stats", [])
+    ]
+    total_contracts = len(source_stats)
+    exact_matches = sum(stat["status"] == "exact" for stat in source_stats)
+    allowed_diffs = sum(stat["status"] == "allowed" for stat in source_stats)
+    failed_diffs = [stat for stat in source_stats if stat["status"] == "failed"]
+    total_files_with_diffs = sum(stat["files_with_diffs"] for stat in source_stats)
+
+    logger.divider()
+    logger.info("SOURCE CODE COMPARISON SUMMARY:")
+    logger.okay(f"Total contracts analyzed: {total_contracts}")
+    logger.okay(f"Exact matches: {exact_matches}")
+    logger.okay(f"Allowed diffs: {allowed_diffs}")
+    logger.okay(f"Failures: {len(failed_diffs)}")
+    logger.okay(f"Total files with non-zero diffs: {total_files_with_diffs}")
+
+    if failed_diffs:
+        logger.divider()
+        logger.warn("Contracts with uncovered source code differences:")
+        for stat in failed_diffs:
+            logger.warn(
+                f"  • {stat['contract_name']} ({stat['contract_address']}): "
+                f"{stat['files_with_diffs']} file(s) with diffs"
+            )
+
+
+def _print_bytecode_summary(all_results: list[dict]) -> None:
+    bytecode_stats = [
+        stat for result in all_results for stat in result.get("bytecode_stats", [])
+    ]
+    total_contracts = len(bytecode_stats)
+    exact_matches = sum(stat["status"] == "exact" for stat in bytecode_stats)
+    allowed_diffs = sum(stat["status"] == "allowed" for stat in bytecode_stats)
+    failed_diffs = [stat for stat in bytecode_stats if stat["status"] == "failed"]
+
+    logger.divider()
+    logger.info("BYTECODE COMPARISON SUMMARY:")
+    logger.okay(f"Total contracts analyzed: {total_contracts}")
+    logger.okay(f"Exact matches: {exact_matches}")
+    logger.okay(f"Allowed diffs: {allowed_diffs}")
+    logger.okay(f"Failures: {len(failed_diffs)}")
+
+    if failed_diffs:
+        logger.divider()
+        logger.warn("Contracts with uncovered bytecode differences:")
+        for stat in failed_diffs:
+            logger.warn(f"  • {stat['contract_name']} ({stat['contract_address']})")
+
+
+def _print_allowlist_suggestions(all_results: list[dict]) -> None:
+    grouped: dict[str, list[dict]] = {}
+
+    for result in all_results:
+        config_path = result["config_path"]
+
+        for diff_kind, key in (
+            ("source", "source_stats"),
+            ("bytecode", "bytecode_stats"),
+        ):
+            for stat in result[key]:
+                if not stat.get("suggestion_entry"):
+                    continue
+                grouped.setdefault(config_path, []).append(
+                    {
+                        "kind": diff_kind,
+                        "address": stat["contract_address"],
+                        "contract_name": stat["contract_name"],
+                        "entry": stat["suggestion_entry"],
+                    }
+                )
+
+    if not grouped:
+        return
+
+    logger.divider()
+    logger.warn("ALLOWLIST SUGGESTIONS:")
+    for config_path, suggestions in grouped.items():
+        logger.warn("Config", config_path)
+        for suggestion in suggestions:
+            logger.warn(
+                f"{suggestion['kind'].capitalize()} suggestion",
+                f"{suggestion['contract_name']} ({suggestion['address']})",
+            )
+            snippet = render_suggestion_snippet(
+                config_path,
+                suggestion["kind"],
+                suggestion["address"],
+                suggestion["entry"],
+            )
+            logger.info(snippet)
+            logger.divider()
 
 
 if __name__ == "__main__":
