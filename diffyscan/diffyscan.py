@@ -4,15 +4,15 @@ import time
 import argparse
 import os
 import traceback
+from pathlib import Path
 
 from dotenv import load_dotenv
 
-from .utils.common import load_config, load_env, prettify_solidity
+from . import __version__
+from .utils.common import load_config, load_env
 from .utils.constants import (
     DIFFS_DIR,
-    DEFAULT_HARDHAT_CONFIG_PATH,
     START_TIME,
-    DEFAULT_LOCAL_RPC_URL,
 )
 from .utils.explorer import (
     get_contract_from_explorer,
@@ -20,31 +20,44 @@ from .utils.explorer import (
     parse_compiled_contract,
     get_explorer_hostname,
     get_explorer_chain_id,
+    merge_libraries,
+    get_solc_sources,
 )
 from .utils.github import (
     get_file_from_github,
     get_file_from_github_recursive,
     resolve_dep,
 )
-from .utils.helpers import create_dirs
 from .utils.logger import logger
 from .utils.binary_verifier import deep_match_bytecode
-from .utils.hardhat import hardhat
 from .utils.node_handler import (
     get_bytecode_from_node,
-    get_account,
-    deploy_contract,
     get_chain_id,
+    simulate_deployment,
 )
 from .utils.calldata import get_calldata
 from .utils.custom_exceptions import (
     ExceptionHandler,
     BaseCustomException,
-    BinVerifierError,
     CompileError,
 )
 
-__version__ = "0.0.0"
+
+def _fetch_github_source(
+    path_to_file: str,
+    config: dict,
+    github_api_token: str,
+    recursive_parsing: bool,
+    cache_github: bool,
+) -> str | None:
+    repo, dep_name = resolve_dep(path_to_file, config)
+    if not dep_name:
+        repo = config["github_repo"]
+
+    fetcher = (
+        get_file_from_github_recursive if recursive_parsing else get_file_from_github
+    )
+    return fetcher(github_api_token, repo, path_to_file, dep_name, cache_github)
 
 
 def _build_github_solc_input(
@@ -55,23 +68,18 @@ def _build_github_solc_input(
     cache_github,
 ):
     solc_input = contract_source_code["solcInput"]
-    sources = solc_input.get("sources", solc_input)
+    sources = get_solc_sources(solc_input)
     updated_sources = {}
     missing = []
 
-    for path_to_file, source in sources.items():
-        repo, dep_name = resolve_dep(path_to_file, config)
-        if not dep_name:
-            repo = config["github_repo"]
-
-        if recursive_parsing:
-            github_file = get_file_from_github_recursive(
-                github_api_token, repo, path_to_file, dep_name, cache_github
-            )
-        else:
-            github_file = get_file_from_github(
-                github_api_token, repo, path_to_file, dep_name, cache_github
-            )
+    for path_to_file in sources:
+        github_file = _fetch_github_source(
+            path_to_file,
+            config,
+            github_api_token,
+            recursive_parsing,
+            cache_github,
+        )
 
         if not github_file:
             missing.append(path_to_file)
@@ -96,22 +104,26 @@ def run_bytecode_diff(
     github_api_token,
     recursive_parsing,
     cache_github,
-    deployer_account,
-    local_rpc_url,
     remote_rpc_url,
 ):
-    """
-    Run bytecode comparison for a contract.
-
-    Returns:
-        bool: True if bytecodes match (fully or only in immutables), False if there are differences
-    """
+    """Run bytecode comparison. Returns True if bytecodes match."""
     address_name = f"{contract_address_from_config} : {contract_name_from_config}"
     logger.divider()
     logger.info(f"Binary bytecode comparison started for {address_name}")
 
-    # Get libraries from config if they exist
-    libraries = config.get("bytecode_comparison", {}).get("libraries", None)
+    explorer_libraries = contract_source_code.get("libraries")
+    manual_libraries = config.get("bytecode_comparison", {}).get("libraries")
+    libraries = merge_libraries(explorer_libraries, manual_libraries)
+    evm_version = contract_source_code.get("evm_version")
+    explorer_constructor_arguments = contract_source_code.get("constructor_arguments")
+
+    _log_explorer_bytecode_metadata(
+        explorer_constructor_arguments,
+        evm_version,
+        explorer_libraries,
+        manual_libraries,
+    )
+
     github_solc_input, missing_sources = _build_github_solc_input(
         contract_source_code,
         config,
@@ -132,7 +144,7 @@ def run_bytecode_diff(
     github_contract_source = dict(contract_source_code)
     github_contract_source["solcInput"] = github_solc_input
     target_compiled_contract = compile_contract_from_explorer(
-        github_contract_source, libraries
+        github_contract_source, libraries, evm_version
     )
     logger.okay("Compiled contract for bytecode comparison using GitHub sources")
 
@@ -150,26 +162,17 @@ def run_bytecode_diff(
         logger.okay("Bytecodes fully match")
         return True
 
-    logger.info(
-        "Static bytecodes not match, trying local deployment to bind immutables"
-    )
+    logger.info("Static bytecodes do not match, simulating constructor via eth_call")
 
     calldata = get_calldata(
         contract_address_from_config,
         target_compiled_contract,
-        config["bytecode_comparison"],
+        config.get("bytecode_comparison"),
+        explorer_constructor_arguments,
     )
 
-    if calldata:
-        contract_creation_code += calldata
-
-    local_contract_address = deploy_contract(
-        local_rpc_url, deployer_account, contract_creation_code
-    )
-
-    local_deployed_bytecode = get_bytecode_from_node(
-        local_contract_address, local_rpc_url
-    )
+    deployment_call_data = _append_calldata(contract_creation_code, calldata)
+    local_deployed_bytecode = simulate_deployment(deployment_call_data, remote_rpc_url)
 
     is_fully_matched = local_deployed_bytecode == remote_deployed_bytecode
 
@@ -190,27 +193,12 @@ def run_source_diff(
     config,
     github_api_token,
     recursive_parsing=False,
-    prettify=False,
     cache_github=False,
     skip_user_input=False,
 ):
-    """
-    Run source code diff for a contract.
-
-    Returns:
-        dict: Statistics with keys:
-            - 'files_count': total number of files
-            - 'files_found': number of files found
-            - 'identical_files': number of files with no diffs
-            - 'files_with_diffs': number of files with non-zero diffs
-            - 'contract_address': address of the contract
-            - 'contract_name': name of the contract
-    """
-    source_files = (
-        contract_code["solcInput"].items()
-        if "sources" not in contract_code["solcInput"]
-        else contract_code["solcInput"]["sources"].items()
-    )
+    """Run source code diff for a contract. Returns a stats dict."""
+    source_files = get_solc_sources(contract_code["solcInput"])
+    standard_json_format = is_standard_json_contract(source_files)
 
     explorer_hostname = get_explorer_hostname(config)
     explorer_chain_id = get_explorer_chain_id(config)
@@ -246,52 +234,33 @@ def run_source_diff(
 
     report = []
 
-    for index, (path_to_file, source_code) in enumerate(source_files):
-        if not is_standard_json_contract(source_files):
+    for file_number, (path_to_file, source_code) in enumerate(
+        source_files.items(), start=1
+    ):
+        if not standard_json_format:
             path_to_file = path_to_file + ".sol"
 
-        file_number = index + 1
         split_path_to_file = path_to_file.split("/")
         origin = split_path_to_file[0]
         filename = split_path_to_file[-1]
 
         logger.update_info(f"File {file_number} / { files_count}", filename)
 
-        repo = None
-        dep_name = None
-
-        (repo, dep_name) = resolve_dep(path_to_file, config)
-        if not dep_name:
-            repo = config["github_repo"]
-
         diff_report_filename = None
         diffs_count = None
+        github_file = _fetch_github_source(
+            path_to_file,
+            config,
+            github_api_token,
+            recursive_parsing,
+            cache_github,
+        )
 
-        if not repo:
-            error_msg = f"File not found in any repository: {path_to_file}"
-            logger.error(error_msg)
-            raise ValueError(error_msg)
-
-        file_found = bool(repo)
-
-        if recursive_parsing:
-            github_file = get_file_from_github_recursive(
-                github_api_token, repo, path_to_file, dep_name, cache_github
-            )
-        else:
-            github_file = get_file_from_github(
-                github_api_token, repo, path_to_file, dep_name, cache_github
-            )
-
+        file_found = bool(github_file)
         if not github_file:
             github_file = "<!-- No file content -->"
-            file_found = False
 
         explorer_content = source_code["content"]
-
-        if prettify:
-            github_file = prettify_solidity(github_file)
-            explorer_content = prettify_solidity(explorer_content)
 
         github_lines = github_file.splitlines()
         explorer_lines = explorer_content.splitlines()
@@ -301,7 +270,7 @@ def run_source_diff(
             f"{DIFFS_DIR}/{contract_address_from_config}/{filename}.html"
         )
 
-        create_dirs(diff_report_filename)
+        Path(diff_report_filename).parent.mkdir(parents=True, exist_ok=True)
         with open(diff_report_filename, "w") as f:
             f.write(diff_html)
 
@@ -321,13 +290,13 @@ def run_source_diff(
 
     logger.divider()
 
-    files_found = len([row for row in report if row[2]])
+    files_found = sum(row[2] for row in report)
     logger.info(f"Files found: {files_found} / {files_count}")
 
-    identical_files = len([row for row in report if row[3] == 0])
+    identical_files = sum(row[3] == 0 for row in report)
     logger.info(f"Identical files: {identical_files} / {files_found}")
 
-    files_with_diffs = len([row for row in report if row[2] and row[3] > 0])
+    files_with_diffs = sum(row[2] and row[3] > 0 for row in report)
 
     logger.report_table(report)
 
@@ -341,119 +310,126 @@ def run_source_diff(
     }
 
 
-def _load_explorer_token(config: dict) -> str | None:
-    """
-    Load explorer token from config or environment.
+def _load_canonical_etherscan_token() -> str | None:
+    return load_env("ETHERSCAN_EXPLORER_TOKEN", masked=True, required=False)
 
-    Args:
-        config: The configuration dictionary
 
-    Returns:
-        str or None: The explorer token if found
-    """
-    # Try config first
-    if "explorer_token_env_var" in config:
-        token = load_env(config["explorer_token_env_var"], masked=True, required=False)
+def _load_explorer_token(config: dict) -> str:
+    """Load explorer token from config env var name with legacy Etherscan fallback."""
+    env_var = config.get("explorer_token_env_var")
+    if not env_var:
+        logger.warn(
+            'Config missing "explorer_token_env_var"; falling back to ETHERSCAN_EXPLORER_TOKEN'
+        )
+        token = _load_canonical_etherscan_token()
         if token:
             return token
-        logger.warn(
-            f'Failed to find explorer token in env ("{config["explorer_token_env_var"]}")'
+
+        error_msg = (
+            'Explorer token not found. Add "explorer_token_env_var" to the config '
+            "or export ETHERSCAN_EXPLORER_TOKEN."
         )
-    else:
-        logger.warn(
-            'Failed to find an explorer token in the config ("explorer_token_env_var")'
+        logger.error(error_msg)
+        raise ValueError(error_msg)
+
+    token = load_env(env_var, masked=True, required=False)
+    if token:
+        return token
+
+    if env_var == "ETHERSCAN_TOKEN":
+        token = _load_canonical_etherscan_token()
+        if token:
+            return token
+
+        error_msg = (
+            "Explorer token not found. Set ETHERSCAN_EXPLORER_TOKEN or restore the "
+            "legacy ETHERSCAN_TOKEN env var."
         )
+        logger.error(error_msg)
+        raise ValueError(error_msg)
 
-    # Fall back to default environment variable
-    token = os.getenv("ETHERSCAN_EXPLORER_TOKEN", default=None)
-    if token is None:
-        logger.warn('Failed to find explorer token in env ("ETHERSCAN_EXPLORER_TOKEN")')
-
-    return token
-
-
-def _validate_github_token() -> str:
-    """
-    Validate that GitHub API token is set.
-
-    Returns:
-        The GitHub API token
-
-    Raises:
-        ValueError: If the token is not set
-    """
-    return load_env("GITHUB_API_TOKEN", masked=True, required=True)
+    error_msg = f'Explorer token not found in env ("{env_var}")'
+    logger.error(error_msg)
+    raise ValueError(error_msg)
 
 
-def _setup_binary_comparison(config: dict) -> tuple[str, str]:
-    """
-    Setup and validate binary comparison configuration.
-
-    Args:
-        config: The configuration dictionary
-
-    Returns:
-        tuple: (local_rpc_url, remote_rpc_url)
-
-    Raises:
-        ValueError: If required configuration is missing
-    """
-    if "bytecode_comparison" not in config:
-        raise ValueError('Failed to find "bytecode_comparison" section in config')
-
-    # LOCAL_RPC_URL may be empty; default to localhost Ganache/Hardhat-compatible URL
-    local_rpc_url = load_env("LOCAL_RPC_URL", masked=False, required=False)
-    if not local_rpc_url:
-        local_rpc_url = DEFAULT_LOCAL_RPC_URL
-        logger.okay("LOCAL_RPC_URL (default)", local_rpc_url)
+def _setup_binary_comparison(config: dict) -> str:
+    """Load REMOTE_RPC_URL and configure exception handling for bytecode comparison."""
     remote_rpc_url = load_env("REMOTE_RPC_URL", masked=True, required=True)
-
     ExceptionHandler.initialize(config.get("fail_on_bytecode_comparison_error", True))
+    return remote_rpc_url
 
-    return local_rpc_url, remote_rpc_url
+
+def _append_calldata(creation_code: str, calldata: str | None) -> str:
+    if not calldata:
+        return creation_code
+    return creation_code + calldata
+
+
+def _log_explorer_bytecode_metadata(
+    constructor_arguments: str | None,
+    evm_version: str | None,
+    explorer_libraries: dict | None,
+    manual_libraries: dict | None,
+) -> None:
+    constructor_length = (
+        "missing"
+        if constructor_arguments is None
+        else f"{len(constructor_arguments) // 2} bytes"
+    )
+    logger.okay("Explorer constructor calldata", constructor_length)
+    logger.okay("Explorer EVM version", evm_version or "default")
+    logger.okay(
+        "Explorer library count",
+        sum(len(libraries) for libraries in (explorer_libraries or {}).values()),
+    )
+    if manual_libraries:
+        logger.warn(
+            "Manual libraries override explorer metadata",
+            sum(len(libraries) for libraries in manual_libraries.values()),
+        )
+
+
+def _warn_deprecated_hardhat_settings(
+    config: dict, hardhat_config_path: str | None
+) -> None:
+    if hardhat_config_path:
+        logger.warn("--hardhat-path is deprecated and ignored")
+
+    bytecode_comparison = config.get("bytecode_comparison", {})
+    if isinstance(bytecode_comparison, dict) and bytecode_comparison.get(
+        "hardhat_config_name"
+    ):
+        logger.warn(
+            'Config key "bytecode_comparison.hardhat_config_name" is deprecated and ignored'
+        )
 
 
 def process_config(
     path: str,
     hardhat_config_path: str | None,
     recursive_parsing: bool,
-    unify_formatting: bool,
     enable_binary_comparison: bool,
     cache_explorer: bool,
     cache_github: bool,
     skip_user_input: bool = False,
 ):
-    """
-    Process a config file and run comparisons.
-
-    Returns:
-        dict: Summary statistics with keys:
-            - 'source_stats': list of per-contract source statistics
-            - 'bytecode_stats': list of per-contract bytecode results
-            - 'config_path': path to the config file
-    """
+    """Process a config file and run source + bytecode comparisons."""
     # Reset exception handler to default before each config
     ExceptionHandler.initialize(True)
 
     logger.info(f"Loading config {path}...")
     config = load_config(path)
-
-    # Resolve hardhat config path: CLI arg > config value > default
-    if hardhat_config_path is None:
-        bytecode_comparison = config.get("bytecode_comparison", {})
-        hardhat_config_path = bytecode_comparison.get(
-            "hardhat_config_name", DEFAULT_HARDHAT_CONFIG_PATH
-        )
+    _warn_deprecated_hardhat_settings(config, hardhat_config_path)
 
     # Load tokens and validate
     explorer_token = _load_explorer_token(config)
-    github_api_token = _validate_github_token()
+    github_api_token = load_env("GITHUB_API_TOKEN", masked=True, required=True)
 
     # Setup binary comparison if enabled
-    local_rpc_url = None
     remote_rpc_url = None
     if enable_binary_comparison:
-        local_rpc_url, remote_rpc_url = _setup_binary_comparison(config)
+        remote_rpc_url = _setup_binary_comparison(config)
 
     # Check if source comparison is enabled
     enable_source_comparison = config.get("source_comparison", True)
@@ -471,24 +447,6 @@ def process_config(
             logger.info("Getting remote chain ID...")
             remote_chain_id = get_chain_id(remote_rpc_url)
             logger.okay("Remote chain ID", remote_chain_id)
-
-            hardhat.start(
-                hardhat_config_path,
-                local_rpc_url,
-                remote_rpc_url,
-                remote_chain_id,
-            )
-            logger.divider()
-            logger.info("Getting local chain ID and deployer account...")
-            deployer_account = get_account(local_rpc_url)
-            local_chain_id = get_chain_id(local_rpc_url)
-
-            logger.okay("Local chain ID", local_chain_id)
-
-            if remote_chain_id != local_chain_id:
-                raise ValueError(
-                    f"Remote chain ID {remote_chain_id} does not match local chain ID {local_chain_id}"
-                )
 
         for contract_address, contract_name in config["contracts"].items():
             try:
@@ -508,7 +466,6 @@ def process_config(
                         config,
                         github_api_token,
                         recursive_parsing,
-                        unify_formatting,
                         cache_github,
                         skip_user_input,
                     )
@@ -524,8 +481,6 @@ def process_config(
                             github_api_token,
                             recursive_parsing,
                             cache_github,
-                            deployer_account,
-                            local_rpc_url,
                             remote_rpc_url,
                         )
                         bytecode_stats.append(
@@ -552,10 +507,6 @@ def process_config(
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt by user")
 
-    finally:
-        if enable_binary_comparison:
-            hardhat.stop()
-
     return {
         "source_stats": source_stats,
         "bytecode_stats": bytecode_stats,
@@ -564,12 +515,6 @@ def process_config(
 
 
 def parse_arguments() -> argparse.Namespace:
-    """
-    Parse command-line arguments.
-
-    Returns:
-        Parsed arguments
-    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--version", "-V", action="store_true", help="Display version information"
@@ -580,7 +525,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--hardhat-path",
         default=None,
-        help="Path to Hardhat config",
+        help=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--yes",
@@ -592,12 +537,6 @@ def parse_arguments() -> argparse.Namespace:
         "--support-brownie",
         help="Support recursive retrieving for contracts. It may be useful for contracts whose sources have been verified by the brownie tooling, which automatically replaces relative paths to contracts in imports with plain contract names.",
         action=argparse.BooleanOptionalAction,
-    )
-    parser.add_argument(
-        "--prettify",
-        "-P",
-        help="Unify formatting by prettier before comparing",
-        action="store_true",
     )
     parser.add_argument(
         "--skip-binary-comparison",
@@ -651,14 +590,6 @@ def print_final_summary(
     enable_source_comparison: bool,
     enable_binary_comparison: bool,
 ) -> None:
-    """
-    Print a final summary of all comparisons performed.
-
-    Args:
-        all_results: List of dictionaries with 'source_stats' and 'bytecode_stats'
-        enable_source_comparison: Whether source comparison was enabled
-        enable_binary_comparison: Whether bytecode comparison was enabled
-    """
     logger.divider()
     logger.divider()
     logger.info("=" * 80)
@@ -792,7 +723,6 @@ def main() -> None:
             config_path,
             args.hardhat_path,
             args.support_brownie,
-            args.prettify,
             enable_binary_comparison,
             args.cache_explorer,
             args.cache_github,
@@ -865,39 +795,12 @@ def main() -> None:
 
 
 def is_standard_json_contract(source_files: dict) -> bool:
-    """
-    Determines if the contract source code is in Standard JSON format.
-
-    Etherscan provides contract source code in two formats:
-    1. Standard JSON - source files are organized in directories with dependencies,
-       each file has proper path and .sol extension
-    2. Single file - contract code is provided as a single string without dependencies,
-       the file identifier is just a contract name without path or extension
-
-    Examples:
-        Single file format (no dependencies):
-            source_files = dict_items([
-                ('Contract', {'content': 'contract Contract { ... }'})
-            ])
-
-        Standard JSON format (with dependencies):
-            source_files = dict_items([
-                ('src/Contract.sol', {'content': 'contract Contract { ... }'}),
-                ('src/Dependency.sol', {'content': 'contract Dependency { ... }'})
-            ])
-
-    Args:
-        source_files: Dictionary of contract source files from Etherscan
-
-    Returns:
-        bool: True if the contract is in Standard JSON format, False if it's a single file
-    """
-    files = list(source_files)
-    if len(files) != 1:
+    """True if source uses Standard JSON format (paths with .sol or /), not single-file."""
+    keys = list(source_files)
+    if len(keys) != 1:
         return True
-
-    filename, _ = files[0]
-    return ".sol" in filename or "/" in filename
+    first_key = keys[0]
+    return ".sol" in first_key or "/" in first_key
 
 
 if __name__ == "__main__":

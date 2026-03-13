@@ -27,21 +27,5 @@
       "commit": "e725abddf1e01cf05ace496e950fc8e243cc7cab",
       "relative_root": "contracts"
     }
-  },
-  "fail_on_bytecode_comparison_error": true,
-  "bytecode_comparison": {
-    "constructor_calldata": {},
-    "constructor_args": {
-      "0x3f221b8E5bC098cC6C23611BEeacaeCfD77e1587": [
-        "0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb",
-        [
-          "0x5Def7fBC0211351139B928f307EDC794af845Bde",
-          "0x671978CEEa7DAf405fA08E930E1047d1b7b21a69",
-          "0xB011531857B6006479627e776feB6c0cEA5fc74a",
-          "0x9FD67B2D5b88BeBaC741EE50510cf808B4854a5F",
-          "0x15f2C9ea98e5564d25A46eE39D19704476998786"
-        ]
-      ]
-    }
   }
 }

@@ -1,89 +1,199 @@
 import base64
 import binascii
 import os
-import hashlib
 
-from .common import fetch, parse_repo_link
+from .common import (
+    build_hashed_cache_key,
+    fetch,
+    load_cache,
+    parse_repo_link,
+    save_cache,
+)
 from .logger import logger
 
 # Cache directory for storing GitHub files
 GITHUB_CACHE_DIR = os.path.join(os.getcwd(), ".diffyscan_cache", "github")
 
 
-def _get_github_cache_key(user_slash_repo, commit, relative_root, path_to_file):
-    """
-    Generate a unique cache key for a GitHub file.
-
-    Args:
-        user_slash_repo: Repository in format "user/repo"
-        commit: Git commit hash
-        relative_root: Relative root path in the repo
-        path_to_file: Path to the file
-
-    Returns:
-        A string cache key (hash)
-    """
-    # Combine all parts to create unique identifier
-    cache_string = f"{user_slash_repo}:{commit}:{relative_root}:{path_to_file}"
-    # Use SHA256 hash for consistent, filesystem-safe cache keys
-    return hashlib.sha256(cache_string.encode()).hexdigest()
+def _get_github_cache_metadata(
+    user_slash_repo: str,
+    commit: str,
+    relative_root: str,
+    path_to_file: str,
+) -> dict[str, str]:
+    return {
+        "schema": "github-file",
+        "repo": user_slash_repo,
+        "commit": commit,
+        "relative_root": relative_root,
+        "path": path_to_file,
+    }
 
 
-def _get_github_cache_path(cache_key):
-    """Get the file path for a GitHub cache key."""
-    return os.path.join(GITHUB_CACHE_DIR, f"{cache_key}.txt")
-
-
-def _load_from_github_cache(user_slash_repo, commit, relative_root, path_to_file):
-    """
-    Load file content from GitHub cache if available.
-
-    Returns:
-        Cached file content or None if not found
-    """
-    cache_key = _get_github_cache_key(
-        user_slash_repo, commit, relative_root, path_to_file
+def _get_github_cache_path(
+    user_slash_repo: str,
+    commit: str,
+    relative_root: str,
+    path_to_file: str,
+) -> str:
+    cache_key = build_hashed_cache_key(
+        user_slash_repo,
+        commit,
+        relative_root,
+        path_to_file,
     )
-    cache_path = _get_github_cache_path(cache_key)
-
-    if os.path.exists(cache_path):
-        try:
-            logger.info(f"Loading GitHub file from cache: {path_to_file}")
-            with open(cache_path, "r", encoding="utf-8") as f:
-                return f.read()
-        except Exception as e:
-            logger.warn(f"Failed to load from GitHub cache: {e}")
-            return None
-    return None
+    return os.path.join(GITHUB_CACHE_DIR, f"{cache_key}.json")
 
 
-def _save_to_github_cache(
-    user_slash_repo, commit, relative_root, path_to_file, content
-):
-    """
-    Save file content to GitHub cache.
-
-    Args:
-        user_slash_repo: Repository in format "user/repo"
-        commit: Git commit hash
-        relative_root: Relative root path in the repo
-        path_to_file: Path to the file
-        content: File content to cache
-    """
-    cache_key = _get_github_cache_key(
-        user_slash_repo, commit, relative_root, path_to_file
+def _build_repo_file_request(
+    dependency_repo: dict,
+    path_to_file: str,
+    dep_name: str | None,
+) -> tuple[str, str, str, str]:
+    normalized_path = path_to_file_without_dependency(path_to_file, dep_name)
+    return (
+        parse_repo_link(dependency_repo["url"]),
+        dependency_repo["commit"],
+        dependency_repo["relative_root"],
+        normalized_path,
     )
-    cache_path = _get_github_cache_path(cache_key)
 
+
+def _get_github_headers(github_api_token: str) -> dict[str, str]:
+    return {"Authorization": f"token {github_api_token}"}
+
+
+def _fetch_github_json(
+    github_api_token: str,
+    user_slash_repo: str,
+    relative_root: str,
+    path_to_file: str | None,
+    commit: str,
+) -> tuple[str, dict | list | None]:
+    github_api_url = get_github_api_url(
+        user_slash_repo,
+        relative_root,
+        path_to_file,
+        commit,
+    )
+    response = fetch(github_api_url, headers=_get_github_headers(github_api_token))
+    return github_api_url, response.json()
+
+
+def _decode_github_file_content(
+    file_content: str,
+    path_to_file: str,
+) -> str | None:
     try:
-        # Create cache directory if it doesn't exist
-        os.makedirs(GITHUB_CACHE_DIR, exist_ok=True)
+        return base64.b64decode(file_content).decode()
+    except (binascii.Error, UnicodeDecodeError) as e:
+        logger.error(f"Failed to decode GitHub file content for {path_to_file}: {e}")
+        return None
 
-        with open(cache_path, "w", encoding="utf-8") as f:
-            f.write(content)
-        logger.info(f"Saved GitHub file to cache: {path_to_file}")
-    except Exception as e:
-        logger.warn(f"Failed to save to GitHub cache: {e}")
+
+def _extract_github_file_content(
+    github_data: dict | list | None,
+    path_to_file: str,
+    *,
+    require_file_type: bool = False,
+) -> str | None:
+    if not isinstance(github_data, dict):
+        return None
+
+    if require_file_type and github_data.get("type") != "file":
+        return None
+
+    file_content = github_data.get("content")
+    if not file_content:
+        logger.error(f"No file content in {path_to_file}")
+        return None
+
+    return _decode_github_file_content(file_content, path_to_file)
+
+
+def _fetch_exact_github_file(
+    github_api_token: str,
+    user_slash_repo: str,
+    relative_root: str,
+    path_to_file: str,
+    commit: str,
+    *,
+    require_file_type: bool = False,
+    log_missing_data: bool = False,
+) -> str | None:
+    github_api_url, github_data = _fetch_github_json(
+        github_api_token,
+        user_slash_repo,
+        relative_root,
+        path_to_file,
+        commit,
+    )
+    if not github_data:
+        if log_missing_data:
+            logger.error("No github data for", github_api_url)
+        return None
+
+    return _extract_github_file_content(
+        github_data,
+        path_to_file,
+        require_file_type=require_file_type,
+    )
+
+
+def _get_file_from_github_with_cache(
+    github_api_token: str,
+    dependency_repo: dict,
+    path_to_file: str,
+    dep_name: str | None,
+    use_cache: bool,
+    fetcher,
+) -> str | None:
+    user_slash_repo, commit, relative_root, path_to_file = _build_repo_file_request(
+        dependency_repo,
+        path_to_file,
+        dep_name,
+    )
+    cache_path = _get_github_cache_path(
+        user_slash_repo,
+        commit,
+        relative_root,
+        path_to_file,
+    )
+    cache_metadata = _get_github_cache_metadata(
+        user_slash_repo,
+        commit,
+        relative_root,
+        path_to_file,
+    )
+
+    if use_cache:
+        cached_content = load_cache(
+            cache_path,
+            "GitHub file",
+            path_to_file,
+            cache_metadata,
+        )
+        if cached_content is not None:
+            return cached_content
+
+    content = fetcher(
+        github_api_token,
+        user_slash_repo,
+        relative_root,
+        path_to_file,
+        commit,
+    )
+
+    if use_cache and content is not None:
+        save_cache(
+            cache_path,
+            "GitHub file",
+            path_to_file,
+            content,
+            cache_metadata,
+        )
+
+    return content
 
 
 def get_file_from_github(
@@ -93,58 +203,14 @@ def get_file_from_github(
     dep_name: str | None,
     use_cache: bool = False,
 ) -> str | None:
-    path_to_file = path_to_file_without_dependency(path_to_file, dep_name)
-    user_slash_repo = parse_repo_link(dependency_repo["url"])
-
-    # Try to load from cache if enabled
-    if use_cache:
-        cached_content = _load_from_github_cache(
-            user_slash_repo,
-            dependency_repo["commit"],
-            dependency_repo["relative_root"],
-            path_to_file,
-        )
-        if cached_content is not None:
-            return cached_content
-
-    github_api_url = get_github_api_url(
-        user_slash_repo,
-        dependency_repo["relative_root"],
+    return _get_file_from_github_with_cache(
+        github_api_token,
+        dependency_repo,
         path_to_file,
-        dependency_repo["commit"],
+        dep_name,
+        use_cache,
+        lambda *args: _fetch_exact_github_file(*args, log_missing_data=True),
     )
-
-    github_data = fetch(
-        github_api_url, headers={"Authorization": f"token {github_api_token}"}
-    ).json()
-
-    if not github_data:
-        logger.error("No github data for", github_api_url)
-        return None
-
-    file_content = github_data.get("content")
-
-    if not file_content:
-        logger.error("No file content")
-        return None
-
-    try:
-        decoded_content = base64.b64decode(file_content).decode()
-    except (binascii.Error, UnicodeDecodeError) as e:
-        logger.error(f"Failed to decode GitHub file content: {e}")
-        return None
-
-    # Save to cache if enabled
-    if use_cache:
-        _save_to_github_cache(
-            user_slash_repo,
-            dependency_repo["commit"],
-            dependency_repo["relative_root"],
-            path_to_file,
-            decoded_content,
-        )
-
-    return decoded_content
 
 
 def get_file_from_github_recursive(
@@ -154,88 +220,14 @@ def get_file_from_github_recursive(
     dep_name: str | None,
     use_cache: bool = False,
 ) -> str | None:
-    path_to_file = path_to_file_without_dependency(path_to_file, dep_name)
-    user_slash_repo = parse_repo_link(dependency_repo["url"])
-
-    # Try to load from cache if enabled
-    if use_cache:
-        cached_content = _load_from_github_cache(
-            user_slash_repo,
-            dependency_repo["commit"],
-            dependency_repo["relative_root"],
-            path_to_file,
-        )
-        if cached_content is not None:
-            return cached_content
-
-    direct_file_content = _get_direct_file(
+    return _get_file_from_github_with_cache(
         github_api_token,
-        user_slash_repo,
-        dependency_repo["relative_root"],
+        dependency_repo,
         path_to_file,
-        dependency_repo["commit"],
+        dep_name,
+        use_cache,
+        _recursive_search,
     )
-    if direct_file_content:
-        # Save to cache if enabled
-        if use_cache:
-            _save_to_github_cache(
-                user_slash_repo,
-                dependency_repo["commit"],
-                dependency_repo["relative_root"],
-                path_to_file,
-                direct_file_content,
-            )
-        return direct_file_content
-
-    recursive_content = _recursive_search(
-        github_api_token,
-        user_slash_repo,
-        dependency_repo["relative_root"],
-        path_to_file,
-        dependency_repo["commit"],
-    )
-
-    # Save to cache if enabled and content was found
-    if use_cache and recursive_content:
-        _save_to_github_cache(
-            user_slash_repo,
-            dependency_repo["commit"],
-            dependency_repo["relative_root"],
-            path_to_file,
-            recursive_content,
-        )
-
-    return recursive_content
-
-
-def _get_direct_file(
-    github_api_token, user_slash_repo, relative_root, path_to_file, commit
-):
-    github_api_url = get_github_api_url(
-        user_slash_repo, relative_root, path_to_file, commit
-    )
-    response = fetch(
-        github_api_url, headers={"Authorization": f"token {github_api_token}"}
-    ).json()
-
-    if response is None:
-        return None
-    github_data = response
-
-    if isinstance(github_data, dict) and github_data.get("type") == "file":
-        file_content = github_data.get("content")
-        if not file_content:
-            logger.error(f"No file content in {path_to_file}")
-            return None
-        try:
-            return base64.b64decode(file_content).decode()
-        except (binascii.Error, UnicodeDecodeError) as e:
-            logger.error(
-                f"Failed to decode GitHub file content for {path_to_file}: {e}"
-            )
-            return None
-
-    return None
 
 
 def _recursive_search(
@@ -246,36 +238,34 @@ def _recursive_search(
     commit,
     checked_dirs=None,
 ):
-    if checked_dirs is None:
-        checked_dirs = []
+    checked_dirs = checked_dirs or set()
 
-    github_api_url = get_github_api_url(
-        user_slash_repo, relative_path, filename, commit
+    direct_file_content = _fetch_exact_github_file(
+        github_api_token,
+        user_slash_repo,
+        relative_path,
+        filename,
+        commit,
+        require_file_type=True,
     )
-    github_data = fetch(
-        github_api_url, headers={"Authorization": f"token {github_api_token}"}
-    ).json()
+    if direct_file_content is not None:
+        return direct_file_content
 
-    if github_data and isinstance(github_data, dict) and "content" in github_data:
-        try:
-            return base64.b64decode(github_data["content"]).decode()
-        except (binascii.Error, UnicodeDecodeError) as e:
-            logger.error(f"Failed to decode GitHub content for {filename}: {e}")
-            return None
-
-    github_api_url = get_github_api_url(user_slash_repo, relative_path, None, commit)
-    github_data = fetch(
-        github_api_url, headers={"Authorization": f"token {github_api_token}"}
-    ).json()
-
-    if github_data and isinstance(github_data, list):
+    _, github_data = _fetch_github_json(
+        github_api_token,
+        user_slash_repo,
+        relative_path,
+        None,
+        commit,
+    )
+    if isinstance(github_data, list):
         directories = [item["path"] for item in github_data if item["type"] == "dir"]
 
         for dir_path in directories:
             if dir_path in checked_dirs:
                 continue
 
-            checked_dirs.append(dir_path)
+            checked_dirs.add(dir_path)
             found_content = _recursive_search(
                 github_api_token,
                 user_slash_repo,
@@ -284,13 +274,18 @@ def _recursive_search(
                 commit,
                 checked_dirs,
             )
-            if found_content:
+            if found_content is not None:
                 return found_content
 
         if relative_path and relative_path not in checked_dirs:
-            checked_dirs.append(relative_path)
+            checked_dirs.add(relative_path)
             return _recursive_search(
-                github_api_token, user_slash_repo, "", filename, commit, checked_dirs
+                github_api_token,
+                user_slash_repo,
+                "",
+                filename,
+                commit,
+                checked_dirs,
             )
 
     return None
@@ -309,13 +304,7 @@ def path_to_file_without_dependency(path_to_file: str, dep_name: str | None) -> 
     Returns:
         The file path without the dependency prefix
     """
-    if not dep_name:
-        return path_to_file
-
-    dep_name_and_slash_length = len(dep_name) + 1
-    path_to_file_without_dependency = path_to_file[dep_name_and_slash_length:]
-
-    return path_to_file_without_dependency
+    return path_to_file if not dep_name else path_to_file[len(dep_name) + 1 :]
 
 
 def resolve_dep(path_to_file: str, config: dict) -> tuple[dict | None, str | None]:
@@ -332,15 +321,11 @@ def resolve_dep(path_to_file: str, config: dict) -> tuple[dict | None, str | Non
     Returns:
         A tuple of (dependency_config, dep_name) or (None, None)
     """
-    dep_names = sorted(
-        list(config.get("dependencies", {}).keys()), key=len, reverse=True
-    )
-
-    for dep_name in dep_names:
+    for dep_name in sorted(config.get("dependencies", {}), key=len, reverse=True):
         if path_to_file.startswith(f"{dep_name}/"):
-            return (config["dependencies"][dep_name], dep_name)
+            return config["dependencies"][dep_name], dep_name
 
-    return (None, None)
+    return None, None
 
 
 def get_github_api_url(

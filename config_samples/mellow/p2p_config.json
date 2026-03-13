@@ -6,7 +6,7 @@
         "0x41A1FBEa7Ace3C3a6B66a73e96E5ED07CDB2A34d": "DepositWrapper"
     },
     "explorer_hostname": "api.etherscan.io",
-    "explorer_token_env_var": "ETHERSCAN_TOKEN",
+    "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
     "github_repo": {
         "url": "https://github.com/mellow-finance/mellow-lrt",
         "commit": "60e9a87eb970be5ee1d4f1f14ccc9919b2b2fbcc",
