@@ -51,7 +51,7 @@ def get_compiler_info(required_platform: str, required_compiler_version: str) ->
             f'Required compiler version "{required_compiler_version}" for "{required_platform}" is not found'
         )
 
-    return required_build_info
+    return dict(required_build_info)
 
 
 def prepare_compiler(
@@ -107,7 +107,8 @@ def compile_contracts(compiler_path: str, input_settings: str) -> dict:
         raise CompileError(f"Compiler process timed out: {e}")
     except Exception as e:
         raise CompileError(f"An unexpected error occurred: {e}")
-    return json.loads(process.stdout)
+    result: dict = json.loads(process.stdout)
+    return result
 
 
 def get_target_compiled_contract(
@@ -125,4 +126,4 @@ def get_target_compiled_contract(
 
     logger.okay("Contracts were successfully compiled")
 
-    return contracts_to_check[0]
+    return dict(contracts_to_check[0])

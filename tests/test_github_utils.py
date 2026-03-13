@@ -38,6 +38,7 @@ def test_resolve_dep():
     }
     repo, dep_name = resolve_dep("@oz/contracts/token.sol", cfg)
     assert dep_name == "@oz/contracts"
+    assert repo is not None
     assert repo["commit"] == "c"
 
 

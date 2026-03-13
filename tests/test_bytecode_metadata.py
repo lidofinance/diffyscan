@@ -175,7 +175,7 @@ def test_get_contract_from_etherscan_retries_rate_limit(monkeypatch):
             },
         ]
     )
-    sleeps = []
+    sleeps: list[float] = []
 
     def fake_fetch(url):
         return DummyResponse(next(responses))
@@ -249,8 +249,8 @@ def test_get_contract_from_blockscout_extracts_and_merges_metadata(monkeypatch):
 
 
 def test_compile_contract_from_explorer_merges_libraries_and_evm_version(monkeypatch):
-    captured = {}
-    contract_code = {
+    captured: dict = {}
+    contract_code: dict = {
         "name": "Demo",
         "compiler": "v0.8.25+commit.b61c2a91",
         "solcInput": {
