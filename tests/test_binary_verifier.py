@@ -1,6 +1,10 @@
 import pytest
 
-from diffyscan.utils.binary_verifier import deep_match_bytecode, parse
+from diffyscan.utils.binary_verifier import (
+    analyze_bytecode_diff,
+    deep_match_bytecode,
+    parse,
+)
 from diffyscan.utils.constants import OPCODES, PUSH0, PUSH32
 from diffyscan.utils.custom_exceptions import BinVerifierError
 
@@ -80,3 +84,34 @@ def test_parse_mixed_sequence():
     assert unknown == set()
     names = [i["op"]["name"] for i in instructions]
     assert names == ["STOP", "ADD", "PUSH1", "TLOAD", "MCOPY", "BLOBHASH", "JUMP"]
+
+
+def test_analyze_bytecode_diff_detects_metadata_only_difference():
+    local = "0x6000abcd0002"
+    remote = "0x6000dcba0002"
+
+    analysis = analyze_bytecode_diff(local, remote, immutables={})
+
+    assert analysis["exact_match"] is False
+    assert analysis["runtime_mismatch_ranges"] == []
+    assert analysis["metadata_mismatch"] is True
+
+
+def test_analyze_bytecode_diff_tracks_immutable_observations():
+    local = "0x6001fe"
+    remote = "0x6002fe"
+
+    analysis = analyze_bytecode_diff(local, remote, immutables={1: 1})
+
+    assert analysis["runtime_mismatch_ranges"] == [
+        {"offset": 1, "length": 1, "immutable": True}
+    ]
+    assert analysis["immutable_observations"] == [
+        {
+            "offset": 1,
+            "length": 1,
+            "local_value": "0x01",
+            "remote_value": "0x02",
+            "differs": True,
+        }
+    ]

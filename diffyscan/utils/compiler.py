@@ -51,7 +51,7 @@ def get_compiler_info(required_platform: str, required_compiler_version: str) ->
             f'Required compiler version "{required_compiler_version}" for "{required_platform}" is not found'
         )
 
-    return required_build_info
+    return dict(required_build_info)
 
 
 def prepare_compiler(
@@ -109,7 +109,7 @@ def compile_contracts(compiler_path: str, input_settings: str) -> dict:
         raise CompileError(f"An unexpected error occurred: {e}")
 
     try:
-        output = json.loads(process.stdout)
+        output: dict = json.loads(process.stdout)
     except (json.JSONDecodeError, UnicodeDecodeError, TypeError) as e:
         raise CompileError(
             f"solc produced non-JSON output: {e}; stdout head: {process.stdout[:500]!r}"
@@ -143,4 +143,4 @@ def get_target_compiled_contract(
 
     logger.okay("Contracts were successfully compiled")
 
-    return contracts_to_check[0]
+    return dict(contracts_to_check[0])

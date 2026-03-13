@@ -8,6 +8,7 @@ import yaml
 
 from urllib.parse import urlparse
 
+from .allowed_diffs import validate_allowed_diffs_config
 from .logger import logger
 from .custom_types import Config
 from .custom_exceptions import NodeError, ExplorerError
@@ -39,7 +40,9 @@ def load_config(path: str) -> Config:
         if ext in (".yaml", ".yml"):
             return _load_yaml_config(config_file, path)
         if ext == ".json":
-            return json.load(config_file)
+            config: Config = json.load(config_file)
+            _validate_loaded_config(config, path)
+            return config
     raise ValueError(f"Unsupported config file extension: {ext}")
 
 
@@ -49,10 +52,30 @@ def _load_yaml_config(config_file, path: str) -> Config:
         raise ValueError(f"{path}: YAML file is empty or contains only comments")
     if not isinstance(config, dict):
         raise ValueError(
-            f"{path}: YAML root must be a mapping, got {type(config).__name__}"
+            f"{path}: configuration root must be a mapping, got {type(config).__name__}"
         )
     _validate_yaml_hex_keys(config, path)
-    return config
+    _validate_bool_fields(config, path)
+    validate_allowed_diffs_config(config, path)
+    return config  # type: ignore[return-value]
+
+
+def _validate_loaded_config(config: object, path: str) -> None:
+    if not isinstance(config, dict):
+        raise ValueError(
+            f"{path}: configuration root must be a mapping, got {type(config).__name__}"
+        )
+    _validate_bool_fields(config, path)
+    validate_allowed_diffs_config(config, path)
+
+
+def _validate_bool_fields(config: dict, path: str) -> None:
+    for field in ("source_comparison", "fail_on_bytecode_comparison_error"):
+        value = config.get(field)
+        if value is not None and not isinstance(value, bool):
+            raise ValueError(
+                f"{path}: {field} must be a boolean, got {type(value).__name__} ({value!r})"
+            )
 
 
 def _quote_hex(value: int) -> str:
@@ -99,27 +122,72 @@ def _validate_yaml_hex_keys(config: dict, path: str) -> None:
             )
 
     bytecode = config.get("bytecode_comparison")
-    if not isinstance(bytecode, dict):
+    if isinstance(bytecode, dict):
+        for section in ("constructor_args", "constructor_calldata"):
+            _validate_yaml_address_keys(
+                bytecode.get(section),
+                path,
+                f"bytecode_comparison.{section}",
+            )
+
+        libraries = bytecode.get("libraries")
+        if isinstance(libraries, dict):
+            for key, libs in libraries.items():
+                if isinstance(libs, dict):
+                    for lib_name, lib_addr in libs.items():
+                        _raise_if_yaml_int(
+                            lib_addr,
+                            lambda parsed_addr: (
+                                f"{path}: bytecode_comparison.libraries.{key}.{lib_name} "
+                                f"was parsed as integer ({parsed_addr:#x}). "
+                                f"Quote it: {_quote_hex(parsed_addr)}"
+                            ),
+                        )
+
+    allowed_diffs = config.get("allowed_diffs")
+    if not isinstance(allowed_diffs, dict):
         return
 
-    for section in ("constructor_args", "constructor_calldata"):
+    for section in ("bytecode", "source"):
+        entries_by_address = allowed_diffs.get(section)
         _validate_yaml_address_keys(
-            bytecode.get(section),
+            entries_by_address,
             path,
-            f"bytecode_comparison.{section}",
+            f"allowed_diffs.{section}",
         )
+        if not isinstance(entries_by_address, dict):
+            continue
 
-    libraries = bytecode.get("libraries")
-    if isinstance(libraries, dict):
-        for key, libs in libraries.items():
-            if isinstance(libs, dict):
-                for lib_name, lib_addr in libs.items():
+        if section != "bytecode":
+            continue
+
+        for address, entries in entries_by_address.items():
+            if not isinstance(entries, list):
+                continue
+            for index, entry in enumerate(entries, start=1):
+                if not isinstance(entry, dict):
+                    continue
+                if "constructor_calldata" in entry:
                     _raise_if_yaml_int(
-                        lib_addr,
-                        lambda parsed_addr: (
-                            f"{path}: bytecode_comparison.libraries.{key}.{lib_name} "
-                            f"was parsed as integer ({parsed_addr:#x}). "
-                            f"Quote it: {_quote_hex(parsed_addr)}"
+                        entry["constructor_calldata"],
+                        lambda parsed_value: (
+                            f"{path}: allowed_diffs.bytecode.{address}[{index}].constructor_calldata "
+                            f"was parsed as integer ({parsed_value:#x}). "
+                            f"Quote it: {_quote_hex(parsed_value)}"
+                        ),
+                    )
+                immutables = entry.get("immutables")
+                if not isinstance(immutables, list):
+                    continue
+                for immutable_index, immutable in enumerate(immutables, start=1):
+                    if not isinstance(immutable, dict):
+                        continue
+                    _raise_if_yaml_int(
+                        immutable.get("value"),
+                        lambda parsed_value: (
+                            f"{path}: allowed_diffs.bytecode.{address}[{index}].immutables[{immutable_index}].value "
+                            f"was parsed as integer ({parsed_value:#x}). "
+                            f"Quote it: {_quote_hex(parsed_value)}"
                         ),
                     )
 
@@ -131,7 +199,7 @@ def _handle_request_errors(error_class: type[BaseException]):
         @wraps(func)
         def wrapper(*args, **kwargs) -> requests.Response:
             try:
-                response = func(*args, **kwargs)
+                response: requests.Response = func(*args, **kwargs)
                 response.raise_for_status()
                 return response
             except requests.exceptions.HTTPError as exc:
