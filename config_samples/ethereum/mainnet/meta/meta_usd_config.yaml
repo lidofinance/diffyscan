@@ -47,7 +47,7 @@ contracts:
   "0x00000000d681E85e5783588f87A9573Cb97Eda01": SwapModule
 
 explorer_hostname: api.etherscan.io
-explorer_token_env_var: ETHERSCAN_TOKEN
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
 explorer_chain_id: 1
 
 github_repo:

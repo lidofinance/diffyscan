@@ -4,7 +4,7 @@
         "0xc24891B75ef55fedC377c5e6Ec59A850b12E23ac": "ProxyAdmin"
     },
     "explorer_hostname": "api.etherscan.io",
-    "explorer_token_env_var": "ETHERSCAN_TOKEN",
+    "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
     "github_repo": {
         "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
         "commit": "dbb6104ce834628e473d2173bbc9d47f81a9eec3",

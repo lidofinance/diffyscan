@@ -4,6 +4,7 @@ import time
 import argparse
 import os
 import traceback
+from pathlib import Path
 
 from dotenv import load_dotenv
 
@@ -27,7 +28,6 @@ from .utils.github import (
     get_file_from_github_recursive,
     resolve_dep,
 )
-from .utils.helpers import create_dirs
 from .utils.logger import logger
 from .utils.binary_verifier import deep_match_bytecode
 from .utils.node_handler import (
@@ -270,7 +270,7 @@ def run_source_diff(
             f"{DIFFS_DIR}/{contract_address_from_config}/{filename}.html"
         )
 
-        create_dirs(diff_report_filename)
+        Path(diff_report_filename).parent.mkdir(parents=True, exist_ok=True)
         with open(diff_report_filename, "w") as f:
             f.write(diff_html)
 
@@ -310,21 +310,47 @@ def run_source_diff(
     }
 
 
-def _load_explorer_token(config: dict) -> str | None:
-    """Load explorer token from config env var name, falling back to ETHERSCAN_EXPLORER_TOKEN."""
+def _load_canonical_etherscan_token() -> str | None:
+    return load_env("ETHERSCAN_EXPLORER_TOKEN", masked=True, required=False)
+
+
+def _load_explorer_token(config: dict) -> str:
+    """Load explorer token from config env var name with legacy Etherscan fallback."""
     env_var = config.get("explorer_token_env_var")
-    if env_var:
-        token = load_env(env_var, masked=True, required=False)
+    if not env_var:
+        logger.warn(
+            'Config missing "explorer_token_env_var"; falling back to ETHERSCAN_EXPLORER_TOKEN'
+        )
+        token = _load_canonical_etherscan_token()
         if token:
             return token
-        logger.warn(f'Explorer token not found in env ("{env_var}")')
-    else:
-        logger.warn('Config missing "explorer_token_env_var"')
 
-    token = os.getenv("ETHERSCAN_EXPLORER_TOKEN")
-    if token is None:
-        logger.warn("Fallback ETHERSCAN_EXPLORER_TOKEN not set")
-    return token
+        error_msg = (
+            'Explorer token not found. Add "explorer_token_env_var" to the config '
+            "or export ETHERSCAN_EXPLORER_TOKEN."
+        )
+        logger.error(error_msg)
+        raise ValueError(error_msg)
+
+    token = load_env(env_var, masked=True, required=False)
+    if token:
+        return token
+
+    if env_var == "ETHERSCAN_TOKEN":
+        token = _load_canonical_etherscan_token()
+        if token:
+            return token
+
+        error_msg = (
+            "Explorer token not found. Set ETHERSCAN_EXPLORER_TOKEN or restore the "
+            "legacy ETHERSCAN_TOKEN env var."
+        )
+        logger.error(error_msg)
+        raise ValueError(error_msg)
+
+    error_msg = f'Explorer token not found in env ("{env_var}")'
+    logger.error(error_msg)
+    raise ValueError(error_msg)
 
 
 def _setup_binary_comparison(config: dict) -> str:

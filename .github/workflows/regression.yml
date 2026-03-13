@@ -13,7 +13,6 @@ jobs:
       DEVCONTAINER_BUILD_CACHE_DIR: .buildx-cache
       DEVCONTAINER_IMAGE: diffyscan-regression:${{ github.sha }}
       ETHERSCAN_EXPLORER_TOKEN: ${{ secrets.ETHERSCAN_EXPLORER_TOKEN }}
-      ETHERSCAN_TOKEN: ${{ secrets.ETHERSCAN_EXPLORER_TOKEN }}
       GITHUB_API_TOKEN: ${{ github.token }}
       REMOTE_RPC_URL: ${{ matrix.network == 'mainnet' && secrets['REMOTE_RPC_URL_MAINNET'] || secrets['REMOTE_RPC_URL_HOODI'] }}
       UV_VERSION: "0.10.9"
@@ -143,7 +142,6 @@ jobs:
             --env DIFFYSCAN_CONFIG \
             --env DIFFYSCAN_FLAGS \
             --env ETHERSCAN_EXPLORER_TOKEN \
-            --env ETHERSCAN_TOKEN \
             --env GITHUB_API_TOKEN \
             --env REMOTE_RPC_URL \
             --env HOME=/tmp/diffyscan-home \

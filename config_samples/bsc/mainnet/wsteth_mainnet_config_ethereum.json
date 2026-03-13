@@ -6,7 +6,7 @@
     "0x3ce1230f39302e62b67bbf2316558f79c25424a2": "WormholeTransceiver",
     "0xf0396a8077eda579f657B5E6F3c3F5e8EE81972b": "TransceiverStructs"
   },
-  "explorer_token_env_var": "ETHERSCAN_TOKEN",
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
   "explorer_hostname": "api.etherscan.io",
   "audit_url": "https://github.com/wormhole-foundation/wormhole-audits/blob/main/2024-07-23-cyfrin-wormhole-evm-ntt-diff-v1.1.0.pdf",
   "github_repo": {

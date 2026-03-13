@@ -59,7 +59,7 @@ contracts:
   "0xFbD83f7C531D35D99392a5A20bb5F1e75E97076e": OracleSubmitter
 
 explorer_hostname: api.etherscan.io
-explorer_token_env_var: ETHERSCAN_TOKEN
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
 explorer_chain_id: 1
 
 github_repo:

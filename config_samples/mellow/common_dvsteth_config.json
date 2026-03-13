@@ -11,7 +11,7 @@
         "0xB8eF363E1909665c18BF0CB72Cba9a8152413A2E": "DefaultProxyImplementation"
     },
     "explorer_hostname": "api.etherscan.io",
-    "explorer_token_env_var": "ETHERSCAN_TOKEN",
+    "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
     "github_repo": {
         "url": "https://github.com/mellow-finance/mellow-lrt",
         "commit": "1c885ad9a2964ca88ad3e59c3a7411fc0059aa34",

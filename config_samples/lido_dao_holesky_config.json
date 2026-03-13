@@ -55,7 +55,7 @@
     "0x2997EA0D07D79038D83Cb04b3BB9A2Bc512E3fDA": "AppProxyUpgradeable"
   },
   "explorer_hostname": "api.etherscan.io",
-  "explorer_token_env_var": "ETHERSCAN_TOKEN",
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
   "explorer_chain_id": 17000,
   "github_repo": {
     "url": "https://github.com/lidofinance/lido-dao",
