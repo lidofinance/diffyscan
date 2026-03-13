@@ -30,7 +30,7 @@ ALL_TOP_LEVEL_KEYS = {
 SAMPLE_CONFIG = {
     "contracts": {"0x0000000000000000000000000000000000000001": "TestContract"},
     "explorer_hostname": "api.etherscan.io",
-    "explorer_token_env_var": "ETHERSCAN_TOKEN",
+    "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
     "github_repo": {
         "url": "https://github.com/example/repo",
         "commit": "abc123",
@@ -86,7 +86,7 @@ contracts:
   "0x0000000000000000000000000000000000000001": TransparentUpgradeableProxy # Vault
   "0x0000000000000000000000000000000000000002": Vault # implementation
 explorer_hostname: api.etherscan.io
-explorer_token_env_var: ETHERSCAN_TOKEN
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
 github_repo:
   url: https://github.com/example/repo
   commit: abc123
@@ -147,7 +147,7 @@ contracts:
   "0x00000000000000000000000000000000000000AB": TestContract
   "0x0000000000000000000000000000000000000100": AnotherContract
 explorer_hostname: api.etherscan.io
-explorer_token_env_var: ETHERSCAN_TOKEN
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
 explorer_chain_id: 1
 github_repo:
   url: https://github.com/example/repo
@@ -177,7 +177,7 @@ def test_yaml_unquoted_hex_address_raises(tmp_path):
 contracts:
   0x00000000000000000000000000000000000000AB: TestContract
 explorer_hostname: api.etherscan.io
-explorer_token_env_var: ETHERSCAN_TOKEN
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
 github_repo:
   url: https://github.com/example/repo
   commit: abc123
@@ -205,7 +205,7 @@ def test_bytecode_comparison_unquoted_hex_raises(tmp_path):
 contracts:
   "0x0000000000000000000000000000000000000001": TestContract
 explorer_hostname: api.etherscan.io
-explorer_token_env_var: ETHERSCAN_TOKEN
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
 github_repo:
   url: https://github.com/example/repo
   commit: abc123
@@ -229,7 +229,7 @@ def test_bytecode_comparison_library_unquoted_hex_raises(tmp_path):
 contracts:
   "0x0000000000000000000000000000000000000001": TestContract
 explorer_hostname: api.etherscan.io
-explorer_token_env_var: ETHERSCAN_TOKEN
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
 github_repo:
   url: https://github.com/example/repo
   commit: abc123

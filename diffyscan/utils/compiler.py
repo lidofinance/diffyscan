@@ -4,9 +4,9 @@ import json
 import os
 import stat
 import sys
+from pathlib import Path
 
 from .common import fetch
-from .helpers import create_dirs
 from .logger import logger
 from .custom_exceptions import CompileError
 
@@ -58,7 +58,7 @@ def prepare_compiler(
     required_platform: str, build_info: dict, compiler_path: str
 ) -> None:
     """Download, verify, and prepare the Solidity compiler."""
-    create_dirs(compiler_path)
+    Path(compiler_path).parent.mkdir(parents=True, exist_ok=True)
     compiler_url = (
         f'https://binaries.soliditylang.org/{required_platform}/{build_info["path"]}'
     )

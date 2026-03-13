@@ -83,7 +83,7 @@ contracts:
   "0x00000000028E2Bc6FABc9e8B9c7d5D411982Ff8e": MellowAccountV1
 
 explorer_hostname: api.etherscan.io
-explorer_token_env_var: ETHERSCAN_TOKEN
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
 explorer_chain_id: 1
 
 github_repo:

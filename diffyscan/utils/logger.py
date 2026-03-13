@@ -1,7 +1,8 @@
+from pathlib import Path
+
 import termtables
 
 from .constants import LOGS_PATH
-from .helpers import create_dirs
 
 CYAN = "\033[96m"
 PURPLE = "\033[95m"
@@ -34,7 +35,7 @@ class Logger:
         self.level = _LOG_LEVELS.get(level_name.lower(), (0,))[0]
 
     def log(self, text):
-        create_dirs(self.log_file)
+        Path(self.log_file).parent.mkdir(parents=True, exist_ok=True)
         with open(self.log_file, mode="a") as logs:
             logs.write(text + "\n")
 

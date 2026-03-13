@@ -3,7 +3,7 @@
         "0xC329400492c6ff2438472D4651Ad17389fCb843a": "DefaultCollateral"
     },
     "explorer_hostname": "api.etherscan.io",
-    "explorer_token_env_var": "ETHERSCAN_TOKEN",
+    "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
     "github_repo": {
         "url": "https://github.com/symbioticfi/collateral",
         "commit": "4a38fadd5ee3f0b0422caa5f195a31e626498621",
