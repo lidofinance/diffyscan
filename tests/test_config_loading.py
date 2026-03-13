@@ -337,8 +337,7 @@ def test_allowed_diffs_source_line_ranges_shape_is_validated(tmp_path):
 
 def test_allowed_diffs_yaml_unquoted_address_raises(tmp_path):
     path = tmp_path / "config.yaml"
-    path.write_text(
-        """\
+    path.write_text("""\
 contracts:
   "0x0000000000000000000000000000000000000001": TestContract
 explorer_hostname: api.etherscan.io
@@ -353,8 +352,7 @@ allowed_diffs:
     0x0000000000000000000000000000000000000001:
       - reason: generated file differs
         any: true
-"""
-    )
+""")
     with pytest.raises(
         ValueError, match="allowed_diffs.source address was parsed as integer"
     ):
@@ -363,8 +361,7 @@ allowed_diffs:
 
 def test_allowed_diffs_yaml_unquoted_immutable_hex_raises(tmp_path):
     path = tmp_path / "config.yaml"
-    path.write_text(
-        """\
+    path.write_text("""\
 contracts:
   "0x0000000000000000000000000000000000000001": TestContract
 explorer_hostname: api.etherscan.io
@@ -381,8 +378,7 @@ allowed_diffs:
         immutables:
           - offset: 0
             value: 0x0000000000000000000000000000000000000001
-"""
-    )
+""")
     with pytest.raises(
         ValueError,
         match="allowed_diffs.bytecode.0x0000000000000000000000000000000000000001\\[1\\].immutables\\[1\\].value",
