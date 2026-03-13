@@ -99,6 +99,7 @@ jobs:
               mkdir -p "$HOME" "$XDG_CACHE_HOME"
               uv sync --locked --group dev
               uv run pytest -q
+              uv run mypy
               uv run pre-commit run --all-files
               uv run diffyscan -Y -E -G "$DIFFYSCAN_CONFIG"
             '
