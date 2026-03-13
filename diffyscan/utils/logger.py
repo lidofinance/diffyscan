@@ -1,7 +1,8 @@
+from pathlib import Path
+
 import termtables
 
 from .constants import LOGS_PATH
-from .helpers import create_dirs
 
 CYAN = "\033[96m"
 PURPLE = "\033[95m"
@@ -17,131 +18,94 @@ UNDERLINE = "\033[4m"
 END = "\033[0m"
 
 
+_LOG_LEVELS = {
+    "info": (0, "🔵 [INFO] ", BLUE),
+    "okay": (1, "🟢 [OKAY] ", GREEN),
+    "warn": (2, "🟠 [WARN] ", YELLOW),
+    "error": (3, "🔴 [ERROR] ", RED),
+}
+
+
 class Logger:
     def __init__(self, log_file):
         self.log_file = log_file
+        self.level = 0
 
-    # log to file
+    def set_level(self, level_name: str):
+        self.level = _LOG_LEVELS.get(level_name.lower(), (0,))[0]
+
     def log(self, text):
-        create_dirs(self.log_file)
+        Path(self.log_file).parent.mkdir(parents=True, exist_ok=True)
         with open(self.log_file, mode="a") as logs:
             logs.write(text + "\n")
 
-    # print to std out
     def stdout(self, text, overwrite=False):
         end_char = "\r" if overwrite else "\n"
         print(text, end=end_char, flush=overwrite)
 
-    def info(self, text, value=None):
-        log_text = "🔵 [INFO] " + text
-        stdout_text = self.hl(" 🔵 [INFO] ", BLUE) + text
+    def _emit(self, level_name, text, value=None, overwrite=False):
+        threshold, emoji, color = _LOG_LEVELS[level_name]
+        log_text = emoji + text
+        stdout_text = f"{color} {emoji}{END}{text}"
 
         if value is not None:
-            log_text = self.cln(log_text, value)
-            stdout_text = self.cln(stdout_text, self.hl(value, BOLD))
+            log_text += f": {value}"
+            stdout_text += f": {BOLD}{value}{END}"
 
         self.log(log_text)
-        self.stdout(stdout_text)
+        if self.level <= threshold:
+            if overwrite:
+                stdout_text += " " * 100
+            self.stdout(stdout_text, overwrite=overwrite)
+
+    def info(self, text, value=None):
+        self._emit("info", text, value)
 
     def update_info(self, text, value=None):
-        log_text = "🔵 [INFO] " + text
-        stdout_text = self.hl(" 🔵 [INFO] ", BLUE) + text
-
-        if value is not None:
-            log_text = self.cln(log_text, value)
-            stdout_text = self.cln(stdout_text, self.hl(value, BOLD))
-
-        self.log(log_text)
-        self.stdout(stdout_text + (" " * 100), overwrite=True)
+        self._emit("info", text, value, overwrite=True)
 
     def okay(self, text, value=None):
-        log_text = "🟢 [OKAY] " + text
-        stdout_text = self.hl(" 🟢 [OKAY] ", GREEN) + text
-
-        if value is not None:
-            log_text += ": " + str(value)
-            stdout_text += ": " + self.hl(value, BOLD)
-
-        self.log(log_text)
-        self.stdout(stdout_text)
+        self._emit("okay", text, value)
 
     def warn(self, text, value=None):
-        log_text = "🟠 [WARN] " + text
-        stdout_text = self.hl(" 🟠 [WARN] ", YELLOW) + text
-
-        if value is not None:
-            log_text += ": " + str(value)
-            stdout_text += ": " + self.hl(value, BOLD)
-
-        self.log(log_text)
-        self.stdout(stdout_text)
+        self._emit("warn", text, value)
 
     def error(self, text, value=None):
-        log_text = "🔴 [ERROR] " + text
-        stdout_text = self.hl(" 🔴 [ERROR] ", RED) + text
-
-        if value is not None:
-            log_text += ": " + str(value)
-            stdout_text += ": " + self.hl(value, BOLD)
-
-        self.log(log_text)
-        self.stdout(stdout_text)
+        self._emit("error", text, value)
 
     def report_table(self, table):
-        log_table = termtables.to_string(
-            table,
-            header=["#", "Filename", "Found", "Diffs", "Origin", "Report"],
-            style=termtables.styles.rounded_double,
+        header = ["#", "Filename", "Found", "Diffs", "Origin", "Report"]
+        self.log(
+            termtables.to_string(
+                table,
+                header=header,
+                style=termtables.styles.rounded_double,
+            )
         )
-        self.log(log_table)
-
-        stdout_table = [self.color_row(row) for row in table]
-        table_colored_string = termtables.to_string(
-            stdout_table,
-            header=["#", "Filename", "Found", "Diffs", "Origin", "Report"],
-            style=termtables.styles.rounded_double,
+        colored = [self._color_row(row) for row in table]
+        self.stdout(
+            termtables.to_string(
+                colored,
+                header=header,
+                style=termtables.styles.rounded_double,
+            )
         )
 
-        self.stdout(table_colored_string)
-
-    def color_row(self, row):
-        hlcolor = GREEN
-
-        file_found = row[2]
-        diffs_found = row[3] is not None and row[3] > 0
-
-        if not file_found:
-            hlcolor = RED
-        elif diffs_found:
-            hlcolor = RED
-
-        return [self.hl(cell, hlcolor) for cell in row]
-
-    def hl(self, text, color=BOLD):
-        return f"{color}{text}{END}"
-
-    def hlgreen(self, text):
-        return self.hl(text, GREEN)
-
-    def hlblue(self, text):
-        return self.hl(text, BLUE)
-
-    def hlred(self, text):
-        return self.hl(text, RED)
-
-    def cln(self, text1, text2):
-        return f"{text1}: {text2}"
+    def _color_row(self, row):
+        color = RED if (not row[2] or (row[3] is not None and row[3] > 0)) else GREEN
+        return [f"{color}{cell}{END}" for cell in row]
 
     def divider(self):
         self.log(" - +" * 20)
-        self.stdout((self.hlred(" -") + self.hlgreen(" +")) * 20)
+        if self.level <= 0:
+            self.stdout((f"{RED} -{END}{GREEN} +{END}") * 20)
 
 
 logger = Logger(LOGS_PATH)
 
 
-def to_hex(index, padStart=2):
-    return f"{index:0{padStart}X}"
+def to_hex(index, pad=2):
+    return f"{index:0{pad}X}"
 
 
 def red(text):

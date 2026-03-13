@@ -1,17 +1,26 @@
 import time
 import os
-import tempfile
 
 DIGEST_DIR = "digest"
 START_TIME = time.time()
 START_TIME_INT = int(START_TIME)
 DIFFS_DIR = f"{DIGEST_DIR}/{START_TIME_INT}/diffs"
 LOGS_PATH = f"{DIGEST_DIR}/{START_TIME_INT}/logs.txt"
-DEFAULT_CONFIG_PATH = "config.json"
-DEFAULT_HARDHAT_CONFIG_PATH = "hardhat_config.ts"
-DEFAULT_LOCAL_RPC_URL = "http://127.0.0.1:7545"
 
-SOLC_DIR = os.path.join(tempfile.gettempdir(), "solc_builds")
+
+def _get_cache_home() -> str:
+    if os.name == "nt":
+        return os.getenv("LOCALAPPDATA") or os.path.join(
+            os.path.expanduser("~"),
+            "AppData",
+            "Local",
+        )
+    return os.getenv("XDG_CACHE_HOME") or os.path.join(
+        os.path.expanduser("~"), ".cache"
+    )
+
+
+SOLC_DIR = os.path.join(_get_cache_home(), "diffyscan", "solc")
 
 # fmt: off
 OPCODES = {
@@ -50,9 +59,5 @@ OPCODES = {
 # fmt: on
 
 
-def get_key_from_value(dictionary: dict, value: str):
-    return next((k for k, v in dictionary.items() if v == value), None)
-
-
-PUSH0 = get_key_from_value(OPCODES, "PUSH0")
-PUSH32 = get_key_from_value(OPCODES, "PUSH32")
+PUSH0 = 0x5F
+PUSH32 = 0x7F

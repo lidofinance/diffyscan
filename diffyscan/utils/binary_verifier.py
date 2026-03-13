@@ -326,5 +326,5 @@ def deep_match_bytecode(
         )
 
     # Otherwise, differences exist but only in immutables
-    logger.okay("Bytecodes have differences only on the immutable reference position")
+    logger.warn("Bytecodes have differences only on the immutable reference position")
     return False

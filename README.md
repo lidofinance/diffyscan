@@ -1,9 +1,7 @@
 # Diffyscan
 
-![python >=3.10,<4](https://img.shields.io/badge/python-≥3.10,<4-blue)
-![poetry ^2.2](https://img.shields.io/badge/poetry-^2.2-blue)
-![NodeJs ^22](https://img.shields.io/badge/NodeJS-^22-yellow)
-![Hardhat ^3.0](https://img.shields.io/badge/Hardhat-^3.0-cyan)
+![python >=3.11,<4](https://img.shields.io/badge/python-≥3.11,<4-blue)
+![uv](https://img.shields.io/badge/uv-managed-blue)
 ![license MIT](https://img.shields.io/badge/license-MIT-brightgreen)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
@@ -12,49 +10,74 @@ Diff deployed EVM-compatible smart contract sourcecode and bytecode against the 
 Key features:
 
 - retrieve and diff sources from the GitHub repo against the queried ones from a blockscan service (e.g. Etherscan)
-- compare the bytecode compiled and deployed on the forked network locally against remote (see section 'bytecode_comparison' in `./config_samples/lido_dao_sepolia_config.json` as an example) - enabled by default
+- compare bytecode by compiling GitHub sources and simulating constructor execution via remote `eth_call` against live chain state - enabled by default
+- automatically reuse explorer-provided constructor calldata, library addresses, and EVM version for bytecode comparison
+- supports both **JSON and YAML** configuration files (`.json`, `.yaml`, `.yml`)
+- automatic environment variable loading from `.env` files
 - cache sources from blockchain explorers (option `--cache-explorer`) and GitHub files (option `--cache-github`) to avoid re-fetching on repeated runs
-- preprocess solidity sourcecode by means of prettier solidity plugin before comparing the sources (option `--prettify`) if needed.
 - preprocess imports to flat paths for Brownie compatibility (option `--support-brownie`)
 - skip binary comparison if needed (option `--skip-binary-comparison`)
-- provide own Hardhat config as optional argument
 
 ## Install
 
 ```bash
-pipx install git+https://github.com/lidofinance/diffyscan
+# Pin a tag or commit instead of floating HEAD for reproducible installs.
+uv tool install git+https://github.com/lidofinance/diffyscan@<tag-or-commit>
 ```
 
-If deployed bytecode binary comparison or prettier source preprocessing are needed:
+## Development setup
 
-```shell
-npm install
+### Dev Container (recommended)
+
+The fastest way to get a working development environment. Works with VS Code, GitHub Codespaces, and any [Dev Container](https://containers.dev/)-compatible tool.
+
+1. Open this repo in VS Code
+2. When prompted "Reopen in Container", click yes (or run **Dev Containers: Reopen in Container** from the command palette)
+3. Wait for the container to build — dependencies, git hooks, and `.env` are set up automatically
+
+That's it. Run tests with `uv run pytest -q` or the CLI with `uv run diffyscan config_samples/lido_dao_sepolia_config.json`.
+
+### Manual setup
+
+Prerequisites: [uv](https://docs.astral.sh/uv/getting-started/installation/), Python 3.11+
+
+```bash
+uv sync --locked --group dev
+uv run pre-commit install --hook-type pre-commit --hook-type commit-msg
+```
+
+Run tests:
+
+```bash
+uv run pytest -q
+```
+
+Run hooks manually:
+
+```bash
+uv run pre-commit run --all-files
+```
+
+Run the CLI locally:
+
+```bash
+uv run diffyscan config_samples/lido_dao_sepolia_config.json
 ```
 
 ## Usage
 
-Set your Etherscan token to fetch verified source code,
+Copy the example environment file and fill in your values:
+
+```bash
+cp .env.example .env
+```
+
+Or set environment variables directly:
 
 ```bash
 export ETHERSCAN_EXPLORER_TOKEN=<your-etherscan-token>
-```
-
-Set your Github token to query API without strict rate limiting,
-
-```bash
 export GITHUB_API_TOKEN=<your-github-token>
-```
-
-Set remote RPC URL to validate contract bytecode at remote rpc node,
-
-```bash
-export REMOTE_RPC_URL =<remote-rpc-url>
-```
-
-Set local RPC URL to check immutables against the local deployment and provided constructor arguments. If not set, it defaults to `http://127.0.0.1:7545`.
-
-```bash
-export LOCAL_RPC_URL=<local-rpc-url>
+export REMOTE_RPC_URL=<remote-rpc-url>
 ```
 
 Start script with one of the examples provided (or entire folder of configs)
@@ -63,7 +86,11 @@ Start script with one of the examples provided (or entire folder of configs)
 diffyscan config_samples/lido_dao_sepolia_config.json
 ```
 
-Alternatively, create a new config file named `config.json` near the diffyscan.py,
+When no path is given, diffyscan looks for `config.json`, `config.yaml`, or `config.yml` in the current directory. When a directory is given, all `.json`, `.yaml`, and `.yml` files inside it are processed.
+
+Alternatively, create a new config file near `diffyscan.py`. Configs can be written in JSON or YAML. The `bytecode_comparison` section is optional and only needed for manual overrides when explorer metadata is missing or you want to override it:
+
+**JSON** (`config.json`):
 
 ```json
 {
@@ -115,71 +142,42 @@ Alternatively, create a new config file named `config.json` near the diffyscan.p
 }
 ```
 
-then either embed Hardhat settings directly in the JSON config (recommended):
+**YAML** (`config.yaml`):
 
-```json
-{
-  "bytecode_comparison": {
-    "hardhat_config": {
-      "solidity_version": "0.8.25",
-      "optimizer": true,
-      "optimizer_runs": 200
-    }
-  }
-}
+```yaml
+contracts:
+  "0x28FAB2059C713A7F9D8c86Db49f9bb0e96Af1ef8": OssifiableProxy
+  "0xDba5Ad530425bb1b14EECD76F1b4a517780de537": LidoLocator
+
+explorer_hostname: api.etherscan.io
+explorer_chain_id: 17000
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+
+github_repo:
+  url: https://github.com/lidofinance/lido-dao
+  commit: cadffa46a2b8ed6cfa1127fca2468bae1a82d6bf
+  relative_root: ""
+
+dependencies:
+  "@openzeppelin/contracts-v4.4":
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: 6bd6b76d1156e20e45d1016f355d154141c7e5b9
+    relative_root: contracts
 ```
 
-or create a separate Hardhat config file named `hardhat_config.ts` near the diffyscan.py
-
-```ts
-import type { HardhatUserConfig } from "hardhat/config";
-
-const config: HardhatUserConfig = {
-  solidity: "0.8.25",
-  networks: {
-    hardhat: {
-      type: "edr-simulated",
-      chainId: 560048,
-      blockGasLimit: 92000000,
-      hardfork: "prague",
-    },
-  },
-};
-
-export default config;
-```
-
-> Note: Hardhat config file is needed to avoid standard config generation routine to be launched.
->
-> See also: https://hardhat.org/hardhat-runner/docs/config#configuration
-
-The inline `hardhat_config` supports these fields:
-
-- `solidity_version` (optional, default: `"0.8.25"`): Solidity compiler version (e.g. `"0.8.19"`)
-- `optimizer`: Enable optimizer (default: `false`)
-- `optimizer_runs`: Optimizer runs (default: `200`)
-- `evm_version`: EVM target version (optional)
-- `hardfork`: Hardhat hardfork setting (default: `"prague"`)
-- `block_gas_limit`: Block gas limit (default: `92000000`)
-
-The chain ID is automatically taken from `explorer_chain_id` in the config. A temporary Hardhat config file is generated at startup and cleaned up after the run.
+> **Important:** In YAML configs, always quote contract addresses (e.g. `"0x1234..."`). Unquoted hex values will be parsed as integers by YAML, and diffyscan will raise an error if this happens.
 
 Start the script
 
 ```bash
 diffyscan /path/to/config.json
-```
-
-Or with a separate Hardhat config file:
-
-```bash
-diffyscan /path/to/config.json --hardhat-path /path/to/hardhat_config.ts
+diffyscan /path/to/config.yaml
 ```
 
 To skip binary comparison (which is enabled by default):
 
 ```bash
-diffyscan /path/to/config.json --hardhat-path /path/to/hardhat_config.ts --skip-binary-comparison
+diffyscan /path/to/config.json --skip-binary-comparison
 ```
 
 > Note: Brownie verification tooling might rewrite the imports in the source submission. It transforms relative paths to imported contracts into flat paths ('./folder/contract.sol' -> 'contract.sol'), which makes Diffyscan unable to find a contract for verification.
@@ -187,7 +185,7 @@ diffyscan /path/to/config.json --hardhat-path /path/to/hardhat_config.ts --skip-
 For contracts whose sources were verified by brownie tooling:
 
 ```bash
-diffyscan /path/to/config.json --hardhat-path /path/to/hardhat_config.ts --support-brownie
+diffyscan /path/to/config.json --support-brownie
 ```
 
 ### Caching
@@ -246,55 +244,3 @@ ls -la .diffyscan_cache/
 ```
 
 ℹ️ See more config examples inside the [config_samples](./config_samples/) dir.
-
-## Development setup
-
-### Prerequisites
-
-This project was developed using these dependencies with their exact versions listed below:
-
-- Python 3.12
-- Poetry 1.8
-- if deployed bytecode binary comparison or prettier source preprocessing are needed:
-  - npm
-
-Other versions may work as well but were not tested at all.
-
-### Setup
-
-1. Install Poetry
-
-Use the following command to install poetry:
-
-```bash
-pip install --user poetry~=1.8
-```
-
-alternatively, you could proceed with `pipx`:
-
-```bash
-pipx install poetry~=1.8
-```
-
-2. Activate poetry virtual environment,
-
-```bash
-poetry shell
-```
-
-3. Install [poetry-dynamic-versioning](https://github.com/mtkennerly/poetry-dynamic-versioning?tab=readme-ov-file#installation)
-
-- In most cases: `poetry self add "poetry-dynamic-versioning[plugin]"`
-- If you installed Poetry with Pipx: `pipx inject poetry "poetry-dynamic-versioning[plugin]"`
-
-4. Install Python dependencies
-
-```bash
-poetry install
-```
-
-5. If deployed bytecode binary comparison or prettier source preprocessing are needed:
-
-```shell
-npm install
-```

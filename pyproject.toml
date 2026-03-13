@@ -1,38 +1,39 @@
-[tool.poetry]
+[project]
 name = "diffyscan"
 version = "0.0.0"
 description = "Diff your Ethereum smart contracts code from GitHub against Blockchain explorer verified source code."
-authors = ["Azat Serikov <azatsdev@gmail.com>"]
-license = "MIT"
+authors = [{ name = "Azat Serikov", email = "azatsdev@gmail.com" }]
+license = { text = "MIT" }
 readme = "README.md"
-repository = "https://github.com/lidofinance/diffyscan"
+requires-python = ">=3.11,<4"
 keywords = ["ethereum", "diff", "sources"]
+dependencies = [
+    "python-dotenv>=1.0,<2",
+    "pyyaml>=6.0,<7",
+    "requests>=2.32.5,<3",
+    "termtables>=0.2.4,<0.3",
+]
 
-package-mode = true
-packages = [{ include = "diffyscan"}]
-exclude = ["config_samples"]
+[project.urls]
+Repository = "https://github.com/lidofinance/diffyscan"
 
-[tool.poetry.scripts]
+[project.scripts]
 diffyscan = "diffyscan.diffyscan:main"
 
-[tool.poetry.dependencies]
-python = ">=3.11,<4"
-requests = "^2.32.5"
-termtables = "^0.2.4"
-
-[tool.poetry.group.dev.dependencies]
-black = "^25.9.0"
-pytest = "^8.4.2"
-
-[tool.poetry-dynamic-versioning]
-enable = true
-vcs = "git"
-style = "semver"
-metadata = false
-
-[tool.poetry-dynamic-versioning.substitution]
-files = ["diffyscan/diffyscan.py"]
+[dependency-groups]
+dev = [
+    "black>=25.9.0,<26",
+    "gitlint>=0.19,<1",
+    "pre-commit>=4.3,<5",
+    "pytest>=8.4.2,<9",
+]
 
 [build-system]
-requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
-build-backend = "poetry_dynamic_versioning.backend"
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["diffyscan"]
+
+[tool.hatch.build.targets.sdist]
+exclude = ["config_samples"]

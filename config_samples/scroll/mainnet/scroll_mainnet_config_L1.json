@@ -5,7 +5,7 @@
         "0xCC2C53556Bc75217cf698721b29071d6f12628A9": "ProxyAdmin"
     },
     "explorer_hostname": "api.etherscan.io",
-    "explorer_token_env_var": "ETHERSCAN_TOKEN",
+    "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
     "github_repo": {
         "url": "https://github.com/scroll-tech/scroll",
         "commit": "69224ebb935d499c055c7859c1c8ade57244249c",

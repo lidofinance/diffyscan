@@ -5,7 +5,7 @@
         "0x0dB416f4387ED89c1C99955fe0Ecad458f07c467": "ProxyAdmin"
     },
     "explorer_hostname": "api-sepolia.etherscan.io",
-    "explorer_token_env_var": "ETHERSCAN_TOKEN",
+    "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
     "github_repo": {
         "url": "https://github.com/scroll-tech/scroll",
         "commit": "69224ebb935d499c055c7859c1c8ade57244249c",

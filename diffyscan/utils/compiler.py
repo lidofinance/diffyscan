@@ -4,11 +4,17 @@ import json
 import os
 import stat
 import sys
+from pathlib import Path
 
 from .common import fetch
-from .helpers import create_dirs
 from .logger import logger
 from .custom_exceptions import CompileError
+
+SOLC_PLATFORM_MAP = {
+    "linux": "linux-amd64",
+    "darwin": "macosx-amd64",
+    "win32": "windows-amd64",
+}
 
 
 def get_solc_native_platform_from_os() -> str:
@@ -22,14 +28,10 @@ def get_solc_native_platform_from_os() -> str:
         CompileError: If the platform is not supported
     """
     platform_name = sys.platform
-    if platform_name == "linux":
-        return "linux-amd64"
-    elif platform_name == "darwin":
-        return "macosx-amd64"
-    elif platform_name == "win32":
-        return "windows-amd64"
-    else:
-        raise CompileError(f"Unsupported platform {platform_name}")
+    try:
+        return SOLC_PLATFORM_MAP[platform_name]
+    except KeyError as exc:
+        raise CompileError(f"Unsupported platform {platform_name}") from exc
 
 
 def get_compiler_info(required_platform: str, required_compiler_version: str) -> dict:
@@ -52,49 +54,41 @@ def get_compiler_info(required_platform: str, required_compiler_version: str) ->
     return required_build_info
 
 
-def download_compiler(
-    required_platform: str, build_info: dict, destination_path: str
-) -> bytes:
-    """Download the Solidity compiler binary."""
+def prepare_compiler(
+    required_platform: str, build_info: dict, compiler_path: str
+) -> None:
+    """Download, verify, and prepare the Solidity compiler."""
+    Path(compiler_path).parent.mkdir(parents=True, exist_ok=True)
     compiler_url = (
         f'https://binaries.soliditylang.org/{required_platform}/{build_info["path"]}'
     )
-    download_compiler_response = fetch(compiler_url)
+    compiler_binary = fetch(compiler_url).content
 
     try:
-        with open(destination_path, "wb") as compiler_file:
-            compiler_file.write(download_compiler_response.content)
-    except IOError as e:
-        raise CompileError(f"Error writing to file: {e}")
-    except Exception as e:
-        raise CompileError(f"An error occurred: {e}")
-    return download_compiler_response.content
+        with open(compiler_path, "wb") as compiler_file:
+            compiler_file.write(compiler_binary)
+    except OSError as exc:
+        raise CompileError(f"Error writing to file: {exc}") from exc
+
+    verify_compiler_integrity(compiler_path, build_info)
 
 
-def check_compiler_checksum(compiler: bytes, valid_checksum: str) -> None:
-    """Verify the compiler binary checksum."""
-    compiler_checksum = hashlib.sha256(compiler).hexdigest()
+def verify_compiler_integrity(compiler_path: str, build_info: dict) -> None:
+    try:
+        with open(compiler_path, "rb") as compiler_file:
+            compiler_binary = compiler_file.read()
+    except OSError as exc:
+        raise CompileError(f"Error reading compiler file: {exc}") from exc
+
+    valid_checksum = build_info["sha256"].removeprefix("0x")
+    compiler_checksum = hashlib.sha256(compiler_binary).hexdigest()
     if compiler_checksum != valid_checksum:
         raise CompileError(
             f"Compiler checksum mismatch. Expected: {valid_checksum}, Got: {compiler_checksum}"
         )
 
-
-def set_compiler_executable(compiler_path: str) -> None:
-    """Set the compiler binary as executable."""
     compiler_file_rights = os.stat(compiler_path)
     os.chmod(compiler_path, compiler_file_rights.st_mode | stat.S_IEXEC)
-
-
-def prepare_compiler(
-    required_platform: str, build_info: dict, compiler_path: str
-) -> None:
-    """Download, verify, and prepare the Solidity compiler."""
-    create_dirs(compiler_path)
-    compiler_binary = download_compiler(required_platform, build_info, compiler_path)
-    valid_checksum = build_info["sha256"][2:]
-    check_compiler_checksum(compiler_binary, valid_checksum)
-    set_compiler_executable(compiler_path)
 
 
 def compile_contracts(compiler_path: str, input_settings: str) -> dict:
@@ -119,11 +113,12 @@ def compile_contracts(compiler_path: str, input_settings: str) -> dict:
 def get_target_compiled_contract(
     compiled_contracts: list, target_contract_name: str
 ) -> dict:
-    contracts_to_check = []
-    for contracts in compiled_contracts:
-        for name, contract in contracts.items():
-            if name == target_contract_name:
-                contracts_to_check.append(contract)
+    contracts_to_check = [
+        contract
+        for contracts in compiled_contracts
+        for name, contract in contracts.items()
+        if name == target_contract_name
+    ]
 
     if len(contracts_to_check) != 1:
         raise CompileError("multiple contracts with the same name")

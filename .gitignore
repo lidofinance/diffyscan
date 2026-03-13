@@ -4,9 +4,10 @@ digest
 config.json
 __pycache__
 .vscode
-node_modules
 dist
 */cache/
 .idea
 cache
 .diffyscan_cache
+.buildx-cache
+.env

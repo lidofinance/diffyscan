@@ -4,7 +4,7 @@
     "0xB7668B5485d0f826B86a75b0115e088bB9ee03eE": "SDVTSubmitExitRequestHashes"
   },
   "explorer_hostname": "api.etherscan.io",
-  "explorer_token_env_var": "ETHERSCAN_TOKEN",
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
   "explorer_chain_id": 1,
   "github_repo": {
     "url": "https://github.com/lidofinance/easy-track",
@@ -14,7 +14,6 @@
   "dependencies": {},
   "fail_on_bytecode_comparison_error": true,
   "bytecode_comparison": {
-    "hardhat_config_name": "mainnet_hardhat_config.js",
     "constructor_calldata": {},
     "constructor_args": {
       "0x8aa34dAaF0fC263203A15Bcfa0Ed926D466e59F3": [
