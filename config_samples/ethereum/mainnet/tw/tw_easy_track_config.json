@@ -28,5 +28,81 @@
         "0000000000000000000000000De4Ea0184c2ad0BacA7183356Aea5B8d5Bf5c6e"
       ]
     }
+  },
+  "allowed_diffs": {
+    "source": {
+      "0x8aa34dAaF0fC263203A15Bcfa0Ed926D466e59F3": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/CuratedSubmitExitRequestHashes.sol",
+              "github": {
+                "start": 6,
+                "count": 7
+              },
+              "explorer": {
+                "start": 6,
+                "count": 7
+              }
+            },
+            {
+              "file": "contracts/libraries/SubmitExitRequestHashesUtils.sol",
+              "github": {
+                "start": 6,
+                "count": 3
+              },
+              "explorer": {
+                "start": 6,
+                "count": 3
+              }
+            }
+          ]
+        }
+      ],
+      "0xB7668B5485d0f826B86a75b0115e088bB9ee03eE": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/SDVTSubmitExitRequestHashes.sol",
+              "github": {
+                "start": 6,
+                "count": 7
+              },
+              "explorer": {
+                "start": 6,
+                "count": 7
+              }
+            },
+            {
+              "file": "contracts/libraries/SubmitExitRequestHashesUtils.sol",
+              "github": {
+                "start": 6,
+                "count": 3
+              },
+              "explorer": {
+                "start": 6,
+                "count": 3
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "bytecode": {
+      "0x8aa34dAaF0fC263203A15Bcfa0Ed926D466e59F3": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0xB7668B5485d0f826B86a75b0115e088bB9ee03eE": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ]
+    }
   }
 }

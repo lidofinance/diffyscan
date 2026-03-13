@@ -335,7 +335,20 @@
         "0x6D799F4C92e8eE9CC0E33367Dd47990ed49a21AC",
         "0x9b5b78D1C9A3238bF24662067e34c57c83E8c354",
         "0x0534aA41907c9631fae990960bCC72d75fA7cfeD",
-        [9000, 43200, 1000, 50, 600, 8, 24, 128, 750000, 100, 101, 50]
+        [
+          9000,
+          43200,
+          1000,
+          50,
+          600,
+          8,
+          24,
+          128,
+          750000,
+          100,
+          101,
+          50
+        ]
       ],
       "0x2a833402e3F46fFC1ecAb3598c599147a78731a9": [
         "0x83BCE68B4e8b7071b2a664a26e6D3Bc17eEe3102",
@@ -407,6 +420,120 @@
       "0x3e144aEd003b5AE6953A99B78dD34154CF3F8c76": [
         "0xb3e6a8B6A752d3bb905A1B3Ef12bbdeE77E8160e",
         "0x"
+      ]
+    }
+  },
+  "allowed_diffs": {
+    "source": {
+      "0x1d10DB6a66EF8D2A6f6D36Ad4dc7092Ef7C12569": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "any": true
+        }
+      ],
+      "0x7D25D43D5a69ae0521440211C655C11840aF0FD6": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "any": true
+        }
+      ],
+      "0xbf95Cd394cC03cD03fEA62A435ac347314877f1d": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "any": true
+        }
+      ],
+      "0x95F00b016bB31b7182D96D25074684518246E42a": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "any": true
+        }
+      ],
+      "0x933b84D2C01B04C2f53cD2FB1b7055241E122C83": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "any": true
+        }
+      ],
+      "0xE22486EA7cE77daE718fFa7B7114fD50CF73Cbac": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "any": true
+        }
+      ],
+      "0xd253b0ca059343e70474e685Beb2974F10CCFa67": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "any": true
+        }
+      ]
+    },
+    "bytecode": {
+      "0x1d10DB6a66EF8D2A6f6D36Ad4dc7092Ef7C12569": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0x7D25D43D5a69ae0521440211C655C11840aF0FD6": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0xbf95Cd394cC03cD03fEA62A435ac347314877f1d": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0x95F00b016bB31b7182D96D25074684518246E42a": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0xd5F04A81ac472B2cB32073CE9dDABa6FaF022827": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0x7E99eE3C66636DE415D2d7C880938F2f40f94De4": [
+        {
+          "reason": "Testnet deployment: bytecode differs due to test-specific build configuration",
+          "any": true
+        }
+      ],
+      "0x6d1a9bBFF97f7565e9532FEB7b499982848E5e07": [
+        {
+          "reason": "Testnet deployment: bytecode differs due to test-specific build configuration",
+          "any": true
+        }
+      ],
+      "0x933b84D2C01B04C2f53cD2FB1b7055241E122C83": [
+        {
+          "reason": "Testnet deployment: bytecode differs due to test-specific build configuration",
+          "any": true
+        }
+      ],
+      "0xE22486EA7cE77daE718fFa7B7114fD50CF73Cbac": [
+        {
+          "reason": "Testnet deployment: bytecode differs due to test-specific build configuration",
+          "any": true
+        }
+      ],
+      "0xd253b0ca059343e70474e685Beb2974F10CCFa67": [
+        {
+          "reason": "Testnet deployment: bytecode differs due to test-specific build configuration",
+          "any": true
+        }
+      ],
+      "0x2F0303F20E0795E6CCd17BD5efE791A586f28E03": [
+        {
+          "reason": "Testnet deployment: bytecode differs due to test-specific build configuration",
+          "any": true
+        }
       ]
     }
   }
