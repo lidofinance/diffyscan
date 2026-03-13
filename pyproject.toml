@@ -43,7 +43,7 @@ exclude = ["config_samples"]
 
 [tool.mypy]
 python_version = "3.11"
-files = ["diffyscan"]
+files = ["diffyscan", "tests"]
 strict = false
 warn_return_any = true
 warn_unused_configs = true

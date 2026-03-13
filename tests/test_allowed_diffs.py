@@ -505,6 +505,7 @@ def test_build_bytecode_suggestion_entry_non_immutable_suggests_byte_ranges():
     )
 
     suggestion = build_bytecode_suggestion_entry(analysis)
+    assert suggestion is not None
     assert suggestion["byte_ranges"] == [
         {"offset": 10, "length": 4},
         {"offset": 20, "length": 2},
@@ -520,6 +521,7 @@ def test_build_bytecode_suggestion_entry_fallback_to_any():
     analysis = _make_base_analysis(string_literal_mismatch=True)
 
     suggestion = build_bytecode_suggestion_entry(analysis)
+    assert suggestion is not None
     assert suggestion["any"] is True
     assert "immutables" not in suggestion
     assert "byte_ranges" not in suggestion

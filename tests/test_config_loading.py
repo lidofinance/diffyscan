@@ -459,12 +459,12 @@ def test_full_fixture_nested_types():
         for rule in rules:
             assert isinstance(rule["reason"], str)
 
-    for rule in result["allowed_diffs"]["source"][
+    for src_rule in result["allowed_diffs"]["source"][
         "0x442af784A788A5bd6F42A01Ebe9F287a871243fb"
     ]:
-        assert isinstance(rule["reason"], str)
-        if "line_ranges" in rule:
-            for line_range in rule["line_ranges"]:
+        assert isinstance(src_rule["reason"], str)
+        if "line_ranges" in src_rule:
+            for line_range in src_rule["line_ranges"]:
                 assert line_range["github"]["start"] >= 1
                 assert line_range["explorer"]["count"] >= 0
 

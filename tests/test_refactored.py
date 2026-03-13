@@ -118,7 +118,7 @@ class TestCalldata:
 
     def test_normalize_calldata_not_string(self):
         with pytest.raises(CalldataError):
-            normalize_calldata(123)
+            normalize_calldata(123)  # type: ignore[arg-type]
 
     def test_get_constructor_abi_found(self):
         contract = {
@@ -200,7 +200,7 @@ class TestExplorerUtils:
         assert result == {"path.sol": {"Lib": "0x2"}}
 
     def test_get_solc_sources_standard(self):
-        solc_input = {"sources": {"a.sol": {}}, "settings": {}}
+        solc_input: dict = {"sources": {"a.sol": {}}, "settings": {}}
         assert get_solc_sources(solc_input) == {"a.sol": {}}
 
     def test_get_solc_sources_fallback(self):
