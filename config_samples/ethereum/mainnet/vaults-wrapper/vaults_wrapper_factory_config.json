@@ -27,5 +27,32 @@
       "commit": "e725abddf1e01cf05ace496e950fc8e243cc7cab",
       "relative_root": "contracts"
     }
+  },
+  "allowed_diffs": {
+    "bytecode": {
+      "0x3f221b8E5bC098cC6C23611BEeacaeCfD77e1587": [
+        {
+          "reason": "Factory stores Timelock implementation address as immutable",
+          "immutables": [
+            {
+              "offset": 304,
+              "value": "0x000000000000000000000000468029a88b6f75eb1d13bb291fc3b82fc2c0232f"
+            },
+            {
+              "offset": 5755,
+              "value": "0x000000000000000000000000468029a88b6f75eb1d13bb291fc3b82fc2c0232f"
+            },
+            {
+              "offset": 8721,
+              "value": "0x000000000000000000000000468029a88b6f75eb1d13bb291fc3b82fc2c0232f"
+            },
+            {
+              "offset": 10394,
+              "value": "0x000000000000000000000000468029a88b6f75eb1d13bb291fc3b82fc2c0232f"
+            }
+          ]
+        }
+      ]
+    }
   }
 }

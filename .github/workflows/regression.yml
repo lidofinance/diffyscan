@@ -23,80 +23,28 @@ jobs:
         include:
           - config: config_samples/ethereum/mainnet/safe_harbor/safe_harbor.json
             network: mainnet
-            flags: ""
           - config: config_samples/ethereum/mainnet/vaults/vaults_config.json
             network: mainnet
-            flags: ""
           - config: config_samples/ethereum/mainnet/vaults/vaults_voting_config.json
             network: mainnet
-            flags: ""
           - config: config_samples/ethereum/mainnet/vaults/vaults_easy_track_config.json
             network: mainnet
-            flags: >
-              --allow-source-diff 0x194A46DA1947E98c9D79af13E06Cfbee0D8610cC
-              --allow-source-diff 0xE73842AEbEC99Dacf2aAEec61409fD01A033f478
-              --allow-source-diff 0x8Bdc726a3147D8187820391D7c6F9F942606aEe6
-              --allow-source-diff 0xf23559De8ab37fF7a154384B0822dA867Cfa7Eac
-              --allow-source-diff 0xa29173C7BCf39dA48D5E404146A652d7464aee14
-              --allow-source-diff 0x73f80240ad9363d5d3C5C3626953C351cA36Bfe9
-              --allow-source-diff 0x5292A1284e4695B95C0840CF8ea25A818751C17F
-              --allow-source-diff 0x28F9Ac198C4E0FA6A9Ad2c2f97CB38F1A3120f27
-              --allow-source-diff 0x6a4f33F05E7412A11100353724Bb6a152Cf0D305
-              --allow-source-diff 0xDfA0bc38113B6d53c2881573FD764CEEFf468610
-              --allow-source-diff 0x6F5c0A5a824773E8f8285bC5aA59ea0Aab2A6400
-              --allow-source-diff 0xaf35A63a4114B7481589fDD9FDB3e35Fd65fAed7
-              --allow-source-diff 0x647DeE7bF33e44829e6430F7A08F63b3319694f0
           - config: config_samples/ethereum/mainnet/vaults-wrapper/vaults_wrapper_factory_config.json
             network: mainnet
-            flags: >
-              --allow-bytecode-diff 0x3f221b8E5bC098cC6C23611BEeacaeCfD77e1587
           - config: config_samples/ethereum/mainnet/gualGovernance/dual_governance_mainnet_config.json
             network: mainnet
-            flags: >
-              --allow-bytecode-diff 0xd6A67636c05BeB5B4a5c90D408b03A63c4e39426
           - config: config_samples/ethereum/mainnet/gualGovernance/dual_governance_mainnet_voting_config.json
             network: mainnet
-            flags: ""
           - config: config_samples/ethereum/mainnet/gualGovernance/dual_governance_mainnet_upgrade_voting_config.json
             network: mainnet
-            flags: ""
           - config: config_samples/ethereum/mainnet/tw/tw_config.json
             network: mainnet
-            flags: ""
           - config: config_samples/ethereum/mainnet/tw/tw_easy_track_config.json
             network: mainnet
-            flags: >
-              --allow-source-diff 0x8aa34dAaF0fC263203A15Bcfa0Ed926D466e59F3
-              --allow-source-diff 0xB7668B5485d0f826B86a75b0115e088bB9ee03eE
           - config: config_samples/ethereum/hoodi/vaults/hoodi_vaults_testnet_config.json
             network: hoodi
-            flags: >
-              --allow-source-diff 0x1d10DB6a66EF8D2A6f6D36Ad4dc7092Ef7C12569
-              --allow-source-diff 0x7D25D43D5a69ae0521440211C655C11840aF0FD6
-              --allow-source-diff 0xbf95Cd394cC03cD03fEA62A435ac347314877f1d
-              --allow-source-diff 0x95F00b016bB31b7182D96D25074684518246E42a
-              --allow-source-diff 0x933b84D2C01B04C2f53cD2FB1b7055241E122C83
-              --allow-source-diff 0xE22486EA7cE77daE718fFa7B7114fD50CF73Cbac
-              --allow-source-diff 0xd253b0ca059343e70474e685Beb2974F10CCFa67
-              --allow-bytecode-diff 0x7E99eE3C66636DE415D2d7C880938F2f40f94De4
-              --allow-bytecode-diff 0x2F0303F20E0795E6CCd17BD5efE791A586f28E03
-              --allow-bytecode-diff 0x6d1a9bBFF97f7565e9532FEB7b499982848E5e07
-              --allow-bytecode-diff 0x933b84D2C01B04C2f53cD2FB1b7055241E122C83
-              --allow-bytecode-diff 0xE22486EA7cE77daE718fFa7B7114fD50CF73Cbac
-              --allow-bytecode-diff 0xd253b0ca059343e70474e685Beb2974F10CCFa67
           - config: config_samples/ethereum/hoodi/vaults/hoodi_vaults_easy_track_config.json
             network: hoodi
-            flags: >
-              --allow-source-diff 0xfEF8B796Fea42b3C68E342364Adcf88F1d6145a6
-              --allow-source-diff 0x56Ff87F41a8CF795764E15E496124240Ac17695b
-              --allow-source-diff 0x4DF806111AC58e93d90E6D2fBE8522a76be6F499
-              --allow-source-diff 0xF21f98cac0Ba38f02b4d5be1667cc345929E8877
-              --allow-source-diff 0xBC2bb8310730F3D2b514Cb26f7e0A8776De879Ac
-              --allow-source-diff 0xc3FA83D65a900303e1d99cDBBF762c6630562c04
-              --allow-source-diff 0x351426775c75aB5127de860Cdcaf1953F1D622a2
-              --allow-source-diff 0x83DfE5Fe8ac8b7DB38c020F4F54BF09b65D92c63
-              --allow-source-diff 0xa11906bBBBaC5207b8FDA4F7F294d7EcB8dcc758
-              --allow-source-diff 0xc5dCd2A9642ceA9B71A632BF5b8ff52424Ea1B40
     steps:
       - uses: actions/checkout@v4
 
@@ -134,14 +82,12 @@ jobs:
       - name: Run regression in devcontainer
         env:
           DIFFYSCAN_CONFIG: ${{ matrix.config }}
-          DIFFYSCAN_FLAGS: ${{ matrix.flags }}
         run: |
           docker run --rm \
             --user "$(id -u):$(id -g)" \
             --volume "${GITHUB_WORKSPACE}:/workspaces/diffyscan" \
             --workdir /workspaces/diffyscan \
             --env DIFFYSCAN_CONFIG \
-            --env DIFFYSCAN_FLAGS \
             --env ETHERSCAN_EXPLORER_TOKEN \
             --env ETHERSCAN_TOKEN \
             --env GITHUB_API_TOKEN \
@@ -156,10 +102,5 @@ jobs:
               uv sync --locked --group dev
               uv run pytest -q
               uv run pre-commit run --all-files
-              if [ -n "$DIFFYSCAN_FLAGS" ]; then
-                read -r -a flags <<< "$DIFFYSCAN_FLAGS"
-              else
-                flags=()
-              fi
-              uv run diffyscan -Y -E -G "$DIFFYSCAN_CONFIG" "${flags[@]}"
+              uv run diffyscan -Y -E -G "$DIFFYSCAN_CONFIG"
             '

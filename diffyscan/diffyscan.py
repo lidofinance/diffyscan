@@ -579,19 +579,38 @@ def process_config(
                         )
                         bytecode_stats.append(bytecode_result)
                     except BaseCustomException as exc:
-                        logger.error(str(exc))
-                        bytecode_stats.append(
-                            {
-                                "contract_address": contract_address,
-                                "contract_name": contract_name,
-                                "status": "failed",
-                                "match": False,
-                                "has_diff": True,
-                                "matched_rule": None,
-                                "matched_facets": [],
-                                "suggestion_entry": None,
-                            }
-                        )
+                        has_any_rule = any(rule.get("any") for rule in bytecode_rules)
+                        if has_any_rule:
+                            logger.warn(
+                                f"Bytecode comparison error suppressed by "
+                                f'"any" rule: {exc}'
+                            )
+                            bytecode_stats.append(
+                                {
+                                    "contract_address": contract_address,
+                                    "contract_name": contract_name,
+                                    "status": "allowed",
+                                    "match": False,
+                                    "has_diff": True,
+                                    "matched_rule": {"any": True},
+                                    "matched_facets": ["any"],
+                                    "suggestion_entry": None,
+                                }
+                            )
+                        else:
+                            logger.error(str(exc))
+                            bytecode_stats.append(
+                                {
+                                    "contract_address": contract_address,
+                                    "contract_name": contract_name,
+                                    "status": "failed",
+                                    "match": False,
+                                    "has_diff": True,
+                                    "matched_rule": None,
+                                    "matched_facets": [],
+                                    "suggestion_entry": None,
+                                }
+                            )
             except BaseCustomException as custom_exc:
                 ExceptionHandler.raise_exception_or_log(custom_exc)
                 traceback.print_exc()
