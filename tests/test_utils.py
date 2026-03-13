@@ -6,7 +6,7 @@ from diffyscan.utils.common import mask_text, pull
 
 def test_single_file_format():
     source_files = [("Contract", {"content": "contract Contract { ... }"})]
-    assert not is_standard_json_contract(source_files)
+    assert not is_standard_json_contract(source_files)  # type: ignore[arg-type]
 
 
 def test_standard_json_format():
@@ -23,7 +23,7 @@ class DummyHttpResponse:
 
 
 def test_pull_masks_rpc_url_in_logs(monkeypatch):
-    logs = []
+    logs: list[str] = []
     url = "https://rpc.example/super-secret-token"
 
     monkeypatch.setattr(
