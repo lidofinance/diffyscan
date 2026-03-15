@@ -72,7 +72,7 @@ bytecode_comparison: { constructor_calldata, constructor_args, libraries }
 
 ### Environment variables
 
-Requires `.env` file (see `.env.example`): `GITHUB_API_TOKEN`, `ETHERSCAN_EXPLORER_TOKEN`, `REMOTE_RPC_URL` (for bytecode comparison).
+Supports loading from `.env` (see `.env.example`), or set directly: `GITHUB_API_TOKEN`, `ETHERSCAN_EXPLORER_TOKEN`, `REMOTE_RPC_URL` (for bytecode comparison).
 
 ## Code style
 
