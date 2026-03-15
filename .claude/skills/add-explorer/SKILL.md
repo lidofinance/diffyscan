@@ -72,6 +72,7 @@ Handles both Etherscan v2 and legacy Etherscan APIs.
 - No API token needed
 - Response: `{"verifiedAt": ..., "request": {"ContractName": ..., "CompilerVersion": ..., "sourceCode": {"sources": ...}}}`
 - Returns a minimal contract dict with `name`, `sources`, `compiler` -- does NOT go through `_build_contract_payload` or `_attach_contract_metadata`
+- **Outlier:** Unlike the other fetchers, this does not return `solcInput`. Downstream code (`run_source_diff`, `run_bytecode_diff`) expects `contract["solcInput"]`, so zkSync contracts use a different code path. New fetchers should follow the standard shape returned by `_build_contract_payload` (`name`, `compiler`, `solcInput`, plus optional `constructor_arguments`, `evm_version`, `libraries`).
 
 ### Fetcher 4: `_get_contract_from_mantle(hostname, address)`
 

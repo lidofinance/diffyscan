@@ -63,6 +63,7 @@ Entry point: `diffyscan/diffyscan.py:main` — parses CLI args, loads config (JS
 Configs live in `config_samples/` organized by chain (ethereum, optimism, zksync, etc.):
 ```
 contracts:          { "0xaddr": "ContractName" }
+network:            "mainnet"  # required in TypedDict, unused at runtime
 explorer_hostname:  "api.etherscan.io"
 explorer_token_env_var: "ETHERSCAN_EXPLORER_TOKEN"
 github_repo:        { url, commit, relative_root }

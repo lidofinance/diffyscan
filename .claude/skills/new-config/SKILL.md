@@ -98,9 +98,11 @@ These are detected by hostname pattern and use different API backends:
 |---|---|---|---|
 | zkSync | starts with `zksync` | `zksync2-mainnet-explorer.zksync.io` | (none needed) |
 | Mantle | ends with `mantle.xyz` | `explorer.mantle.xyz`, `explorer.testnet.mantle.xyz` | (none needed) |
-| Blockscout | ends with `blockscout.com`, `mode.network`, `swellnetwork.io`, `lisk.com`, `inkonchain.com`, `routescan.io`, `monadvision.com` | `blockscout.lisk.com`, `explorer.mode.network`, `explorer.swellnetwork.io`, `megaeth.blockscout.com`, `explorer.inkonchain.com`, `api.routescan.io/v2/network/mainnet/evm/9745/etherscan` | Varies (some use API keys like `INK_API_KEY`, `MEGAETH_API_KEY`, `PLASMA_API_KEY`; some need none) |
+| Blockscout | ends with `blockscout.com`, `mode.network`, `swellnetwork.io`, `lisk.com`, `inkonchain.com`, `routescan.io`, `monadvision.com` | `blockscout.lisk.com`, `explorer.mode.network`, `explorer.swellnetwork.io`, `megaeth.blockscout.com`, `explorer.inkonchain.com` | Varies (some use API keys like `INK_API_KEY`, `MEGAETH_API_KEY`; some need none) |
 
 Blockscout explorers use the `/api/v2/smart-contracts/{address}` endpoint. Some Blockscout-based explorers (ink, megaeth) also set `explorer_chain_id`.
+
+**Note:** `api.routescan.io/v2/network/mainnet/evm/9745/etherscan` (used for Plasma) does NOT match the Blockscout dispatcher — the hostname ends with `etherscan`, not `routescan.io`. It falls through to the default Etherscan fetcher and uses `PLASMA_API_KEY`.
 
 ### `explorer_hostname_env_var` (CI convention only)
 
