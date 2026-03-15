@@ -64,7 +64,7 @@ ls digest/<timestamp>/diffs/<contract_address>/
 | `"missing GitHub sources for bytecode compilation"` | Add the missing dependency to `dependencies` in the config with correct `url`, `commit`, and `relative_root` |
 | Source diffs in OpenZeppelin or other dependency imports | Check the dependency `commit` hash matches what was used at deploy time |
 | Bytecode mismatch after constructor | Add `constructor_calldata` (raw hex) or `constructor_args` (ABI-typed values) for the contract under `bytecode_comparison` |
-| `"Failed to infer source path for library"` | Add library addresses to `bytecode_comparison.libraries` keyed by `"path/to/File.sol": {"LibName": "0xAddr"}` |
+| `"Failed to infer source path for library '...' from explorer metadata"` | Add library addresses to `bytecode_comparison.libraries` keyed by `"path/to/File.sol": {"LibName": "0xAddr"}` |
 | All files show diffs | Wrong `commit` or `relative_root` in `github_repo` |
 | Single contract fails | May need a per-contract `constructor_calldata` or `constructor_args` entry |
 | `"Bytecodes have differences not on the immutable reference position"` | Real bytecode mismatch -- check compiler version, optimizer settings, EVM version, and library addresses |

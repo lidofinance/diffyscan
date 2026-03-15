@@ -82,7 +82,7 @@ These are Etherscan-compatible and fall through to the default `_get_contract_fr
 | `api-optimistic.etherscan.io` | `OPTISCAN_EXPLORER_TOKEN` | Optimism mainnet |
 | `api.basescan.org` | `ETHERSCAN_EXPLORER_TOKEN` | Base mainnet |
 | `api.lineascan.build` | `LINEA_EXPLORER_TOKEN` | Linea mainnet (special: token is ignored by dispatcher) |
-| `api.scrollscan.com` | (no dedicated token) | Scroll mainnet |
+| `api.scrollscan.com` | `ETHERSCAN_EXPLORER_TOKEN` (fallback) | Scroll mainnet |
 | `api.bscscan.com` | `BSCSCAN_TOKEN` | BSC mainnet |
 | `api-holesky.etherscan.io` | `ETHERSCAN_EXPLORER_TOKEN` | Holesky testnet |
 | `api-hoodi.etherscan.io` | `ETHERSCAN_EXPLORER_TOKEN` | Hoodi testnet |
