@@ -58,6 +58,7 @@ Handles both Etherscan v2 and legacy Etherscan APIs.
 - Response format: `{"message": "OK", "result": [{"ContractName": ..., "SourceCode": ..., "CompilerVersion": ..., ...}]}`
 - If `SourceCode` starts with `{{`, it is treated as a JSON solc standard input (stripped of outer braces and parsed)
 - Otherwise, `_build_source_files()` + `_build_solc_input()` construct the solc input from flat source
+- **Limitation:** Flattened (single-file) contracts and contracts verified without standard JSON input may produce incomplete solc inputs. The flat-source path creates a minimal solc input from the single source file plus any `AdditionalSources`, but without the original compiler settings (e.g. remappings, via-IR). This can cause bytecode mismatches even when source diffs are clean.
 
 ### Fetcher 2: `_get_contract_from_blockscout(hostname, address)`
 

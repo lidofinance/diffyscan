@@ -112,6 +112,13 @@ Some configs (soneium, unichain) use `explorer_hostname_env_var` instead of `exp
 
 Save configs to `config_samples/<chain>/<network>/` following existing naming conventions. Look at existing configs in that directory for patterns. Some older configs live directly under `config_samples/` (e.g. `lido_dao_holesky_config.json`) or under `config_samples/<chain>/` without a network subdirectory.
 
+## Best practices
+
+- **Use exact commit SHAs** — always use full 40-character commit hashes, never branch names or tags (they can change)
+- **Enable bytecode comparison** — provide `constructor_calldata` or `constructor_args` for contracts with constructors so bytecode verification runs
+- **Include `audit_url`** — link to the relevant audit report when available for cross-reference
+- **Keep configs strict** — prefer explicit over implicit; include all fields even if optional, so verification is as thorough as possible
+
 ## Workflow
 
 1. Gather required info from user (ask for missing pieces)

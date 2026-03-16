@@ -1,6 +1,6 @@
 ---
 name: debug-diff
-description: Debug a failed diffyscan verification run. Analyzes diffs, identifies root causes, and suggests fixes. Use when diffyscan exits with non-zero or shows unexpected diffs.
+description: Debug a failed diffyscan verification run. Analyzes diffs, identifies root causes. Use when diffyscan exits with non-zero or shows unexpected diffs.
 argument-hint: [config-path-or-contract-address]
 ---
 
@@ -80,7 +80,5 @@ uv run diffyscan <config-path> --yes --cache-explorer --cache-github
 - `--cache-explorer` (`-E`) reuses cached explorer responses from `.diffyscan_cache/`
 - `--cache-github` (`-G`) reuses cached GitHub file fetches
 - `--support-brownie` enables recursive retrieval for brownie-verified contracts with flattened import paths
-- `--skip-binary-comparison` (`-S`) skips bytecode comparison entirely (useful when debugging source diffs only)
 - `--allow-source-diff 0xAddr` accepts source diffs for a specific address (can be repeated)
 - `--allow-bytecode-diff 0xAddr` accepts bytecode diffs for a specific address (can be repeated)
-- `--log-level warn` or `--quiet` (`-Q`) reduces output noise
