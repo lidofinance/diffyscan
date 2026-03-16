@@ -43,6 +43,7 @@ ls digest/<timestamp>/diffs/<contract_address>/
 - Wrong EVM version -- the explorer may report a different version than expected
 - Immutable variables -- `deep_match_bytecode()` in `diffyscan/utils/binary_verifier.py` compares instruction-by-instruction and tolerates differences that fall within known immutable reference regions. If all diffs are in immutable positions it logs a warning and returns `False` (still reported as a non-match — use `--allow-bytecode-diff 0xAddr` to accept). Differences outside immutable regions raise `BinVerifierError`
 - Optimizer settings mismatch -- the solcInput from the explorer includes optimizer settings; the GitHub recompilation must match
+- Flat-source contracts -- see **Known limitations** section below
 
 **Compilation errors** (raised as `CompileError`):
 - Missing GitHub sources -- a dependency is not configured or has a wrong `relative_root`. The error message is: `"missing GitHub sources for bytecode compilation; count=N; first=path1, path2..."` (from `run_bytecode_diff()` in `diffyscan/diffyscan.py`)
@@ -82,3 +83,18 @@ uv run diffyscan <config-path> --yes --cache-explorer --cache-github
 - `--support-brownie` enables recursive retrieval for brownie-verified contracts with flattened import paths
 - `--allow-source-diff 0xAddr` accepts source diffs for a specific address (can be repeated)
 - `--allow-bytecode-diff 0xAddr` accepts bytecode diffs for a specific address (can be repeated)
+
+## Known limitations
+
+If any of these apply, **explicitly tell the user** — these are inherent constraints of the tool, not bugs to debug.
+
+### Flat-source (non-standard-JSON) contracts
+
+When a contract was verified on the explorer as a single flattened file (the explorer's `SourceCode` is a plain string, not JSON wrapped in `{{}}`), diffyscan **cannot reliably reproduce the bytecode**. Two problems arise:
+
+1. **Lost compiler settings** — diffyscan reconstructs a minimal solc input with only basic optimizer settings. Remappings, via-IR, and other original compiler settings are not available from the explorer for flat-verified contracts. Bytecode mismatches are **expected** even when source diffs are clean.
+2. **Contract name used as source key** — the explorer's `ContractName` field is used as the solc source file key (e.g. `{"sources": {"MyContract": {...}}}`). If the explorer does not return `ContractName`, or the name does not match the actual `contract` declaration in the Solidity source, the compiled output cannot be remapped and `get_target_compiled_contract()` will fail.
+
+**How to detect**: check the explorer response or logs — if the solc input has a source key that looks like a contract name (no `.sol` extension, no path separators) rather than a file path, the contract was flat-verified.
+
+**What to tell the user**: explain that bytecode comparison is unreliable for this contract due to the flat-source limitation. Recommend using `--allow-bytecode-diff 0xAddr` to accept the mismatch, and note that source comparison is still valid.
