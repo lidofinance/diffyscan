@@ -2,46 +2,36 @@ from .logger import logger
 
 
 class BaseCustomException(Exception):
-    def __init__(self, message: str):
+    prefix = ""
+
+    def __init__(self, reason: str):
+        message = f"{self.prefix}: {reason}" if self.prefix else reason
         super().__init__(message)
         self.message = message
 
 
 class CompileError(BaseCustomException):
-    def __init__(self, reason: str):
-        super().__init__(f"Failed to compile contract: {reason}")
+    prefix = "Failed to compile contract"
 
 
 class NodeError(BaseCustomException):
-    def __init__(self, reason: str):
-        super().__init__(
-            f"Failed to receive bytecode from node: {reason}, please check hardhat config and fork chain_id"
-        )
+    prefix = "Failed to communicate with RPC node"
 
 
 class CalldataError(BaseCustomException):
-    def __init__(self, reason: str):
-        super().__init__(f"Failed to get calldata: {reason}")
+    prefix = "Failed to get calldata"
 
 
 class EncoderError(BaseCustomException):
-    def __init__(self, reason: str):
-        super().__init__(f"Failed to encode calldata arguments: {reason}")
-
-
-class HardhatError(BaseCustomException):
-    def __init__(self, reason: str):
-        super().__init__(f"Failed to start Hardhat: {reason}")
+    prefix = "Failed to encode calldata arguments"
 
 
 class ExplorerError(BaseCustomException):
-    def __init__(self, reason: str):
-        super().__init__(f"Failed to communicate with a remote resource: {reason}")
+    prefix = "Failed to communicate with a remote resource"
 
 
 class BinVerifierError(BaseCustomException):
-    def __init__(self, reason: str):
-        super().__init__(f"Failed in binary comparison: {reason}")
+    prefix = "Failed in binary comparison"
 
 
 class ExceptionHandler:

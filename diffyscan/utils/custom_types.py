@@ -2,10 +2,19 @@ from typing import TypedDict, NotRequired
 
 
 class BinaryConfig(TypedDict):
-    hardhat_config_name: str
+    hardhat_config_name: NotRequired[str]
     constructor_calldata: NotRequired[dict[str, str]]
     constructor_args: NotRequired[dict[str, list]]
     libraries: NotRequired[dict[str, dict[str, str]]]
+
+
+class ExplorerContract(TypedDict, total=False):
+    name: str
+    compiler: str
+    solcInput: dict
+    constructor_arguments: str
+    evm_version: str
+    libraries: dict[str, dict[str, str]]
 
 
 class GithubRepo(TypedDict):

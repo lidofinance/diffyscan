@@ -70,7 +70,6 @@
   },
   "fail_on_bytecode_comparison_error": true,
   "bytecode_comparison": {
-    "hardhat_config_name": "hoodi_hardhat_config.js",
     "constructor_calldata": {},
     "constructor_args": {
       "0x47975A61067a4CE41BeB730cf6c57378E55b849A": [

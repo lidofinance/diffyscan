@@ -31,7 +31,6 @@
   },
   "fail_on_comparison_error": false,
   "bytecode_comparison": {
-    "hardhat_config_name": "holesky_hardhat.config.js",
     "constructor_args": {
       "0x8BD0a916faDa88Ba3accb595a3Acd28F467130e8": [
         "0x707A81c39293998046D4AF63F12E5C485d371081"

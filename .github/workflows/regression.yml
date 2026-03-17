@@ -5,29 +5,31 @@ on: [workflow_dispatch, push]
 # .github/workflows/ci.yaml
 permissions: # least-privilege principle
   contents: read # widen only if you need more
-  pull-requests: write
 
 jobs:
   regression:
     runs-on: ubuntu-latest
+    env:
+      DEVCONTAINER_BUILD_CACHE_DIR: .buildx-cache
+      DEVCONTAINER_IMAGE: diffyscan-regression:${{ github.sha }}
+      ETHERSCAN_EXPLORER_TOKEN: ${{ secrets.ETHERSCAN_EXPLORER_TOKEN }}
+      GITHUB_API_TOKEN: ${{ github.token }}
+      REMOTE_RPC_URL: ${{ matrix.network == 'mainnet' && secrets['REMOTE_RPC_URL_MAINNET'] || secrets['REMOTE_RPC_URL_HOODI'] }}
+      UV_VERSION: "0.10.9"
     strategy:
       fail-fast: false
       matrix:
         include:
           - config: config_samples/ethereum/mainnet/safe_harbor/safe_harbor.json
-            hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
             flags: ""
           - config: config_samples/ethereum/mainnet/vaults/vaults_config.json
-            hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
             flags: ""
           - config: config_samples/ethereum/mainnet/vaults/vaults_voting_config.json
-            hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
             flags: ""
           - config: config_samples/ethereum/mainnet/vaults/vaults_easy_track_config.json
-            hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
             flags: >
               --allow-source-diff 0x194A46DA1947E98c9D79af13E06Cfbee0D8610cC
@@ -44,35 +46,28 @@ jobs:
               --allow-source-diff 0xaf35A63a4114B7481589fDD9FDB3e35Fd65fAed7
               --allow-source-diff 0x647DeE7bF33e44829e6430F7A08F63b3319694f0
           - config: config_samples/ethereum/mainnet/vaults-wrapper/vaults_wrapper_factory_config.json
-            hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
             flags: >
               --allow-bytecode-diff 0x3f221b8E5bC098cC6C23611BEeacaeCfD77e1587
           - config: config_samples/ethereum/mainnet/gualGovernance/dual_governance_mainnet_config.json
-            hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
             flags: >
               --allow-bytecode-diff 0xd6A67636c05BeB5B4a5c90D408b03A63c4e39426
           - config: config_samples/ethereum/mainnet/gualGovernance/dual_governance_mainnet_voting_config.json
-            hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
             flags: ""
           - config: config_samples/ethereum/mainnet/gualGovernance/dual_governance_mainnet_upgrade_voting_config.json
-            hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
             flags: ""
           - config: config_samples/ethereum/mainnet/tw/tw_config.json
-            hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
             flags: ""
           - config: config_samples/ethereum/mainnet/tw/tw_easy_track_config.json
-            hardhat: hardhat_configs/mainnet_hardhat_config.ts
             network: mainnet
             flags: >
               --allow-source-diff 0x8aa34dAaF0fC263203A15Bcfa0Ed926D466e59F3
               --allow-source-diff 0xB7668B5485d0f826B86a75b0115e088bB9ee03eE
           - config: config_samples/ethereum/hoodi/vaults/hoodi_vaults_testnet_config.json
-            hardhat: hardhat_configs/hoodi_hardhat_config.ts
             network: hoodi
             flags: >
               --allow-source-diff 0x1d10DB6a66EF8D2A6f6D36Ad4dc7092Ef7C12569
@@ -89,7 +84,6 @@ jobs:
               --allow-bytecode-diff 0xE22486EA7cE77daE718fFa7B7114fD50CF73Cbac
               --allow-bytecode-diff 0xd253b0ca059343e70474e685Beb2974F10CCFa67
           - config: config_samples/ethereum/hoodi/vaults/hoodi_vaults_easy_track_config.json
-            hardhat: hardhat_configs/hoodi_hardhat_config.ts
             network: hoodi
             flags: >
               --allow-source-diff 0xfEF8B796Fea42b3C68E342364Adcf88F1d6145a6
@@ -102,42 +96,68 @@ jobs:
               --allow-source-diff 0x83DfE5Fe8ac8b7DB38c020F4F54BF09b65D92c63
               --allow-source-diff 0xa11906bBBBaC5207b8FDA4F7F294d7EcB8dcc758
               --allow-source-diff 0xc5dCd2A9642ceA9B71A632BF5b8ff52424Ea1B40
-    env:
-      ETHERSCAN_EXPLORER_TOKEN: ${{ secrets.ETHERSCAN_EXPLORER_TOKEN }}
-      ETHERSCAN_TOKEN: ${{ secrets.ETHERSCAN_EXPLORER_TOKEN }}
-      GITHUB_API_TOKEN: ${{ github.token }}
-      LOCAL_RPC_URL: "http://127.0.0.1:7545"
-      REMOTE_RPC_URL: ${{ matrix.network == 'mainnet' && secrets['REMOTE_RPC_URL_MAINNET'] || secrets['REMOTE_RPC_URL_HOODI'] }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-      - name: Install Poetry
-        run: |
-          pip install poetry~=2.2
-      - name: Install dependencies
-        run: |
-          poetry install --no-interaction
-          npm ci
 
       - name: Restore diffyscan caches
         uses: actions/cache@v4
         with:
           path: .diffyscan_cache
-          key: diffyscan-cache-${{ matrix.config }}-${{ github.run_id }}
+          key: diffyscan-cache-${{ github.ref_name }}-${{ matrix.config }}-${{ github.sha }}
           restore-keys: |
-            diffyscan-cache-${{ matrix.config }}-
-            diffyscan-cache-
+            diffyscan-cache-${{ github.ref_name }}-${{ matrix.config }}-
 
-      - name: Run unit tests
-        run: |
-          poetry run pytest -q
+      - name: Restore devcontainer build cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.DEVCONTAINER_BUILD_CACHE_DIR }}
+          key: devcontainer-buildx-${{ runner.os }}-${{ hashFiles('.devcontainer/Dockerfile', '.dockerignore') }}
+          restore-keys: |
+            devcontainer-buildx-${{ runner.os }}-
 
-      - name: Run diffyscan
+      - name: Build devcontainer image
         run: |
-          FLAGS="${{ matrix.flags }}"
-          poetry run diffyscan --hardhat-path ${{ matrix.hardhat }} -Y -E -G ${{ matrix.config }} ${FLAGS}
+          docker buildx create --use --name diffyscan-builder
+          docker buildx inspect --bootstrap
+          docker buildx build \
+            --build-arg UV_VERSION="${UV_VERSION}" \
+            --cache-from "type=local,src=${DEVCONTAINER_BUILD_CACHE_DIR}" \
+            --cache-to "type=local,dest=${DEVCONTAINER_BUILD_CACHE_DIR}-new,mode=max" \
+            --file .devcontainer/Dockerfile \
+            --load \
+            --tag "${DEVCONTAINER_IMAGE}" \
+            .
+          rm -rf "${DEVCONTAINER_BUILD_CACHE_DIR}"
+          mv "${DEVCONTAINER_BUILD_CACHE_DIR}-new" "${DEVCONTAINER_BUILD_CACHE_DIR}"
+
+      - name: Run regression in devcontainer
+        env:
+          DIFFYSCAN_CONFIG: ${{ matrix.config }}
+          DIFFYSCAN_FLAGS: ${{ matrix.flags }}
+        run: |
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            --volume "${GITHUB_WORKSPACE}:/workspaces/diffyscan" \
+            --workdir /workspaces/diffyscan \
+            --env DIFFYSCAN_CONFIG \
+            --env DIFFYSCAN_FLAGS \
+            --env ETHERSCAN_EXPLORER_TOKEN \
+            --env GITHUB_API_TOKEN \
+            --env REMOTE_RPC_URL \
+            --env HOME=/tmp/diffyscan-home \
+            --env UV_LINK_MODE=copy \
+            --env XDG_CACHE_HOME=/tmp/diffyscan-home/.cache \
+            "${DEVCONTAINER_IMAGE}" \
+            bash -lc '
+              set -euo pipefail
+              mkdir -p "$HOME" "$XDG_CACHE_HOME"
+              uv sync --locked --group dev
+              uv run pytest -q
+              uv run pre-commit run --all-files
+              if [ -n "$DIFFYSCAN_FLAGS" ]; then
+                read -r -a flags <<< "$DIFFYSCAN_FLAGS"
+              else
+                flags=()
+              fi
+              uv run diffyscan -Y -E -G "$DIFFYSCAN_CONFIG" "${flags[@]}"
+            '

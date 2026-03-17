@@ -1,0 +1,7 @@
+.diffyscan_cache
+.env
+.git
+.venv
+__pycache__
+digest
+dist

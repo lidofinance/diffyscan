@@ -39,7 +39,7 @@
     "0x8A1AA86d35b2EE8C9369618E7D7b40000cCD3295": "AppProxyUpgradeable",
     "0x2dfF8E2c55959f719Faa6dCC4a3B0937bcA71F73": "ACL"
   },
-  "explorer_token_env_var": "ETHERSCAN_TOKEN",
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
   "explorer_hostname": "api.etherscan.io",
   "explorer_chain_id": 11155111,
   "github_repo": {

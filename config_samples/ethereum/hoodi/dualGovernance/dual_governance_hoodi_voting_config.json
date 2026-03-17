@@ -20,7 +20,6 @@
   },
   "fail_on_comparison_error": false,
   "bytecode_comparison": {
-    "hardhat_config_name": "hardhat.config.js",
     "constructor_args": {
       "0x98FC7b149767302647D8e1dA1463F0051978826B": [
         [
