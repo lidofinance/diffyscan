@@ -12,6 +12,7 @@ Key features:
 - retrieve and diff sources from the GitHub repo against the queried ones from a blockscan service (e.g. Etherscan)
 - compare bytecode by compiling GitHub sources and simulating constructor execution via remote `eth_call` against live chain state - enabled by default
 - automatically reuse explorer-provided constructor calldata, library addresses, and EVM version for bytecode comparison
+- configurable `allowed_diffs` rules for granular bytecode and source diff allowlisting, with summary suggestions for uncovered diffs
 - supports both **JSON and YAML** configuration files (`.json`, `.yaml`, `.yml`)
 - automatic environment variable loading from `.env` files
 - cache sources from blockchain explorers (option `--cache-explorer`) and GitHub files (option `--cache-github`) to avoid re-fetching on repeated runs
@@ -166,6 +167,52 @@ dependencies:
 ```
 
 > **Important:** In YAML configs, always quote contract addresses (e.g. `"0x1234..."`). Unquoted hex values will be parsed as integers by YAML, and diffyscan will raise an error if this happens.
+
+### Granular allowlists
+
+Use `allowed_diffs` to describe exactly which differences are expected. The same schema works in JSON and YAML.
+
+```yaml
+allowed_diffs:
+  bytecode:
+    "0x28FAB2059C713A7F9D8c86Db49f9bb0e96Af1ef8":
+      - reason: Proxy immutable owner differs on deployment
+        immutables:
+          - offset: 320
+            value: "0x000000000000000000000000ab89ed3d8f31bcf8bb7de53f02084d1e6f043d34"
+        cbor_metadata: true
+      - reason: Alternate constructor calldata on testnet
+        constructor_calldata: "0x1234abcd"
+
+  source:
+    "0xDba5Ad530425bb1b14EECD76F1b4a517780de537":
+      - reason: Version banner differs
+        line_ranges:
+          - file: contracts/utils/Versioned.sol
+            github: { start: 17, count: 2 }
+            explorer: { start: 17, count: 2 }
+      - reason: Generated file differs
+        files:
+          - contracts/generated/BuildInfo.sol
+```
+
+Supported bytecode facets:
+
+- `immutables`: exact expected on-chain values for compiler-derived immutable regions
+- `cbor_metadata: true`: allow trailing Solidity metadata changes
+- `byte_ranges`: allow explicit runtime byte ranges
+- `constructor_args` or `constructor_calldata`: re-simulate deployment with alternate constructor input
+- `any: true`: blanket escape hatch
+
+Supported source facets:
+
+- `line_ranges`: exact changed hunks using 1-based `start` and `count`
+- `files`: allow any hunk inside specific files
+- `any: true`: blanket escape hatch
+
+When an uncovered diff is found, diffyscan prints a suggested `allowed_diffs` snippet in the final summary. Immutable-backed bytecode diffs are suggested as exact immutable values before falling back to byte ranges.
+
+`--allow-bytecode-diff` and `--allow-source-diff` still work, but they are now deprecated shorthands for `any: true`. Move those rules into the config file so the summary suggestions can help you tighten them over time.
 
 Start the script
 

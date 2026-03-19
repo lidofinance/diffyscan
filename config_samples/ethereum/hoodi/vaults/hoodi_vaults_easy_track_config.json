@@ -71,5 +71,131 @@
         "0xBC2bb8310730F3D2b514Cb26f7e0A8776De879Ac"
       ]
     }
+  },
+  "allowed_diffs": {
+    "source": {
+      "0xfEF8B796Fea42b3C68E342364Adcf88F1d6145a6": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "any": true
+        }
+      ],
+      "0x56Ff87F41a8CF795764E15E496124240Ac17695b": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "any": true
+        }
+      ],
+      "0x4DF806111AC58e93d90E6D2fBE8522a76be6F499": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "any": true
+        }
+      ],
+      "0xF21f98cac0Ba38f02b4d5be1667cc345929E8877": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "any": true
+        }
+      ],
+      "0xBC2bb8310730F3D2b514Cb26f7e0A8776De879Ac": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "any": true
+        }
+      ],
+      "0xc3FA83D65a900303e1d99cDBBF762c6630562c04": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "any": true
+        }
+      ],
+      "0x351426775c75aB5127de860Cdcaf1953F1D622a2": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "any": true
+        }
+      ],
+      "0x83DfE5Fe8ac8b7DB38c020F4F54BF09b65D92c63": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "any": true
+        }
+      ],
+      "0xa11906bBBBaC5207b8FDA4F7F294d7EcB8dcc758": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "any": true
+        }
+      ],
+      "0xc5dCd2A9642ceA9B71A632BF5b8ff52424Ea1B40": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "any": true
+        }
+      ]
+    },
+    "bytecode": {
+      "0xfEF8B796Fea42b3C68E342364Adcf88F1d6145a6": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0x56Ff87F41a8CF795764E15E496124240Ac17695b": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0x4DF806111AC58e93d90E6D2fBE8522a76be6F499": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0xF21f98cac0Ba38f02b4d5be1667cc345929E8877": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0xBC2bb8310730F3D2b514Cb26f7e0A8776De879Ac": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0xc3FA83D65a900303e1d99cDBBF762c6630562c04": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0x351426775c75aB5127de860Cdcaf1953F1D622a2": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0x83DfE5Fe8ac8b7DB38c020F4F54BF09b65D92c63": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0xa11906bBBBaC5207b8FDA4F7F294d7EcB8dcc758": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0xc5dCd2A9642ceA9B71A632BF5b8ff52424Ea1B40": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ]
+    }
   }
 }

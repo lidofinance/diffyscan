@@ -69,6 +69,58 @@
       "relative_root": "contracts"
     }
   },
+  "allowed_diffs": {
+    "bytecode": {
+      "0x2C298963FB763f74765829722a1ebe0784f4F5Cf": [
+        {
+          "reason": "cbor metadata differs due to different compilation environment",
+          "cbor_metadata": true
+        }
+      ],
+      "0xE9906E543274cebcd335d2C560094089e9547e8d": [
+        {
+          "reason": "cbor metadata differs due to different compilation environment",
+          "cbor_metadata": true
+        }
+      ],
+      "0x905A211eD6830Cfc95643f0bE2ff64E7f3bf9b94": [
+        {
+          "reason": "cbor metadata differs due to different compilation environment",
+          "cbor_metadata": true
+        }
+      ],
+      "0x7D2BAa6094E1C4B60Da4cbAF4A77C3f4694fD53D": [
+        {
+          "reason": "cbor metadata differs due to different compilation environment",
+          "cbor_metadata": true
+        }
+      ],
+      "0x226f9265CBC37231882b7409658C18bB7738173A": [
+        {
+          "reason": "cbor metadata differs due to different compilation environment",
+          "cbor_metadata": true
+        }
+      ],
+      "0x6828b023e737f96B168aCd0b5c6351971a4F81aE": [
+        {
+          "reason": "cbor metadata differs due to different compilation environment",
+          "cbor_metadata": true
+        }
+      ],
+      "0xbDb567672c867DB533119C2dcD4FB9d8b44EC82f": [
+        {
+          "reason": "cbor metadata differs due to different compilation environment",
+          "cbor_metadata": true
+        }
+      ],
+      "0xDC00116a0D3E064427dA2600449cfD2566B3037B": [
+        {
+          "reason": "cbor metadata differs due to different compilation environment",
+          "cbor_metadata": true
+        }
+      ]
+    }
+  },
   "fail_on_bytecode_comparison_error": true,
   "bytecode_comparison": {
     "libraries": {

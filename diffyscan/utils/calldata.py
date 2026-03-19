@@ -87,5 +87,5 @@ def _get_constructor_abi(compiled_contract: dict) -> list | None:
     """Extract constructor input ABI from a compiled contract, or None if absent."""
     for entry in compiled_contract.get("abi", []):
         if entry.get("type") == "constructor" and entry.get("inputs"):
-            return entry["inputs"]
+            return list(entry["inputs"])
     return None

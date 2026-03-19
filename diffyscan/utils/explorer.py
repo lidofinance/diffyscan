@@ -41,7 +41,8 @@ def _default_output_selection() -> dict:
 
 
 def get_solc_sources(solc_input: dict) -> dict:
-    return solc_input.get("sources", solc_input)
+    result: dict = solc_input.get("sources", solc_input)
+    return result
 
 
 def _build_source_files(
@@ -161,7 +162,7 @@ def _is_etherscan_rate_limited(response: dict) -> bool:
 
 def _fetch_etherscan_response(etherscan_link: str, contract: str) -> dict:
     for attempt in range(ETHERSCAN_RATE_LIMIT_RETRY_COUNT + 1):
-        response = fetch(etherscan_link).json()
+        response: dict = fetch(etherscan_link).json()
         if not _is_etherscan_rate_limited(response):
             return response
 
@@ -248,12 +249,12 @@ def _get_contract_from_zksync(zksync_explorer_hostname: str, contract: str) -> d
     if "contractName" not in data:
         _error_no_source_code_and_exit(contract)
 
-    contract = {
+    result = {
         "name": data["ContractName"],
         "sources": json.loads(data["sourceCode"]["sources"]),
         "compiler": data["CompilerVersion"],
     }
-    return contract
+    return result
 
 
 def _get_contract_from_mantle(mantle_explorer_hostname: str, contract: str) -> dict:
@@ -409,7 +410,7 @@ def _parse_libraries(
         return None
 
     if isinstance(raw_libraries, dict):
-        parsed = {}
+        parsed: dict[str, dict[str, str]] = {}
         for key, value in raw_libraries.items():
             if isinstance(value, dict):
                 parsed.setdefault(key, {})
@@ -423,7 +424,7 @@ def _parse_libraries(
         return parsed or None
 
     if isinstance(raw_libraries, list):
-        parsed = {}
+        parsed_list: dict[str, dict[str, str]] = {}
         for item in raw_libraries:
             if not isinstance(item, dict):
                 raise ExplorerError(
@@ -446,11 +447,11 @@ def _parse_libraries(
             if not file_path:
                 file_path = _infer_library_path(str(library_name), source_files)
 
-            parsed.setdefault(str(file_path), {})
-            parsed[str(file_path)][str(library_name)] = _normalize_library_address(
+            parsed_list.setdefault(str(file_path), {})
+            parsed_list[str(file_path)][str(library_name)] = _normalize_library_address(
                 address
             )
-        return parsed or None
+        return parsed_list or None
 
     if isinstance(raw_libraries, str):
         stripped = raw_libraries.strip()
@@ -516,7 +517,7 @@ def _infer_library_path(library_name: str, source_files: dict) -> str:
                 break
 
     if len(matches) == 1:
-        return matches[0]
+        return str(matches[0])
     if not matches:
         raise ExplorerError(
             f"Failed to infer source path for library '{library_name}' from explorer metadata"
@@ -536,7 +537,7 @@ def _normalize_library_address(address: str) -> str:
 def merge_libraries(
     *library_sets: dict[str, dict[str, str]] | None,
 ) -> dict[str, dict[str, str]] | None:
-    merged = {}
+    merged: dict[str, dict[str, str]] = {}
     for library_set in library_sets:
         if not library_set:
             continue
@@ -627,7 +628,7 @@ def get_contract_from_explorer(
                 cached_result["name"],
                 "cached data",
             )
-            return cached_result
+            return dict(cached_result)
         else:
             logger.warn(f"No cached explorer contract found for {contract_address}")
 
@@ -635,7 +636,7 @@ def get_contract_from_explorer(
     fetcher, requires_token = _get_explorer_fetcher(explorer_hostname)
 
     if requires_token:
-        result = fetcher(token, explorer_hostname, contract_address, chain_id)
+        result: dict = fetcher(token, explorer_hostname, contract_address, chain_id)
     else:
         result = fetcher(explorer_hostname, contract_address)
 
@@ -753,9 +754,11 @@ def get_config_value(config: dict, key: str, warn_if_missing: bool = True):
 
 def get_explorer_hostname(config: dict) -> str | None:
     """Get explorer hostname from config."""
-    return get_config_value(config, "explorer_hostname", warn_if_missing=True)
+    value = get_config_value(config, "explorer_hostname", warn_if_missing=True)
+    return str(value) if value is not None else None
 
 
 def get_explorer_chain_id(config: dict) -> int | None:
     """Get explorer chain ID from config."""
-    return get_config_value(config, "explorer_chain_id", warn_if_missing=False)
+    value = get_config_value(config, "explorer_chain_id", warn_if_missing=False)
+    return int(value) if value is not None else None
