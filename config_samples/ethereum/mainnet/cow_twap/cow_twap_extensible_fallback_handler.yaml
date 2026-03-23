@@ -1,13 +1,14 @@
 contracts:
   "0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5": ExtensibleFallbackHandler
 
+network: mainnet
 explorer_hostname: api.etherscan.io
 explorer_token_env_var: ETHERSCAN_TOKEN
 explorer_chain_id: 1
 
 github_repo:
   url: https://github.com/cowprotocol/composable-cow
-  commit: bd2634dbd2634d3b3b4297402fd3a5ca3f3a5ccbf75aed0
+  commit: bd2634d3b3b4297402fd3a5ca3f3a5ccbf75aed0
   # https://github.com/cowprotocol/composable-cow/tree/ab3addad9bc05acdbf5fb040eb5c336209b58e31/audits
   relative_root: ""
 
@@ -23,8 +24,4 @@ dependencies:
     # https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/audits/2023-05-v4.9.pdf
     relative_root: ""
 
-fail_on_bytecode_comparison_error: false
-
-bytecode_comparison:
-  constructor_calldata: {}
-  constructor_args: {}
+bytecode_comparison: {}
