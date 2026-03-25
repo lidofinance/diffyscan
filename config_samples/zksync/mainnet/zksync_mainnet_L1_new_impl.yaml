@@ -1,0 +1,31 @@
+# Foundry-verified contracts store full paths in Etherscan metadata, unlike Hardhat:
+#   - Source paths include "zksync/" prefix, so relative_root must be "" (not "zksync")
+#   - Dependency paths include "node_modules/" prefix, so dependency keys must too
+
+contracts:
+  "0x43a66B32c9AdcA1A59b273E69b61Da5197c21cCd": L1ERC20Bridge
+
+explorer_hostname: api.etherscan.io
+explorer_chain_id: 1
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+
+github_repo:
+  url: https://github.com/lidofinance/lido-l2
+  commit: b5bbb12982cc5d3279243e271ae69de6e4e6725e
+  relative_root: ""  # "" for Foundry, "zksync" for Hardhat
+
+dependencies:
+  "node_modules/@openzeppelin/contracts":  # "node_modules/" prefix required for Foundry
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: d4fb3a89f9d0a39c7ee6f2601d33ffbf30085322
+    relative_root: contracts
+
+  "node_modules/@openzeppelin/contracts-upgradeable":
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable
+    commit: f6febd79e2a3a17e26969dd0d450c6ebd64bf459
+    relative_root: contracts
+
+  "node_modules/@matterlabs/zksync-contracts":
+    url: https://github.com/matter-labs/v2-testnet-contracts
+    commit: 093341c8549de4b750f779b14ae727c88ae884ff
+    relative_root: ""
