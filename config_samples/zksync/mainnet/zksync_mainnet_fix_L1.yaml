@@ -1,0 +1,28 @@
+contracts:
+  "0x43a66b32c9adca1a59b273e69b61da5197c21ccd": L1ERC20Bridge
+
+network: mainnet
+explorer_hostname: api.etherscan.io
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+explorer_chain_id: 1
+
+github_repo:
+  url: https://github.com/lidofinance/lido-l2
+  # https://github.com/lidofinance/audits/blob/main/L2/zkSync-2026-03-05-Cantina-PR-85-fix-report.pdf
+  commit: b5bbb12982cc5d3279243e271ae69de6e4e6725e
+  relative_root: ""
+
+dependencies:
+  "node_modules/@openzeppelin/contracts":
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: d4fb3a89f9d0a39c7ee6f2601d33ffbf30085322 # 4.6.0
+    relative_root: contracts
+  "node_modules/@openzeppelin/contracts-upgradeable":
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable
+    commit: f6febd79e2a3a17e26969dd0d450c6ebd64bf459 # 4.9.0
+    relative_root: contracts
+  "node_modules/@matterlabs/zksync-contracts":
+    url: https://github.com/matter-labs/v2-testnet-contracts
+    commit: 093341c8549de4b750f779b14ae727c88ae884ff # 0.6.2-beta
+    relative_root: ""
+
