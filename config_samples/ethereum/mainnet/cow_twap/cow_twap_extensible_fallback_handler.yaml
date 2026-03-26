@@ -1,5 +1,6 @@
 contracts:
   "0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5": ExtensibleFallbackHandler
+  "0xfdaFc9d1902f4e0b84f65F49f244b32b31013b74": ComposableCoW
 
 network: mainnet
 explorer_hostname: api.etherscan.io
@@ -14,7 +15,7 @@ github_repo:
 
 dependencies:
   lib/safe:
-    url: https://github.com/rndlabs/safe-contracts  
+    url: https://github.com/rndlabs/safe-contracts
     commit: e53ffea42d8547c984c463bf5b7e47f156619a1f
     # https://github.com/cowprotocol/composable-cow/tree/ab3addad9bc05acdbf5fb040eb5c336209b58e31/audits
     relative_root: ""
@@ -22,6 +23,11 @@ dependencies:
     url: https://github.com/OpenZeppelin/openzeppelin-contracts
     commit: fd81a96f01cc42ef1c9a5399364968d0e07e9e90 # v4.9.3
     # https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/audits/2023-05-v4.9.pdf
+    relative_root: ""
+  lib/cowprotocol:
+    url: https://github.com/gnosis/gp-v2-contracts
+    commit: 40c349d52d14f8f3c9f787fe2fca5a496bb10ea9
+    # https://github.com/gnosis/gp-v2-contracts/tree/363402b26fea510eeb110a0e39b5ee4d11f78fdd/audits
     relative_root: ""
 
 bytecode_comparison: {}
