@@ -10,7 +10,7 @@ explorer_chain_id: 1
 
 github_repo:
   url: https://github.com/cowprotocol/composable-cow
-  commit: bd2634d3b3b4297402fd3a5ca3f3a5ccbf75aed0
+  commit: f847da56f9307d20540a7e44c94b91aec5ea5703
   # https://github.com/cowprotocol/composable-cow/tree/ab3addad9bc05acdbf5fb040eb5c336209b58e31/audits
   relative_root: ""
 
@@ -26,9 +26,8 @@ dependencies:
     # https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/audits/2023-05-v4.9.pdf
     relative_root: ""
   lib/cowprotocol:
-    url: https://github.com/gnosis/gp-v2-contracts
-    commit: 40c349d52d14f8f3c9f787fe2fca5a496bb10ea9
-    # https://github.com/gnosis/gp-v2-contracts/tree/363402b26fea510eeb110a0e39b5ee4d11f78fdd/audits
+    url: https://github.com/cowprotocol/contracts
+    commit: 1450413c863fb2b800e4617cebfc0a219aa4e1a1
     relative_root: ""
 
 bytecode_comparison: {}
