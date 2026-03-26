@@ -1,0 +1,33 @@
+contracts:
+  "0x6cF1e9cA41f7611dEf408122793c358a3d11E5a5": TWAP
+  "0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5": ExtensibleFallbackHandler
+  "0xfdaFc9d1902f4e0b84f65F49f244b32b31013b74": ComposableCoW
+
+network: mainnet
+explorer_hostname: api.etherscan.io
+explorer_token_env_var: ETHERSCAN_TOKEN
+explorer_chain_id: 1
+
+github_repo:
+  url: https://github.com/cowprotocol/composable-cow
+  commit: f847da56f9307d20540a7e44c94b91aec5ea5703
+  # https://github.com/cowprotocol/composable-cow/tree/ab3addad9bc05acdbf5fb040eb5c336209b58e31/audits
+  relative_root: ""
+
+dependencies:
+  lib/safe:
+    url: https://github.com/rndlabs/safe-contracts
+    commit: e53ffea42d8547c984c463bf5b7e47f156619a1f
+    # https://github.com/cowprotocol/composable-cow/tree/ab3addad9bc05acdbf5fb040eb5c336209b58e31/audits
+    relative_root: ""
+  lib/@openzeppelin:
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: fd81a96f01cc42ef1c9a5399364968d0e07e9e90 # v4.9.3
+    # https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/audits/2023-05-v4.9.pdf
+    relative_root: ""
+  lib/cowprotocol:
+    url: https://github.com/cowprotocol/contracts
+    commit: 1450413c863fb2b800e4617cebfc0a219aa4e1a1
+    relative_root: ""
+
+bytecode_comparison: {}
