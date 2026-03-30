@@ -2,6 +2,7 @@ contracts:
   "0x6cF1e9cA41f7611dEf408122793c358a3d11E5a5": TWAP
   "0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5": ExtensibleFallbackHandler
   "0xfdaFc9d1902f4e0b84f65F49f244b32b31013b74": ComposableCoW
+  "0x52ed56da04309aca4c3fecc595298d80c2f16bac": CurrentBlockTimestampFactory
 
 network: mainnet
 explorer_hostname: api.etherscan.io
