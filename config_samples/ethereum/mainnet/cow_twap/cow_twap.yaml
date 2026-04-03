@@ -29,6 +29,15 @@ dependencies:
   lib/cowprotocol:
     url: https://github.com/cowprotocol/contracts
     commit: 1450413c863fb2b800e4617cebfc0a219aa4e1a1
+    # https://github.com/cowprotocol/contracts/tree/main/audits
+    # audits was done for https://github.com/gnosis/gp-v2-contracts/tree/40c349d52d14f8f3c9f787fe2fca5a496bb10ea9
+    # but the slightly changed version was used as a dependency (https://github.com/rndlabs/cowswap-contracts)
+    # in the audited commit of composable-cow repo (which was later renamed to ).
+    # The changes includes merely changing the solidity version from 0.7.6 to 0.8+
+
+    # One can check the difference by pointing diffyscan to audit commit
+    # url: https://github.com/gnosis/gp-v2-contracts
+    # commit: 40c349d52d14f8f3c9f787fe2fca5a496bb10ea9
     relative_root: ""
 
 bytecode_comparison: {}
