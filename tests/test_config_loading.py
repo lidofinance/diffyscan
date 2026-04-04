@@ -78,7 +78,8 @@ def test_yaml_and_json_produce_identical_config(tmp_path):
 def test_yaml_comments_are_ignored(tmp_path):
     """Comments are the whole reason we migrated to YAML — verify they parse cleanly."""
     path = tmp_path / "config.yaml"
-    path.write_text("""\
+    path.write_text(
+        """\
 # Top-level comment
 contracts:
   "0x0000000000000000000000000000000000000001": TransparentUpgradeableProxy # Vault
@@ -95,7 +96,8 @@ dependencies:
     commit: def456
     relative_root: contracts
     # version 1.0.0
-""")
+"""
+    )
     result = load_config(str(path))
     assert (
         result["contracts"]["0x0000000000000000000000000000000000000001"]
@@ -138,7 +140,8 @@ def test_yaml_preserves_hex_address_strings(tmp_path):
     """YAML auto-coerces unquoted hex (0x1A -> int 26). Quoted addresses must stay strings."""
     path = tmp_path / "config.yaml"
     # Write raw YAML with quoted hex addresses to ensure they stay as strings
-    path.write_text("""\
+    path.write_text(
+        """\
 contracts:
   "0x00000000000000000000000000000000000000AB": TestContract
   "0x0000000000000000000000000000000000000100": AnotherContract
@@ -150,7 +153,8 @@ github_repo:
   commit: abc123
   relative_root: ""
 dependencies: {}
-""")
+"""
+    )
     result = load_config(str(path))
     addresses = list(result["contracts"].keys())
     for addr in addresses:
@@ -167,7 +171,8 @@ dependencies: {}
 def test_yaml_unquoted_hex_address_raises(tmp_path):
     """Unquoted hex addresses get coerced to int by PyYAML — load_config must catch this."""
     path = tmp_path / "config.yaml"
-    path.write_text("""\
+    path.write_text(
+        """\
 contracts:
   0x00000000000000000000000000000000000000AB: TestContract
 explorer_hostname: api.etherscan.io
@@ -177,7 +182,8 @@ github_repo:
   commit: abc123
   relative_root: ""
 dependencies: {}
-""")
+"""
+    )
     with pytest.raises(ValueError, match="parsed as integer"):
         load_config(str(path))
 
@@ -193,7 +199,8 @@ def test_empty_yaml_raises(tmp_path):
 def test_bytecode_comparison_unquoted_hex_raises(tmp_path):
     """Unquoted hex in bytecode_comparison.constructor_args keys should be caught."""
     path = tmp_path / "config.yaml"
-    path.write_text("""\
+    path.write_text(
+        """\
 contracts:
   "0x0000000000000000000000000000000000000001": TestContract
 explorer_hostname: api.etherscan.io
@@ -207,7 +214,8 @@ bytecode_comparison:
   constructor_args:
     0x00000000000000000000000000000000000000AB:
       - "0x01"
-""")
+"""
+    )
     with pytest.raises(ValueError, match="bytecode_comparison.constructor_args"):
         load_config(str(path))
 
@@ -215,7 +223,8 @@ bytecode_comparison:
 def test_bytecode_comparison_library_unquoted_hex_raises(tmp_path):
     """Unquoted hex in bytecode_comparison.libraries values should be caught."""
     path = tmp_path / "config.yaml"
-    path.write_text("""\
+    path.write_text(
+        """\
 contracts:
   "0x0000000000000000000000000000000000000001": TestContract
 explorer_hostname: api.etherscan.io
@@ -229,7 +238,8 @@ bytecode_comparison:
   libraries:
     "contracts/Foo.sol":
       MyLib: 0x00000000000000000000000000000000000000AB
-""")
+"""
+    )
     with pytest.raises(ValueError, match="bytecode_comparison.libraries"):
         load_config(str(path))
 

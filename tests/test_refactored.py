@@ -19,6 +19,7 @@ from diffyscan.utils.constants import PUSH0, PUSH32, OPCODES
 from diffyscan.utils.custom_exceptions import CalldataError, EncoderError
 from diffyscan.utils.explorer import merge_libraries, get_solc_sources
 
+
 # --- encoder tests ---
 
 
