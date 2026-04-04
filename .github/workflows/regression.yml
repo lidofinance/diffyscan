@@ -97,10 +97,10 @@ jobs:
               --allow-source-diff 0xa11906bBBBaC5207b8FDA4F7F294d7EcB8dcc758
               --allow-source-diff 0xc5dCd2A9642ceA9B71A632BF5b8ff52424Ea1B40
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Restore diffyscan caches
-        uses: actions/cache@v4
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           path: .diffyscan_cache
           key: diffyscan-cache-${{ github.ref_name }}-${{ matrix.config }}-${{ github.sha }}
@@ -108,7 +108,7 @@ jobs:
             diffyscan-cache-${{ github.ref_name }}-${{ matrix.config }}-
 
       - name: Restore devcontainer build cache
-        uses: actions/cache@v4
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           path: ${{ env.DEVCONTAINER_BUILD_CACHE_DIR }}
           key: devcontainer-buildx-${{ runner.os }}-${{ hashFiles('.devcontainer/Dockerfile', '.dockerignore') }}

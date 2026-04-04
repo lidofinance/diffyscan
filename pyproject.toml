@@ -32,6 +32,9 @@ dev = [
 requires = ["hatchling==1.27.0"]
 build-backend = "hatchling.build"
 
+[tool.black]
+target-version = ["py311"]
+
 [tool.hatch.build.targets.wheel]
 packages = ["diffyscan"]
 
