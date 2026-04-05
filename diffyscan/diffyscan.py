@@ -701,7 +701,6 @@ def main() -> None:
     """Main entry point for the diffyscan application."""
     load_dotenv()
     args = parse_arguments()
-    skip_user_input = args.yes
     if args.quiet:
         logger.set_level("okay")
     else:
@@ -757,7 +756,7 @@ def main() -> None:
             enable_binary_comparison,
             args.cache_explorer,
             args.cache_github,
-            skip_user_input,
+            args.yes,
             args.contract_filter,
             args.local_rpc,
         )
