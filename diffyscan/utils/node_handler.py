@@ -44,7 +44,12 @@ def get_chain_id(rpc_url: str) -> int:
     return chain_id
 
 
-def simulate_deployment(data: str, rpc_url: str, caller: str = DEFAULT_CALLER, gas_limit: int = DEFAULT_DEPLOYMENT_GAS_LIMIT) -> str:
+def simulate_deployment(
+    data: str,
+    rpc_url: str,
+    caller: str = DEFAULT_CALLER,
+    gas_limit: int = DEFAULT_DEPLOYMENT_GAS_LIMIT,
+) -> str:
     """Simulate contract deployment via eth_call and return deployed runtime bytecode."""
     logger.info(f'Simulating deployment via eth_call on "{mask_text(rpc_url)}" ...')
 

@@ -174,7 +174,9 @@ def run_bytecode_diff(
     deployment_call_data = _append_calldata(contract_creation_code, calldata)
     gas_limit = config.get("deployment_gas_limit")
     extra = {"gas_limit": gas_limit} if gas_limit else {}
-    local_deployed_bytecode = simulate_deployment(deployment_call_data, remote_rpc_url, **extra)
+    local_deployed_bytecode = simulate_deployment(
+        deployment_call_data, remote_rpc_url, **extra
+    )
 
     is_fully_matched = local_deployed_bytecode == remote_deployed_bytecode
 
@@ -358,7 +360,8 @@ def _load_explorer_token(config: dict) -> str:
 def _setup_binary_comparison(config: dict, use_local_rpc: bool = False) -> str:
     """Load RPC URL and configure exception handling for bytecode comparison."""
     rpc_env_var = (
-        "LOCAL_RPC_URL" if use_local_rpc
+        "LOCAL_RPC_URL"
+        if use_local_rpc
         else config.get("rpc_url_env_var", "REMOTE_RPC_URL")
     )
     remote_rpc_url = load_env(rpc_env_var, masked=True, required=True)
@@ -458,9 +461,7 @@ def process_config(
 
         # Apply contract filter if specified
         filter_set = (
-            set(addr.lower() for addr in contract_filter)
-            if contract_filter
-            else None
+            set(addr.lower() for addr in contract_filter) if contract_filter else None
         )
 
         for contract_address, contract_name in config["contracts"].items():

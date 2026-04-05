@@ -2,7 +2,6 @@
 
 import pytest
 
-
 CONTRACTS = {
     "0xAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAa": "ContractA",
     "0xBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBb": "ContractB",
@@ -29,12 +28,8 @@ def test_no_filter_returns_all():
 
 
 def test_filter_single_contract():
-    filtered = apply_filter(
-        CONTRACTS, ["0xAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAa"]
-    )
-    assert list(filtered.keys()) == [
-        "0xAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAa"
-    ]
+    filtered = apply_filter(CONTRACTS, ["0xAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAa"])
+    assert list(filtered.keys()) == ["0xAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAa"]
     assert filtered["0xAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAa"] == "ContractA"
 
 
@@ -51,17 +46,13 @@ def test_filter_multiple_contracts():
 
 
 def test_filter_is_case_insensitive():
-    filtered = apply_filter(
-        CONTRACTS, ["0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]
-    )
+    filtered = apply_filter(CONTRACTS, ["0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"])
     assert len(filtered) == 1
     assert "ContractA" in filtered.values()
 
 
 def test_filter_nonexistent_address_returns_empty():
-    filtered = apply_filter(
-        CONTRACTS, ["0x0000000000000000000000000000000000000000"]
-    )
+    filtered = apply_filter(CONTRACTS, ["0x0000000000000000000000000000000000000000"])
     assert filtered == {}
 
 
