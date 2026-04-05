@@ -181,6 +181,14 @@ diffyscan /path/to/config.json -C 0xContractAddress
 diffyscan /path/to/config.json -C 0xFirst -C 0xSecond
 ```
 
+To use a local RPC node (e.g. anvil fork) for bytecode comparison, overriding the config's `rpc_url_env_var`:
+
+```bash
+diffyscan /path/to/config.yaml -L
+```
+
+This reads `LOCAL_RPC_URL` from `.env` instead of the chain-specific RPC URL.
+
 To skip binary comparison (which is enabled by default):
 
 ```bash
