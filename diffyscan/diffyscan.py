@@ -413,6 +413,7 @@ def process_config(
     cache_explorer: bool,
     cache_github: bool,
     skip_user_input: bool = False,
+    contract_filter: list[str] | None = None,
 ):
     """Process a config file and run source + bytecode comparisons."""
     # Reset exception handler to default before each config
@@ -448,7 +449,16 @@ def process_config(
             remote_chain_id = get_chain_id(remote_rpc_url)
             logger.okay("Remote chain ID", remote_chain_id)
 
+        # Apply contract filter if specified
+        filter_set = (
+            set(addr.lower() for addr in contract_filter)
+            if contract_filter
+            else None
+        )
+
         for contract_address, contract_name in config["contracts"].items():
+            if filter_set and contract_address.lower() not in filter_set:
+                continue
             try:
                 contract_code = get_contract_from_explorer(
                     explorer_token,
@@ -581,6 +591,14 @@ def parse_arguments() -> argparse.Namespace:
         "-Q",
         help="Hide info messages, show okay/warn/error (shorthand for --log-level okay)",
         action="store_true",
+    )
+    parser.add_argument(
+        "--contract",
+        "-C",
+        dest="contract_filter",
+        action="append",
+        default=[],
+        help="Only check specific contract address (0x...). Can be passed multiple times.",
     )
     return parser.parse_args()
 
@@ -727,6 +745,7 @@ def main() -> None:
             args.cache_explorer,
             args.cache_github,
             skip_user_input,
+            args.contract_filter,
         )
         all_results.append(result)
 
