@@ -5,7 +5,7 @@ from .logger import logger
 from .custom_exceptions import NodeError
 
 DEFAULT_CALLER = "0x0000000000000000000000000000000000000000"
-DEPLOYMENT_SIMULATION_GAS_LIMIT = 100_000_000
+DEFAULT_DEPLOYMENT_GAS_LIMIT = 100_000_000
 
 
 def _rpc_call(rpc_url: str, method: str, params: list):
@@ -44,7 +44,12 @@ def get_chain_id(rpc_url: str) -> int:
     return chain_id
 
 
-def simulate_deployment(data: str, rpc_url: str, caller: str = DEFAULT_CALLER) -> str:
+def simulate_deployment(
+    data: str,
+    rpc_url: str,
+    caller: str = DEFAULT_CALLER,
+    gas_limit: int = DEFAULT_DEPLOYMENT_GAS_LIMIT,
+) -> str:
     """Simulate contract deployment via eth_call and return deployed runtime bytecode."""
     logger.info(f'Simulating deployment via eth_call on "{mask_text(rpc_url)}" ...')
 
@@ -55,7 +60,7 @@ def simulate_deployment(data: str, rpc_url: str, caller: str = DEFAULT_CALLER) -
             {
                 "from": caller,
                 "to": None,
-                "gas": hex(DEPLOYMENT_SIMULATION_GAS_LIMIT),
+                "gas": hex(gas_limit),
                 "data": data,
             },
             "latest",

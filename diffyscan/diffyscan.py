@@ -172,7 +172,11 @@ def run_bytecode_diff(
     )
 
     deployment_call_data = _append_calldata(contract_creation_code, calldata)
-    local_deployed_bytecode = simulate_deployment(deployment_call_data, remote_rpc_url)
+    gas_limit = config.get("deployment_gas_limit")
+    extra = {"gas_limit": gas_limit} if gas_limit else {}
+    local_deployed_bytecode = simulate_deployment(
+        deployment_call_data, remote_rpc_url, **extra
+    )
 
     is_fully_matched = local_deployed_bytecode == remote_deployed_bytecode
 
@@ -353,9 +357,14 @@ def _load_explorer_token(config: dict) -> str:
     raise ValueError(error_msg)
 
 
-def _setup_binary_comparison(config: dict) -> str:
-    """Load REMOTE_RPC_URL and configure exception handling for bytecode comparison."""
-    remote_rpc_url = load_env("REMOTE_RPC_URL", masked=True, required=True)
+def _setup_binary_comparison(config: dict, use_local_rpc: bool = False) -> str:
+    """Load RPC URL and configure exception handling for bytecode comparison."""
+    rpc_env_var = (
+        "LOCAL_RPC_URL"
+        if use_local_rpc
+        else config.get("rpc_url_env_var", "REMOTE_RPC_URL")
+    )
+    remote_rpc_url = load_env(rpc_env_var, masked=True, required=True)
     ExceptionHandler.initialize(config.get("fail_on_bytecode_comparison_error", True))
     return remote_rpc_url
 
@@ -413,6 +422,8 @@ def process_config(
     cache_explorer: bool,
     cache_github: bool,
     skip_user_input: bool = False,
+    contract_filter: list[str] | None = None,
+    use_local_rpc: bool = False,
 ):
     """Process a config file and run source + bytecode comparisons."""
     # Reset exception handler to default before each config
@@ -429,7 +440,7 @@ def process_config(
     # Setup binary comparison if enabled
     remote_rpc_url = None
     if enable_binary_comparison:
-        remote_rpc_url = _setup_binary_comparison(config)
+        remote_rpc_url = _setup_binary_comparison(config, use_local_rpc)
 
     # Check if source comparison is enabled
     enable_source_comparison = config.get("source_comparison", True)
@@ -448,7 +459,14 @@ def process_config(
             remote_chain_id = get_chain_id(remote_rpc_url)
             logger.okay("Remote chain ID", remote_chain_id)
 
+        # Apply contract filter if specified
+        filter_set = (
+            set(addr.lower() for addr in contract_filter) if contract_filter else None
+        )
+
         for contract_address, contract_name in config["contracts"].items():
+            if filter_set and contract_address.lower() not in filter_set:
+                continue
             try:
                 contract_code = get_contract_from_explorer(
                     explorer_token,
@@ -582,6 +600,20 @@ def parse_arguments() -> argparse.Namespace:
         help="Hide info messages, show okay/warn/error (shorthand for --log-level okay)",
         action="store_true",
     )
+    parser.add_argument(
+        "--contract",
+        "-C",
+        dest="contract_filter",
+        action="append",
+        default=[],
+        help="Only check specific contract address (0x...). Can be passed multiple times.",
+    )
+    parser.add_argument(
+        "--local-rpc",
+        "-L",
+        action="store_true",
+        help="Use LOCAL_RPC_URL env var for bytecode comparison, overriding config rpc_url_env_var.",
+    )
     return parser.parse_args()
 
 
@@ -670,7 +702,6 @@ def main() -> None:
     """Main entry point for the diffyscan application."""
     load_dotenv()
     args = parse_arguments()
-    skip_user_input = args.yes
     if args.quiet:
         logger.set_level("okay")
     else:
@@ -726,7 +757,9 @@ def main() -> None:
             enable_binary_comparison,
             args.cache_explorer,
             args.cache_github,
-            skip_user_input,
+            args.yes,
+            args.contract_filter,
+            args.local_rpc,
         )
         all_results.append(result)
 

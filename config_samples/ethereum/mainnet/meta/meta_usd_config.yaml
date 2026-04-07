@@ -33,6 +33,21 @@ contracts:
   "0xD0e9094E7E26ff133C349ACd9993743DCc15cA5c": TimelockController
   "0x03852b7138c6704F8F46e87768399616D31Cf733": OracleSubmitter
 
+  # earnUSDe (Experimental)
+  "0x0E27abEF8C0390DB326be61Da660cEAb5D7A01c0": TransparentUpgradeableProxy # Vault
+  "0x1ABBef01954e2F58AFa0153A50e78674D5f12F4b": TransparentUpgradeableProxy # SwapModule 0
+  "0x6082A97Bbb2e51d5aa429DE7DAa5a7Cb04c1B17A": TransparentUpgradeableProxy # Subvault 0
+  "0x6445DC7C182386997D894A8dA2872E0e0a002F8b": TransparentUpgradeableProxy # Verifier 0
+  "0x0c48c1eA0Bb779F2B747d9a89EDEb4199000Fa90": TransparentUpgradeableProxy # SyncDepositQueue (USDC)
+  "0xAeF472489Ae2405c4B9ece09642e1ce7A9233446": TransparentUpgradeableProxy # RedeemQueue (USDC)
+  "0xdbd555288BA3C789156718D7C94c568a0E4e0023": TransparentUpgradeableProxy # SyncDepositQueue (USDT)
+  "0x248cA260BfecD194e9596aa7bf50f0E49a5fa43a": TransparentUpgradeableProxy # Oracle
+  "0x18bf9c3004da28bA2Ad4Dc676aF2091E38CcB414": TransparentUpgradeableProxy # ShareManager
+  "0xeffE4750254e520b39E5bf872b821Aa5973B69eC": TransparentUpgradeableProxy # FeeManager
+  "0xb48c3b3ed0D12fbFA0f2bD9c9E11AB44B8317BA3": TransparentUpgradeableProxy # RiskManager
+  "0xFf06E4D42Bc59Dc47DbE2CEBE4E05A0ddA27378A": TimelockController
+  "0xd114BCC2a5b683CF6568789d9B0B8702eD56948d": OracleSubmitter
+
   # Shared implementations
   "0x0000000615B2771511dAa693aC07BE5622869E01": Vault
   "0x00000006dA9f179BFE250Dd1c51cD2d3581930c8": DepositQueue
