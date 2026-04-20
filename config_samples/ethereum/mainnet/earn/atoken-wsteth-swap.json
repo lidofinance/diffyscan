@@ -1,0 +1,26 @@
+{
+  "contracts": {
+    "0x9D1F0f86E06f087E302E888aDBc9B07bfED0a25F": "ATokenWstETHSwap"
+  },
+  "explorer_hostname": "api.etherscan.io",
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+  "explorer_chain_id": 1,
+  "github_repo": {
+    "url": "https://github.com/lidofinance/atoken-wsteth-swap/",
+    "commit": "00432c9a76049dfd9ab0804dfa892ff3ea4b89af",
+    "relative_root": ""
+  },
+  "dependencies": {},
+  "fail_on_bytecode_comparison_error": true,
+  "bytecode_comparison": {
+    "constructor_calldata": {},
+    "constructor_args": {
+      "0x9D1F0f86E06f087E302E888aDBc9B07bfED0a25F": [
+        "0x199cC9fDD6c9a7d1924A32EA03097D7475FDbaDf",
+        "0x893aa69FBAA1ee81B536f0FbE3A3453e86290080",
+        "0xcCf2daba8Bb04a232a2fDA0D01010D4EF6C69B85",
+        5000
+      ]
+    }
+  }
+}
