@@ -96,6 +96,10 @@ jobs:
               --allow-source-diff 0x83DfE5Fe8ac8b7DB38c020F4F54BF09b65D92c63
               --allow-source-diff 0xa11906bBBBaC5207b8FDA4F7F294d7EcB8dcc758
               --allow-source-diff 0xc5dCd2A9642ceA9B71A632BF5b8ff52424Ea1B40
+          - config: config_samples/ethereum/hoodi/srv3/hoodi_srv3_config.json
+            network: hoodi
+            flags: >
+              --allow-bytecode-diff 0x1a629bB7C0563650e46406Eb6764A2ba207a0eFE
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
