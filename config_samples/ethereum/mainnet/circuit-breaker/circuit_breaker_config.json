@@ -1,0 +1,29 @@
+{
+  "contracts": {
+    "0x6019cB557978296Ba3C08a7B73225C0975dfb2f7": "CircuitBreaker"
+  },
+  "explorer_hostname": "api.etherscan.io",
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+  "explorer_chain_id": 1,
+  "github_repo": {
+    "url": "https://github.com/lidofinance/circuit-breaker/",
+    "commit": "780652f041f51596963dd028f1d59718adcd12be",
+    "relative_root": ""
+  },
+  "dependencies": {},
+  "fail_on_bytecode_comparison_error": true,
+  "bytecode_comparison": {
+    "constructor_calldata": {},
+    "constructor_args": {
+      "0x6019cB557978296Ba3C08a7B73225C0975dfb2f7": [
+        "0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c",
+        432000,
+        5184000,
+        2592000,
+        94608000,
+        1814400,
+        31536000
+      ]
+    }
+  }
+}
