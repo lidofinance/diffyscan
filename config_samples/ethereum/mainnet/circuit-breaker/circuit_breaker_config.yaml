@@ -11,6 +11,8 @@ github_repo:
   commit: b4b2fbc921b3191560a3fc62d502d4bb98ad99e1
   relative_root: ""
 
+dependencies: {}
+
 fail_on_bytecode_comparison_error: true
 
 bytecode_comparison:
