@@ -105,6 +105,34 @@ def test_simulate_deployment_uses_eth_call(monkeypatch):
     assert captured["payload"]["params"][0]["data"] == "0x6001600055"
 
 
+def test_simulate_deployment_uses_default_gas_limit(monkeypatch):
+    captured = {}
+
+    def fake_pull(rpc_url, payload, headers):
+        captured["payload"] = json.loads(payload)
+        return DummyResponse({"result": "0x6001"})
+
+    monkeypatch.setattr("diffyscan.utils.node_handler.pull", fake_pull)
+
+    simulate_deployment("0x6001", "https://rpc.example")
+
+    assert captured["payload"]["params"][0]["gas"] == hex(100_000_000)
+
+
+def test_simulate_deployment_uses_custom_gas_limit(monkeypatch):
+    captured = {}
+
+    def fake_pull(rpc_url, payload, headers):
+        captured["payload"] = json.loads(payload)
+        return DummyResponse({"result": "0x6001"})
+
+    monkeypatch.setattr("diffyscan.utils.node_handler.pull", fake_pull)
+
+    simulate_deployment("0x6001", "https://rpc.example", gas_limit=1_000_000_000)
+
+    assert captured["payload"]["params"][0]["gas"] == hex(1_000_000_000)
+
+
 def test_simulate_deployment_surfaces_rpc_errors(monkeypatch):
     def fake_pull(rpc_url, payload, headers):
         return DummyResponse(

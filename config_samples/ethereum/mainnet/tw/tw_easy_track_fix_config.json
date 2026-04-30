@@ -1,0 +1,31 @@
+{
+  "contracts": {
+    "0x4F716AD3Cc7A3A5cdA2359e5B2c84335c171dCde": "CuratedSubmitExitRequestHashes",
+    "0x58A59dDC6Aea9b1D5743D024E15DfA4badB56E37": "SDVTSubmitExitRequestHashes"
+  },
+  "explorer_hostname": "api.etherscan.io",
+  "explorer_chain_id": 1,
+  "github_repo": {
+    "url": "https://github.com/lidofinance/easy-track",
+    "commit": "bdd048352fe6719b0e1f998bffdc05c6607688e0",
+    "relative_root": ""
+  },
+  "dependencies": {},
+  "fail_on_bytecode_comparison_error": true,
+  "bytecode_comparison": {
+    "constructor_calldata": {},
+    "constructor_args": {
+      "0x4F716AD3Cc7A3A5cdA2359e5B2c84335c171dCde": [
+        "0x55032650b14df07b85bF18A3a3eC8E0Af2e028d5",
+        "0xFdDf38947aFB03C621C71b06C9C70bce73f12999",
+        "0x0De4Ea0184c2ad0BacA7183356Aea5B8d5Bf5c6e"
+      ],
+      "0x58A59dDC6Aea9b1D5743D024E15DfA4badB56E37": [
+        "0x08637515E85A4633E23dfc7861e2A9f53af640f7",
+        "0xaE7B191A31f627b4eB1d4DaC64eaB9976995b433",
+        "0xFdDf38947aFB03C621C71b06C9C70bce73f12999",
+        "0x0De4Ea0184c2ad0BacA7183356Aea5B8d5Bf5c6e"
+      ]
+    }
+  }
+}
