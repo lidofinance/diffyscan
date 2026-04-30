@@ -62,6 +62,9 @@ jobs:
           - config: config_samples/ethereum/mainnet/tw/tw_config.json
             network: mainnet
             flags: ""
+          - config: config_samples/ethereum/mainnet/circuit-breaker/circuit_breaker_config.yaml
+            network: mainnet
+            flags: ""
           - config: config_samples/ethereum/mainnet/tw/tw_easy_track_config.json
             network: mainnet
             flags: >
