@@ -700,9 +700,18 @@ def compile_contract_from_explorer(
         solc_input["settings"]["evmVersion"] = evm_version
 
     input_settings = json.dumps(solc_input)
-    compiled_contracts = compile_contracts(compiler_path, input_settings)[
-        "contracts"
-    ].values()
+    compilation_output = compile_contracts(compiler_path, input_settings)
+    if "contracts" not in compilation_output:
+        errors = compilation_output.get("errors", [])
+        error_messages = [
+            e.get("formattedMessage", e.get("message", str(e)))
+            for e in errors
+            if e.get("severity") == "error"
+        ]
+        raise CompileError(
+            f"Compilation failed with no output:\n" + "\n".join(error_messages)
+        )
+    compiled_contracts = compilation_output["contracts"].values()
 
     target_contract_name = contract_code["name"]
     compiled_contract = get_target_compiled_contract(
