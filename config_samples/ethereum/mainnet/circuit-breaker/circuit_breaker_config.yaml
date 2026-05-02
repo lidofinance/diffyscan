@@ -1,0 +1,28 @@
+contracts:
+  "0x6019cB557978296Ba3C08a7B73225C0975dfb2f7": CircuitBreaker
+
+explorer_hostname: api.etherscan.io
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+explorer_chain_id: 1
+
+github_repo:
+  url: https://github.com/lidofinance/circuit-breaker/
+  # https://github.com/lidofinance/audits/blob/ec84cf548f04c98cabb144d1c457e3256c8c9ae9/Cyfrin%20CircuitBreaker%20Audit%20Report%2004-2026.pdf
+  commit: b4b2fbc921b3191560a3fc62d502d4bb98ad99e1
+  relative_root: ""
+
+dependencies: {}
+
+fail_on_bytecode_comparison_error: true
+
+bytecode_comparison:
+  constructor_calldata: {}
+  constructor_args:
+    "0x6019cB557978296Ba3C08a7B73225C0975dfb2f7":
+      - "0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c"
+      - 432000
+      - 5184000
+      - 2592000
+      - 94608000
+      - 1814400
+      - 31536000
