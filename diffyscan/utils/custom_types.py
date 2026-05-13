@@ -5,6 +5,7 @@ class BinaryConfig(TypedDict):
     hardhat_config_name: NotRequired[str]
     constructor_calldata: NotRequired[dict[str, str]]
     constructor_args: NotRequired[dict[str, list]]
+    deployment_from: NotRequired[dict[str, str]]
     libraries: NotRequired[dict[str, dict[str, str]]]
 
 

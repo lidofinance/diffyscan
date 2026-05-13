@@ -99,6 +99,24 @@ jobs:
               --allow-source-diff 0x83DfE5Fe8ac8b7DB38c020F4F54BF09b65D92c63
               --allow-source-diff 0xa11906bBBBaC5207b8FDA4F7F294d7EcB8dcc758
               --allow-source-diff 0xc5dCd2A9642ceA9B71A632BF5b8ff52424Ea1B40
+          - config: config_samples/ethereum/hoodi/srv3/hoodi_srv3_config.json
+            network: hoodi
+            flags: >
+              --allow-bytecode-diff 0x1a629bB7C0563650e46406Eb6764A2ba207a0eFE
+              --allow-source-diff 0x44d0b2B95d2C2bDF73FE4f5cD7E3A930494E5B1f
+              --allow-source-diff 0x6147270470A9Ee5b55c33EA71e32000E5d6D8E6B
+          - config: config_samples/ethereum/hoodi/srv3/hoodi_srv3_easy_track_config.json
+            network: hoodi
+            flags: >
+              --allow-source-diff 0x22D36e7616F541A527989C5652fDA4d527bB461C
+              --allow-source-diff 0xD63cf25df1bA6144db27A81A98120Dfc53dE4540
+              --allow-source-diff 0xf71fcB20B9FB8468653Bcb24E31F39bc069D5995
+              --allow-source-diff 0x4EaB04775837A6F0218750A10454119f349258FE
+              --allow-source-diff 0xd0c38B2F0C1F760976dA010C1c35D828331Ff9E2
+              --allow-source-diff 0x5194cC02B6F477B4a23DFA422fFC238c8B5b1736
+              --allow-source-diff 0x6E40FED7c28bAA93a798cA10f8A93965a19eC52e
+              --allow-source-diff 0x3486B872768D361309e405A046C4BF995c21CC6c
+              --allow-source-diff 0x44D9b39bBdc2182Aa1af6f16f8F55E0eA038294d
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
