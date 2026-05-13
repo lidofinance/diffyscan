@@ -13,7 +13,7 @@
     "0x44d0b2B95d2C2bDF73FE4f5cD7E3A930494E5B1f": "StakingRouter",
     "0xFd1b63657dda65C4E6fDEF9d1f37064D078e9B49": "TopUpGateway",
     "0x86aeA211B30174b3ee5d294ECeaDbD7f1C575eF3": "ValidatorsExitBusOracle",
-    "0xB97e67CC20bd2970E30341c0ECc7497d8A5b7342": "WithdrawalVault"
+    "0x6724DaD16f7b05157dF72783F99cA6B813742330": "WithdrawalVault"
   },
   "network": "hoodi",
   "explorer_hostname": "api.etherscan.io",
@@ -21,7 +21,7 @@
   "explorer_chain_id": 560048,
   "github_repo": {
     "url": "https://github.com/lidofinance/core",
-    "commit": "13cc8fa31cedc797575b107d576c7a63b96192e4",
+    "commit": "b25e808e1049e924275852b01be8963463335af9",
     "relative_root": ""
   },
   "dependencies": {
@@ -195,11 +195,11 @@
         1742213400,
         "0xe2EF9536DAAAEBFf5b1c130957AB3E80056b06D8"
       ],
-      "0xB97e67CC20bd2970E30341c0ECc7497d8A5b7342": [
+      "0x6724DaD16f7b05157dF72783F99cA6B813742330": [
         "0x3508A952176b3c15387C97BE809eaffB1982176a",
         "0x0534aA41907c9631fae990960bCC72d75fA7cfeD",
         "0x6679090D92b08a2a686eF8614feECD8cDFE209db",
-        "0xce93710b849e0dC202AaC513837e05bEA9D7DdFD",
+        "0xC9991Bb865d025364BCbBd99f36e85889Fb68e69",
         "0x00000961Ef480Eb55e80D19ad83579A64c007002",
         "0x0000BBdDc7CE488642fb579F8B00f3a590007251"
       ]

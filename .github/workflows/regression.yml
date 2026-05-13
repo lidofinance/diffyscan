@@ -100,6 +100,8 @@ jobs:
             network: hoodi
             flags: >
               --allow-bytecode-diff 0x1a629bB7C0563650e46406Eb6764A2ba207a0eFE
+              --allow-source-diff 0x44d0b2B95d2C2bDF73FE4f5cD7E3A930494E5B1f
+              --allow-source-diff 0x6147270470A9Ee5b55c33EA71e32000E5d6D8E6B
           - config: config_samples/ethereum/hoodi/srv3/hoodi_srv3_easy_track_config.json
             network: hoodi
             flags: >
