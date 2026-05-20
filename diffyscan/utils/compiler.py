@@ -110,7 +110,7 @@ def compile_contracts(compiler_path: str, input_settings: str) -> dict:
 
     try:
         output = json.loads(process.stdout)
-    except json.JSONDecodeError as e:
+    except (json.JSONDecodeError, UnicodeDecodeError, TypeError) as e:
         raise CompileError(
             f"solc produced non-JSON output: {e}; stdout head: {process.stdout[:500]!r}"
         )
