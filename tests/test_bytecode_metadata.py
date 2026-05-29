@@ -105,6 +105,27 @@ def test_simulate_deployment_uses_eth_call(monkeypatch):
     assert captured["payload"]["params"][0]["data"] == "0x6001600055"
 
 
+def test_simulate_deployment_uses_custom_caller(monkeypatch):
+    captured = {}
+
+    def fake_pull(rpc_url, payload, headers):
+        captured["payload"] = json.loads(payload)
+        return DummyResponse({"result": "0x60016000"})
+
+    monkeypatch.setattr("diffyscan.utils.node_handler.pull", fake_pull)
+
+    simulate_deployment(
+        "0x6001600055",
+        "https://rpc.example",
+        caller="0x0000000000000000000000000000000000000002",
+    )
+
+    assert (
+        captured["payload"]["params"][0]["from"]
+        == "0x0000000000000000000000000000000000000002"
+    )
+
+
 def test_simulate_deployment_surfaces_rpc_errors(monkeypatch):
     def fake_pull(rpc_url, payload, headers):
         return DummyResponse(

@@ -234,6 +234,27 @@ bytecode_comparison:
         load_config(str(path))
 
 
+def test_bytecode_comparison_deployment_from_unquoted_hex_raises(tmp_path):
+    """Unquoted hex in bytecode_comparison.deployment_from values should be caught."""
+    path = tmp_path / "config.yaml"
+    path.write_text("""\
+contracts:
+  "0x0000000000000000000000000000000000000001": TestContract
+explorer_hostname: api.etherscan.io
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+github_repo:
+  url: https://github.com/example/repo
+  commit: abc123
+  relative_root: ""
+dependencies: {}
+bytecode_comparison:
+  deployment_from:
+    "0x0000000000000000000000000000000000000001": 0x00000000000000000000000000000000000000AB
+""")
+    with pytest.raises(ValueError, match="bytecode_comparison.deployment_from"):
+        load_config(str(path))
+
+
 # --- Full-fixture tests (max properties) ---
 
 
@@ -279,6 +300,11 @@ def test_full_fixture_nested_types():
         assert isinstance(args, list), f"constructor_args for {addr} should be list"
         for arg in args:
             assert isinstance(arg, str), f"constructor arg {arg!r} should be str"
+
+    # bytecode_comparison.deployment_from maps contract addresses to caller addresses
+    for addr, caller in result["bytecode_comparison"]["deployment_from"].items():
+        assert isinstance(addr, str) and addr.startswith("0x")
+        assert isinstance(caller, str) and caller.startswith("0x")
 
     # bytecode_comparison.libraries nested dict of str -> str
     for path, libs in result["bytecode_comparison"]["libraries"].items():

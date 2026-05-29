@@ -40,6 +40,7 @@ from .utils.custom_exceptions import (
     ExceptionHandler,
     BaseCustomException,
     CompileError,
+    CalldataError,
 )
 
 
@@ -172,7 +173,18 @@ def run_bytecode_diff(
     )
 
     deployment_call_data = _append_calldata(contract_creation_code, calldata)
-    local_deployed_bytecode = simulate_deployment(deployment_call_data, remote_rpc_url)
+    deployment_from = _get_deployment_from(
+        config.get("bytecode_comparison"), contract_address_from_config
+    )
+    if deployment_from:
+        logger.info("Using deployment simulation from config", deployment_from)
+        local_deployed_bytecode = simulate_deployment(
+            deployment_call_data, remote_rpc_url, caller=deployment_from
+        )
+    else:
+        local_deployed_bytecode = simulate_deployment(
+            deployment_call_data, remote_rpc_url
+        )
 
     is_fully_matched = local_deployed_bytecode == remote_deployed_bytecode
 
@@ -364,6 +376,45 @@ def _append_calldata(creation_code: str, calldata: str | None) -> str:
     if not calldata:
         return creation_code
     return creation_code + calldata
+
+
+def _validate_config_address(value: object, field_name: str) -> str:
+    if not isinstance(value, str):
+        raise CalldataError(f"{field_name} must be a hex string address")
+
+    address = value.strip()
+    if not address.startswith("0x") or len(address) != 42:
+        raise CalldataError(f"{field_name} must be a 20-byte hex address")
+
+    try:
+        int(address[2:], 16)
+    except ValueError as exc:
+        raise CalldataError(f"{field_name} is not valid hex") from exc
+
+    return address
+
+
+def _get_deployment_from(
+    binary_config: dict | None, contract_address: str
+) -> str | None:
+    if not isinstance(binary_config, dict):
+        return None
+
+    deployment_from = binary_config.get("deployment_from")
+    if deployment_from is None:
+        return None
+    if not isinstance(deployment_from, dict):
+        raise CalldataError(
+            'Config key "bytecode_comparison.deployment_from" must be an object'
+        )
+
+    if contract_address not in deployment_from:
+        return None
+
+    return _validate_config_address(
+        deployment_from[contract_address],
+        f"bytecode_comparison.deployment_from.{contract_address}",
+    )
 
 
 def _log_explorer_bytecode_metadata(

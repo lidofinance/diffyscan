@@ -45,6 +45,8 @@ bytecode_comparison:
       - "0x13Ac97663d19fF20fe467BFa580748505e664beB"
     "0x442af784A788A5bd6F42A01Ebe9F287a871243fb":
       - "00000000000000000000000000000000219ab540356cbb839cbe05303d7705fa"
+  deployment_from:
+    "0xe561152e8d3f618b386ef4dd6e3fb980eb2f9e61": "0x13Ac97663d19fF20fe467BFa580748505e664beB"
   libraries:
     contracts/common/lib/MinFirstAllocationStrategy.sol:
       MinFirstAllocationStrategy: "0x7e70De6D1877B3711b2bEDa7BA00013C7142d993"
