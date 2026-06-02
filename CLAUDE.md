@@ -56,7 +56,7 @@ Entry point: `diffyscan/diffyscan.py:main` — parses CLI args, loads config (JS
 - **node_handler.py** — RPC calls: `eth_getCode`, `eth_chainId`, `eth_call`
 - **common.py** — config loading (with YAML hex address validation), HTTP helpers, caching with SHA256 validation
 - **custom_types.py** — TypedDict definitions: `Config`, `BinaryConfig`, `ExplorerContract`, `GithubRepo`
-- **custom_exceptions.py** — exception hierarchy (`BaseCustomException` and subtypes)
+- **custom_exceptions.py** — exception hierarchy; `ExceptionHandler` controls fail-or-log behavior
 
 ### Config schema
 

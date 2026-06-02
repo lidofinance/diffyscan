@@ -3,6 +3,7 @@ import sys
 import time
 import argparse
 import os
+import traceback
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -36,6 +37,7 @@ from .utils.node_handler import (
 )
 from .utils.calldata import get_calldata
 from .utils.custom_exceptions import (
+    ExceptionHandler,
     BaseCustomException,
     CompileError,
 )
@@ -356,13 +358,14 @@ def _load_explorer_token(config: dict) -> str:
 
 
 def _setup_binary_comparison(config: dict, use_local_rpc: bool = False) -> str:
-    """Load the RPC URL for bytecode comparison."""
+    """Load RPC URL and configure exception handling for bytecode comparison."""
     rpc_env_var = (
         "LOCAL_RPC_URL"
         if use_local_rpc
         else config.get("rpc_url_env_var", "REMOTE_RPC_URL")
     )
     remote_rpc_url = load_env(rpc_env_var, masked=True, required=True)
+    ExceptionHandler.initialize(config.get("fail_on_bytecode_comparison_error", True))
     return remote_rpc_url
 
 
@@ -423,6 +426,9 @@ def process_config(
     use_local_rpc: bool = False,
 ):
     """Process a config file and run source + bytecode comparisons."""
+    # Reset exception handler to default before each config
+    ExceptionHandler.initialize(True)
+
     logger.info(f"Loading config {path}...")
     config = load_config(path)
     _warn_deprecated_hardhat_settings(config, hardhat_config_path)
@@ -446,7 +452,6 @@ def process_config(
     # Statistics tracking
     source_stats = []
     bytecode_stats = []
-    errored_contracts = []
 
     try:
         if enable_binary_comparison:
@@ -483,50 +488,46 @@ def process_config(
                         skip_user_input,
                     )
                     source_stats.append(source_result)
-            except BaseCustomException as custom_exc:
-                # A contract that can't be fetched/source-checked (e.g. unverified on
-                # the explorer) must not abort the whole run — log it with its config
-                # for context, record it, and move on to the next contract.
-                logger.error(f"{custom_exc} [config: {path}]")
-                errored_contracts.append(
-                    {
-                        "contract_address": contract_address,
-                        "contract_name": contract_name,
-                        "error": str(custom_exc),
-                        "config_path": path,
-                    }
-                )
-                continue
 
-            # Bytecode comparison errors are fatal: a contract whose deployment can't
-            # be simulated (missing/bad calldata, compile or RPC failure) is a hard
-            # failure, not a skip. A plain bytecode mismatch returns False instead and
-            # is reported as a diff.
-            if enable_binary_comparison:
-                bytecode_match = run_bytecode_diff(
-                    contract_address,
-                    contract_name,
-                    contract_code,
-                    config,
-                    github_api_token,
-                    recursive_parsing,
-                    cache_github,
-                    remote_rpc_url,
-                )
-                bytecode_stats.append(
-                    {
-                        "contract_address": contract_address,
-                        "contract_name": contract_name,
-                        "match": bytecode_match,
-                    }
-                )
+                if enable_binary_comparison:
+                    try:
+                        bytecode_match = run_bytecode_diff(
+                            contract_address,
+                            contract_name,
+                            contract_code,
+                            config,
+                            github_api_token,
+                            recursive_parsing,
+                            cache_github,
+                            remote_rpc_url,
+                        )
+                        bytecode_stats.append(
+                            {
+                                "contract_address": contract_address,
+                                "contract_name": contract_name,
+                                "match": bytecode_match,
+                            }
+                        )
+                    except BaseCustomException as exc:
+                        # Treat bytecode comparison errors as reportable diffs; final
+                        # allowlist handling happens after all contracts are processed.
+                        logger.error(str(exc))
+                        bytecode_stats.append(
+                            {
+                                "contract_address": contract_address,
+                                "contract_name": contract_name,
+                                "match": False,
+                            }
+                        )
+            except BaseCustomException as custom_exc:
+                ExceptionHandler.raise_exception_or_log(custom_exc)
+                traceback.print_exc()
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt by user")
 
     return {
         "source_stats": source_stats,
         "bytecode_stats": bytecode_stats,
-        "errored_contracts": errored_contracts,
         "config_path": path,
     }
 
@@ -693,19 +694,6 @@ def print_final_summary(
             for contract in bytecode_mismatches:
                 logger.warn(f"  • {contract['name']} ({contract['address']})")
 
-    # Contracts skipped because of errors (e.g. unverified on the explorer)
-    errored = [e for result in all_results for e in result.get("errored_contracts", [])]
-    if errored:
-        logger.divider()
-        logger.info("ERRORED CONTRACTS (not compared):")
-        logger.warn(f"Contracts skipped due to errors: {len(errored)}")
-        for e in errored:
-            cfg = e.get("config_path")
-            loc = f" [{cfg}]" if cfg else ""
-            logger.warn(
-                f"  • {e['contract_name']} ({e['contract_address']}){loc}: {e['error']}"
-            )
-
     logger.divider()
     logger.info("=" * 80)
 
@@ -823,23 +811,16 @@ def main() -> None:
                 ", ".join(sorted(allowed_bytecode_addrs)),
             )
 
-    # Contracts that could not be fetched/compared at all (e.g. unverified)
-    errored_count = sum(len(r.get("errored_contracts", [])) for r in all_results)
-
-    # Decide exit code: non-zero if any unallowed diffs or errored contracts exist
-    has_failures = (
-        (unallowed_source_diffs > 0)
-        or (unallowed_bytecode_diffs > 0)
-        or (errored_count > 0)
-    )
+    # Decide exit code: non-zero if any unallowed diffs exist
+    has_unallowed_diffs = (unallowed_source_diffs > 0) or (unallowed_bytecode_diffs > 0)
 
     logger.okay(f"Done in {round(execution_time, 3)}s ✨" + " " * 100)
 
-    if has_failures:
+    if has_unallowed_diffs:
         # Explicitly log a final line explaining failure condition
         logger.error(
-            "Exiting with non-zero code due to unallowed diffs or errors",
-            f"source={unallowed_source_diffs}, bytecode={unallowed_bytecode_diffs}, errored={errored_count}",
+            "Exiting with non-zero code due to unallowed diffs",
+            f"source={unallowed_source_diffs}, bytecode={unallowed_bytecode_diffs}",
         )
         sys.exit(1)
     else:

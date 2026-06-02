@@ -51,6 +51,7 @@ YAML gotcha: addresses and hex strings MUST be quoted (`"0xabc..."`) — unquote
   - `constructor_args` — typed args per address: `{"0xAddr": ["0xarg1", true, 42]}`
   - `libraries` — per source path: `{"contracts/lib/Foo.sol": {"Foo": "0xLibAddr"}}`
   - `hardhat_config_name` — (deprecated) name of a hardhat config file
+- `fail_on_bytecode_comparison_error` — set to `true` for strict mode
 - `source_comparison` — set to `false` to skip source diffs (bytecode-only check)
 - `explorer_hostname_env_var` — config convention for external CI/tooling to pass the explorer hostname via env var (used for soneium, unichain). Note: diffyscan itself does NOT resolve this at runtime — `get_explorer_hostname()` only reads `explorer_hostname`. External scripts must set `explorer_hostname` before invoking diffyscan.
 - `audit_url` — optional link to an audit report for documentation purposes

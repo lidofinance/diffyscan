@@ -1,3 +1,6 @@
+from .logger import logger
+
+
 class BaseCustomException(Exception):
     prefix = ""
 
@@ -29,3 +32,17 @@ class ExplorerError(BaseCustomException):
 
 class BinVerifierError(BaseCustomException):
     prefix = "Failed in binary comparison"
+
+
+class ExceptionHandler:
+    raise_exception = True
+
+    @staticmethod
+    def initialize(raise_exception: bool) -> None:
+        ExceptionHandler.raise_exception = raise_exception
+
+    @staticmethod
+    def raise_exception_or_log(custom_exception: BaseCustomException) -> None:
+        if ExceptionHandler.raise_exception:
+            raise custom_exception
+        logger.error(str(custom_exception))
