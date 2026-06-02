@@ -1,7 +1,9 @@
 """A contract that errors (e.g. unverified on the explorer) must not abort the run."""
 
+import pytest
+
 import diffyscan.diffyscan as ds
-from diffyscan.utils.custom_exceptions import ExplorerError
+from diffyscan.utils.custom_exceptions import ExplorerError, CalldataError
 
 ADDR_BAD = "0xAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAa"
 ADDR_OK = "0xBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBb"
@@ -60,3 +62,23 @@ def test_all_contracts_ok_yields_no_errors(monkeypatch):
 
     assert result["errored_contracts"] == []
     assert len(result["source_stats"]) == 1
+
+
+def test_bytecode_comparison_error_aborts_run(monkeypatch):
+    """A bytecode comparison error (not a mismatch) is fatal and must propagate."""
+    config = {"contracts": {ADDR_OK: "Bar"}}
+    _patch_common(monkeypatch, config)
+    monkeypatch.setattr(
+        ds, "get_contract_from_explorer", lambda *a, **k: {"name": "Bar"}
+    )
+    monkeypatch.setattr(ds, "_setup_binary_comparison", lambda *a, **k: "http://rpc")
+    monkeypatch.setattr(ds, "get_chain_id", lambda url: 1)
+
+    def boom(*a, **k):
+        raise CalldataError("empty constructor calldata")
+
+    monkeypatch.setattr(ds, "run_bytecode_diff", boom)
+
+    with pytest.raises(CalldataError):
+        # enable_binary_comparison=True (4th positional arg)
+        ds.process_config("cfg", None, False, True, False, False, True)

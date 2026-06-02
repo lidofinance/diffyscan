@@ -27,7 +27,6 @@
       "relative_root": "contracts"
     }
   },
-  "fail_on_bytecode_comparison_error": true,
   "bytecode_comparison": {
     "hardhat_config_name": "mainnet_hardhat_config.js",
     "constructor_calldata": {

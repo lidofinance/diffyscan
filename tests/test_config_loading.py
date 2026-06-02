@@ -20,7 +20,6 @@ ALL_TOP_LEVEL_KEYS = {
     "explorer_hostname_env_var",
     "explorer_chain_id",
     "bytecode_comparison",
-    "fail_on_bytecode_comparison_error",
     "audit_url",
     "metadata",
 }
@@ -270,9 +269,6 @@ def test_full_fixture_nested_types():
     # explorer_chain_id stays int
     assert result["explorer_chain_id"] == 1
     assert isinstance(result["explorer_chain_id"], int)
-
-    # fail_on_bytecode_comparison_error stays bool
-    assert result["fail_on_bytecode_comparison_error"] is True
 
     # bytecode_comparison.constructor_args values are lists of strings
     for addr, args in result["bytecode_comparison"]["constructor_args"].items():

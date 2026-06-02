@@ -23,7 +23,6 @@ The `Config` TypedDict (`diffyscan/utils/custom_types.py`) defines:
 - `explorer_token_env_var` — `str`
 - `explorer_chain_id` — `int`
 - `bytecode_comparison` — `BinaryConfig`
-- `fail_on_bytecode_comparison_error` — `bool`
 - `source_comparison` — `bool`
 
 **Additional fields found in real configs but not in the TypedDict:**
@@ -107,7 +106,6 @@ Recommended cross-reference warnings:
 
 ### 9. Optional flags
 
-- `fail_on_bytecode_comparison_error` defaults to `true` if absent
 - `source_comparison` defaults to `true` if absent; set to `false` to skip source diffs
 
 ## Output

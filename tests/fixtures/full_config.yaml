@@ -30,7 +30,6 @@ dependencies:
     relative_root: contracts
     # version 5.3.0
 
-fail_on_bytecode_comparison_error: true
 
 bytecode_comparison:
   hardhat_config_name: mainnet_hardhat_config.js

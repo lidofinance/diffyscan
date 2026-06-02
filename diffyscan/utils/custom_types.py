@@ -32,5 +32,4 @@ class Config(TypedDict):
     explorer_token_env_var: NotRequired[str]
     explorer_chain_id: NotRequired[int]
     bytecode_comparison: NotRequired[BinaryConfig]
-    fail_on_bytecode_comparison_error: NotRequired[bool]
     source_comparison: NotRequired[bool]
