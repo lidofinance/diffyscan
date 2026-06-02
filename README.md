@@ -88,7 +88,7 @@ diffyscan config_samples/lido_dao_sepolia_config.json
 
 When no path is given, diffyscan looks for `config.json`, `config.yaml`, or `config.yml` in the current directory. When a directory is given, all `.json`, `.yaml`, and `.yml` files inside it are processed.
 
-Alternatively, create a new config file near `diffyscan.py`. Configs can be written in JSON or YAML. The `bytecode_comparison` section is optional and only needed for manual overrides when explorer metadata is missing or you want to override it:
+Alternatively, create a new config file. Configs can be written in JSON or YAML. The `bytecode_comparison` section is optional and only needed for manual overrides when explorer metadata is missing or you want to override it:
 
 **JSON** (`config.json`):
 
