@@ -107,7 +107,25 @@ def compile_contracts(compiler_path: str, input_settings: str) -> dict:
         raise CompileError(f"Compiler process timed out: {e}")
     except Exception as e:
         raise CompileError(f"An unexpected error occurred: {e}")
-    return json.loads(process.stdout)
+
+    try:
+        output = json.loads(process.stdout)
+    except (json.JSONDecodeError, UnicodeDecodeError, TypeError) as e:
+        raise CompileError(
+            f"solc produced non-JSON output: {e}; stdout head: {process.stdout[:500]!r}"
+        )
+
+    if "contracts" not in output:
+        errors = output.get("errors") or []
+        fatal = [e for e in errors if e.get("severity") == "error"] or errors
+        msgs = "\n".join(
+            e.get("formattedMessage") or e.get("message") or str(e) for e in fatal
+        )
+        raise CompileError(
+            f"solc returned no contracts ({len(fatal)} error(s)):\n{msgs}"
+        )
+
+    return output
 
 
 def get_target_compiled_contract(

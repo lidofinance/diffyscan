@@ -1,0 +1,35 @@
+{
+  "contracts": {
+    "0x96c9a897D116ef660086d3aA67b3af653324aB37": "LazyOracle"
+  },
+  "network": "mainnet",
+  "explorer_hostname": "api.etherscan.io",
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+  "explorer_chain_id": 1,
+  "github_repo": {
+    "url": "https://github.com/lidofinance/core",
+    "commit": "6e36d1969788097b857ce8d15f28beccc3f8cfdc",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "@openzeppelin/contracts-v4.4": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "6bd6b76d1156e20e45d1016f355d154141c7e5b9",
+      "relative_root": "contracts"
+    },
+    "@openzeppelin/contracts-v5.2": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "acd4ff74de833399287ed6b31b4debf6b2b35527",
+      "relative_root": "contracts"
+    }
+  },
+  "fail_on_bytecode_comparison_error": true,
+  "bytecode_comparison": {
+    "constructor_calldata": {},
+    "constructor_args": {
+      "0x96c9a897D116ef660086d3aA67b3af653324aB37": [
+        "0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb"
+      ]
+    }
+  }
+}
