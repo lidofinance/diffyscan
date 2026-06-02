@@ -73,7 +73,7 @@ ls digest/<timestamp>/diffs/<contract_address>/
 | `"Contract name in config does not match with blockchain explorer ... !="` | Contract not verified on explorer — comment it out or verify it on the explorer first |
 | `"Failed to get calldata: Explorer metadata has empty constructor calldata for 0x..."` | Factory-created contract — Etherscan has no constructor args. Add `constructor_calldata` manually (extract via `getsourcecode` API `ConstructorArguments`, `debug_traceTransaction` trace, or cross-chain reuse) |
 | `"HTTP error: 404 ... contents/<path>.sol"` | Missing or wrong `dependencies` entry — the explorer source uses a path prefix not covered by config dependencies. Add a mapping for that prefix |
-| `"err: intrinsic gas too low"` | Chain gas model incompatible with `eth_call` deployment simulation (known on Mantle) — use `--skip-binary-comparison` |
+| `"err: intrinsic gas too low"` | Chain gas model needs a higher deployment gas cap (known on Mantle) — set `deployment_gas_limit` in the config (e.g. `30000000000`) |
 | All proxy bytecode diffs say "immutable reference position" | Normal for TransparentUpgradeableProxy — ProxyAdmin address baked in as immutable. Use `--allow-bytecode-diff` or accept as expected |
 
 ### 4. Suggest a re-run command
