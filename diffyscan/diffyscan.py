@@ -3,7 +3,6 @@ import sys
 import time
 import argparse
 import os
-import traceback
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -452,6 +451,7 @@ def process_config(
     # Statistics tracking
     source_stats = []
     bytecode_stats = []
+    errored_contracts = []
 
     try:
         if enable_binary_comparison:
@@ -520,14 +520,24 @@ def process_config(
                             }
                         )
             except BaseCustomException as custom_exc:
-                ExceptionHandler.raise_exception_or_log(custom_exc)
-                traceback.print_exc()
+                # A contract that can't be fetched/compared (e.g. unverified on the
+                # explorer) must not abort the whole run — log it, record it as an
+                # error, and move on to the next contract.
+                logger.error(str(custom_exc))
+                errored_contracts.append(
+                    {
+                        "contract_address": contract_address,
+                        "contract_name": contract_name,
+                        "error": str(custom_exc),
+                    }
+                )
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt by user")
 
     return {
         "source_stats": source_stats,
         "bytecode_stats": bytecode_stats,
+        "errored_contracts": errored_contracts,
         "config_path": path,
     }
 
@@ -694,6 +704,17 @@ def print_final_summary(
             for contract in bytecode_mismatches:
                 logger.warn(f"  • {contract['name']} ({contract['address']})")
 
+    # Contracts skipped because of errors (e.g. unverified on the explorer)
+    errored = [e for result in all_results for e in result.get("errored_contracts", [])]
+    if errored:
+        logger.divider()
+        logger.info("ERRORED CONTRACTS (not compared):")
+        logger.warn(f"Contracts skipped due to errors: {len(errored)}")
+        for e in errored:
+            logger.warn(
+                f"  • {e['contract_name']} ({e['contract_address']}): {e['error']}"
+            )
+
     logger.divider()
     logger.info("=" * 80)
 
@@ -811,16 +832,23 @@ def main() -> None:
                 ", ".join(sorted(allowed_bytecode_addrs)),
             )
 
-    # Decide exit code: non-zero if any unallowed diffs exist
-    has_unallowed_diffs = (unallowed_source_diffs > 0) or (unallowed_bytecode_diffs > 0)
+    # Contracts that could not be fetched/compared at all (e.g. unverified)
+    errored_count = sum(len(r.get("errored_contracts", [])) for r in all_results)
+
+    # Decide exit code: non-zero if any unallowed diffs or errored contracts exist
+    has_failures = (
+        (unallowed_source_diffs > 0)
+        or (unallowed_bytecode_diffs > 0)
+        or (errored_count > 0)
+    )
 
     logger.okay(f"Done in {round(execution_time, 3)}s ✨" + " " * 100)
 
-    if has_unallowed_diffs:
+    if has_failures:
         # Explicitly log a final line explaining failure condition
         logger.error(
-            "Exiting with non-zero code due to unallowed diffs",
-            f"source={unallowed_source_diffs}, bytecode={unallowed_bytecode_diffs}",
+            "Exiting with non-zero code due to unallowed diffs or errors",
+            f"source={unallowed_source_diffs}, bytecode={unallowed_bytecode_diffs}, errored={errored_count}",
         )
         sys.exit(1)
     else:
