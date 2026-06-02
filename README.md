@@ -174,6 +174,13 @@ diffyscan /path/to/config.json
 diffyscan /path/to/config.yaml
 ```
 
+To check only specific contracts (can be passed multiple times):
+
+```bash
+diffyscan /path/to/config.json -C 0xContractAddress
+diffyscan /path/to/config.json -C 0xFirst -C 0xSecond
+```
+
 To skip binary comparison (which is enabled by default):
 
 ```bash

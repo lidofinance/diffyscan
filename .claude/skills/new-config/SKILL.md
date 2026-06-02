@@ -51,8 +51,10 @@ YAML gotcha: addresses and hex strings MUST be quoted (`"0xabc..."`) — unquote
   - `constructor_args` — typed args per address: `{"0xAddr": ["0xarg1", true, 42]}`
   - `libraries` — per source path: `{"contracts/lib/Foo.sol": {"Foo": "0xLibAddr"}}`
   - `hardhat_config_name` — (deprecated) name of a hardhat config file
-- `fail_on_bytecode_comparison_error` — set to `true` for strict mode
+- `fail_on_bytecode_comparison_error` — defaults to `true`; when `false`, a per-contract exception (e.g. failing to fetch/verify a contract from the explorer) is logged and the run continues instead of aborting. Despite the name, an actual error inside `run_bytecode_diff` is always caught and recorded as a mismatch (`match=False`) regardless of this flag.
 - `source_comparison` — set to `false` to skip source diffs (bytecode-only check)
+- `rpc_url_env_var` — name of the env var holding the RPC URL for bytecode comparison (defaults to `REMOTE_RPC_URL`; e.g. `MANTLE_RPC_URL`, `PLASMA_RPC_URL`)
+- `deployment_gas_limit` — optional gas limit for the `eth_call` deployment simulation (helps on chains where the default reverts with "intrinsic gas too low")
 - `explorer_hostname_env_var` — config convention for external CI/tooling to pass the explorer hostname via env var (used for soneium, unichain). Note: diffyscan itself does NOT resolve this at runtime — `get_explorer_hostname()` only reads `explorer_hostname`. External scripts must set `explorer_hostname` before invoking diffyscan.
 - `audit_url` — optional link to an audit report for documentation purposes
 - `metadata` — optional object for deployment metadata (e.g. `chain_name`, `deployment_date`, `timelock_address`, `timelock_requirements`)
@@ -119,9 +121,46 @@ Save configs to `config_samples/<chain>/<network>/` following existing naming co
 - **Include `audit_url`** — link to the relevant audit report when available for cross-reference
 - **Keep configs strict** — prefer explicit over implicit; include all fields even if optional, so verification is as thorough as possible
 
+## Extracting proxy constructor calldata
+
+Factory-created proxies (e.g. TransparentUpgradeableProxy) often need `constructor_calldata` for bytecode comparison. Three methods, in order of preference:
+
+**Method 1: Etherscan v2 API** (preferred)
+```bash
+curl -s "https://api.etherscan.io/v2/api?chainid=<CHAIN_ID>&module=contract&action=getsourcecode&address=<ADDR>&apikey=<TOKEN>" \
+  | python3 -c "import sys,json; print(json.load(sys.stdin)['result'][0].get('ConstructorArguments',''))"
+```
+Factory-created contracts sometimes return empty — fall through to Method 2.
+
+**Method 2: debug_traceTransaction** (when Etherscan has empty args)
+1. Get creation tx hash via `getcontractcreation` API
+2. Trace with `{"tracer": "callTracer"}` to find CREATE/CREATE2 opcodes
+3. Constructor args are appended to initcode in the CREATE2 input. Find the implementation address (padded to 32 bytes) in the hex input — everything from that point on is the constructor args.
+4. Alternatively, if you know the exact initcode size (e.g. from a reference deployment on another chain), slice at that offset.
+
+**Method 3: Cross-chain reuse** (when traces unavailable)
+CREATE2 with same factory + same init code + same salt = same address on every chain. If a proxy has the same address on two chains, its constructor calldata is identical. Copy from the chain where you already have it.
+
+### Verifying proxy implementations
+Always verify implementations on-chain before writing the config:
+```bash
+cast implementation <proxy_address> --rpc-url <RPC_URL>
+```
+
+### Chain-specific RPC limitations
+- Some chains (Arbitrum, Mantle) do NOT support `debug_traceTransaction` on public RPCs — use Etherscan API or cross-chain reuse instead.
+- Mantle's gas model causes `eth_call` to fail with "intrinsic gas too low" for large deployment simulations — use `--skip-binary-comparison`.
+- Unverified contracts on a chain's explorer should be commented out in the config.
+
+### Dependencies: matching explorer source paths
+If diffyscan fails with 404 fetching a GitHub file, the explorer source uses a path prefix that isn't covered by `dependencies`. Each key in `dependencies` maps a source path prefix → a GitHub repo. Check the explorer source file paths and add the missing prefix mapping.
+
 ## Workflow
 
 1. Gather required info from user (ask for missing pieces)
 2. Look at existing configs in the same chain directory for reference patterns
-3. Create the config file
-4. Suggest running: `uv run diffyscan <config-path> --yes --cache-explorer --cache-github`
+3. Verify implementations on-chain with `cast implementation`
+4. Extract constructor calldata (Etherscan API → trace → cross-chain reuse)
+5. Create the config file with all needed dependencies
+6. Run: `uv run diffyscan <config-path> --yes --cache-explorer --cache-github`
+7. Expected: source diffs = 0; bytecode diffs on proxies (immutable reference) is normal
