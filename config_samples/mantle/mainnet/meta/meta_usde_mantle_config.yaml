@@ -44,6 +44,8 @@ explorer_hostname: api.etherscan.io
 explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
 explorer_chain_id: 5000
 
+deployment_gas_limit: 30000000000  # Mantle has inflated gas costs
+
 github_repo:
   url: https://github.com/mellow-finance/flexible-vaults
   commit: c9c71818f0a8bead183f9860db3b8bbceb7b8f37

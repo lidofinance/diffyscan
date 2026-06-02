@@ -1,6 +1,4 @@
 # Core implementations and factories — Plasma deployment
-# NOTE: contracts not yet verified on Etherscan v2 (chain ID 9745)
-#
 
 contracts:
   # Factory
