@@ -41,7 +41,7 @@ ls digest/<timestamp>/diffs/<contract_address>/
 - Missing or wrong constructor arguments -- see `constructor_calldata` or `constructor_args` under the `bytecode_comparison` config key
 - Missing libraries -- check if the contract uses external libraries that need addresses in `bytecode_comparison.libraries`
 - Wrong EVM version -- the explorer may report a different version than expected
-- Immutable variables -- `deep_match_bytecode()` in `diffyscan/utils/binary_verifier.py` compares instruction-by-instruction and tolerates differences that fall within known immutable reference regions. If all diffs are in immutable positions it logs a warning and returns `False` (still reported as a non-match — use `--allow-bytecode-diff 0xAddr` to accept). Differences outside immutable regions raise `BinVerifierError`
+- Immutable variables -- `deep_match_bytecode()` in `diffyscan/utils/binary_verifier.py` compares instruction-by-instruction and tolerates differences that fall within known immutable reference regions. If all diffs are in immutable positions it logs a warning and returns `False` (still reported as a non-match — use `--allow-bytecode-diff 0xAddr` to accept). Differences outside immutable regions raise `BinVerifierError`, which `process_config` catches and records as a non-match (`match=False`) — it does not abort the run
 - Optimizer settings mismatch -- the solcInput from the explorer includes optimizer settings; the GitHub recompilation must match
 - Flat-source contracts -- see **Known limitations** section below
 
@@ -68,7 +68,7 @@ ls digest/<timestamp>/diffs/<contract_address>/
 | `"Failed to infer source path for library '...' from explorer metadata"` | Add library addresses to `bytecode_comparison.libraries` keyed by `"path/to/File.sol": {"LibName": "0xAddr"}` |
 | All files show diffs | Wrong `commit` or `relative_root` in `github_repo` |
 | Single contract fails | May need a per-contract `constructor_calldata` or `constructor_args` entry |
-| `"Bytecodes have differences not on the immutable reference position"` | Real bytecode mismatch -- check compiler version, optimizer settings, EVM version, and library addresses |
+| `"Failed in binary comparison: Bytecodes have differences not on the immutable reference position"` | Real bytecode mismatch -- check compiler version, optimizer settings, EVM version, and library addresses |
 | `"Exiting with non-zero code due to unallowed diffs"` | Either fix the diffs or use `--allow-source-diff 0xAddr` / `--allow-bytecode-diff 0xAddr` for known acceptable diffs |
 | `"Contract name in config does not match with blockchain explorer ... !="` | Contract not verified on explorer — comment it out or verify it on the explorer first |
 | `"Failed to get calldata: Explorer metadata has empty constructor calldata for 0x..."` | Factory-created contract — Etherscan has no constructor args. Add `constructor_calldata` manually (extract via `getsourcecode` API `ConstructorArguments`, `debug_traceTransaction` trace, or cross-chain reuse) |

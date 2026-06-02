@@ -51,8 +51,10 @@ YAML gotcha: addresses and hex strings MUST be quoted (`"0xabc..."`) — unquote
   - `constructor_args` — typed args per address: `{"0xAddr": ["0xarg1", true, 42]}`
   - `libraries` — per source path: `{"contracts/lib/Foo.sol": {"Foo": "0xLibAddr"}}`
   - `hardhat_config_name` — (deprecated) name of a hardhat config file
-- `fail_on_bytecode_comparison_error` — set to `true` for strict mode
+- `fail_on_bytecode_comparison_error` — defaults to `true` (strict); set to `false` to log bytecode comparison errors instead of failing the run
 - `source_comparison` — set to `false` to skip source diffs (bytecode-only check)
+- `rpc_url_env_var` — name of the env var holding the RPC URL for bytecode comparison (defaults to `REMOTE_RPC_URL`; e.g. `MANTLE_RPC_URL`, `PLASMA_RPC_URL`)
+- `deployment_gas_limit` — optional gas limit for the `eth_call` deployment simulation (helps on chains where the default reverts with "intrinsic gas too low")
 - `explorer_hostname_env_var` — config convention for external CI/tooling to pass the explorer hostname via env var (used for soneium, unichain). Note: diffyscan itself does NOT resolve this at runtime — `get_explorer_hostname()` only reads `explorer_hostname`. External scripts must set `explorer_hostname` before invoking diffyscan.
 - `audit_url` — optional link to an audit report for documentation purposes
 - `metadata` — optional object for deployment metadata (e.g. `chain_name`, `deployment_date`, `timelock_address`, `timelock_requirements`)
