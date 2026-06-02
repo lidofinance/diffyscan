@@ -452,6 +452,7 @@ def process_config(
     # Statistics tracking
     source_stats = []
     bytecode_stats = []
+    matched_count = 0
 
     try:
         if enable_binary_comparison:
@@ -467,6 +468,7 @@ def process_config(
         for contract_address, contract_name in config["contracts"].items():
             if filter_set and contract_address.lower() not in filter_set:
                 continue
+            matched_count += 1
             try:
                 contract_code = get_contract_from_explorer(
                     explorer_token,
@@ -529,6 +531,7 @@ def process_config(
         "source_stats": source_stats,
         "bytecode_stats": bytecode_stats,
         "config_path": path,
+        "matched_count": matched_count,
     }
 
 
@@ -762,6 +765,14 @@ def main() -> None:
             args.local_rpc,
         )
         all_results.append(result)
+
+    # A contract filter that matches nothing across all configs is a usage error
+    if args.contract_filter and sum(r["matched_count"] for r in all_results) == 0:
+        logger.error(
+            "No contracts matched the --contract filter",
+            ", ".join(args.contract_filter),
+        )
+        sys.exit(1)
 
     execution_time = time.time() - START_TIME
 

@@ -51,9 +51,42 @@ def test_filter_is_case_insensitive():
     assert "ContractA" in filtered.values()
 
 
+def filter_matched_any(config_contracts, contract_filter):
+    """Reproduce the run-level check from main: did the filter match any contract?"""
+    if not contract_filter:
+        return True
+    return any(
+        apply_filter(contracts, contract_filter) for contracts in config_contracts
+    )
+
+
 def test_filter_nonexistent_address_returns_empty():
     filtered = apply_filter(CONTRACTS, ["0x0000000000000000000000000000000000000000"])
     assert filtered == {}
+
+
+def test_filter_matching_nothing_is_an_error():
+    # A filter that matches no contract in any config is a usage error (exit non-zero).
+    assert (
+        filter_matched_any([CONTRACTS], ["0x0000000000000000000000000000000000000000"])
+        is False
+    )
+
+
+def test_filter_matching_in_any_config_is_ok():
+    # Matching at least one contract in one of several configs is fine.
+    other = {"0xDdDdDdDdDdDdDdDdDdDdDdDdDdDdDdDdDdDdDdDd": "ContractD"}
+    assert (
+        filter_matched_any(
+            [other, CONTRACTS], ["0xAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAa"]
+        )
+        is True
+    )
+
+
+def test_no_filter_is_never_an_error():
+    assert filter_matched_any([CONTRACTS], None) is True
+    assert filter_matched_any([CONTRACTS], []) is True
 
 
 def test_filter_mixed_case_multiple():
