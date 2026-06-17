@@ -13,6 +13,19 @@ updates:
     commit-message:
       prefix: "ci"
 
+  - package-ecosystem: "docker"
+    directory: "/.devcontainer"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    groups:
+      docker:
+        patterns: ["*"]
+    labels: ["dependencies", "docker"]
+    commit-message:
+      prefix: "build"
+
   - package-ecosystem: "uv"
     directory: "/"
     schedule:
