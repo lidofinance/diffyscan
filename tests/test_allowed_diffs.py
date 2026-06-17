@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from diffyscan.utils.allowed_diffs import (
     build_bytecode_suggestion_entry,
     build_effective_allowed_diffs,
@@ -10,7 +12,17 @@ from diffyscan.utils.allowed_diffs import (
     render_suggestion_snippet,
     summarize_bytecode_uncovered,
     summarize_source_uncovered_hunks,
+    validate_allowed_diffs_config,
 )
+
+ADDR = "0x0000000000000000000000000000000000000001"
+
+
+def _config_with(diff_kind: str, rule: dict) -> dict:
+    return {
+        "contracts": {ADDR: "Test"},
+        "allowed_diffs": {diff_kind: {ADDR: [rule]}},
+    }
 
 
 def test_build_effective_allowed_diffs_prefers_config_over_cli():
@@ -35,7 +47,6 @@ def test_build_effective_allowed_diffs_prefers_config_over_cli():
         {
             "reason": "config",
             "cbor_metadata": True,
-            "_origin": "config",
         }
     ]
 
@@ -544,7 +555,7 @@ def test_build_effective_allowed_diffs_cli_only_address():
     rules = result["source"]["0x0000000000000000000000000000000000000001"]
     assert len(rules) == 1
     assert rules[0]["any"] is True
-    assert rules[0]["_origin"] == "cli"
+    assert rules[0] == {"reason": "CLI allow-source-diff", "any": True}
 
 
 # --- summarize helpers ---
@@ -582,3 +593,202 @@ def test_summarize_bytecode_uncovered():
     assert "cbor_metadata" in summaries
     assert "string_literal" in summaries
     assert "runtime_length" in summaries
+
+
+# --- validate_allowed_diffs_config: happy path ---
+
+
+def test_validate_allowed_diffs_config_accepts_valid_rules():
+    config = {
+        "contracts": {ADDR: "Test"},
+        "allowed_diffs": {
+            "bytecode": {
+                ADDR: [
+                    {"reason": "meta", "cbor_metadata": True},
+                    {
+                        "reason": "imm",
+                        "immutables": [{"offset": 0, "value": "0x00"}],
+                    },
+                ]
+            },
+            "source": {
+                ADDR: [
+                    {"reason": "files", "files": ["a.sol"]},
+                    {
+                        "reason": "lines",
+                        "line_ranges": [
+                            {
+                                "file": "a.sol",
+                                "github": {"start": 1, "count": 2},
+                                "explorer": {"start": 1, "count": 2},
+                            }
+                        ],
+                    },
+                ]
+            },
+        },
+    }
+    validate_allowed_diffs_config(config, "cfg")  # should not raise
+
+
+def test_validate_allowed_diffs_config_noop_without_block():
+    validate_allowed_diffs_config({"contracts": {}}, "cfg")
+
+
+# --- validate_allowed_diffs_config: structural errors ---
+
+
+def test_validate_rejects_non_mapping_allowed_diffs():
+    with pytest.raises(ValueError, match="must be a mapping"):
+        validate_allowed_diffs_config({"allowed_diffs": []}, "cfg")
+
+
+def test_validate_rejects_unknown_diff_kind():
+    config = {"contracts": {ADDR: "T"}, "allowed_diffs": {"runtime": {}}}
+    with pytest.raises(ValueError, match="not supported"):
+        validate_allowed_diffs_config(config, "cfg")
+
+
+def test_validate_rejects_address_not_in_contracts():
+    config = {
+        "contracts": {ADDR: "T"},
+        "allowed_diffs": {
+            "bytecode": {
+                "0x0000000000000000000000000000000000000002": [
+                    {"reason": "x", "any": True}
+                ]
+            }
+        },
+    }
+    with pytest.raises(ValueError, match="not present"):
+        validate_allowed_diffs_config(config, "cfg")
+
+
+def test_validate_rejects_empty_rule_list():
+    with pytest.raises(ValueError, match="non-empty list"):
+        validate_allowed_diffs_config(
+            {"contracts": {ADDR: "T"}, "allowed_diffs": {"bytecode": {ADDR: []}}},
+            "cfg",
+        )
+
+
+def test_validate_rejects_missing_reason():
+    with pytest.raises(ValueError, match="reason"):
+        validate_allowed_diffs_config(_config_with("bytecode", {"any": True}), "cfg")
+
+
+# --- validate_allowed_diffs_config: facet rules ---
+
+
+def test_validate_rejects_any_combined_with_facet():
+    rule = {"reason": "x", "any": True, "cbor_metadata": True}
+    with pytest.raises(ValueError, match="cannot combine any"):
+        validate_allowed_diffs_config(_config_with("bytecode", rule), "cfg")
+
+
+def test_validate_rejects_rule_without_any_facet():
+    with pytest.raises(ValueError, match="at least one allowlist facet"):
+        validate_allowed_diffs_config(_config_with("bytecode", {"reason": "x"}), "cfg")
+
+
+def test_validate_rejects_constructor_args_and_calldata_together():
+    rule = {
+        "reason": "x",
+        "constructor_args": [1],
+        "constructor_calldata": "0x00",
+    }
+    with pytest.raises(ValueError, match="cannot include both"):
+        validate_allowed_diffs_config(_config_with("bytecode", rule), "cfg")
+
+
+def test_validate_rejects_cbor_metadata_not_true():
+    rule = {"reason": "x", "cbor_metadata": False}
+    with pytest.raises(ValueError, match="cbor_metadata must be true"):
+        validate_allowed_diffs_config(_config_with("bytecode", rule), "cfg")
+
+
+def test_validate_rejects_duplicate_immutable_offset():
+    rule = {
+        "reason": "x",
+        "immutables": [
+            {"offset": 4, "value": "0x00"},
+            {"offset": 4, "value": "0x11"},
+        ],
+    }
+    with pytest.raises(ValueError, match="duplicate offset"):
+        validate_allowed_diffs_config(_config_with("bytecode", rule), "cfg")
+
+
+def test_validate_rejects_negative_immutable_offset():
+    rule = {"reason": "x", "immutables": [{"offset": -1, "value": "0x00"}]}
+    with pytest.raises(ValueError, match="non-negative integer"):
+        validate_allowed_diffs_config(_config_with("bytecode", rule), "cfg")
+
+
+def test_validate_rejects_zero_length_byte_range():
+    rule = {"reason": "x", "byte_ranges": [{"offset": 0, "length": 0}]}
+    with pytest.raises(ValueError, match="positive integer"):
+        validate_allowed_diffs_config(_config_with("bytecode", rule), "cfg")
+
+
+def test_validate_rejects_odd_length_hex_value():
+    rule = {"reason": "x", "immutables": [{"offset": 0, "value": "0x000"}]}
+    with pytest.raises(ValueError, match="even number"):
+        validate_allowed_diffs_config(_config_with("bytecode", rule), "cfg")
+
+
+def test_validate_rejects_non_hex_calldata():
+    rule = {"reason": "x", "constructor_calldata": "0xzz"}
+    with pytest.raises(ValueError, match="not valid hex"):
+        validate_allowed_diffs_config(_config_with("bytecode", rule), "cfg")
+
+
+def test_validate_rejects_unknown_rule_key():
+    rule = {"reason": "x", "cbor_metadata": True, "bogus": 1}
+    with pytest.raises(ValueError, match="unsupported keys"):
+        validate_allowed_diffs_config(_config_with("bytecode", rule), "cfg")
+
+
+# --- validate_allowed_diffs_config: source rules ---
+
+
+def test_validate_rejects_line_range_start_below_one():
+    rule = {
+        "reason": "x",
+        "line_ranges": [
+            {
+                "file": "a.sol",
+                "github": {"start": 0, "count": 1},
+                "explorer": {"start": 1, "count": 1},
+            }
+        ],
+    }
+    with pytest.raises(ValueError, match="start must be an integer >= 1"):
+        validate_allowed_diffs_config(_config_with("source", rule), "cfg")
+
+
+def test_validate_rejects_empty_files_list():
+    rule = {"reason": "x", "files": []}
+    with pytest.raises(ValueError, match="files must be a non-empty list"):
+        validate_allowed_diffs_config(_config_with("source", rule), "cfg")
+
+
+# --- suggestion edge cases ---
+
+
+def test_build_source_suggestion_entry_returns_none_without_diff():
+    assert build_source_suggestion_entry({"has_diff": False, "files": []}) is None
+
+
+def test_build_bytecode_suggestion_entry_metadata_only_is_not_wildcard():
+    analysis = _make_base_analysis(metadata_mismatch=True)
+    entry = build_bytecode_suggestion_entry(analysis)
+    assert entry is not None
+    assert entry == {"reason": entry["reason"], "cbor_metadata": True}
+    assert "any" not in entry
+
+
+def test_render_suggestion_snippet_reason_only_entry_roundtrips():
+    entry = {"reason": "because", "any": True}
+    snippet = render_suggestion_snippet("cfg.json", "bytecode", ADDR, entry)
+    assert json.loads(snippet)["allowed_diffs"]["bytecode"][ADDR] == [entry]

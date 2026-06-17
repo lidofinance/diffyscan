@@ -721,14 +721,14 @@ def parse_arguments() -> argparse.Namespace:
         dest="allow_source_diff",
         action="append",
         default=[],
-        help="Allow source diffs for a specific contract address (0x...). Can be passed multiple times.",
+        help="DEPRECATED shorthand for an allowed_diffs source 'any: true' rule; prefer config allowed_diffs. Allow source diffs for a specific contract address (0x...). Can be passed multiple times.",
     )
     parser.add_argument(
         "--allow-bytecode-diff",
         dest="allow_bytecode_diff",
         action="append",
         default=[],
-        help="Allow bytecode diffs for a specific contract address (0x...). Can be passed multiple times.",
+        help="DEPRECATED shorthand for an allowed_diffs bytecode 'any: true' rule; prefer config allowed_diffs. Allow bytecode diffs for a specific contract address (0x...). Can be passed multiple times.",
     )
     parser.add_argument(
         "--log-level",
@@ -893,9 +893,7 @@ def is_standard_json_contract(source_files: dict) -> bool:
 
 def _log_allowed_diff(diff_kind: str, contract_label: str, evaluation: dict) -> None:
     matched_rule = evaluation["matched_rule"] or {}
-    facets = ", ".join(
-        evaluation["matched_facets"] or _present_rule_facets(matched_rule)
-    )
+    facets = ", ".join(evaluation["matched_facets"])
     logger.warn(f"Allowed {diff_kind} diff", contract_label)
     logger.warn("Matched allowlist rule", matched_rule.get("reason"))
     if facets:
@@ -925,24 +923,6 @@ def _log_uncovered_bytecode_diff(analysis: dict) -> None:
                 "Observed immutable value",
                 f"offset={observed['offset']} value={observed['remote_value']}",
             )
-
-
-def _present_rule_facets(rule: dict) -> list[str]:
-    facets = []
-    for field in (
-        "any",
-        "immutables",
-        "cbor_metadata",
-        "byte_ranges",
-        "constructor_args",
-        "constructor_calldata",
-        "files",
-        "line_ranges",
-    ):
-        value = rule.get(field)
-        if value not in (None, False, [], {}):
-            facets.append(field)
-    return facets
 
 
 def _constructor_rule_cache_key(rule: dict) -> str:

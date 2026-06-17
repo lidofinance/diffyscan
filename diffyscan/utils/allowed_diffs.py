@@ -93,8 +93,7 @@ def build_effective_allowed_diffs(
         for address, entries in entries_by_address.items():
             normalized_address = address.lower()
             effective[diff_kind][normalized_address] = [
-                _normalize_rule_entry(diff_kind, entry, origin="config")
-                for entry in entries
+                _normalize_rule_entry(diff_kind, entry) for entry in entries
             ]
 
     for diff_kind, addresses in (
@@ -119,7 +118,6 @@ def build_effective_allowed_diffs(
                 {
                     "reason": f"CLI allow-{diff_kind}-diff",
                     "any": True,
-                    "_origin": "cli",
                 }
             ]
 
@@ -203,7 +201,7 @@ def evaluate_bytecode_rules(
 def normalize_source_hunks(
     github_lines: list[str], explorer_lines: list[str]
 ) -> list[dict]:
-    matcher = _build_matcher(github_lines, explorer_lines)
+    matcher = SequenceMatcher(None, github_lines, explorer_lines)
     hunks = []
 
     for tag, i1, i2, j1, j2 in matcher.get_opcodes():
@@ -457,9 +455,8 @@ def _validate_source_rule_entry(entry: object, scope: str) -> None:
             _validate_source_span(line_range.get("explorer"), f"{item_scope}.explorer")
 
 
-def _normalize_rule_entry(diff_kind: str, entry: dict, origin: str) -> dict:
+def _normalize_rule_entry(diff_kind: str, entry: dict) -> dict:
     normalized = copy.deepcopy(entry)
-    normalized["_origin"] = origin
 
     if diff_kind == "bytecode":
         if "constructor_calldata" in normalized:
@@ -598,13 +595,6 @@ def _is_full_file_insert_or_delete(file_result: dict) -> bool:
         (github_count == 0 and explorer_count == file_result["explorer_line_count"])
         or (explorer_count == 0 and github_count == file_result["github_line_count"])
     )
-
-
-def _build_matcher(
-    github_lines: list[str], explorer_lines: list[str]
-) -> SequenceMatcher:
-
-    return SequenceMatcher(None, github_lines, explorer_lines)
 
 
 def _validate_any_field(entry: dict, scope: str) -> None:
