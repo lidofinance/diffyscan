@@ -172,7 +172,11 @@ def run_bytecode_diff(
     )
 
     deployment_call_data = _append_calldata(contract_creation_code, calldata)
-    local_deployed_bytecode = simulate_deployment(deployment_call_data, remote_rpc_url)
+    gas_limit = config.get("deployment_gas_limit")
+    extra = {"gas_limit": gas_limit} if gas_limit else {}
+    local_deployed_bytecode = simulate_deployment(
+        deployment_call_data, remote_rpc_url, **extra
+    )
 
     is_fully_matched = local_deployed_bytecode == remote_deployed_bytecode
 
@@ -354,8 +358,9 @@ def _load_explorer_token(config: dict) -> str:
 
 
 def _setup_binary_comparison(config: dict) -> str:
-    """Load REMOTE_RPC_URL and configure exception handling for bytecode comparison."""
-    remote_rpc_url = load_env("REMOTE_RPC_URL", masked=True, required=True)
+    """Load RPC URL and configure exception handling for bytecode comparison."""
+    rpc_env_var = config.get("rpc_url_env_var", "REMOTE_RPC_URL")
+    remote_rpc_url = load_env(rpc_env_var, masked=True, required=True)
     ExceptionHandler.initialize(config.get("fail_on_bytecode_comparison_error", True))
     return remote_rpc_url
 
@@ -413,6 +418,7 @@ def process_config(
     cache_explorer: bool,
     cache_github: bool,
     skip_user_input: bool = False,
+    contract_filter: list[str] | None = None,
 ):
     """Process a config file and run source + bytecode comparisons."""
     # Reset exception handler to default before each config
@@ -441,6 +447,7 @@ def process_config(
     # Statistics tracking
     source_stats = []
     bytecode_stats = []
+    matched_count = 0
 
     try:
         if enable_binary_comparison:
@@ -448,7 +455,15 @@ def process_config(
             remote_chain_id = get_chain_id(remote_rpc_url)
             logger.okay("Remote chain ID", remote_chain_id)
 
+        # Apply contract filter if specified
+        filter_set = (
+            set(addr.lower() for addr in contract_filter) if contract_filter else None
+        )
+
         for contract_address, contract_name in config["contracts"].items():
+            if filter_set and contract_address.lower() not in filter_set:
+                continue
+            matched_count += 1
             try:
                 contract_code = get_contract_from_explorer(
                     explorer_token,
@@ -511,6 +526,7 @@ def process_config(
         "source_stats": source_stats,
         "bytecode_stats": bytecode_stats,
         "config_path": path,
+        "matched_count": matched_count,
     }
 
 
@@ -581,6 +597,14 @@ def parse_arguments() -> argparse.Namespace:
         "-Q",
         help="Hide info messages, show okay/warn/error (shorthand for --log-level okay)",
         action="store_true",
+    )
+    parser.add_argument(
+        "--contract",
+        "-C",
+        dest="contract_filter",
+        action="append",
+        default=[],
+        help="Only check specific contract address (0x...). Can be passed multiple times.",
     )
     return parser.parse_args()
 
@@ -670,7 +694,6 @@ def main() -> None:
     """Main entry point for the diffyscan application."""
     load_dotenv()
     args = parse_arguments()
-    skip_user_input = args.yes
     if args.quiet:
         logger.set_level("okay")
     else:
@@ -726,9 +749,18 @@ def main() -> None:
             enable_binary_comparison,
             args.cache_explorer,
             args.cache_github,
-            skip_user_input,
+            args.yes,
+            args.contract_filter,
         )
         all_results.append(result)
+
+    # A contract filter that matches nothing across all configs is a usage error
+    if args.contract_filter and sum(r["matched_count"] for r in all_results) == 0:
+        logger.error(
+            "No contracts matched the --contract filter",
+            ", ".join(args.contract_filter),
+        )
+        sys.exit(1)
 
     execution_time = time.time() - START_TIME
 
