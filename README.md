@@ -212,7 +212,17 @@ Supported source facets:
 
 When an uncovered diff is found, diffyscan prints a suggested `allowed_diffs` snippet in the final summary. Immutable-backed bytecode diffs are suggested as exact immutable values before falling back to byte ranges.
 
-`--allow-bytecode-diff` and `--allow-source-diff` still work, but they are now deprecated shorthands for `any: true`. Move those rules into the config file so the summary suggestions can help you tighten them over time.
+#### Prefer granular rules over `any: true`
+
+`any: true` allowlists **every** diff for a contract: it provides no audit trail of what actually differs, and it silently hides *future* drift — a later unexpected change to that contract will pass unnoticed. Treat it as a temporary placeholder, not a destination. Always prefer the narrowest facet that covers the real diff (`immutables`/`byte_ranges`/`cbor_metadata`/`line_ranges`/`files`); reserve `any: true` for diffs that genuinely cannot be scoped (e.g. bytecode that can't be reproduced, or a deployment whose constructor can't be simulated), and explain why in the `reason`. CI (`tests/test_no_wildcard_regression.py`) fails on any new wildcard that isn't explicitly justified.
+
+Recommended workflow to tighten a wildcard:
+
+1. Temporarily remove the rule (or start without one) and run diffyscan against the live chain.
+2. Copy the `allowed_diffs` snippet it prints for the uncovered diff.
+3. Paste it into the config, replace the placeholder `reason` with the real explanation, and re-run to confirm it now passes.
+
+`--allow-bytecode-diff` and `--allow-source-diff` still work, but they are **deprecated** shorthands for `any: true` (diffyscan warns when they are used). Move those rules into the config file so the summary suggestions can help you tighten them over time.
 
 Start the script
 

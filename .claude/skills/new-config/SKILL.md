@@ -52,6 +52,23 @@ YAML gotcha: addresses and hex strings MUST be quoted (`"0xabc..."`) — unquote
   - `libraries` — per source path: `{"contracts/lib/Foo.sol": {"Foo": "0xLibAddr"}}`
   - `hardhat_config_name` — (deprecated) name of a hardhat config file
 - `fail_on_bytecode_comparison_error` — defaults to `true`; when `false`, a per-contract exception (e.g. failing to fetch/verify a contract from the explorer) is logged and the run continues instead of aborting. Despite the name, an actual error inside `run_bytecode_diff` is always caught and recorded as a mismatch (`match=False`) regardless of this flag.
+- `allowed_diffs` — declare expected, known diffs so the run still passes while everything else stays verified. Map of `bytecode` / `source` → `{"0xAddr": [rules]}`; each rule needs a `reason`. Prefer the **most specific** facet — for bytecode: `immutables` (exact on-chain values), `byte_ranges`, `cbor_metadata: true`, `constructor_args`/`constructor_calldata`; for source: `line_ranges` (exact hunks), `files` (whole files). `any: true` is a blanket wildcard that hides *all* future drift — use it only when a diff genuinely cannot be scoped (e.g. bytecode that can't be reproduced), and explain why in the `reason`. When a diff is uncovered, diffyscan prints a ready-to-paste snippet in the final summary; paste it and tighten the placeholder. Example:
+  ```yaml
+  allowed_diffs:
+    bytecode:
+      "0xAddr":
+        - reason: Factory stores its timelock as an immutable
+          immutables:
+            - offset: 304
+              value: "0x000000000000000000000000468029a8..."
+    source:
+      "0xAddr":
+        - reason: Import paths differ between repo and explorer
+          line_ranges:
+            - file: contracts/Foo.sol
+              github: { start: 6, count: 5 }
+              explorer: { start: 6, count: 5 }
+  ```
 - `source_comparison` — set to `false` to skip source diffs (bytecode-only check)
 - `rpc_url_env_var` — name of the env var holding the RPC URL for bytecode comparison (defaults to `REMOTE_RPC_URL`; e.g. `MANTLE_RPC_URL`, `PLASMA_RPC_URL`)
 - `deployment_gas_limit` — optional gas limit for the `eth_call` deployment simulation (helps on chains where the default reverts with "intrinsic gas too low")

@@ -69,7 +69,10 @@ explorer_token_env_var: "ETHERSCAN_EXPLORER_TOKEN"
 github_repo:        { url, commit, relative_root }
 dependencies:       { "dep_name": { url, commit, relative_root } }
 bytecode_comparison: { constructor_calldata, constructor_args, libraries }
+allowed_diffs:      { bytecode: {...}, source: {...} }  # optional; see below
 ```
+
+`allowed_diffs` declares known/expected diffs per contract so a run still passes while everything else stays verified (validated by `diffyscan/utils/allowed_diffs.py`). Each rule needs a `reason`. **Prefer the tightest facet** — bytecode: `immutables`, `byte_ranges`, `cbor_metadata`, `constructor_args`/`constructor_calldata`; source: `line_ranges`, `files`. `any: true` is a blanket wildcard that hides all future drift — avoid it unless a diff genuinely can't be scoped, and say why in the `reason`. The deprecated `--allow-source-diff`/`--allow-bytecode-diff` CLI flags are just shorthands for `any: true`. `tests/test_no_wildcard_regression.py` guards against new wildcards.
 
 ### Environment variables
 
