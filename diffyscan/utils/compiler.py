@@ -10,6 +10,11 @@ from .common import fetch
 from .logger import logger
 from .custom_exceptions import CompileError
 
+# Large multi-file contracts (e.g. the Lido core V3 vault system) routinely take
+# well over a minute to compile with the optimizer enabled. Keep this generous so
+# slower CI runners don't spuriously time out; a real hang is still bounded.
+COMPILE_TIMEOUT_SECONDS = 300
+
 SOLC_PLATFORM_MAP = {
     "linux": "linux-amd64",
     "darwin": "macosx-amd64",
@@ -99,7 +104,7 @@ def compile_contracts(compiler_path: str, input_settings: str) -> dict:
             input=input_settings.encode(),
             capture_output=True,
             check=True,
-            timeout=60,
+            timeout=COMPILE_TIMEOUT_SECONDS,
         )
     except subprocess.CalledProcessError as e:
         raise CompileError(f"Error during compiler subprocess execution: {e}")
