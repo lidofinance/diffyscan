@@ -25,7 +25,7 @@ dev = [
     "black>=26.5.1,<27",
     "gitlint>=0.19,<1",
     "pre-commit>=4.6.0,<5",
-    "pytest>=9.0.3,<10",
+    "pytest>=9.1.0,<10",
 ]
 
 [build-system]
