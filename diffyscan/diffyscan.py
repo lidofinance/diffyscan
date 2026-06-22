@@ -16,6 +16,7 @@ from .utils.constants import (
 )
 from .utils.explorer import (
     get_contract_from_explorer,
+    build_contract_from_local_input,
     compile_contract_from_explorer,
     parse_compiled_contract,
     get_explorer_hostname,
@@ -365,6 +366,22 @@ def _setup_binary_comparison(config: dict) -> str:
     return remote_rpc_url
 
 
+def _get_local_inputs(config: dict, config_path: str) -> dict[str, str]:
+    """Map lowercased address -> absolute solc-input path from local_compilation.
+
+    Paths are resolved relative to the config file directory.
+    """
+    local_compilation = config.get("local_compilation") or {}
+    inputs = local_compilation.get("inputs") or {}
+    base_dir = os.path.dirname(os.path.abspath(config_path))
+    resolved = {}
+    for address, input_path in inputs.items():
+        if not os.path.isabs(input_path):
+            input_path = os.path.join(base_dir, input_path)
+        resolved[address.lower()] = input_path
+    return resolved
+
+
 def _append_calldata(creation_code: str, calldata: str | None) -> str:
     if not calldata:
         return creation_code
@@ -428,8 +445,15 @@ def process_config(
     config = load_config(path)
     _warn_deprecated_hardhat_settings(config, hardhat_config_path)
 
-    # Load tokens and validate
-    explorer_token = _load_explorer_token(config)
+    # Contracts whose sources/settings come from a local solc input, not an explorer
+    local_inputs = _get_local_inputs(config, path)
+    local_compiler = (config.get("local_compilation") or {}).get("compiler")
+
+    # The explorer token is only needed when some contract still uses the explorer
+    needs_explorer = any(
+        address.lower() not in local_inputs for address in config["contracts"]
+    )
+    explorer_token = _load_explorer_token(config) if needs_explorer else None
     github_api_token = load_env("GITHUB_API_TOKEN", masked=True, required=True)
 
     # Setup binary comparison if enabled
@@ -465,16 +489,31 @@ def process_config(
                 continue
             matched_count += 1
             try:
-                contract_code = get_contract_from_explorer(
-                    explorer_token,
-                    get_explorer_hostname(config),
-                    contract_address,
-                    contract_name,
-                    get_explorer_chain_id(config),
-                    cache_explorer,
-                )
+                local_input_path = local_inputs.get(contract_address.lower())
+                if local_input_path:
+                    if not local_compiler:
+                        raise CompileError(
+                            'Config "local_compilation.compiler" is required when '
+                            '"local_compilation.inputs" is set (e.g. "v0.8.26+commit.8a97fa7a")'
+                        )
+                    logger.info(
+                        f"Building {contract_address} from local solc input {local_input_path}"
+                    )
+                    contract_code = build_contract_from_local_input(
+                        contract_name, local_input_path, local_compiler
+                    )
+                else:
+                    contract_code = get_contract_from_explorer(
+                        explorer_token,
+                        get_explorer_hostname(config),
+                        contract_address,
+                        contract_name,
+                        get_explorer_chain_id(config),
+                        cache_explorer,
+                    )
 
-                if enable_source_comparison:
+                # Source diff needs explorer sources; local inputs run bytecode only
+                if enable_source_comparison and not local_input_path:
                     source_result = run_source_diff(
                         contract_address,
                         contract_code,

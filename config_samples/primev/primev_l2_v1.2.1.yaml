@@ -1,0 +1,41 @@
+# Primev mev-commit chain (chainId 57173) — v1.2.1 implementation
+# https://github.com/primev/mev-commit @ 28a54c02cc2d04cc13e70a9c40a39c2897d1a53e
+# ProviderRegistry was upgraded to ProviderRegistryV2 (v1.2.1) on 2025-10-06.
+# local_compilation, bytecode only; see primev_l2_v1.2.0.yaml. Run:
+#   MEV_COMMIT_RPC_URL=https://chainrpc.mev-commit.xyz \
+#     uv run diffyscan config_samples/primev/primev_l2_v1.2.1.yaml -Y
+
+contracts:
+  "0x09b3ceeae27899c87d44e4be7a31ad9a7b765342": ProviderRegistryV2
+
+network: mainnet
+explorer_chain_id: 57173  # informational; no explorer fetch happens
+source_comparison: false
+rpc_url_env_var: MEV_COMMIT_RPC_URL
+
+github_repo:
+  url: https://github.com/primev/mev-commit
+  commit: 28a54c02cc2d04cc13e70a9c40a39c2897d1a53e
+  relative_root: contracts
+
+dependencies:
+  lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts:
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: dbb6104ce834628e473d2173bbc9d47f81a9eec3
+    relative_root: contracts
+    # v5.0.2 (nested inside the upgradeable submodule)
+  lib/openzeppelin-contracts-upgradeable/contracts:
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable
+    commit: 723f8cab09cdae1aca9ec9cc1cfa040c2d4b06c1
+    relative_root: contracts
+    # v5.0.2
+  lib/openzeppelin-contracts/contracts:
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: fd81a96f01cc42ef1c9a5399364968d0e07e9e90
+    relative_root: contracts
+    # v4.9.3 (top-level, @openzeppelin/contracts/ remapping at v1.2.x)
+
+local_compilation:
+  compiler: v0.8.26+commit.8a97fa7a
+  inputs:
+    "0x09b3ceeae27899c87d44e4be7a31ad9a7b765342": l2_inputs/ProviderRegistryV2.json

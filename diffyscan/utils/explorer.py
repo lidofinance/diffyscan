@@ -659,6 +659,39 @@ def get_contract_from_explorer(
     return result
 
 
+def build_contract_from_local_input(
+    contract_name: str,
+    input_path: str,
+    compiler: str,
+) -> dict:
+    """Build a contract_code dict from a local solc standard-JSON input file.
+
+    Same shape as get_contract_from_explorer, for chains without a verified-source
+    explorer. The input supplies the file manifest and compiler settings; contents
+    are fetched from GitHub at compile time.
+    """
+    try:
+        with open(input_path) as f:
+            solc_input = json.load(f)
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ExplorerError(f"Failed to read local solc input {input_path}: {exc}")
+
+    if "sources" not in solc_input:
+        raise ExplorerError(f'Local solc input {input_path} has no "sources"')
+
+    settings = solc_input.setdefault("settings", {})
+    settings["outputSelection"] = _default_output_selection()
+
+    return {
+        "name": contract_name,
+        "compiler": compiler,
+        "solcInput": solc_input,
+        "evm_version": settings.get("evmVersion"),
+        "libraries": settings.get("libraries") or None,
+        "constructor_arguments": None,
+    }
+
+
 def compile_contract_from_explorer(
     contract_code: dict,
     libraries: dict | None = None,

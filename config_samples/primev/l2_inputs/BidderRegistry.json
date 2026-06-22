@@ -1,0 +1,124 @@
+{
+ "language": "Solidity",
+ "sources": {
+  "contracts/core/BidderRegistry.sol": {
+   "content": ""
+  },
+  "lib/openzeppelin-contracts-upgradeable/contracts/access/Ownable2StepUpgradeable.sol": {
+   "content": ""
+  },
+  "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol": {
+   "content": ""
+  },
+  "lib/openzeppelin-contracts-upgradeable/contracts/utils/ReentrancyGuardUpgradeable.sol": {
+   "content": ""
+  },
+  "lib/openzeppelin-contracts-upgradeable/contracts/utils/PausableUpgradeable.sol": {
+   "content": ""
+  },
+  "contracts/interfaces/IBidderRegistry.sol": {
+   "content": ""
+  },
+  "contracts/core/BidderRegistryStorage.sol": {
+   "content": ""
+  },
+  "contracts/interfaces/IBlockTracker.sol": {
+   "content": ""
+  },
+  "contracts/utils/FeePayout.sol": {
+   "content": ""
+  },
+  "contracts/utils/Occurrence.sol": {
+   "content": ""
+  },
+  "contracts/core/DepositManager.sol": {
+   "content": ""
+  },
+  "lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol": {
+   "content": ""
+  },
+  "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol": {
+   "content": ""
+  },
+  "lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/interfaces/draft-IERC1822.sol": {
+   "content": ""
+  },
+  "lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Utils.sol": {
+   "content": ""
+  },
+  "lib/openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol": {
+   "content": ""
+  },
+  "contracts/utils/Errors.sol": {
+   "content": ""
+  },
+  "lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/proxy/beacon/IBeacon.sol": {
+   "content": ""
+  },
+  "lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/utils/Address.sol": {
+   "content": ""
+  },
+  "lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol": {
+   "content": ""
+  }
+ },
+ "settings": {
+  "remappings": [
+   "@openzeppelin/contracts/=lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/",
+   "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+   "ds-test/=lib/forge-std/lib/ds-test/src/",
+   "erc4626-tests/=lib/openzeppelin-contracts/lib/erc4626-tests/",
+   "forge-std/=lib/forge-std/src/",
+   "@openzeppelin-contracts/=lib/openzeppelin-contracts/",
+   "eigenlayer-contracts/=lib/eigenlayer-contracts/",
+   "symbiotic-core/=lib/core/src/",
+   "symbiotic-burners/=lib/burners/src/",
+   "@openzeppelin-upgrades-v4.9.0/=lib/eigenlayer-contracts/lib/openzeppelin-contracts-upgradeable-v4.9.0/",
+   "@openzeppelin-upgrades/=lib/eigenlayer-contracts/lib/openzeppelin-contracts-upgradeable/",
+   "@openzeppelin-v4.9.0/=lib/eigenlayer-contracts/lib/openzeppelin-contracts-v4.9.0/",
+   "@symbioticfi/core/=lib/burners/lib/core/",
+   "burners/=lib/burners/",
+   "core/=lib/core/",
+   "openzeppelin-contracts-upgradeable-v4.9.0/=lib/eigenlayer-contracts/lib/openzeppelin-contracts-upgradeable-v4.9.0/",
+   "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+   "openzeppelin-contracts-v4.9.0/=lib/eigenlayer-contracts/lib/openzeppelin-contracts-v4.9.0/",
+   "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+   "openzeppelin-foundry-upgrades/=lib/openzeppelin-foundry-upgrades/src/",
+   "openzeppelin-upgrades/=lib/openzeppelin-upgrades/",
+   "openzeppelin/=lib/openzeppelin-contracts/contracts/",
+   "solidity-stringutils/=lib/openzeppelin-foundry-upgrades/lib/solidity-stringutils/"
+  ],
+  "optimizer": {
+   "enabled": true,
+   "runs": 200
+  },
+  "metadata": {
+   "useLiteralContent": false,
+   "bytecodeHash": "ipfs",
+   "appendCBOR": true
+  },
+  "outputSelection": {
+   "*": {
+    "": [
+     "ast"
+    ],
+    "*": [
+     "abi",
+     "evm.bytecode.object",
+     "evm.bytecode.sourceMap",
+     "evm.bytecode.linkReferences",
+     "evm.deployedBytecode.object",
+     "evm.deployedBytecode.sourceMap",
+     "evm.deployedBytecode.linkReferences",
+     "evm.deployedBytecode.immutableReferences",
+     "evm.methodIdentifiers",
+     "metadata",
+     "storageLayout"
+    ]
+   }
+  },
+  "evmVersion": "cancun",
+  "viaIR": true,
+  "libraries": {}
+ }
+}

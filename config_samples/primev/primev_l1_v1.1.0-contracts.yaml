@@ -1,0 +1,37 @@
+# Primev mev-commit L1 — v1.1.0-contracts implementations
+# https://github.com/primev/mev-commit @ 1ee789e9f44c59bb4e2b10a8409d66cd584cd572
+
+contracts:
+  "0x585963e61dd3943bae02f4f2dbae0f9edba842af": ValidatorOptInRouter
+  "0x59fbe4cc4ca974e98300f41ac661f7204f0c3fcd": VanillaRegistry
+  "0x5a68216fae665df4650597b7472101bb1b66c208": MevCommitAVS
+
+network: mainnet
+explorer_hostname: api.etherscan.io
+explorer_chain_id: 1
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+
+github_repo:
+  url: https://github.com/primev/mev-commit
+  commit: 1ee789e9f44c59bb4e2b10a8409d66cd584cd572
+  relative_root: contracts
+
+dependencies:
+  lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts:
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: dbb6104ce834628e473d2173bbc9d47f81a9eec3
+    relative_root: contracts
+    # v5.0.2 (nested inside the upgradeable submodule)
+  lib/openzeppelin-contracts-upgradeable/contracts:
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable
+    commit: 723f8cab09cdae1aca9ec9cc1cfa040c2d4b06c1
+    relative_root: contracts
+    # v5.0.2
+  lib/eigenlayer-contracts/src:
+    url: https://github.com/Layr-Labs/eigenlayer-contracts
+    commit: 426f461c59b4f0e16f8becdffd747075edcaded8
+    relative_root: src
+  lib/core/src:
+    url: https://github.com/symbioticfi/core
+    commit: 106d10bcc77c9e1a1d2cd041f6840009ed135692
+    relative_root: src
