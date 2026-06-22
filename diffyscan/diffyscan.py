@@ -28,6 +28,7 @@ from .utils.constants import DIFFS_DIR, START_TIME
 from .utils.custom_exceptions import (
     BaseCustomException,
     CompileError,
+    DeploymentSimulationError,
     ExceptionHandler,
 )
 from .utils.explorer import (
@@ -239,6 +240,7 @@ def run_bytecode_diff(
         override_deployed_bytecode = simulate_deployment(
             override_call_data,
             remote_rpc_url,
+            **extra,
         )
         analysis_cache[cache_key] = analyze_bytecode_diff(
             override_deployed_bytecode,
@@ -622,11 +624,18 @@ def process_config(
                         )
                         bytecode_stats.append(bytecode_result)
                     except BaseCustomException as exc:
-                        has_any_rule = any(rule.get("any") for rule in bytecode_rules)
-                        if has_any_rule:
+                        any_rule = _find_any_rule(bytecode_rules)
+                        if (
+                            isinstance(exc, DeploymentSimulationError)
+                            and any_rule is not None
+                        ):
                             logger.warn(
                                 f"Bytecode comparison error suppressed by "
                                 f'"any" rule: {exc}'
+                            )
+                            logger.warn(
+                                "Matched allowlist rule",
+                                any_rule.get("reason"),
                             )
                             bytecode_stats.append(
                                 {
@@ -635,7 +644,7 @@ def process_config(
                                     "status": "allowed",
                                     "match": False,
                                     "has_diff": True,
-                                    "matched_rule": {"any": True},
+                                    "matched_rule": any_rule,
                                     "matched_facets": ["any"],
                                     "suggestion_entry": None,
                                 }
@@ -929,6 +938,10 @@ def _constructor_rule_cache_key(rule: dict) -> str:
     if "constructor_calldata" in rule:
         return f"constructor_calldata:{rule['constructor_calldata']}"
     return "constructor_args:" + json.dumps(rule["constructor_args"], sort_keys=True)
+
+
+def _find_any_rule(rules: list[dict]) -> dict | None:
+    return next((rule for rule in rules if rule.get("any")), None)
 
 
 def _build_constructor_override_binary_config(
