@@ -1,11 +1,13 @@
-# Primev mev-commit L1 — v1.1.0-contracts implementations
-# https://github.com/primev/mev-commit @ 1ee789e9f44c59bb4e2b10a8409d66cd584cd572
+# Primev mev-commit L1 — verification against the audited base commit
+# https://github.com/primev/mev-commit @ 7bed93a0abd1935d6a703933008929bcc4881309
 
 contracts:
-  "0x585963e61dd3943bae02f4f2dbae0f9edba842af": ValidatorOptInRouter
-  "0x59fbe4cc4ca974e98300f41ac661f7204f0c3fcd": VanillaRegistry
+  "0xC973D09e51A20C9Ab0214c439e4B34Dbac52AD67": L1Gateway
   "0x5a68216fae665df4650597b7472101bb1b66c208": MevCommitAVS
-
+  # "0x3d9Af87Bc4E20a7a1c7d81208D44432E9b313734": MevCommitMiddlewareV2 – 404
+  "0x59fbe4cc4ca974e98300f41ac661f7204f0c3fcd": VanillaRegistry
+  "0x585963E61dd3943bAe02F4f2dBaE0f9EDBa842Af": ValidatorOptInRouter
+  
 network: mainnet
 explorer_hostname: api.etherscan.io
 explorer_chain_id: 1
@@ -13,7 +15,7 @@ explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
 
 github_repo:
   url: https://github.com/primev/mev-commit
-  commit: 1ee789e9f44c59bb4e2b10a8409d66cd584cd572
+  commit: 7bed93a0abd1935d6a703933008929bcc4881309
   relative_root: contracts
 
 dependencies:
@@ -27,6 +29,11 @@ dependencies:
     commit: 723f8cab09cdae1aca9ec9cc1cfa040c2d4b06c1
     relative_root: contracts
     # v5.0.2
+  lib/openzeppelin-contracts/contracts:
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: fd81a96f01cc42ef1c9a5399364968d0e07e9e90
+    relative_root: contracts
+    # top-level @openzeppelin/contracts/ remapping at v1.2.x
   lib/eigenlayer-contracts/src:
     url: https://github.com/Layr-Labs/eigenlayer-contracts
     commit: 426f461c59b4f0e16f8becdffd747075edcaded8
