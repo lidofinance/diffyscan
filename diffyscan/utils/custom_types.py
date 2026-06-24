@@ -68,13 +68,15 @@ class GithubRepo(TypedDict):
 
 class Config(TypedDict):
     contracts: dict[str, str]
-    network: str
+    network: NotRequired[str]
     github_repo: GithubRepo
     dependencies: NotRequired[dict[str, GithubRepo]]
     explorer_hostname: str
     explorer_hostname_env_var: NotRequired[str]
     explorer_token_env_var: NotRequired[str]
-    explorer_chain_id: NotRequired[int]
+    explorer_chain_id: NotRequired[int | str]
+    rpc_url_env_var: NotRequired[str]
+    deployment_gas_limit: NotRequired[int]
     bytecode_comparison: NotRequired[BinaryConfig]
     allowed_diffs: NotRequired[AllowedDiffsConfig]
     fail_on_bytecode_comparison_error: NotRequired[bool]
