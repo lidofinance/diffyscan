@@ -190,7 +190,7 @@ def run_bytecode_diff(
         contract_address_from_config, remote_rpc_url
     )
 
-    if local_compiled_bytecode == remote_deployed_bytecode:
+    def exact_match() -> dict:
         logger.okay("Bytecodes fully match")
         return _bytecode_result(
             contract_address_from_config,
@@ -199,6 +199,9 @@ def run_bytecode_diff(
             match=True,
             has_diff=False,
         )
+
+    if local_compiled_bytecode == remote_deployed_bytecode:
+        return exact_match()
 
     logger.info("Static bytecodes do not match, simulating constructor via eth_call")
 
@@ -216,14 +219,7 @@ def run_bytecode_diff(
     )
 
     if local_deployed_bytecode == remote_deployed_bytecode:
-        logger.okay("Bytecodes fully match")
-        return _bytecode_result(
-            contract_address_from_config,
-            contract_name_from_config,
-            status="exact",
-            match=True,
-            has_diff=False,
-        )
+        return exact_match()
 
     base_analysis = analyze_bytecode_diff(
         local_deployed_bytecode,
