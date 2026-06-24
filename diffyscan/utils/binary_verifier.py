@@ -135,8 +135,8 @@ def analyze_bytecode_diff(
         local_trimmed["string_literal"] != remote_trimmed["string_literal"]
     )
     metadata_mismatch = local_trimmed["metadata"] != remote_trimmed["metadata"]
-    length_mismatch = len(_strip_prefix(local_runtime)) != len(
-        _strip_prefix(remote_runtime)
+    length_mismatch = len(local_runtime.removeprefix("0x")) != len(
+        remote_runtime.removeprefix("0x")
     )
     exact_match = not (
         runtime_mismatch_ranges
@@ -247,8 +247,8 @@ def _compute_runtime_mismatch_ranges(
     remote_runtime: str,
     immutables: dict[int, int],
 ) -> list[dict]:
-    local_hex = _strip_prefix(local_runtime)
-    remote_hex = _strip_prefix(remote_runtime)
+    local_hex = local_runtime.removeprefix("0x")
+    remote_hex = remote_runtime.removeprefix("0x")
     comparable_byte_count = min(len(local_hex), len(remote_hex)) // 2
 
     ranges = []
@@ -312,8 +312,8 @@ def _collect_immutable_observations(
     remote_runtime: str,
     immutables: dict[int, int],
 ) -> list[dict]:
-    local_hex = _strip_prefix(local_runtime)
-    remote_hex = _strip_prefix(remote_runtime)
+    local_hex = local_runtime.removeprefix("0x")
+    remote_hex = remote_runtime.removeprefix("0x")
     observations = []
 
     for offset, length in sorted(immutables.items()):
@@ -446,7 +446,3 @@ def slice_hex(hex_value: str, offset: int, length: int) -> str:
 
 def _prefix_hex(value: str) -> str:
     return f"0x{value}" if value else ""
-
-
-def _strip_prefix(value: str) -> str:
-    return value[2:] if value.startswith("0x") else value

@@ -107,6 +107,29 @@ def _build_github_solc_input(
     return github_solc_input, missing
 
 
+def _bytecode_result(
+    contract_address: str,
+    contract_name: str,
+    *,
+    status: str,
+    match: bool,
+    has_diff: bool = True,
+    matched_rule: dict | None = None,
+    matched_facets: list | None = None,
+    suggestion_entry: dict | None = None,
+) -> dict:
+    return {
+        "contract_address": contract_address,
+        "contract_name": contract_name,
+        "status": status,
+        "match": match,
+        "has_diff": has_diff,
+        "matched_rule": matched_rule,
+        "matched_facets": matched_facets or [],
+        "suggestion_entry": suggestion_entry,
+    }
+
+
 def run_bytecode_diff(
     contract_address_from_config,
     contract_name_from_config,
@@ -167,18 +190,18 @@ def run_bytecode_diff(
         contract_address_from_config, remote_rpc_url
     )
 
-    if local_compiled_bytecode == remote_deployed_bytecode:
+    def exact_match() -> dict:
         logger.okay("Bytecodes fully match")
-        return {
-            "contract_address": contract_address_from_config,
-            "contract_name": contract_name_from_config,
-            "status": "exact",
-            "match": True,
-            "has_diff": False,
-            "matched_rule": None,
-            "matched_facets": [],
-            "suggestion_entry": None,
-        }
+        return _bytecode_result(
+            contract_address_from_config,
+            contract_name_from_config,
+            status="exact",
+            match=True,
+            has_diff=False,
+        )
+
+    if local_compiled_bytecode == remote_deployed_bytecode:
+        return exact_match()
 
     logger.info("Static bytecodes do not match, simulating constructor via eth_call")
 
@@ -196,17 +219,7 @@ def run_bytecode_diff(
     )
 
     if local_deployed_bytecode == remote_deployed_bytecode:
-        logger.okay("Bytecodes fully match")
-        return {
-            "contract_address": contract_address_from_config,
-            "contract_name": contract_name_from_config,
-            "status": "exact",
-            "match": True,
-            "has_diff": False,
-            "matched_rule": None,
-            "matched_facets": [],
-            "suggestion_entry": None,
-        }
+        return exact_match()
 
     base_analysis = analyze_bytecode_diff(
         local_deployed_bytecode,
@@ -262,16 +275,15 @@ def run_bytecode_diff(
         _log_uncovered_bytecode_diff(best_analysis)
         suggestion_entry = build_bytecode_suggestion_entry(best_analysis)
 
-    return {
-        "contract_address": contract_address_from_config,
-        "contract_name": contract_name_from_config,
-        "status": evaluation["status"],
-        "match": evaluation["status"] != "failed",
-        "has_diff": True,
-        "matched_rule": evaluation["matched_rule"],
-        "matched_facets": evaluation["matched_facets"],
-        "suggestion_entry": suggestion_entry,
-    }
+    return _bytecode_result(
+        contract_address_from_config,
+        contract_name_from_config,
+        status=evaluation["status"],
+        match=evaluation["status"] != "failed",
+        matched_rule=evaluation["matched_rule"],
+        matched_facets=evaluation["matched_facets"],
+        suggestion_entry=suggestion_entry,
+    )
 
 
 def run_source_diff(
@@ -638,30 +650,24 @@ def process_config(
                                 any_rule.get("reason"),
                             )
                             bytecode_stats.append(
-                                {
-                                    "contract_address": contract_address,
-                                    "contract_name": contract_name,
-                                    "status": "allowed",
-                                    "match": False,
-                                    "has_diff": True,
-                                    "matched_rule": any_rule,
-                                    "matched_facets": ["any"],
-                                    "suggestion_entry": None,
-                                }
+                                _bytecode_result(
+                                    contract_address,
+                                    contract_name,
+                                    status="allowed",
+                                    match=False,
+                                    matched_rule=any_rule,
+                                    matched_facets=["any"],
+                                )
                             )
                         else:
                             logger.error(str(exc))
                             bytecode_stats.append(
-                                {
-                                    "contract_address": contract_address,
-                                    "contract_name": contract_name,
-                                    "status": "failed",
-                                    "match": False,
-                                    "has_diff": True,
-                                    "matched_rule": None,
-                                    "matched_facets": [],
-                                    "suggestion_entry": None,
-                                }
+                                _bytecode_result(
+                                    contract_address,
+                                    contract_name,
+                                    status="failed",
+                                    match=False,
+                                )
                             )
             except BaseCustomException as custom_exc:
                 ExceptionHandler.raise_exception_or_log(custom_exc)
@@ -864,25 +870,20 @@ def main() -> None:
 
     print_final_summary(all_results, enable_source_comparison, enable_binary_comparison)
 
-    has_unallowed_diffs = any(
+    source_failures = sum(
         stat["status"] == "failed"
         for result in all_results
-        for stat in result["source_stats"] + result["bytecode_stats"]
+        for stat in result["source_stats"]
+    )
+    bytecode_failures = sum(
+        stat["status"] == "failed"
+        for result in all_results
+        for stat in result["bytecode_stats"]
     )
 
     logger.okay(f"Done in {round(execution_time, 3)}s ✨" + " " * 100)
 
-    if has_unallowed_diffs:
-        source_failures = sum(
-            stat["status"] == "failed"
-            for result in all_results
-            for stat in result["source_stats"]
-        )
-        bytecode_failures = sum(
-            stat["status"] == "failed"
-            for result in all_results
-            for stat in result["bytecode_stats"]
-        )
+    if source_failures + bytecode_failures > 0:
         logger.error(
             "Exiting with non-zero code due to unallowed diffs",
             f"source={source_failures}, bytecode={bytecode_failures}",
