@@ -55,8 +55,7 @@ def _load_yaml_config(config_file, path: str) -> Config:
             f"{path}: configuration root must be a mapping, got {type(config).__name__}"
         )
     _validate_yaml_hex_keys(config, path)
-    _validate_bool_fields(config, path)
-    validate_allowed_diffs_config(config, path)
+    _validate_loaded_config(config, path)
     return config  # type: ignore[return-value]
 
 
