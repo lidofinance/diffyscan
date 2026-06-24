@@ -40,18 +40,12 @@ def test_build_contract_from_local_input_keeps_libraries(tmp_path):
     assert contract["libraries"] == libs
 
 
-def test_build_contract_from_local_input_missing_sources(tmp_path):
-    path = tmp_path / "bad.json"
-    path.write_text(json.dumps({"language": "Solidity"}))
-    with pytest.raises(ExplorerError):
-        build_contract_from_local_input("Foo", str(path), "v0.8.26")
-
-
-def test_build_contract_from_local_input_unreadable(tmp_path):
-    with pytest.raises(ExplorerError):
-        build_contract_from_local_input(
-            "Foo", str(tmp_path / "does_not_exist.json"), "v0.8.26"
-        )
+def test_build_contract_from_local_input_errors(tmp_path):
+    missing_sources = tmp_path / "bad.json"
+    missing_sources.write_text(json.dumps({"language": "Solidity"}))
+    for path in (missing_sources, tmp_path / "does_not_exist.json"):
+        with pytest.raises(ExplorerError):
+            build_contract_from_local_input("Foo", str(path), "v0.8.26")
 
 
 def test_get_local_inputs_resolves_relative_to_config(tmp_path):

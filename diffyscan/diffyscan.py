@@ -448,6 +448,11 @@ def process_config(
     # Contracts whose sources/settings come from a local solc input, not an explorer
     local_inputs = _get_local_inputs(config, path)
     local_compiler = (config.get("local_compilation") or {}).get("compiler")
+    if local_inputs and not local_compiler:
+        raise CompileError(
+            'Config "local_compilation.compiler" is required when '
+            '"local_compilation.inputs" is set (e.g. "v0.8.26+commit.8a97fa7a")'
+        )
 
     # The explorer token is only needed when some contract still uses the explorer
     needs_explorer = any(
@@ -491,11 +496,6 @@ def process_config(
             try:
                 local_input_path = local_inputs.get(contract_address.lower())
                 if local_input_path:
-                    if not local_compiler:
-                        raise CompileError(
-                            'Config "local_compilation.compiler" is required when '
-                            '"local_compilation.inputs" is set (e.g. "v0.8.26+commit.8a97fa7a")'
-                        )
                     logger.info(
                         f"Building {contract_address} from local solc input {local_input_path}"
                     )
