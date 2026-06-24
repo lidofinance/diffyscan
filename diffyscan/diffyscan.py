@@ -35,7 +35,6 @@ from .utils.explorer import (
     compile_contract_from_explorer,
     get_contract_from_explorer,
     get_explorer_chain_id,
-    get_explorer_hostname,
     get_solc_sources,
     merge_libraries,
     parse_compiled_contract,
@@ -299,12 +298,12 @@ def run_source_diff(
     source_files = get_solc_sources(contract_code["solcInput"])
     standard_json_format = is_standard_json_contract(source_files)
 
-    explorer_hostname = get_explorer_hostname(config)
+    explorer_hostname = config.get("explorer_hostname")
     explorer_chain_id = get_explorer_chain_id(config)
     logger.divider()
     logger.okay("Contract", contract_address_from_config)
     logger.okay("Blockchain explorer Hostname", explorer_hostname)
-    if explorer_chain_id:
+    if explorer_chain_id is not None:
         logger.okay("Blockchain explorer Chain ID", explorer_chain_id)
     else:
         logger.warn("Blockchain explorer Chain ID isn't set")
@@ -580,8 +579,11 @@ def process_config(
             remote_chain_id = get_chain_id(remote_rpc_url)
             logger.okay("Remote chain ID", remote_chain_id)
 
-        explorer_hostname = get_explorer_hostname(config)
+        explorer_hostname = config.get("explorer_hostname")
+        if explorer_hostname is None:
+            logger.warn('Failed to find "explorer_hostname" in the config')
         assert explorer_hostname is not None, "explorer_hostname is required"
+        explorer_chain_id = get_explorer_chain_id(config)
 
         # Apply contract filter if specified
         filter_set = (
@@ -598,7 +600,7 @@ def process_config(
                     explorer_hostname,
                     contract_address,
                     contract_name,
-                    get_explorer_chain_id(config),
+                    explorer_chain_id,
                     cache_explorer,
                 )
 
