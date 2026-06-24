@@ -26,9 +26,9 @@ dev = [
     "gitlint>=0.19,<1",
     "mypy>=1.15,<2",
     "pre-commit>=4.6.0,<5",
-    "pytest>=9.0.3,<10",
     "types-pyyaml>=6.0,<7",
     "types-requests>=2.32,<3",
+    "pytest>=9.1.0,<10",
 ]
 
 [build-system]
