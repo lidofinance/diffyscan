@@ -7,7 +7,6 @@ class BaseCustomException(Exception):
     def __init__(self, reason: str):
         message = f"{self.prefix}: {reason}" if self.prefix else reason
         super().__init__(message)
-        self.message = message
 
 
 class CompileError(BaseCustomException):
