@@ -174,7 +174,7 @@ def _get_file_from_github_with_cache(
             cache_metadata,
         )
         if cached_content is not None:
-            return cached_content
+            return str(cached_content)
 
     content = fetcher(
         github_api_token,
@@ -193,7 +193,7 @@ def _get_file_from_github_with_cache(
             cache_metadata,
         )
 
-    return content
+    return content  # type: ignore[no-any-return]
 
 
 def get_file_from_github(

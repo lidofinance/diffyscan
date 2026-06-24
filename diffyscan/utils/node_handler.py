@@ -2,7 +2,7 @@ import json
 
 from .common import pull, mask_text
 from .logger import logger
-from .custom_exceptions import NodeError
+from .custom_exceptions import DeploymentSimulationError, NodeError
 
 DEFAULT_CALLER = "0x0000000000000000000000000000000000000000"
 DEFAULT_DEPLOYMENT_GAS_LIMIT = 100_000_000
@@ -32,8 +32,10 @@ def get_bytecode_from_node(contract_address: str, rpc_url: str) -> str:
     result = _rpc_call(rpc_url, "eth_getCode", [contract_address, "latest"])
     if result == "0x":
         raise NodeError(f"Empty bytecode for contract {contract_address}")
+    if not isinstance(result, str):
+        raise NodeError(f"Malformed bytecode RPC response")
     logger.okay("Bytecode received")
-    return result
+    return result  # type cast is safe as `isinstance` enforced above
 
 
 def get_chain_id(rpc_url: str) -> int:
@@ -53,22 +55,29 @@ def simulate_deployment(
     """Simulate contract deployment via eth_call and return deployed runtime bytecode."""
     logger.info(f'Simulating deployment via eth_call on "{mask_text(rpc_url)}" ...')
 
-    result = _rpc_call(
-        rpc_url,
-        "eth_call",
-        [
-            {
-                "from": caller,
-                "to": None,
-                "gas": hex(gas_limit),
-                "data": data,
-            },
-            "latest",
-        ],
-    )
+    try:
+        result = _rpc_call(
+            rpc_url,
+            "eth_call",
+            [
+                {
+                    "from": caller,
+                    "to": None,
+                    "gas": hex(gas_limit),
+                    "data": data,
+                },
+                "latest",
+            ],
+        )
+    except NodeError as exc:
+        message = str(exc)
+        node_prefix = f"{NodeError.prefix}: "
+        if message.startswith(node_prefix):
+            message = message[len(node_prefix) :]
+        raise DeploymentSimulationError(message) from exc
 
     if not isinstance(result, str) or result == "0x":
-        raise NodeError("eth_call returned empty runtime bytecode")
+        raise DeploymentSimulationError("eth_call returned empty runtime bytecode")
 
     logger.okay("eth_call returned runtime bytecode", f"{len(result[2:]) // 2} bytes")
     return result

@@ -52,6 +52,52 @@
       }
     }
   },
+  "allowed_diffs": {
+    "bytecode": {
+      "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84": [
+        {
+          "reason": "Immutable owner differs on deployment",
+          "immutables": [
+            {
+              "offset": 320,
+              "value": "0x00000000000000000000000013ac97663d19ff20fe467bfa580748505e664beb"
+            }
+          ],
+          "cbor_metadata": true
+        },
+        {
+          "reason": "Legacy escape hatch",
+          "any": true
+        }
+      ]
+    },
+    "source": {
+      "0x442af784A788A5bd6F42A01Ebe9F287a871243fb": [
+        {
+          "reason": "Version banner differs",
+          "line_ranges": [
+            {
+              "file": "contracts/utils/Versioned.sol",
+              "github": {
+                "start": 17,
+                "count": 2
+              },
+              "explorer": {
+                "start": 17,
+                "count": 2
+              }
+            }
+          ]
+        },
+        {
+          "reason": "Generated file differs",
+          "files": [
+            "contracts/generated/BuildInfo.sol"
+          ]
+        }
+      ]
+    }
+  },
   "metadata": {
     "chain_name": "ethereum",
     "deployment_date": "2025-11-16",

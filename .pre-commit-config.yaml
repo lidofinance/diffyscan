@@ -12,6 +12,13 @@ repos:
         types_or:
           - python
         require_serial: true
+      - id: mypy
+        name: mypy
+        entry: .venv/bin/mypy
+        language: system
+        types_or:
+          - python
+        require_serial: true
       - id: gitlint
         name: gitlint
         entry: .venv/bin/gitlint --msg-filename

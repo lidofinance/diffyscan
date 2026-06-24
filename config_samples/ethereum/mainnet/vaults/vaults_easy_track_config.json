@@ -92,5 +92,323 @@
         "0x28F9Ac198C4E0FA6A9Ad2c2f97CB38F1A3120f27"
       ]
     }
+  },
+  "allowed_diffs": {
+    "source": {
+      "0x194A46DA1947E98c9D79af13E06Cfbee0D8610cC": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/vaultFactories/RegisterGroupsInOperatorGrid.sol",
+              "github": {
+                "start": 6,
+                "count": 5
+              },
+              "explorer": {
+                "start": 6,
+                "count": 5
+              }
+            }
+          ]
+        }
+      ],
+      "0xE73842AEbEC99Dacf2aAEec61409fD01A033f478": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/vaultFactories/RegisterGroupsInOperatorGrid.sol",
+              "github": {
+                "start": 6,
+                "count": 5
+              },
+              "explorer": {
+                "start": 6,
+                "count": 5
+              }
+            }
+          ]
+        }
+      ],
+      "0x8Bdc726a3147D8187820391D7c6F9F942606aEe6": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/vaultFactories/UpdateGroupsShareLimitInOperatorGrid.sol",
+              "github": {
+                "start": 6,
+                "count": 5
+              },
+              "explorer": {
+                "start": 6,
+                "count": 5
+              }
+            }
+          ]
+        }
+      ],
+      "0xf23559De8ab37fF7a154384B0822dA867Cfa7Eac": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/vaultFactories/UpdateGroupsShareLimitInOperatorGrid.sol",
+              "github": {
+                "start": 6,
+                "count": 5
+              },
+              "explorer": {
+                "start": 6,
+                "count": 5
+              }
+            }
+          ]
+        }
+      ],
+      "0xa29173C7BCf39dA48D5E404146A652d7464aee14": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/vaultFactories/AlterTiersInOperatorGrid.sol",
+              "github": {
+                "start": 6,
+                "count": 5
+              },
+              "explorer": {
+                "start": 6,
+                "count": 5
+              }
+            }
+          ]
+        }
+      ],
+      "0x73f80240ad9363d5d3C5C3626953C351cA36Bfe9": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/vaultFactories/AlterTiersInOperatorGrid.sol",
+              "github": {
+                "start": 6,
+                "count": 5
+              },
+              "explorer": {
+                "start": 6,
+                "count": 5
+              }
+            }
+          ]
+        }
+      ],
+      "0x5292A1284e4695B95C0840CF8ea25A818751C17F": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/vaultFactories/RegisterTiersInOperatorGrid.sol",
+              "github": {
+                "start": 6,
+                "count": 5
+              },
+              "explorer": {
+                "start": 6,
+                "count": 5
+              }
+            }
+          ]
+        }
+      ],
+      "0x28F9Ac198C4E0FA6A9Ad2c2f97CB38F1A3120f27": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/vaultFactories/VaultsAdapter.sol",
+              "github": {
+                "start": 6,
+                "count": 4
+              },
+              "explorer": {
+                "start": 6,
+                "count": 4
+              }
+            }
+          ]
+        }
+      ],
+      "0x6a4f33F05E7412A11100353724Bb6a152Cf0D305": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/vaultFactories/SetJailStatusInOperatorGrid.sol",
+              "github": {
+                "start": 6,
+                "count": 5
+              },
+              "explorer": {
+                "start": 6,
+                "count": 5
+              }
+            }
+          ]
+        }
+      ],
+      "0xDfA0bc38113B6d53c2881573FD764CEEFf468610": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/vaultFactories/UpdateVaultsFeesInOperatorGrid.sol",
+              "github": {
+                "start": 6,
+                "count": 6
+              },
+              "explorer": {
+                "start": 6,
+                "count": 6
+              }
+            }
+          ]
+        }
+      ],
+      "0x6F5c0A5a824773E8f8285bC5aA59ea0Aab2A6400": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/vaultFactories/ForceValidatorExitsInVaultHub.sol",
+              "github": {
+                "start": 6,
+                "count": 4
+              },
+              "explorer": {
+                "start": 6,
+                "count": 4
+              }
+            }
+          ]
+        }
+      ],
+      "0xaf35A63a4114B7481589fDD9FDB3e35Fd65fAed7": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/vaultFactories/SocializeBadDebtInVaultHub.sol",
+              "github": {
+                "start": 6,
+                "count": 5
+              },
+              "explorer": {
+                "start": 6,
+                "count": 5
+              }
+            }
+          ]
+        }
+      ],
+      "0x647DeE7bF33e44829e6430F7A08F63b3319694f0": [
+        {
+          "reason": "Solidity import paths differ between GitHub repo and explorer-verified source",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/vaultFactories/SetLiabilitySharesTargetInVaultHub.sol",
+              "github": {
+                "start": 6,
+                "count": 4
+              },
+              "explorer": {
+                "start": 6,
+                "count": 4
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "bytecode": {
+      "0x194A46DA1947E98c9D79af13E06Cfbee0D8610cC": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0xE73842AEbEC99Dacf2aAEec61409fD01A033f478": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0x8Bdc726a3147D8187820391D7c6F9F942606aEe6": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0xf23559De8ab37fF7a154384B0822dA867Cfa7Eac": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0xa29173C7BCf39dA48D5E404146A652d7464aee14": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0x73f80240ad9363d5d3C5C3626953C351cA36Bfe9": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0x5292A1284e4695B95C0840CF8ea25A818751C17F": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0x28F9Ac198C4E0FA6A9Ad2c2f97CB38F1A3120f27": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0x6a4f33F05E7412A11100353724Bb6a152Cf0D305": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0xDfA0bc38113B6d53c2881573FD764CEEFf468610": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0x6F5c0A5a824773E8f8285bC5aA59ea0Aab2A6400": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0xaf35A63a4114B7481589fDD9FDB3e35Fd65fAed7": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ],
+      "0x647DeE7bF33e44829e6430F7A08F63b3319694f0": [
+        {
+          "reason": "CBOR metadata hash differs due to differing import paths in source",
+          "cbor_metadata": true
+        }
+      ]
+    }
   }
 }
