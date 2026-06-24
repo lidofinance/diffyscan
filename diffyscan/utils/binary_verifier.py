@@ -1,6 +1,5 @@
 from .logger import logger, bgYellow, bgRed, bgGreen, red, green, to_hex
 from .constants import OPCODES, PUSH0, PUSH32
-from .custom_exceptions import BinVerifierError
 
 
 def format_bytecode(bytecode: str) -> str:
@@ -197,49 +196,6 @@ def log_bytecode_diff_analysis(analysis: dict) -> None:
         checkpoints,
         analysis["immutable_regions"],
     )
-
-
-def deep_match_bytecode(
-    actual_bytecode: str,
-    expected_bytecode: str,
-    immutables: dict,
-) -> bool:
-    """
-    Backward-compatible wrapper around bytecode analysis.
-
-    Metadata-only differences are still ignored here. The CLI now uses the
-    structured analysis result directly for granular allowlists.
-    """
-    analysis = analyze_bytecode_diff(actual_bytecode, expected_bytecode, immutables)
-
-    if (
-        not analysis["runtime_mismatch_ranges"]
-        and not analysis["string_literal_mismatch"]
-        and not analysis["length_mismatch"]
-    ):
-        logger.okay("Bytecodes match (after trimming metadata and string literals)")
-        return True
-
-    log_bytecode_diff_analysis(analysis)
-
-    if analysis["length_mismatch"]:
-        raise BinVerifierError(
-            "Bytecodes have different length after trimming metadata and string literals"
-        )
-
-    if analysis["string_literal_mismatch"]:
-        raise BinVerifierError("Bytecodes have different string literals")
-
-    if any(
-        not range_info["immutable"]
-        for range_info in analysis["runtime_mismatch_ranges"]
-    ):
-        raise BinVerifierError(
-            "Bytecodes have differences not on the immutable reference position"
-        )
-
-    logger.warn("Bytecodes have differences only on the immutable reference position")
-    return False
 
 
 def _compute_runtime_mismatch_ranges(

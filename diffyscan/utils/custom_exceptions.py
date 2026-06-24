@@ -34,10 +34,6 @@ class ExplorerError(BaseCustomException):
     prefix = "Failed to communicate with a remote resource"
 
 
-class BinVerifierError(BaseCustomException):
-    prefix = "Failed in binary comparison"
-
-
 class ExceptionHandler:
     raise_exception = True
 
