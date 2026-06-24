@@ -23,6 +23,13 @@ class GithubRepo(TypedDict):
     relative_root: str
 
 
+class LocalCompilation(TypedDict):
+    # solc version string, e.g. "v0.8.26+commit.8a97fa7a"
+    compiler: str
+    # contract address -> path of its solc standard-JSON input file
+    inputs: dict[str, str]
+
+
 class Config(TypedDict):
     contracts: dict[str, str]
     network: str
@@ -32,5 +39,6 @@ class Config(TypedDict):
     explorer_token_env_var: NotRequired[str]
     explorer_chain_id: NotRequired[int]
     bytecode_comparison: NotRequired[BinaryConfig]
+    local_compilation: NotRequired[LocalCompilation]
     fail_on_bytecode_comparison_error: NotRequired[bool]
     source_comparison: NotRequired[bool]

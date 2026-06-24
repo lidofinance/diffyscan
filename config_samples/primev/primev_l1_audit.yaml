@@ -1,0 +1,44 @@
+# Primev mev-commit L1 — verification against the audited base commit
+# https://github.com/primev/mev-commit @ 7bed93a0abd1935d6a703933008929bcc4881309
+
+contracts:
+  "0xC973D09e51A20C9Ab0214c439e4B34Dbac52AD67": L1Gateway
+  "0x5a68216fae665df4650597b7472101bb1b66c208": MevCommitAVS
+  # "0x3d9Af87Bc4E20a7a1c7d81208D44432E9b313734": MevCommitMiddlewareV2 – 404
+  "0x59fbe4cc4ca974e98300f41ac661f7204f0c3fcd": VanillaRegistry
+  "0x585963E61dd3943bAe02F4f2dBaE0f9EDBa842Af": ValidatorOptInRouter
+  
+network: mainnet
+explorer_hostname: api.etherscan.io
+explorer_chain_id: 1
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+
+github_repo:
+  url: https://github.com/primev/mev-commit
+  commit: 7bed93a0abd1935d6a703933008929bcc4881309
+  relative_root: contracts
+
+dependencies:
+  lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts:
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: dbb6104ce834628e473d2173bbc9d47f81a9eec3
+    relative_root: contracts
+    # v5.0.2 (nested inside the upgradeable submodule)
+  lib/openzeppelin-contracts-upgradeable/contracts:
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable
+    commit: 723f8cab09cdae1aca9ec9cc1cfa040c2d4b06c1
+    relative_root: contracts
+    # v5.0.2
+  lib/openzeppelin-contracts/contracts:
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: fd81a96f01cc42ef1c9a5399364968d0e07e9e90
+    relative_root: contracts
+    # top-level @openzeppelin/contracts/ remapping at v1.2.x
+  lib/eigenlayer-contracts/src:
+    url: https://github.com/Layr-Labs/eigenlayer-contracts
+    commit: 426f461c59b4f0e16f8becdffd747075edcaded8
+    relative_root: src
+  lib/core/src:
+    url: https://github.com/symbioticfi/core
+    commit: 106d10bcc77c9e1a1d2cd041f6840009ed135692
+    relative_root: src
