@@ -46,13 +46,10 @@ def test_any_rule_does_not_suppress_compile_errors(monkeypatch):
 
     result = runner.process_config(
         "config.json",
-        hardhat_config_path=None,
         recursive_parsing=False,
         enable_binary_comparison=True,
         cache_explorer=False,
         cache_github=False,
-        cli_allowed_source_diffs=[],
-        cli_allowed_bytecode_diffs=[],
         skip_user_input=True,
     )
 
@@ -83,13 +80,10 @@ def test_any_rule_can_suppress_deployment_simulation_errors(monkeypatch):
 
     result = runner.process_config(
         "config.json",
-        hardhat_config_path=None,
         recursive_parsing=False,
         enable_binary_comparison=True,
         cache_explorer=False,
         cache_github=False,
-        cli_allowed_source_diffs=[],
-        cli_allowed_bytecode_diffs=[],
         skip_user_input=True,
     )
 
@@ -123,13 +117,10 @@ def test_process_config_normalizes_explorer_chain_id(monkeypatch):
 
     runner.process_config(
         "config.json",
-        hardhat_config_path=None,
         recursive_parsing=False,
         enable_binary_comparison=False,
         cache_explorer=False,
         cache_github=False,
-        cli_allowed_source_diffs=[],
-        cli_allowed_bytecode_diffs=[],
         skip_user_input=True,
     )
 
