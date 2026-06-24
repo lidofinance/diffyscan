@@ -279,7 +279,7 @@ def run_bytecode_diff(
         contract_address_from_config,
         contract_name_from_config,
         status=evaluation["status"],
-        match=evaluation["status"] != "failed",
+        match=evaluation["status"] == "exact",
         matched_rule=evaluation["matched_rule"],
         matched_facets=evaluation["matched_facets"],
         suggestion_entry=suggestion_entry,

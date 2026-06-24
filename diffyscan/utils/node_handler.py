@@ -32,8 +32,10 @@ def get_bytecode_from_node(contract_address: str, rpc_url: str) -> str:
     result = _rpc_call(rpc_url, "eth_getCode", [contract_address, "latest"])
     if result == "0x":
         raise NodeError(f"Empty bytecode for contract {contract_address}")
+    if not isinstance(result, str):
+        raise NodeError(f"Malformed bytecode RPC response")
     logger.okay("Bytecode received")
-    return str(result)
+    return result  # type cast is safe as `isinstance` enforced above
 
 
 def get_chain_id(rpc_url: str) -> int:
@@ -68,7 +70,11 @@ def simulate_deployment(
             ],
         )
     except NodeError as exc:
-        raise DeploymentSimulationError(str(exc)) from exc
+        message = str(exc)
+        node_prefix = f"{NodeError.prefix}: "
+        if message.startswith(node_prefix):
+            message = message[len(node_prefix) :]
+        raise DeploymentSimulationError(message) from exc
 
     if not isinstance(result, str) or result == "0x":
         raise DeploymentSimulationError("eth_call returned empty runtime bytecode")

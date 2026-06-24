@@ -67,7 +67,9 @@ def _iter_wildcards():
         data = _load(path)
         if not isinstance(data, dict):
             continue
-        allowed_diffs = data.get("allowed_diffs") or {}
+        allowed_diffs = data.get("allowed_diffs")
+        if not isinstance(allowed_diffs, dict):
+            continue
         rel = os.path.relpath(path, os.path.join(REPO_ROOT, "config_samples"))
         for diff_kind in ("source", "bytecode"):
             for address, rules in (allowed_diffs.get(diff_kind) or {}).items():
