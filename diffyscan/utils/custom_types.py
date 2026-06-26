@@ -2,7 +2,6 @@ from typing import TypedDict, NotRequired
 
 
 class BinaryConfig(TypedDict):
-    hardhat_config_name: NotRequired[str]
     constructor_calldata: NotRequired[dict[str, str]]
     constructor_args: NotRequired[dict[str, list]]
     deployment_from: NotRequired[dict[str, str]]
@@ -70,13 +69,15 @@ class GithubRepo(TypedDict):
 
 class Config(TypedDict):
     contracts: dict[str, str]
-    network: str
+    network: NotRequired[str]
     github_repo: GithubRepo
     dependencies: NotRequired[dict[str, GithubRepo]]
     explorer_hostname: str
     explorer_hostname_env_var: NotRequired[str]
     explorer_token_env_var: NotRequired[str]
-    explorer_chain_id: NotRequired[int]
+    explorer_chain_id: NotRequired[int | str]
+    rpc_url_env_var: NotRequired[str]
+    deployment_gas_limit: NotRequired[int]
     bytecode_comparison: NotRequired[BinaryConfig]
     allowed_diffs: NotRequired[AllowedDiffsConfig]
     fail_on_bytecode_comparison_error: NotRequired[bool]

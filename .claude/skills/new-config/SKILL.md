@@ -50,7 +50,6 @@ YAML gotcha: addresses and hex strings MUST be quoted (`"0xabc..."`) — unquote
   - `constructor_calldata` — raw hex calldata per address: `{"0xAddr": "0xabcd..."}`
   - `constructor_args` — typed args per address: `{"0xAddr": ["0xarg1", true, 42]}`
   - `libraries` — per source path: `{"contracts/lib/Foo.sol": {"Foo": "0xLibAddr"}}`
-  - `hardhat_config_name` — (deprecated) name of a hardhat config file
 - `fail_on_bytecode_comparison_error` — defaults to `true`; when `false`, a per-contract exception (e.g. failing to fetch/verify a contract from the explorer) is logged and the run continues instead of aborting. Despite the name, an actual error inside `run_bytecode_diff` is always caught and recorded as a mismatch (`match=False`) regardless of this flag.
 - `allowed_diffs` — declare expected, known diffs so the run still passes while everything else stays verified. Map of `bytecode` / `source` → `{"0xAddr": [rules]}`; each rule needs a `reason`. Prefer the **most specific** facet — for bytecode: `immutables` (exact on-chain values), `byte_ranges`, `cbor_metadata: true`, `constructor_args`/`constructor_calldata`; for source: `line_ranges` (exact hunks), `files` (whole files). `any: true` is a blanket wildcard that hides *all* future drift — use it only when a diff genuinely cannot be scoped (e.g. bytecode that can't be reproduced), and explain why in the `reason`. When a diff is uncovered, diffyscan prints a ready-to-paste snippet in the final summary; paste it and tighten the placeholder. Example:
   ```yaml

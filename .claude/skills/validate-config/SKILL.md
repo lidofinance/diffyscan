@@ -32,7 +32,6 @@ The `Config` TypedDict (`diffyscan/utils/custom_types.py`) defines:
 - `metadata` — `dict` (free-form project metadata)
 
 The `BinaryConfig` TypedDict has all-optional fields:
-- `hardhat_config_name` — `str` (deprecated, ignored at runtime)
 - `constructor_calldata` — `dict[str, str]` mapping address to raw hex calldata
 - `constructor_args` — `dict[str, list]` mapping address to a list of ABI-encodable arguments
 - `libraries` — `dict[str, dict[str, str]]` mapping source path to `{LibraryName: "0xAddress"}`
@@ -92,7 +91,6 @@ However, the test suite (`tests/test_configs.py:test_contract_addresses_format`)
 - `constructor_args` values must be lists (arrays of ABI-encodable values)
 - A contract address must NOT appear in both `constructor_calldata` and `constructor_args` -- the runtime raises `CalldataError` if it does (see `get_calldata` in `diffyscan/utils/calldata.py`)
 - `libraries` maps Solidity source file paths to `{LibraryName: "0xAddress"}` dicts
-- `hardhat_config_name` is deprecated and ignored at runtime (a warning is logged)
 
 ### 8. Cross-reference checks
 
@@ -127,6 +125,6 @@ Beyond schema validity, **flag every `any: true` rule as a smell**: it suppresse
 
 Report issues in two categories:
 - **Errors** (must fix): missing required fields, type mismatches, YAML hex coercion, duplicate entries in both `constructor_calldata` and `constructor_args`
-- **Warnings** (should review): missing `explorer_token_env_var`, short commit SHA, addresses not matching 0x/42-char format, missing `network`, deprecated `hardhat_config_name`, unused bytecode_comparison entries
+- **Warnings** (should review): missing `explorer_token_env_var`, short commit SHA, addresses not matching 0x/42-char format, missing `network`, unused bytecode_comparison entries
 
 If the config looks good, confirm it passes validation.

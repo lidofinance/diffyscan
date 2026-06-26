@@ -25,7 +25,7 @@ def _config_with(diff_kind: str, rule: dict) -> dict:
     }
 
 
-def test_build_effective_allowed_diffs_prefers_config_over_cli():
+def test_build_effective_allowed_diffs_uses_config():
     config = {
         "contracts": {"0x0000000000000000000000000000000000000001": "Test"},
         "allowed_diffs": {
@@ -37,11 +37,7 @@ def test_build_effective_allowed_diffs_prefers_config_over_cli():
         },
     }
 
-    result = build_effective_allowed_diffs(
-        config,
-        cli_source_addrs=[],
-        cli_bytecode_addrs=["0x0000000000000000000000000000000000000001"],
-    )
+    result = build_effective_allowed_diffs(config)
 
     assert result["bytecode"]["0x0000000000000000000000000000000000000001"] == [
         {
@@ -536,26 +532,6 @@ def test_build_bytecode_suggestion_entry_fallback_to_any():
     assert suggestion["any"] is True
     assert "immutables" not in suggestion
     assert "byte_ranges" not in suggestion
-
-
-# --- build_effective_allowed_diffs: CLI-only address ---
-
-
-def test_build_effective_allowed_diffs_cli_only_address():
-    config = {
-        "contracts": {"0x0000000000000000000000000000000000000001": "Test"},
-    }
-
-    result = build_effective_allowed_diffs(
-        config,
-        cli_source_addrs=["0x0000000000000000000000000000000000000001"],
-        cli_bytecode_addrs=[],
-    )
-
-    rules = result["source"]["0x0000000000000000000000000000000000000001"]
-    assert len(rules) == 1
-    assert rules[0]["any"] is True
-    assert rules[0] == {"reason": "CLI allow-source-diff", "any": True}
 
 
 # --- summarize helpers ---

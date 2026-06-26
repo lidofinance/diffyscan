@@ -225,8 +225,6 @@ Recommended workflow to tighten a wildcard:
 2. Copy the `allowed_diffs` snippet it prints for the uncovered diff.
 3. Paste it into the config, replace the placeholder `reason` with the real explanation, and re-run to confirm it now passes.
 
-`--allow-bytecode-diff` and `--allow-source-diff` still work, but they are **deprecated** shorthands for `any: true` (diffyscan warns when they are used). Move those rules into the config file so the summary suggestions can help you tighten them over time.
-
 Start the script
 
 ```bash

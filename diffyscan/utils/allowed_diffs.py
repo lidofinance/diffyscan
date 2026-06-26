@@ -77,11 +77,7 @@ def validate_allowed_diffs_config(config: dict, path: str) -> None:
                     _validate_source_rule_entry(entry, scope)
 
 
-def build_effective_allowed_diffs(
-    config: dict,
-    cli_source_addrs: list[str] | None = None,
-    cli_bytecode_addrs: list[str] | None = None,
-) -> dict:
+def build_effective_allowed_diffs(config: dict) -> dict:
     allowed_diffs = config.get("allowed_diffs") or {}
     effective: dict[str, dict[str, list[dict]]] = {"source": {}, "bytecode": {}}
 
@@ -94,31 +90,6 @@ def build_effective_allowed_diffs(
             normalized_address = address.lower()
             effective[diff_kind][normalized_address] = [
                 _normalize_rule_entry(diff_kind, entry) for entry in entries
-            ]
-
-    for diff_kind, addresses in (
-        ("source", cli_source_addrs or []),
-        ("bytecode", cli_bytecode_addrs or []),
-    ):
-        if not addresses:
-            continue
-        logger.warn(
-            f"--allow-{diff_kind}-diff is deprecated",
-            "move these rules into config.allowed_diffs",
-        )
-        for address in addresses:
-            normalized_address = address.lower()
-            if normalized_address in effective[diff_kind]:
-                logger.warn(
-                    f"Ignoring CLI --allow-{diff_kind}-diff for {address}",
-                    "config.allowed_diffs takes precedence",
-                )
-                continue
-            effective[diff_kind][normalized_address] = [
-                {
-                    "reason": f"CLI allow-{diff_kind}-diff",
-                    "any": True,
-                }
             ]
 
     return effective

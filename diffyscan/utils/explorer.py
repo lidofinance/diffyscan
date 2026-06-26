@@ -743,31 +743,6 @@ def parse_compiled_contract(
     return contract_creation_code_without_calldata, deployed_bytecode, immutables
 
 
-def get_config_value(config: dict, key: str, warn_if_missing: bool = True):
-    """
-    Get a value from config with optional warning if missing.
-
-    Args:
-        config: Configuration dictionary
-        key: Key to look up
-        warn_if_missing: Whether to warn if the key is not found
-
-    Returns:
-        The config value or None if not found
-    """
-    value = config.get(key)
-    if value is None and warn_if_missing:
-        logger.warn(f'Failed to find "{key}" in the config')
-    return value
-
-
-def get_explorer_hostname(config: dict) -> str | None:
-    """Get explorer hostname from config."""
-    value = get_config_value(config, "explorer_hostname", warn_if_missing=True)
-    return str(value) if value is not None else None
-
-
 def get_explorer_chain_id(config: dict) -> int | None:
-    """Get explorer chain ID from config."""
-    value = get_config_value(config, "explorer_chain_id", warn_if_missing=False)
+    value = config.get("explorer_chain_id")
     return int(value) if value is not None else None
