@@ -1,7 +1,7 @@
 {
   "contracts": {
     "0xA39fe063A6d1420E59d218d318d52D84Fbd9202F": "Accounting",
-    "0xfdF72d92B55555B02e89D61177D5138B144815dE": "AccountingOracle",
+    "0xD00dD90651f031ED3158Cf75AC6e4361B4CCcBD8": "AccountingOracle",
     "0xB9A2Fb8336f3775d790b3FdD6151e3F193AA7352": "Lido",
     "0x2908c4B32548D8799fDc601C1a75E7d5C2FbC556": "ConsolidationBus",
     "0xC9991Bb865d025364BCbBd99f36e85889Fb68e69": "ConsolidationGateway",
@@ -21,7 +21,7 @@
   "explorer_chain_id": 560048,
   "github_repo": {
     "url": "https://github.com/lidofinance/core",
-    "commit": "b25e808e1049e924275852b01be8963463335af9",
+    "commit": "a9885382fde2d6c8a82a90cc2e9924d7e9e28d40",
     "relative_root": ""
   },
   "dependencies": {
@@ -92,7 +92,7 @@
         "0xe2EF9536DAAAEBFf5b1c130957AB3E80056b06D8",
         "0x3508A952176b3c15387C97BE809eaffB1982176a"
       ],
-      "0xfdF72d92B55555B02e89D61177D5138B144815dE": [
+      "0xD00dD90651f031ED3158Cf75AC6e4361B4CCcBD8": [
         "0xe2EF9536DAAAEBFf5b1c130957AB3E80056b06D8",
         12,
         1742213400
