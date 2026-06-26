@@ -555,13 +555,14 @@ def _get_deployment_from(
             'Config key "bytecode_comparison.deployment_from" must be an object'
         )
 
-    if contract_address not in deployment_from:
-        return None
+    for addr, caller in deployment_from.items():
+        if addr.lower() == contract_address.lower():
+            return _validate_config_address(
+                caller,
+                f"bytecode_comparison.deployment_from.{addr}",
+            )
 
-    return _validate_config_address(
-        deployment_from[contract_address],
-        f"bytecode_comparison.deployment_from.{contract_address}",
-    )
+    return None
 
 
 def _log_explorer_bytecode_metadata(
