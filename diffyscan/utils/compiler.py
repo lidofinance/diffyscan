@@ -10,6 +10,11 @@ from .common import fetch
 from .logger import logger
 from .custom_exceptions import CompileError
 
+# Large multi-file contracts (e.g. the Lido core V3 vault system) routinely take
+# well over a minute to compile with the optimizer enabled. Keep this generous so
+# slower CI runners don't spuriously time out; a real hang is still bounded.
+COMPILE_TIMEOUT_SECONDS = 300
+
 SOLC_PLATFORM_MAP = {
     "linux": "linux-amd64",
     "darwin": "macosx-amd64",
@@ -51,7 +56,7 @@ def get_compiler_info(required_platform: str, required_compiler_version: str) ->
             f'Required compiler version "{required_compiler_version}" for "{required_platform}" is not found'
         )
 
-    return required_build_info
+    return dict(required_build_info)
 
 
 def prepare_compiler(
@@ -99,7 +104,7 @@ def compile_contracts(compiler_path: str, input_settings: str) -> dict:
             input=input_settings.encode(),
             capture_output=True,
             check=True,
-            timeout=60,
+            timeout=COMPILE_TIMEOUT_SECONDS,
         )
     except subprocess.CalledProcessError as e:
         raise CompileError(f"Error during compiler subprocess execution: {e}")
@@ -107,7 +112,25 @@ def compile_contracts(compiler_path: str, input_settings: str) -> dict:
         raise CompileError(f"Compiler process timed out: {e}")
     except Exception as e:
         raise CompileError(f"An unexpected error occurred: {e}")
-    return json.loads(process.stdout)
+
+    try:
+        output: dict = json.loads(process.stdout)
+    except (json.JSONDecodeError, UnicodeDecodeError, TypeError) as e:
+        raise CompileError(
+            f"solc produced non-JSON output: {e}; stdout head: {process.stdout[:500]!r}"
+        )
+
+    if "contracts" not in output:
+        errors = output.get("errors") or []
+        fatal = [e for e in errors if e.get("severity") == "error"] or errors
+        msgs = "\n".join(
+            e.get("formattedMessage") or e.get("message") or str(e) for e in fatal
+        )
+        raise CompileError(
+            f"solc returned no contracts ({len(fatal)} error(s)):\n{msgs}"
+        )
+
+    return output
 
 
 def get_target_compiled_contract(
@@ -125,4 +148,4 @@ def get_target_compiled_contract(
 
     logger.okay("Contracts were successfully compiled")
 
-    return contracts_to_check[0]
+    return dict(contracts_to_check[0])

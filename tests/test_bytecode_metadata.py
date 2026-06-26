@@ -126,6 +126,34 @@ def test_simulate_deployment_uses_custom_caller(monkeypatch):
     )
 
 
+def test_simulate_deployment_uses_default_gas_limit(monkeypatch):
+    captured = {}
+
+    def fake_pull(rpc_url, payload, headers):
+        captured["payload"] = json.loads(payload)
+        return DummyResponse({"result": "0x6001"})
+
+    monkeypatch.setattr("diffyscan.utils.node_handler.pull", fake_pull)
+
+    simulate_deployment("0x6001", "https://rpc.example")
+
+    assert captured["payload"]["params"][0]["gas"] == hex(100_000_000)
+
+
+def test_simulate_deployment_uses_custom_gas_limit(monkeypatch):
+    captured = {}
+
+    def fake_pull(rpc_url, payload, headers):
+        captured["payload"] = json.loads(payload)
+        return DummyResponse({"result": "0x6001"})
+
+    monkeypatch.setattr("diffyscan.utils.node_handler.pull", fake_pull)
+
+    simulate_deployment("0x6001", "https://rpc.example", gas_limit=1_000_000_000)
+
+    assert captured["payload"]["params"][0]["gas"] == hex(1_000_000_000)
+
+
 def test_simulate_deployment_surfaces_rpc_errors(monkeypatch):
     def fake_pull(rpc_url, payload, headers):
         return DummyResponse(
@@ -196,7 +224,7 @@ def test_get_contract_from_etherscan_retries_rate_limit(monkeypatch):
             },
         ]
     )
-    sleeps = []
+    sleeps: list[float] = []
 
     def fake_fetch(url):
         return DummyResponse(next(responses))
@@ -270,8 +298,8 @@ def test_get_contract_from_blockscout_extracts_and_merges_metadata(monkeypatch):
 
 
 def test_compile_contract_from_explorer_merges_libraries_and_evm_version(monkeypatch):
-    captured = {}
-    contract_code = {
+    captured: dict = {}
+    contract_code: dict = {
         "name": "Demo",
         "compiler": "v0.8.25+commit.b61c2a91",
         "solcInput": {

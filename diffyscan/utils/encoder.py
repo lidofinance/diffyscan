@@ -94,8 +94,8 @@ def encode_tuple(components_abi: list, values: list) -> str:
             f"Tuple component count mismatch: {len(components_abi)} vs {len(values)}"
         )
 
-    static_parts = []
-    dynamic_parts = []
+    static_parts: list[str | None] = []
+    dynamic_parts: list[str] = []
 
     for comp, val in zip(components_abi, values):
         t = comp["type"]
@@ -124,7 +124,7 @@ def encode_tuple(components_abi: list, values: list) -> str:
             dyn = next(dynamic_iter)
             dynamic_offset += ((len(dyn) // 2 + 31) // 32) * 32
 
-    return "".join(static_parts) + "".join(dynamic_parts)
+    return "".join(p for p in static_parts if p is not None) + "".join(dynamic_parts)
 
 
 def encode_dynamic_type(arg_value: str, argument_index: int):

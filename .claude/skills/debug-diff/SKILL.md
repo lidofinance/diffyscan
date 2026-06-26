@@ -41,7 +41,7 @@ ls digest/<timestamp>/diffs/<contract_address>/
 - Missing or wrong constructor arguments -- see `constructor_calldata` or `constructor_args` under the `bytecode_comparison` config key
 - Missing libraries -- check if the contract uses external libraries that need addresses in `bytecode_comparison.libraries`
 - Wrong EVM version -- the explorer may report a different version than expected
-- Immutable variables -- `deep_match_bytecode()` in `diffyscan/utils/binary_verifier.py` compares instruction-by-instruction and tolerates differences that fall within known immutable reference regions. If all diffs are in immutable positions it logs a warning and returns `False` (still reported as a non-match — use `--allow-bytecode-diff 0xAddr` to accept). Differences outside immutable regions raise `BinVerifierError`
+- Immutable variables -- `deep_match_bytecode()` in `diffyscan/utils/binary_verifier.py` compares instruction-by-instruction and tolerates differences that fall within known immutable reference regions. If all diffs are in immutable positions it logs a warning and reports a non-match. To accept it, add a granular `allowed_diffs.bytecode` rule with the exact on-chain `immutables` values (diffyscan prints a ready-to-paste suggestion in the final summary) rather than a blanket wildcard. Differences outside immutable regions raise `BinVerifierError`, which `process_config` catches and records as a non-match (`match=False`) — it does not abort the run
 - Optimizer settings mismatch -- the solcInput from the explorer includes optimizer settings; the GitHub recompilation must match
 - Flat-source contracts -- see **Known limitations** section below
 
@@ -68,8 +68,13 @@ ls digest/<timestamp>/diffs/<contract_address>/
 | `"Failed to infer source path for library '...' from explorer metadata"` | Add library addresses to `bytecode_comparison.libraries` keyed by `"path/to/File.sol": {"LibName": "0xAddr"}` |
 | All files show diffs | Wrong `commit` or `relative_root` in `github_repo` |
 | Single contract fails | May need a per-contract `constructor_calldata` or `constructor_args` entry |
-| `"Bytecodes have differences not on the immutable reference position"` | Real bytecode mismatch -- check compiler version, optimizer settings, EVM version, and library addresses |
-| `"Exiting with non-zero code due to unallowed diffs"` | Either fix the diffs or use `--allow-source-diff 0xAddr` / `--allow-bytecode-diff 0xAddr` for known acceptable diffs |
+| `"Failed in binary comparison: Bytecodes have differences not on the immutable reference position"` | Real bytecode mismatch -- check compiler version, optimizer settings, EVM version, and library addresses |
+| `"Exiting with non-zero code due to unallowed diffs"` | Either fix the diffs or add a granular `allowed_diffs` rule to the config for known-acceptable diffs (copy the suggestion diffyscan prints in the final summary; prefer `immutables`/`byte_ranges`/`line_ranges`/`files`/`cbor_metadata` over `any: true`) |
+| `"Contract name in config does not match with blockchain explorer ... !="` | Contract not verified on explorer — comment it out or verify it on the explorer first |
+| `"Failed to get calldata: Explorer metadata has empty constructor calldata for 0x..."` | Factory-created contract — Etherscan has no constructor args. Add `constructor_calldata` manually (extract via `getsourcecode` API `ConstructorArguments`, `debug_traceTransaction` trace, or cross-chain reuse) |
+| `"HTTP error: 404 ... contents/<path>.sol"` | Missing or wrong `dependencies` entry — the explorer source uses a path prefix not covered by config dependencies. Add a mapping for that prefix |
+| `"err: intrinsic gas too low"` | Chain gas model needs a higher deployment gas cap (known on Mantle) — set `deployment_gas_limit` in the config (e.g. `30000000000`) |
+| All proxy bytecode diffs say "immutable reference position" | Normal for TransparentUpgradeableProxy — ProxyAdmin address baked in as immutable. Add an `allowed_diffs.bytecode` rule with the exact `immutables` values (from the printed suggestion) to accept it |
 
 ### 4. Suggest a re-run command
 After fixing, suggest:
@@ -81,8 +86,8 @@ uv run diffyscan <config-path> --yes --cache-explorer --cache-github
 - `--cache-explorer` (`-E`) reuses cached explorer responses from `.diffyscan_cache/`
 - `--cache-github` (`-G`) reuses cached GitHub file fetches
 - `--support-brownie` enables recursive retrieval for brownie-verified contracts with flattened import paths
-- `--allow-source-diff 0xAddr` accepts source diffs for a specific address (can be repeated)
-- `--allow-bytecode-diff 0xAddr` accepts bytecode diffs for a specific address (can be repeated)
+
+To accept known diffs, prefer config `allowed_diffs` rules over CLI flags. The `--allow-source-diff 0xAddr` / `--allow-bytecode-diff 0xAddr` flags still work but are **deprecated** shorthands for `any: true` (a blanket wildcard that hides all future drift). When a diff is uncovered, diffyscan prints a ready-to-paste `allowed_diffs` snippet in the final summary — paste it into the config and replace the placeholder `reason`, tightening `any: true` to a granular facet (`immutables`, `byte_ranges`, `cbor_metadata`, `line_ranges`, `files`) wherever possible. See the "Granular allowlists" section of the README.
 
 ## Known limitations
 
@@ -97,4 +102,4 @@ When a contract was verified on the explorer as a single flattened file (the exp
 
 **How to detect**: check the explorer response or logs — if the solc input has a source key that looks like a contract name (no `.sol` extension, no path separators) rather than a file path, the contract was flat-verified.
 
-**What to tell the user**: explain that bytecode comparison is unreliable for this contract due to the flat-source limitation. Recommend using `--allow-bytecode-diff 0xAddr` to accept the mismatch, and note that source comparison is still valid.
+**What to tell the user**: explain that bytecode comparison is unreliable for this contract due to the flat-source limitation. Recommend accepting the mismatch with an `allowed_diffs.bytecode` rule (use `any: true` here only because the bytecode genuinely cannot be reproduced — and say so in the `reason`), and note that source comparison is still valid.

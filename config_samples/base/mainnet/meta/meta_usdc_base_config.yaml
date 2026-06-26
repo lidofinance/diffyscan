@@ -43,6 +43,7 @@ contracts:
   "0x0555306F5063f62a3A7896A9eaBA0754c1185a67": TimelockController
   "0x8A6a1648A39C7F3dE64282e8bF2fcD783CCF08b0": OracleSubmitter
 
+rpc_url_env_var: BASE_RPC_URL
 explorer_hostname: api.etherscan.io
 explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
 explorer_chain_id: 8453

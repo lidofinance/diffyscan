@@ -18,6 +18,10 @@ class NodeError(BaseCustomException):
     prefix = "Failed to communicate with RPC node"
 
 
+class DeploymentSimulationError(NodeError):
+    prefix = "Failed to simulate deployment"
+
+
 class CalldataError(BaseCustomException):
     prefix = "Failed to get calldata"
 

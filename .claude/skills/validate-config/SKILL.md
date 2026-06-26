@@ -105,7 +105,20 @@ Recommended cross-reference warnings:
 - Warn if an address appears in `constructor_calldata` or `constructor_args` but not in `contracts` (it would be unused)
 - Warn if a contract is in both `constructor_calldata` and `constructor_args` (runtime error)
 
-### 9. Optional flags
+### 9. Allowed diffs
+
+`allowed_diffs` (optional) declares expected diffs. It is validated at config-load time by `validate_allowed_diffs_config` in `diffyscan/utils/allowed_diffs.py`, which raises `ValueError` on:
+- top-level not a mapping, or a key other than `bytecode` / `source`
+- an address not present in `contracts` (case-insensitive; a casing mismatch logs a warning)
+- an empty rule list, or a rule missing a non-empty `reason`
+- `any` combined with any other facet, or `any` not literally `true`
+- a rule with no facet and no `any`
+- bytecode: both `constructor_args` and `constructor_calldata`; `cbor_metadata` not `true`; duplicate/negative immutable `offset`; non-positive `byte_ranges.length`; invalid/odd-length hex in `value`/`constructor_calldata`
+- source: `line_ranges` span with `start < 1` or `count < 0`; empty `files`; unknown keys
+
+Beyond schema validity, **flag every `any: true` rule as a smell**: it suppresses all diffs for that contract and hides future drift. Recommend tightening it to a granular facet (`immutables`, `byte_ranges`, `cbor_metadata`, `line_ranges`, `files`) using the suggestion diffyscan prints in its final summary. `any: true` is acceptable only when a diff genuinely cannot be scoped (e.g. unreproducible bytecode), and the `reason` should say so. Note: `tests/test_no_wildcard_regression.py` fails CI on any new wildcard not listed in its `KNOWN_WILDCARDS`.
+
+### 10. Optional flags
 
 - `fail_on_bytecode_comparison_error` defaults to `true` if absent
 - `source_comparison` defaults to `true` if absent; set to `false` to skip source diffs
