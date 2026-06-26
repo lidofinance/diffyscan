@@ -122,12 +122,29 @@ def _validate_yaml_hex_keys(config: dict, path: str) -> None:
 
     bytecode = config.get("bytecode_comparison")
     if isinstance(bytecode, dict):
-        for section in ("constructor_args", "constructor_calldata"):
+        for section in (
+            "constructor_args",
+            "constructor_calldata",
+            "deployment_from",
+            "extra_sources",
+        ):
             _validate_yaml_address_keys(
                 bytecode.get(section),
                 path,
                 f"bytecode_comparison.{section}",
             )
+
+        deployment_from = bytecode.get("deployment_from")
+        if isinstance(deployment_from, dict):
+            for contract_addr, caller in deployment_from.items():
+                _raise_if_yaml_int(
+                    caller,
+                    lambda parsed_addr: (
+                        f"{path}: bytecode_comparison.deployment_from.{contract_addr} "
+                        f"was parsed as integer ({parsed_addr:#x}). "
+                        f"Quote it: {_quote_hex(parsed_addr)}"
+                    ),
+                )
 
         libraries = bytecode.get("libraries")
         if isinstance(libraries, dict):
