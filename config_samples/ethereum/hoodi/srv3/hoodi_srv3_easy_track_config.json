@@ -71,5 +71,249 @@
         1
       ]
     }
+  },
+  "allowed_diffs": {
+    "bytecode": {
+      "0x22D36e7616F541A527989C5652fDA4d527bB461C": [
+        {
+          "reason": "Trailing CBOR metadata hash differs (compiler/source-path fingerprint); executable runtime bytecode is identical.",
+          "cbor_metadata": true
+        }
+      ],
+      "0xD63cf25df1bA6144db27A81A98120Dfc53dE4540": [
+        {
+          "reason": "Trailing CBOR metadata hash differs (compiler/source-path fingerprint); executable runtime bytecode is identical.",
+          "cbor_metadata": true
+        }
+      ],
+      "0xf71fcB20B9FB8468653Bcb24E31F39bc069D5995": [
+        {
+          "reason": "Trailing CBOR metadata hash differs (compiler/source-path fingerprint); executable runtime bytecode is identical.",
+          "cbor_metadata": true
+        }
+      ],
+      "0x4EaB04775837A6F0218750A10454119f349258FE": [
+        {
+          "reason": "Trailing CBOR metadata hash differs (compiler/source-path fingerprint); executable runtime bytecode is identical.",
+          "cbor_metadata": true
+        }
+      ],
+      "0xd0c38B2F0C1F760976dA010C1c35D828331Ff9E2": [
+        {
+          "reason": "Trailing CBOR metadata hash differs (compiler/source-path fingerprint); executable runtime bytecode is identical.",
+          "cbor_metadata": true
+        }
+      ],
+      "0x5194cC02B6F477B4a23DFA422fFC238c8B5b1736": [
+        {
+          "reason": "Trailing CBOR metadata hash differs (compiler/source-path fingerprint); executable runtime bytecode is identical.",
+          "cbor_metadata": true
+        }
+      ],
+      "0x6E40FED7c28bAA93a798cA10f8A93965a19eC52e": [
+        {
+          "reason": "Trailing CBOR metadata hash differs (compiler/source-path fingerprint); executable runtime bytecode is identical.",
+          "cbor_metadata": true
+        }
+      ],
+      "0x3486B872768D361309e405A046C4BF995c21CC6c": [
+        {
+          "reason": "Trailing CBOR metadata hash differs (compiler/source-path fingerprint); executable runtime bytecode is identical.",
+          "cbor_metadata": true
+        }
+      ],
+      "0x44D9b39bBdc2182Aa1af6f16f8F55E0eA038294d": [
+        {
+          "reason": "Trailing CBOR metadata hash differs (compiler/source-path fingerprint); executable runtime bytecode is identical.",
+          "cbor_metadata": true
+        }
+      ]
+    },
+    "source": {
+      "0x22D36e7616F541A527989C5652fDA4d527bB461C": [
+        {
+          "reason": "Import-path differences only: the GitHub source uses relative imports (../, ./) while the Etherscan verified source rewrote them to absolute paths (contracts/...). Same files resolved; no executable-logic change (runtime bytecode matches modulo CBOR metadata).",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/AllowConsolidationPair.sol",
+              "github": {
+                "start": 6,
+                "count": 7
+              },
+              "explorer": {
+                "start": 6,
+                "count": 7
+              }
+            },
+            {
+              "file": "contracts/interfaces/ICuratedModule.sol",
+              "github": {
+                "start": 6,
+                "count": 2
+              },
+              "explorer": {
+                "start": 6,
+                "count": 2
+              }
+            }
+          ]
+        }
+      ],
+      "0xD63cf25df1bA6144db27A81A98120Dfc53dE4540": [
+        {
+          "reason": "Import-path differences only: the GitHub source uses relative imports (../, ./) while the Etherscan verified source rewrote them to absolute paths (contracts/...). Same files resolved; no executable-logic change (runtime bytecode matches modulo CBOR metadata).",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/UpdateStakingModuleShareLimits.sol",
+              "github": {
+                "start": 6,
+                "count": 4
+              },
+              "explorer": {
+                "start": 6,
+                "count": 4
+              }
+            }
+          ]
+        }
+      ],
+      "0xf71fcB20B9FB8468653Bcb24E31F39bc069D5995": [
+        {
+          "reason": "Import-path differences only: the GitHub source uses relative imports (../, ./) while the Etherscan verified source rewrote them to absolute paths (contracts/...). Same files resolved; no executable-logic change (runtime bytecode matches modulo CBOR metadata).",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/SetMerkleGateTree.sol",
+              "github": {
+                "start": 6,
+                "count": 4
+              },
+              "explorer": {
+                "start": 6,
+                "count": 4
+              }
+            }
+          ]
+        }
+      ],
+      "0x4EaB04775837A6F0218750A10454119f349258FE": [
+        {
+          "reason": "Import-path differences only: the GitHub source uses relative imports (../, ./) while the Etherscan verified source rewrote them to absolute paths (contracts/...). Same files resolved; no executable-logic change (runtime bytecode matches modulo CBOR metadata).",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/ReportWithdrawalsForSlashedValidators.sol",
+              "github": {
+                "start": 6,
+                "count": 4
+              },
+              "explorer": {
+                "start": 6,
+                "count": 4
+              }
+            }
+          ]
+        }
+      ],
+      "0xd0c38B2F0C1F760976dA010C1c35D828331Ff9E2": [
+        {
+          "reason": "Import-path differences only: the GitHub source uses relative imports (../, ./) while the Etherscan verified source rewrote them to absolute paths (contracts/...). Same files resolved; no executable-logic change (runtime bytecode matches modulo CBOR metadata).",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/SettleGeneralDelayedPenalty.sol",
+              "github": {
+                "start": 6,
+                "count": 5
+              },
+              "explorer": {
+                "start": 6,
+                "count": 5
+              }
+            }
+          ]
+        }
+      ],
+      "0x5194cC02B6F477B4a23DFA422fFC238c8B5b1736": [
+        {
+          "reason": "Import-path differences only: the GitHub source uses relative imports (../, ./) while the Etherscan verified source rewrote them to absolute paths (contracts/...). Same files resolved; no executable-logic change (runtime bytecode matches modulo CBOR metadata).",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/SetMerkleGateTree.sol",
+              "github": {
+                "start": 6,
+                "count": 4
+              },
+              "explorer": {
+                "start": 6,
+                "count": 4
+              }
+            }
+          ]
+        }
+      ],
+      "0x6E40FED7c28bAA93a798cA10f8A93965a19eC52e": [
+        {
+          "reason": "Import-path differences only: the GitHub source uses relative imports (../, ./) while the Etherscan verified source rewrote them to absolute paths (contracts/...). Same files resolved; no executable-logic change (runtime bytecode matches modulo CBOR metadata).",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/ReportWithdrawalsForSlashedValidators.sol",
+              "github": {
+                "start": 6,
+                "count": 4
+              },
+              "explorer": {
+                "start": 6,
+                "count": 4
+              }
+            }
+          ]
+        }
+      ],
+      "0x3486B872768D361309e405A046C4BF995c21CC6c": [
+        {
+          "reason": "Import-path differences only: the GitHub source uses relative imports (../, ./) while the Etherscan verified source rewrote them to absolute paths (contracts/...). Same files resolved; no executable-logic change (runtime bytecode matches modulo CBOR metadata).",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/SettleGeneralDelayedPenalty.sol",
+              "github": {
+                "start": 6,
+                "count": 5
+              },
+              "explorer": {
+                "start": 6,
+                "count": 5
+              }
+            }
+          ]
+        }
+      ],
+      "0x44D9b39bBdc2182Aa1af6f16f8F55E0eA038294d": [
+        {
+          "reason": "Import-path differences only: the GitHub source uses relative imports (../, ./) while the Etherscan verified source rewrote them to absolute paths (contracts/...). Same files resolved; no executable-logic change (runtime bytecode matches modulo CBOR metadata).",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/CreateOrUpdateOperatorGroup.sol",
+              "github": {
+                "start": 6,
+                "count": 7
+              },
+              "explorer": {
+                "start": 6,
+                "count": 7
+              }
+            },
+            {
+              "file": "contracts/interfaces/ICuratedModule.sol",
+              "github": {
+                "start": 6,
+                "count": 2
+              },
+              "explorer": {
+                "start": 6,
+                "count": 2
+              }
+            }
+          ]
+        }
+      ]
+    }
   }
 }
