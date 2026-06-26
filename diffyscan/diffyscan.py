@@ -86,8 +86,7 @@ def _build_github_solc_input(
     updated_sources = {}
     missing = []
 
-    # Extra sources first so they cannot be silently shadowed by an explorer
-    # entry of the same path; the explorer loop below skips already-fetched paths.
+    # Explorer source list plus any configured extras not already in it.
     paths = list(sources) + [
         path for path in (extra_source_paths or []) if path not in sources
     ]
