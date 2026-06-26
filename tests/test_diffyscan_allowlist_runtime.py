@@ -105,8 +105,15 @@ def test_process_config_normalizes_explorer_chain_id(monkeypatch):
     captured = {}
     _stub_process_config_dependencies(monkeypatch, config)
 
-    def fake_get_contract_from_explorer(*args):
-        captured["explorer_chain_id"] = args[4]
+    def fake_get_contract_from_explorer(
+        token,
+        explorer_hostname,
+        contract_address,
+        contract_name_from_config,
+        chain_id=None,
+        use_cache: bool = False,
+    ):
+        captured["explorer_chain_id"] = chain_id
         return {"name": "Test", "solcInput": {"sources": {}}}
 
     monkeypatch.setattr(
