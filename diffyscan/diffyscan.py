@@ -6,6 +6,7 @@ import sys
 import time
 import traceback
 from pathlib import Path
+from typing import Any
 
 from dotenv import load_dotenv
 
@@ -27,6 +28,7 @@ from .utils.common import load_config, load_env
 from .utils.constants import DIFFS_DIR, START_TIME
 from .utils.custom_exceptions import (
     BaseCustomException,
+    CalldataError,
     CompileError,
     DeploymentSimulationError,
     ExceptionHandler,
@@ -76,13 +78,22 @@ def _build_github_solc_input(
     github_api_token,
     recursive_parsing,
     cache_github,
+    extra_source_paths=None,
 ):
     solc_input = contract_source_code["solcInput"]
     sources = get_solc_sources(solc_input)
     updated_sources = {}
     missing = []
 
-    for path_to_file in sources:
+    # Append extra sources after the explorer set, skipping paths already
+    # present so the same file isn't fetched twice.
+    paths = list(sources) + [
+        path for path in (extra_source_paths or []) if path not in sources
+    ]
+
+    for path_to_file in paths:
+        if path_to_file in updated_sources:
+            continue
         github_file = _fetch_github_source(
             path_to_file,
             config,
@@ -157,12 +168,25 @@ def run_bytecode_diff(
         manual_libraries,
     )
 
+    extra_sources_cfg = (config.get("bytecode_comparison") or {}).get(
+        "extra_sources"
+    ) or {}
+    extra_source_paths: list[str] = next(
+        (
+            paths
+            for addr, paths in extra_sources_cfg.items()
+            if addr.lower() == contract_address_from_config.lower()
+        ),
+        [],
+    )
+
     github_solc_input, missing_sources = _build_github_solc_input(
         contract_source_code,
         config,
         github_api_token,
         recursive_parsing,
         cache_github,
+        extra_source_paths,
     )
     if missing_sources:
         missing_preview = ", ".join(missing_sources[:5])
@@ -211,8 +235,16 @@ def run_bytecode_diff(
         explorer_constructor_arguments,
     )
     deployment_call_data = _append_calldata(contract_creation_code, calldata)
+    deployment_from = _get_deployment_from(
+        config.get("bytecode_comparison"), contract_address_from_config
+    )
     gas_limit = config.get("deployment_gas_limit")
-    extra = {"gas_limit": gas_limit} if gas_limit else {}
+    extra: dict[str, Any] = {}
+    if deployment_from:
+        logger.info("Using deployment simulation from config", deployment_from)
+        extra["caller"] = deployment_from
+    if gas_limit:
+        extra["gas_limit"] = gas_limit
     local_deployed_bytecode = simulate_deployment(
         deployment_call_data, remote_rpc_url, **extra
     )
@@ -490,6 +522,46 @@ def _append_calldata(creation_code: str, calldata: str | None) -> str:
     if not calldata:
         return creation_code
     return creation_code + calldata
+
+
+def _validate_config_address(value: object, field_name: str) -> str:
+    if not isinstance(value, str):
+        raise CalldataError(f"{field_name} must be a hex string address")
+
+    address = value.strip()
+    if not address.startswith("0x") or len(address) != 42:
+        raise CalldataError(f"{field_name} must be a 20-byte hex address")
+
+    try:
+        int(address[2:], 16)
+    except ValueError as exc:
+        raise CalldataError(f"{field_name} is not valid hex") from exc
+
+    return address
+
+
+def _get_deployment_from(
+    binary_config: dict | None, contract_address: str
+) -> str | None:
+    if not isinstance(binary_config, dict):
+        return None
+
+    deployment_from = binary_config.get("deployment_from")
+    if deployment_from is None:
+        return None
+    if not isinstance(deployment_from, dict):
+        raise CalldataError(
+            'Config key "bytecode_comparison.deployment_from" must be an object'
+        )
+
+    for addr, caller in deployment_from.items():
+        if addr.lower() == contract_address.lower():
+            return _validate_config_address(
+                caller,
+                f"bytecode_comparison.deployment_from.{addr}",
+            )
+
+    return None
 
 
 def _log_explorer_bytecode_metadata(

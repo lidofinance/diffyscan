@@ -45,6 +45,10 @@ jobs:
             network: hoodi
           - config: config_samples/ethereum/hoodi/vaults/hoodi_vaults_easy_track_config.json
             network: hoodi
+          - config: config_samples/ethereum/hoodi/srv3/hoodi_srv3_config.json
+            network: hoodi
+          - config: config_samples/ethereum/hoodi/srv3/hoodi_srv3_easy_track_config.json
+            network: hoodi
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 

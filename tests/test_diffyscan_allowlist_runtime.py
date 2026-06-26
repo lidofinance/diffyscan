@@ -201,3 +201,57 @@ def test_constructor_override_simulation_uses_deployment_gas_limit(monkeypatch):
     assert result["status"] == "allowed"
     assert result["matched_facets"] == ["exact_match", "constructor_args"]
     assert [call["gas_limit"] for call in simulate_calls] == [12345, 12345]
+
+
+def _fetcher(monkeypatch, content_by_path):
+    calls = []
+
+    def fake_fetch(path_to_file, *args, **kwargs):
+        calls.append(path_to_file)
+        return content_by_path.get(path_to_file)
+
+    monkeypatch.setattr(runner, "_fetch_github_source", fake_fetch)
+    return calls
+
+
+def test_extra_sources_are_added_to_github_compilation(monkeypatch):
+    monkeypatch.setattr(
+        runner, "get_solc_sources", lambda solc_input: ["A.sol", "B.sol"]
+    )
+    calls = _fetcher(monkeypatch, {"A.sol": "a", "B.sol": "b", "C.sol": "c"})
+
+    solc_input, missing = runner._build_github_solc_input(
+        {"solcInput": {"sources": {}}},
+        {},
+        "github-token",
+        False,
+        False,
+        ["C.sol"],
+    )
+
+    assert missing == []
+    assert set(solc_input["sources"]) == {"A.sol", "B.sol", "C.sol"}
+    assert "C.sol" in calls
+
+
+def test_extra_source_already_in_explorer_list_is_not_fetched_twice(monkeypatch):
+    monkeypatch.setattr(runner, "get_solc_sources", lambda solc_input: ["A.sol"])
+    calls = _fetcher(monkeypatch, {"A.sol": "a"})
+
+    solc_input, missing = runner._build_github_solc_input(
+        {"solcInput": {}}, {}, "github-token", False, False, ["A.sol"]
+    )
+
+    assert calls == ["A.sol"]
+    assert set(solc_input["sources"]) == {"A.sol"}
+
+
+def test_missing_extra_source_is_reported(monkeypatch):
+    monkeypatch.setattr(runner, "get_solc_sources", lambda solc_input: ["A.sol"])
+    _fetcher(monkeypatch, {"A.sol": "a"})  # "C.sol" returns None -> missing
+
+    _, missing = runner._build_github_solc_input(
+        {"solcInput": {}}, {}, "github-token", False, False, ["C.sol"]
+    )
+
+    assert missing == ["C.sol"]
