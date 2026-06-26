@@ -6,6 +6,7 @@ import sys
 import time
 import traceback
 from pathlib import Path
+from typing import Any
 
 from dotenv import load_dotenv
 
@@ -217,7 +218,7 @@ def run_bytecode_diff(
         config.get("bytecode_comparison"), contract_address_from_config
     )
     gas_limit = config.get("deployment_gas_limit")
-    extra = {}
+    extra: dict[str, Any] = {}
     if deployment_from:
         logger.info("Using deployment simulation from config", deployment_from)
         extra["caller"] = deployment_from

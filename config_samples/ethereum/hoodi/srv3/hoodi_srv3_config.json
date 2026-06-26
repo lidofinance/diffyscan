@@ -215,5 +215,282 @@
         "SRLib": "0x1AF72A21223FAb0A7bB5ec6F2C3dE0C018803F0D"
       }
     }
+  },
+  "allowed_diffs": {
+    "bytecode": {
+      "0xA39fe063A6d1420E59d218d318d52D84Fbd9202F": [
+        {
+          "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after runtime code) differs; executable runtime bytecode is identical.",
+          "cbor_metadata": true
+        }
+      ],
+      "0xD00dD90651f031ED3158Cf75AC6e4361B4CCcBD8": [
+        {
+          "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after runtime code) differs; executable runtime bytecode is identical.",
+          "cbor_metadata": true
+        }
+      ],
+      "0xB9A2Fb8336f3775d790b3FdD6151e3F193AA7352": [
+        {
+          "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after runtime code) differs; executable runtime bytecode is identical.",
+          "cbor_metadata": true
+        }
+      ],
+      "0x2908c4B32548D8799fDc601C1a75E7d5C2FbC556": [
+        {
+          "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after runtime code) differs; executable runtime bytecode is identical.",
+          "cbor_metadata": true
+        }
+      ],
+      "0x8BF11ead77fFe142AB27BE486Bc5aB22D9baF520": [
+        {
+          "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after runtime code) differs; executable runtime bytecode is identical.",
+          "cbor_metadata": true
+        }
+      ],
+      "0xf738F86009Ec704880c9Aa175fc5869F020FEe4e": [
+        {
+          "reason": "Constructor-set immutable values (addresses/hashes baked into the bytecode at deploy time) differ from the placeholders in freshly compiled bytecode, and the trailing CBOR metadata hash differs; both are expected and carry no executable-logic difference.",
+          "immutables": [
+            {
+              "offset": 643,
+              "value": "0xfed594227b745906546cc94cefc1c0e8b525a7d631311ddbd07b8ccdcc73d6f3"
+            },
+            {
+              "offset": 706,
+              "value": "0x00000000000000000000000000000000219ab540356cbb839cbe05303d7705fa"
+            },
+            {
+              "offset": 824,
+              "value": "0x67a2d8939f08188c60891a393c419cb4f438a4a3fd25ab9050702c39fa368dcd"
+            },
+            {
+              "offset": 882,
+              "value": "0x17f7c014faa6a92ed0cdbcc5d87e37b6f45827c3414e7d20832be74ea7d08185"
+            },
+            {
+              "offset": 929,
+              "value": "0x000000000000000000000000cc820558b39ee15c7c45b59390b503b83fb499a8"
+            },
+            {
+              "offset": 1388,
+              "value": "0x67a2d8939f08188c60891a393c419cb4f438a4a3fd25ab9050702c39fa368dcd"
+            },
+            {
+              "offset": 1720,
+              "value": "0x000000000000000000000000cc820558b39ee15c7c45b59390b503b83fb499a8"
+            },
+            {
+              "offset": 2023,
+              "value": "0xfed594227b745906546cc94cefc1c0e8b525a7d631311ddbd07b8ccdcc73d6f3"
+            },
+            {
+              "offset": 2246,
+              "value": "0x000000000000000000000000cc820558b39ee15c7c45b59390b503b83fb499a8"
+            },
+            {
+              "offset": 2507,
+              "value": "0x00000000000000000000000000000000219ab540356cbb839cbe05303d7705fa"
+            },
+            {
+              "offset": 2709,
+              "value": "0x000000000000000000000000cc820558b39ee15c7c45b59390b503b83fb499a8"
+            },
+            {
+              "offset": 3170,
+              "value": "0x000000000000000000000000cc820558b39ee15c7c45b59390b503b83fb499a8"
+            },
+            {
+              "offset": 4642,
+              "value": "0x000000000000000000000000cc820558b39ee15c7c45b59390b503b83fb499a8"
+            },
+            {
+              "offset": 4800,
+              "value": "0x000000000000000000000000cc820558b39ee15c7c45b59390b503b83fb499a8"
+            },
+            {
+              "offset": 4976,
+              "value": "0x17f7c014faa6a92ed0cdbcc5d87e37b6f45827c3414e7d20832be74ea7d08185"
+            }
+          ],
+          "cbor_metadata": true
+        }
+      ],
+      "0x1dB06d15976954D48765f40d4bDd840C257CD4B9": [
+        {
+          "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after runtime code) differs; executable runtime bytecode is identical.",
+          "cbor_metadata": true
+        }
+      ],
+      "0xB2A07615cDe70Dc99f493aA5556175405537B21b": [
+        {
+          "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after runtime code) differs; executable runtime bytecode is identical.",
+          "cbor_metadata": true
+        }
+      ],
+      "0xD0261b0032A00a7449ee7fbE14d3f98702996441": [
+        {
+          "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after runtime code) differs; executable runtime bytecode is identical.",
+          "cbor_metadata": true
+        }
+      ],
+      "0x2107dffDf8C2934A5197C8C6c5eC646099C51204": [
+        {
+          "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after runtime code) differs; executable runtime bytecode is identical.",
+          "cbor_metadata": true
+        }
+      ],
+      "0x8621D8a402fdf2a131E38e16ac50f4C97660Fc2b": [
+        {
+          "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after runtime code) differs; executable runtime bytecode is identical.",
+          "cbor_metadata": true
+        }
+      ],
+      "0xA881F320E17Aa97d6Ce0bE76B0e2620bd2FC555A": [
+        {
+          "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after runtime code) differs; executable runtime bytecode is identical.",
+          "cbor_metadata": true
+        }
+      ],
+      "0x6724DaD16f7b05157dF72783F99cA6B813742330": [
+        {
+          "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after runtime code) differs; executable runtime bytecode is identical.",
+          "cbor_metadata": true
+        }
+      ]
+    },
+    "source": {
+      "0xA39fe063A6d1420E59d218d318d52D84Fbd9202F": [
+        {
+          "reason": "Verified-source IOracleReportSanityChecker interface declares an extra method (checkCLPendingBalanceIncrease) not present at this GitHub commit; the method is unused by Accounting and has no bytecode impact (runtime bytecode matches modulo CBOR metadata).",
+          "line_ranges": [
+            {
+              "file": "contracts/common/interfaces/IOracleReportSanityChecker.sol",
+              "github": {
+                "start": 36,
+                "count": 0
+              },
+              "explorer": {
+                "start": 36,
+                "count": 11
+              }
+            }
+          ]
+        }
+      ],
+      "0xC9991Bb865d025364BCbBd99f36e85889Fb68e69": [
+        {
+          "reason": "NatSpec comment wording differences in ConsolidationGateway.sol, plus the 'is IPausableUntil' interface-inheritance declaration / import present only in the GitHub source of PausableUntil.sol. Interface inheritance is declaration-only and produces no runtime bytecode (bytecode matches modulo CBOR metadata).",
+          "line_ranges": [
+            {
+              "file": "contracts/0.8.25/consolidation/ConsolidationGateway.sol",
+              "github": {
+                "start": 50,
+                "count": 1
+              },
+              "explorer": {
+                "start": 50,
+                "count": 1
+              }
+            },
+            {
+              "file": "contracts/0.8.25/consolidation/ConsolidationGateway.sol",
+              "github": {
+                "start": 64,
+                "count": 1
+              },
+              "explorer": {
+                "start": 64,
+                "count": 1
+              }
+            },
+            {
+              "file": "contracts/0.8.25/consolidation/ConsolidationGateway.sol",
+              "github": {
+                "start": 144,
+                "count": 1
+              },
+              "explorer": {
+                "start": 144,
+                "count": 1
+              }
+            },
+            {
+              "file": "contracts/common/utils/PausableUntil.sol",
+              "github": {
+                "start": 7,
+                "count": 1
+              },
+              "explorer": {
+                "start": 7,
+                "count": 0
+              }
+            },
+            {
+              "file": "contracts/common/utils/PausableUntil.sol",
+              "github": {
+                "start": 13,
+                "count": 1
+              },
+              "explorer": {
+                "start": 12,
+                "count": 1
+              }
+            }
+          ]
+        }
+      ],
+      "0x6724DaD16f7b05157dF72783F99cA6B813742330": [
+        {
+          "reason": "NatSpec comment-only wording differences in WithdrawalVault.sol (migration label v2/v3, 'this contract' vs 'burner contract', 'withdrawal' vs 'consolidation' fee wording). No code changes; runtime bytecode matches modulo CBOR metadata.",
+          "line_ranges": [
+            {
+              "file": "contracts/0.8.9/WithdrawalVault.sol",
+              "github": {
+                "start": 86,
+                "count": 1
+              },
+              "explorer": {
+                "start": 86,
+                "count": 1
+              }
+            },
+            {
+              "file": "contracts/0.8.9/WithdrawalVault.sol",
+              "github": {
+                "start": 121,
+                "count": 1
+              },
+              "explorer": {
+                "start": 121,
+                "count": 1
+              }
+            },
+            {
+              "file": "contracts/0.8.9/WithdrawalVault.sol",
+              "github": {
+                "start": 138,
+                "count": 1
+              },
+              "explorer": {
+                "start": 138,
+                "count": 1
+              }
+            },
+            {
+              "file": "contracts/0.8.9/WithdrawalVault.sol",
+              "github": {
+                "start": 193,
+                "count": 1
+              },
+              "explorer": {
+                "start": 193,
+                "count": 1
+              }
+            }
+          ]
+        }
+      ]
+    }
   }
 }
