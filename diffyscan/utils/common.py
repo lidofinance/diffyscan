@@ -122,7 +122,12 @@ def _validate_yaml_hex_keys(config: dict, path: str) -> None:
 
     bytecode = config.get("bytecode_comparison")
     if isinstance(bytecode, dict):
-        for section in ("constructor_args", "constructor_calldata", "deployment_from"):
+        for section in (
+            "constructor_args",
+            "constructor_calldata",
+            "deployment_from",
+            "extra_sources",
+        ):
             _validate_yaml_address_keys(
                 bytecode.get(section),
                 path,

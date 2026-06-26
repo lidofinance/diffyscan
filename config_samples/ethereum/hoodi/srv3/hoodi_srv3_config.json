@@ -87,6 +87,11 @@
     "deployment_from": {
       "0xf738F86009Ec704880c9Aa175fc5869F020FEe4e": "0x83BCE68B4e8b7071b2a664a26e6D3Bc17eEe3102"
     },
+    "extra_sources": {
+      "0xC9991Bb865d025364BCbBd99f36e85889Fb68e69": [
+        "contracts/common/interfaces/IPausableUntil.sol"
+      ]
+    },
     "constructor_args": {
       "0xA39fe063A6d1420E59d218d318d52D84Fbd9202F": [
         "0xe2EF9536DAAAEBFf5b1c130957AB3E80056b06D8",
@@ -218,6 +223,12 @@
   },
   "allowed_diffs": {
     "bytecode": {
+      "0xC9991Bb865d025364BCbBd99f36e85889Fb68e69": [
+        {
+          "reason": "Trailing CBOR metadata hash differs (compiled with IPausableUntil supplied via extra_sources); runtime bytecode is identical \u2014 'is IPausableUntil' adds no executable code.",
+          "cbor_metadata": true
+        }
+      ],
       "0xA39fe063A6d1420E59d218d318d52D84Fbd9202F": [
         {
           "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after runtime code) differs; executable runtime bytecode is identical.",
@@ -360,24 +371,6 @@
       ]
     },
     "source": {
-      "0xA39fe063A6d1420E59d218d318d52D84Fbd9202F": [
-        {
-          "reason": "Verified-source IOracleReportSanityChecker interface declares an extra method (checkCLPendingBalanceIncrease) not present at this GitHub commit; the method is unused by Accounting and has no bytecode impact (runtime bytecode matches modulo CBOR metadata).",
-          "line_ranges": [
-            {
-              "file": "contracts/common/interfaces/IOracleReportSanityChecker.sol",
-              "github": {
-                "start": 36,
-                "count": 0
-              },
-              "explorer": {
-                "start": 36,
-                "count": 11
-              }
-            }
-          ]
-        }
-      ],
       "0xC9991Bb865d025364BCbBd99f36e85889Fb68e69": [
         {
           "reason": "NatSpec comment wording differences in ConsolidationGateway.sol, plus the 'is IPausableUntil' interface-inheritance declaration / import present only in the GitHub source of PausableUntil.sol. Interface inheritance is declaration-only and produces no runtime bytecode (bytecode matches modulo CBOR metadata).",
@@ -435,6 +428,24 @@
               "explorer": {
                 "start": 12,
                 "count": 1
+              }
+            }
+          ]
+        }
+      ],
+      "0xA39fe063A6d1420E59d218d318d52D84Fbd9202F": [
+        {
+          "reason": "Verified-source IOracleReportSanityChecker interface declares an extra method (checkCLPendingBalanceIncrease) not present at this GitHub commit; the method is unused by Accounting and has no bytecode impact (runtime bytecode matches modulo CBOR metadata).",
+          "line_ranges": [
+            {
+              "file": "contracts/common/interfaces/IOracleReportSanityChecker.sol",
+              "github": {
+                "start": 36,
+                "count": 0
+              },
+              "explorer": {
+                "start": 36,
+                "count": 11
               }
             }
           ]

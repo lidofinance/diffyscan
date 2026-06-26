@@ -79,13 +79,22 @@ def _build_github_solc_input(
     github_api_token,
     recursive_parsing,
     cache_github,
+    extra_source_paths=None,
 ):
     solc_input = contract_source_code["solcInput"]
     sources = get_solc_sources(solc_input)
     updated_sources = {}
     missing = []
 
-    for path_to_file in sources:
+    # Extra sources first so they cannot be silently shadowed by an explorer
+    # entry of the same path; the explorer loop below skips already-fetched paths.
+    paths = list(sources) + [
+        path for path in (extra_source_paths or []) if path not in sources
+    ]
+
+    for path_to_file in paths:
+        if path_to_file in updated_sources:
+            continue
         github_file = _fetch_github_source(
             path_to_file,
             config,
@@ -160,12 +169,25 @@ def run_bytecode_diff(
         manual_libraries,
     )
 
+    extra_sources_cfg = (config.get("bytecode_comparison") or {}).get(
+        "extra_sources"
+    ) or {}
+    extra_source_paths: list[str] = next(
+        (
+            paths
+            for addr, paths in extra_sources_cfg.items()
+            if addr.lower() == contract_address_from_config.lower()
+        ),
+        [],
+    )
+
     github_solc_input, missing_sources = _build_github_solc_input(
         contract_source_code,
         config,
         github_api_token,
         recursive_parsing,
         cache_github,
+        extra_source_paths,
     )
     if missing_sources:
         missing_preview = ", ".join(missing_sources[:5])

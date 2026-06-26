@@ -7,6 +7,7 @@ class BinaryConfig(TypedDict):
     constructor_args: NotRequired[dict[str, list]]
     deployment_from: NotRequired[dict[str, str]]
     libraries: NotRequired[dict[str, dict[str, str]]]
+    extra_sources: NotRequired[dict[str, list[str]]]
 
 
 class ImmutableRule(TypedDict):
