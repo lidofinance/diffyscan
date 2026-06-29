@@ -297,6 +297,38 @@ def test_get_contract_from_blockscout_extracts_and_merges_metadata(monkeypatch):
     }
 
 
+def test_get_contract_from_blockscout_strips_project_prefix_from_paths(monkeypatch):
+    def fake_fetch(url):
+        return DummyResponse(
+            {
+                "name": "Demo",
+                "file_path": "project:/contracts/Demo.sol",
+                "source_code": "import './Helper.sol'; contract Demo {}",
+                "additional_sources": [
+                    {
+                        "file_path": "project:/contracts/Helper.sol",
+                        "source_code": "library Helper {}",
+                    }
+                ],
+                "optimization_enabled": False,
+                "optimization_runs": 0,
+                "compiler_version": "v0.8.25+commit.b61c2a91",
+            }
+        )
+
+    monkeypatch.setattr("diffyscan.utils.explorer.fetch", fake_fetch)
+
+    contract = _get_contract_from_blockscout(
+        "eth.blockscout.com",
+        "0x0000000000000000000000000000000000000001",
+    )
+
+    assert set(contract["solcInput"]["sources"]) == {
+        "contracts/Demo.sol",
+        "contracts/Helper.sol",
+    }
+
+
 def test_compile_contract_from_explorer_merges_libraries_and_evm_version(monkeypatch):
     captured: dict = {}
     contract_code: dict = {

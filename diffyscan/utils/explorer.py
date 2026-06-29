@@ -3,6 +3,7 @@ import os
 import copy
 import re
 import time
+from collections.abc import Callable
 
 from .common import fetch, load_cache, save_cache
 from .logger import logger
@@ -52,10 +53,12 @@ def _build_source_files(
     *,
     path_key: str,
     content_key: str,
+    normalize_path: Callable[[str], str] | None = None,
 ) -> dict[str, dict[str, str]]:
-    source_files = {primary_path: {"content": primary_source}}
+    normalize = normalize_path or (lambda value: value)
+    source_files = {normalize(primary_path): {"content": primary_source}}
     for entry in additional_sources or []:
-        source_files[entry[path_key]] = {"content": entry[content_key]}
+        source_files[normalize(entry[path_key])] = {"content": entry[content_key]}
     return source_files
 
 
@@ -311,6 +314,7 @@ def _get_contract_from_blockscout(explorer_hostname: str, contract: str) -> dict
         response.get("additional_sources"),
         path_key="file_path",
         content_key="source_code",
+        normalize_path=lambda path: path.removeprefix("project:/"),
     )
 
     compiler_settings = copy.deepcopy(response.get("compiler_settings") or {})
