@@ -24,11 +24,11 @@ diffyscan = "diffyscan.diffyscan:main"
 dev = [
     "black>=26.5.1,<27",
     "gitlint>=0.19,<1",
-    "mypy>=1.15,<2",
+    "mypy>=2.1.0,<3",
     "pre-commit>=4.6.0,<5",
     "types-pyyaml>=6.0,<7",
     "types-requests>=2.32,<3",
-    "pytest>=9.1.0,<10",
+    "pytest>=9.1.1,<10",
 ]
 
 [build-system]
