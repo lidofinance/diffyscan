@@ -11,19 +11,22 @@ explorer_chain_id: 1
 
 github_repo:
   url: https://github.com/lidofinance/aragon-apps
-  # audited at this commit: Ackee + Statemind, Lido Simple Delegation 2024-07
+  # Commit the deployed implementation was built from. Matches release
+  # app-voting-v3.1 except one docs-only NatSpec line (c112cc2e). Audited here:
+  # Ackee + Statemind, Lido Simple Delegation 2024-07.
   commit: 50d9802f6e728388b80b275b7baea5d93b9b6b25
-  # exact source of the deployed impl; tag app-voting-v3.1 and master differ by one NatSpec line (c112cc2e)
   relative_root: apps/voting
 
 dependencies:
+  # @aragon/os@4.4.0
   "@aragon/os":
     url: https://github.com/aragon/aragonOS
-    commit: f3ae59b00f73984e562df00129c925339cd069ff  # @aragon/os@4.4.0
+    commit: f3ae59b00f73984e562df00129c925339cd069ff
     relative_root: ""
+  # @aragon/minime@1.0.0
   "@aragon/minime":
     url: https://github.com/aragon/minime
-    commit: 1d5251fc88eee5024ff318d95bc9f4c5de130430  # @aragon/minime@1.0.0
+    commit: 1d5251fc88eee5024ff318d95bc9f4c5de130430
     relative_root: ""
 
 fail_on_bytecode_comparison_error: true

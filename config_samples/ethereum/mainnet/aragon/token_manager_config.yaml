@@ -14,18 +14,23 @@ explorer_chain_id: 1
 
 github_repo:
   url: https://github.com/lidofinance/aragon-apps
-  # no Lido audit pins this commit; upstream Aragon code, unmodified
-  commit: e44f928f1c4c2118ba547464b1547cbe32b1cd71  # fork master, matches deployed impl
+  # Commit the deployed implementation was built from (fork master); it is release
+  # apps-token-manager-v2.1.0. Source differs from the tag only in the post-#1218
+  # @aragon/minime import paths and one radspec comment (no bytecode change).
+  # No Lido audit pins this commit.
+  commit: e44f928f1c4c2118ba547464b1547cbe32b1cd71
   relative_root: apps/token-manager
 
 dependencies:
+  # @aragon/os@4.4.0
   "@aragon/os":
     url: https://github.com/aragon/aragonOS
-    commit: f3ae59b00f73984e562df00129c925339cd069ff  # @aragon/os@4.4.0
+    commit: f3ae59b00f73984e562df00129c925339cd069ff
     relative_root: ""
+  # @aragon/minime@1.0.0
   "@aragon/minime":
     url: https://github.com/aragon/minime
-    commit: 1d5251fc88eee5024ff318d95bc9f4c5de130430  # @aragon/minime@1.0.0
+    commit: 1d5251fc88eee5024ff318d95bc9f4c5de130430
     relative_root: ""
 
 fail_on_bytecode_comparison_error: true
