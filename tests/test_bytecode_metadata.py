@@ -313,6 +313,20 @@ def test_get_contract_from_blockscout_strips_project_prefix_from_paths(monkeypat
                 "optimization_enabled": False,
                 "optimization_runs": 0,
                 "compiler_version": "v0.8.25+commit.b61c2a91",
+                "compiler_settings": {
+                    "libraries": {
+                        "project:/contracts/Existing.sol": {
+                            "Existing": "0x2222222222222222222222222222222222222222"
+                        }
+                    }
+                },
+                "external_libraries": [
+                    {
+                        "file_path": "project:/contracts/Helper.sol",
+                        "name": "Helper",
+                        "address": "0x1111111111111111111111111111111111111111",
+                    }
+                ],
             }
         )
 
@@ -326,6 +340,14 @@ def test_get_contract_from_blockscout_strips_project_prefix_from_paths(monkeypat
     assert set(contract["solcInput"]["sources"]) == {
         "contracts/Demo.sol",
         "contracts/Helper.sol",
+    }
+    assert contract["libraries"] == {
+        "contracts/Existing.sol": {
+            "Existing": "0x2222222222222222222222222222222222222222"
+        },
+        "contracts/Helper.sol": {
+            "Helper": "0x1111111111111111111111111111111111111111"
+        },
     }
 
 

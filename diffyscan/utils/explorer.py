@@ -299,6 +299,7 @@ def _get_contract_from_mantle(mantle_explorer_hostname: str, contract: str) -> d
 def _get_contract_from_blockscout(explorer_hostname: str, contract: str) -> dict:
     explorer_link = f"https://{explorer_hostname}/api/v2/smart-contracts/{contract}"
     response = fetch(explorer_link).json()
+    normalize_path = lambda path: path.removeprefix("project:/")
 
     if "name" not in response:
         _error_no_source_code_and_exit(contract)
@@ -314,10 +315,26 @@ def _get_contract_from_blockscout(explorer_hostname: str, contract: str) -> dict
         response.get("additional_sources"),
         path_key="file_path",
         content_key="source_code",
-        normalize_path=lambda path: path.removeprefix("project:/"),
+        normalize_path=normalize_path,
     )
 
     compiler_settings = copy.deepcopy(response.get("compiler_settings") or {})
+    if isinstance(compiler_settings.get("libraries"), dict):
+        compiler_settings["libraries"] = {
+            normalize_path(str(path)): value
+            for path, value in compiler_settings["libraries"].items()
+        }
+    external_libraries = copy.deepcopy(response.get("external_libraries"))
+    if isinstance(external_libraries, list):
+        for external_library in external_libraries:
+            if not isinstance(external_library, dict):
+                continue
+            if isinstance(external_library.get("file_path"), str):
+                external_library["file_path"] = normalize_path(
+                    external_library["file_path"]
+                )
+            if isinstance(external_library.get("path"), str):
+                external_library["path"] = normalize_path(external_library["path"])
     optimization_runs = response.get(
         "optimization_runs", response.get("optimizations_runs", 0)
     )
@@ -333,7 +350,7 @@ def _get_contract_from_blockscout(explorer_hostname: str, contract: str) -> dict
         solc_input,
         constructor_arguments=response.get("constructor_args"),
         evm_version=response.get("evm_version"),
-        libraries=response.get("external_libraries"),
+        libraries=external_libraries,
     )
 
 
