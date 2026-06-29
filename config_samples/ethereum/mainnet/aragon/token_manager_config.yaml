@@ -1,8 +1,8 @@
 # Lido DAO Aragon TokenManager app (mainnet). Upstream Aragon code, no Lido
 # modifications; wraps the LDO MiniMe token (mint/assign/vest, forward() gate).
 # Proxy 0xf73a1260d222f447210581DDf212D915c09a3249.
-# Blockscout explorer: Etherscan has this contract verified as a single flattened
-# file, which is not path-mappable; Blockscout serves it as multi-file.
+# Uses Blockscout: Etherscan verifies this contract as one flattened file
+# (not path-mappable); Blockscout serves it multi-file.
 
 contracts:
   "0xde3A93028F2283cc28756B3674BD657eaFB992f4": TokenManager
@@ -14,7 +14,8 @@ explorer_chain_id: 1
 
 github_repo:
   url: https://github.com/lidofinance/aragon-apps
-  commit: e44f928f1c4c2118ba547464b1547cbe32b1cd71  # audit pin; deployed matches fork master
+  # no Lido audit pins this commit; upstream Aragon code, unmodified
+  commit: e44f928f1c4c2118ba547464b1547cbe32b1cd71  # fork master, matches deployed impl
   relative_root: apps/token-manager
 
 dependencies:
