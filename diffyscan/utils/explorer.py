@@ -324,17 +324,6 @@ def _get_contract_from_blockscout(explorer_hostname: str, contract: str) -> dict
             normalize_path(str(path)): value
             for path, value in compiler_settings["libraries"].items()
         }
-    external_libraries = copy.deepcopy(response.get("external_libraries"))
-    if isinstance(external_libraries, list):
-        for external_library in external_libraries:
-            if not isinstance(external_library, dict):
-                continue
-            if isinstance(external_library.get("file_path"), str):
-                external_library["file_path"] = normalize_path(
-                    external_library["file_path"]
-                )
-            if isinstance(external_library.get("path"), str):
-                external_library["path"] = normalize_path(external_library["path"])
     optimization_runs = response.get(
         "optimization_runs", response.get("optimizations_runs", 0)
     )
@@ -344,13 +333,15 @@ def _get_contract_from_blockscout(explorer_hostname: str, contract: str) -> dict
         optimizer_runs=optimization_runs,
         settings=compiler_settings,
     )
+    # Libraries come from compiler_settings.libraries (keyed by source path).
+    # Blockscout's external_libraries repeats them with only name + address_hash,
+    # so it can't be mapped to a path when the library source isn't fetched.
     return _build_contract_payload(
         response["name"],
         response["compiler_version"],
         solc_input,
         constructor_arguments=response.get("constructor_args"),
         evm_version=response.get("evm_version"),
-        libraries=external_libraries,
     )
 
 

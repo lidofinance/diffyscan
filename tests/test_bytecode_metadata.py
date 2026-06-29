@@ -270,9 +270,8 @@ def test_get_contract_from_blockscout_extracts_and_merges_metadata(monkeypatch):
                 },
                 "external_libraries": [
                     {
-                        "file_path": "contracts/Helper.sol",
                         "name": "Helper",
-                        "address": "0x1111111111111111111111111111111111111111",
+                        "address_hash": "0x1111111111111111111111111111111111111111",
                     }
                 ],
             }
@@ -287,12 +286,11 @@ def test_get_contract_from_blockscout_extracts_and_merges_metadata(monkeypatch):
 
     assert contract["constructor_arguments"] == "deadbeef"
     assert contract["evm_version"] == "prague"
+    # external_libraries (name + address_hash, no path) repeats
+    # compiler_settings.libraries and can't map to a path, so it's excluded.
     assert contract["libraries"] == {
         "contracts/Existing.sol": {
             "Existing": "0x2222222222222222222222222222222222222222"
-        },
-        "contracts/Helper.sol": {
-            "Helper": "0x1111111111111111111111111111111111111111"
         },
     }
 
@@ -320,13 +318,6 @@ def test_get_contract_from_blockscout_strips_project_prefix_from_paths(monkeypat
                         }
                     }
                 },
-                "external_libraries": [
-                    {
-                        "file_path": "project:/contracts/Helper.sol",
-                        "name": "Helper",
-                        "address": "0x1111111111111111111111111111111111111111",
-                    }
-                ],
             }
         )
 
@@ -344,9 +335,6 @@ def test_get_contract_from_blockscout_strips_project_prefix_from_paths(monkeypat
     assert contract["libraries"] == {
         "contracts/Existing.sol": {
             "Existing": "0x2222222222222222222222222222222222222222"
-        },
-        "contracts/Helper.sol": {
-            "Helper": "0x1111111111111111111111111111111111111111"
         },
     }
 
