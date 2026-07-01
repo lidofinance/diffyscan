@@ -87,7 +87,7 @@ uv run diffyscan <config-path> --yes --cache-explorer --cache-github
 - `--cache-github` (`-G`) reuses cached GitHub file fetches
 - `--support-brownie` enables recursive retrieval for brownie-verified contracts with flattened import paths
 
-To accept known diffs, prefer config `allowed_diffs` rules over CLI flags. The `--allow-source-diff 0xAddr` / `--allow-bytecode-diff 0xAddr` flags still work but are **deprecated** shorthands for `any: true` (a blanket wildcard that hides all future drift). When a diff is uncovered, diffyscan prints a ready-to-paste `allowed_diffs` snippet in the final summary — paste it into the config and replace the placeholder `reason`, tightening `any: true` to a granular facet (`immutables`, `byte_ranges`, `cbor_metadata`, `line_ranges`, `files`) wherever possible. See the "Granular allowlists" section of the README.
+To accept known diffs, use config `allowed_diffs` rules. (The former `--allow-source-diff` / `--allow-bytecode-diff` CLI flags have been removed; they were blanket `any: true` shorthands.) When a diff is uncovered, diffyscan prints a ready-to-paste `allowed_diffs` snippet in the final summary — paste it into the config and replace the placeholder `reason`, tightening `any: true` to a granular facet (`immutables`, `byte_ranges`, `cbor_metadata`, `line_ranges`, `files`) wherever possible. See the "Granular allowlists" section of the README.
 
 ## Known limitations
 

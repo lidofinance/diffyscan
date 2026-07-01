@@ -5,11 +5,16 @@ import pytest
 from diffyscan.utils.calldata import get_calldata
 from diffyscan.utils.custom_exceptions import CalldataError, CompileError, NodeError
 from diffyscan.utils.explorer import (
+    _assert_libraries_linked,
     _get_contract_from_blockscout,
     _get_contract_from_etherscan,
+    _parse_libraries,
     compile_contract_from_explorer,
 )
-from diffyscan.utils.node_handler import simulate_deployment
+from diffyscan.utils.node_handler import (
+    DEFAULT_DEPLOYMENT_GAS_LIMIT,
+    simulate_deployment,
+)
 
 
 class DummyResponse:
@@ -137,7 +142,10 @@ def test_simulate_deployment_uses_default_gas_limit(monkeypatch):
 
     simulate_deployment("0x6001", "https://rpc.example")
 
-    assert captured["payload"]["params"][0]["gas"] == hex(100_000_000)
+    # EIP-7825: default must not exceed the per-tx gas cap (2**24).
+    assert DEFAULT_DEPLOYMENT_GAS_LIMIT == 16_777_216
+    assert captured["payload"]["params"][0]["gas"] == hex(16_777_216)
+    assert int(captured["payload"]["params"][0]["gas"], 16) <= 2**24
 
 
 def test_simulate_deployment_uses_custom_gas_limit(monkeypatch):
@@ -435,3 +443,128 @@ def test_compile_contract_from_explorer_redownloads_tampered_cached_compiler(
 
     assert result == {"abi": [], "evm": {}}
     assert calls["prepare"] == 1
+
+
+# --- Fix A: re-key explorer libraries by definition file --------------------
+
+_ACCOUNTING_SOURCES = {
+    "src/Accounting.sol": {
+        "content": "import './lib/AssetRecovererLib.sol'; contract Accounting {}"
+    },
+    "src/lib/AssetRecovererLib.sol": {
+        "content": "library AssetRecovererLib { function recover() external {} }"
+    },
+}
+
+
+def test_parse_libraries_rekeys_importing_file_to_definition_file():
+    # Etherscan settings.libraries keys libs by the IMPORTING file, but solc
+    # links placeholders by the DEFINITION file. The result must be re-keyed.
+    parsed = _parse_libraries(
+        {
+            "src/Accounting.sol": {
+                "AssetRecovererLib": "0x37ada408ae3c3992953688e2ccb9ee7a3dfda902"
+            }
+        },
+        _ACCOUNTING_SOURCES,
+    )
+
+    assert parsed == {
+        "src/lib/AssetRecovererLib.sol": {
+            "AssetRecovererLib": "0x37ada408ae3c3992953688e2ccb9ee7a3dfda902"
+        }
+    }
+
+
+def test_parse_libraries_falls_back_when_definition_not_found():
+    # No source declares the library -> keep the explorer-provided key.
+    parsed = _parse_libraries(
+        {
+            "contracts/Consumer.sol": {
+                "Helper": "0x1111111111111111111111111111111111111111"
+            }
+        },
+        {"contracts/Consumer.sol": {"content": "contract Consumer {}"}},
+    )
+
+    assert parsed == {
+        "contracts/Consumer.sol": {
+            "Helper": "0x1111111111111111111111111111111111111111"
+        }
+    }
+
+
+def test_get_contract_from_etherscan_rekeys_standard_json_libraries(monkeypatch):
+    standard_json = json.dumps(
+        {
+            "language": "Solidity",
+            "sources": _ACCOUNTING_SOURCES,
+            "settings": {
+                "libraries": {
+                    "src/Accounting.sol": {
+                        "AssetRecovererLib": "0x37ada408ae3c3992953688e2ccb9ee7a3dfda902"
+                    }
+                }
+            },
+        }
+    )
+
+    def fake_fetch(url):
+        return DummyResponse(
+            {
+                "message": "OK",
+                "result": [
+                    {
+                        "ContractName": "Accounting",
+                        "CompilerVersion": "v0.8.33+commit.64118f21",
+                        "SourceCode": "{" + standard_json + "}",
+                        "OptimizationUsed": "1",
+                        "Runs": "200",
+                        "EVMVersion": "osaka",
+                        "Library": "",
+                    }
+                ],
+            }
+        )
+
+    monkeypatch.setattr("diffyscan.utils.explorer.fetch", fake_fetch)
+
+    contract = _get_contract_from_etherscan(
+        None,
+        "api.etherscan.io",
+        "0x0000000000000000000000000000000000000001",
+    )
+
+    assert contract["libraries"] == {
+        "src/lib/AssetRecovererLib.sol": {
+            "AssetRecovererLib": "0x37ada408ae3c3992953688e2ccb9ee7a3dfda902"
+        }
+    }
+
+
+# --- Fix B: unlinked-library guard ------------------------------------------
+
+
+def test_assert_libraries_linked_raises_on_unlinked():
+    compiled = {
+        "evm": {
+            "bytecode": {
+                "object": "6080__$...$__",
+                "linkReferences": {
+                    "src/lib/AssetRecovererLib.sol": {
+                        "AssetRecovererLib": [{"start": 10, "length": 20}]
+                    }
+                },
+            }
+        }
+    }
+
+    with pytest.raises(CompileError, match="unlinked libraries"):
+        _assert_libraries_linked(compiled, "Accounting")
+
+
+def test_assert_libraries_linked_passes_when_linked():
+    # Empty or missing linkReferences means fully linked -> no error.
+    _assert_libraries_linked({"evm": {"bytecode": {"linkReferences": {}}}}, "Demo")
+    _assert_libraries_linked({"evm": {"bytecode": {}}}, "Demo")
+    _assert_libraries_linked({"evm": {}}, "Demo")

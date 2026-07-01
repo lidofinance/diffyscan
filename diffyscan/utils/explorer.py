@@ -413,12 +413,16 @@ def _parse_libraries(
         parsed: dict[str, dict[str, str]] = {}
         for key, value in raw_libraries.items():
             if isinstance(value, dict):
-                parsed.setdefault(key, {})
                 for lib_name, address in value.items():
-                    parsed[key][lib_name] = _normalize_library_address(address)
+                    path = _resolve_library_definition_path(
+                        lib_name, str(key), source_files
+                    )
+                    parsed.setdefault(path, {})
+                    parsed[path][lib_name] = _normalize_library_address(address)
                 continue
 
             path, lib_name = _parse_qualified_library_name(str(key), source_files)
+            path = _resolve_library_definition_path(lib_name, path, source_files)
             parsed.setdefault(path, {})
             parsed[path][lib_name] = _normalize_library_address(value)
         return parsed or None
@@ -478,6 +482,7 @@ def _parse_libraries(
                 raise ExplorerError(f"Unsupported library entry: {part}")
 
             path, lib_name = _parse_qualified_library_name(qualified_name, source_files)
+            path = _resolve_library_definition_path(lib_name, path, source_files)
             parsed.setdefault(path, {})
             parsed[path][lib_name] = _normalize_library_address(address)
 
@@ -525,6 +530,24 @@ def _infer_library_path(library_name: str, source_files: dict) -> str:
     raise ExplorerError(
         f"Multiple source files declare library '{library_name}': {matches}"
     )
+
+
+def _resolve_library_definition_path(
+    library_name: str, fallback_path: str, source_files: dict
+) -> str:
+    """Return the source path that DEFINES the library.
+
+    solc keys library link placeholders by the library's definition file, but
+    explorers (notably Etherscan's ``settings.libraries``) often key them by the
+    importing file, which solc cannot match -- leaving ``__$…$__`` placeholders
+    that make the deployment-simulation eth_call fail with an opaque
+    "Invalid params". Re-derive the definition path from source; fall back to the
+    explorer-provided path when it cannot be uniquely inferred.
+    """
+    try:
+        return _infer_library_path(library_name, source_files)
+    except ExplorerError:
+        return fallback_path
 
 
 def _normalize_library_address(address: str) -> str:
@@ -719,7 +742,31 @@ def compile_contract_from_explorer(
         compiled_contracts, target_contract_name
     )
 
+    _assert_libraries_linked(compiled_contract, target_contract_name)
+
     return compiled_contract
+
+
+def _assert_libraries_linked(compiled_contract: dict, contract_name: str) -> None:
+    """Fail early if solc left unlinked library placeholders in the creation
+    bytecode. They are invalid hex, so the deployment-simulation eth_call would
+    otherwise fail with an opaque "Invalid params" from the RPC node."""
+    link_references = (
+        compiled_contract.get("evm", {}).get("bytecode", {}).get("linkReferences")
+    )
+    if not link_references:  # None or {} -> fully linked
+        return
+
+    unlinked = sorted(
+        f"{path}:{name}"
+        for path, libraries in link_references.items()
+        for name in libraries
+    )
+    raise CompileError(
+        f"Contract '{contract_name}' has unlinked libraries: {', '.join(unlinked)}. "
+        "Add their addresses to bytecode_comparison.libraries, keyed by each "
+        "library's definition file."
+    )
 
 
 def parse_compiled_contract(
@@ -743,31 +790,6 @@ def parse_compiled_contract(
     return contract_creation_code_without_calldata, deployed_bytecode, immutables
 
 
-def get_config_value(config: dict, key: str, warn_if_missing: bool = True):
-    """
-    Get a value from config with optional warning if missing.
-
-    Args:
-        config: Configuration dictionary
-        key: Key to look up
-        warn_if_missing: Whether to warn if the key is not found
-
-    Returns:
-        The config value or None if not found
-    """
-    value = config.get(key)
-    if value is None and warn_if_missing:
-        logger.warn(f'Failed to find "{key}" in the config')
-    return value
-
-
-def get_explorer_hostname(config: dict) -> str | None:
-    """Get explorer hostname from config."""
-    value = get_config_value(config, "explorer_hostname", warn_if_missing=True)
-    return str(value) if value is not None else None
-
-
 def get_explorer_chain_id(config: dict) -> int | None:
-    """Get explorer chain ID from config."""
-    value = get_config_value(config, "explorer_chain_id", warn_if_missing=False)
+    value = config.get("explorer_chain_id")
     return int(value) if value is not None else None

@@ -33,7 +33,6 @@ dependencies:
 fail_on_bytecode_comparison_error: true
 
 bytecode_comparison:
-  hardhat_config_name: mainnet_hardhat_config.js
   constructor_calldata:
     "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84": "0x1234abcd"
   constructor_args:
