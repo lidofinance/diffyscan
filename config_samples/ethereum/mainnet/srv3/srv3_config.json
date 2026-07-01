@@ -1,0 +1,228 @@
+{
+  "contracts": {
+    "0x3aa937Ac2ab89CDd363EdC6b5A4d4A42dF5bc043": "Accounting",
+    "0xe4f03D1107d1905B6F2A28FCb6Af221E0CE19136": "AccountingOracle",
+    "0x028271E30a695c0527A0C50cA30603feD004cDb0": "Lido",
+    "0xFfDe8Acab9D7037f29198Ad03ad6d05bac8B0a2E": "ConsolidationBus",
+    "0x17be979344f2c2cC806229a532D92f8742C10462": "ConsolidationGateway",
+    "0x6Fb4c152F092373dD71f0C07C83c1E77406599aB": "ConsolidationMigrator",
+    "0xF573E9E3de1f86B085417ab294f56E7920B4e9Be": "DepositSecurityModule",
+    "0x0360002bf51DCae1c0267aE0AFDaBacAF7De686b": "LidoLocator",
+    "0x98F1da239a199574A4F7f371fD8fc0a872022c73": "MinFirstAllocationStrategy",
+    "0x147f8d3cf3004FAf9Bf94E88B54b6C06De507be9": "OracleReportSanityChecker",
+    "0xDD76927045435C7605cf6f5F978cfb8CABDb5F80": "StakingRouter",
+    "0xc0be9942Fd8f54aB126A5F0Ba649A90049ccad14": "SRLib",
+    "0xb08dBc68C521cD7A4318dc4C807a42bEB20f1106": "TopUpGateway",
+    "0x2C3386b39db89eef0F362A3BE0C05a6811E809E3": "ValidatorsExitBusOracle",
+    "0xfB4521BD151BFB45DB6045D2d07e58e0f597e340": "WithdrawalVault",
+    "0xf98AC162eAB766bDB9507c3584c00C535B8F6216": "BeaconChainDepositor"
+  },
+  "network": "mainnet",
+  "explorer_hostname": "api.etherscan.io",
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+  "explorer_chain_id": 1,
+  "github_repo": {
+    "url": "https://github.com/lidofinance/core",
+    "commit": "7b658bbf59b45a5247d725dbcf170753fe368b57",
+    "relative_root": ""
+  },
+  "dependencies": {
+    "@aragon/os": {
+      "url": "https://github.com/aragon/aragonOS",
+      "commit": "f3ae59b00f73984e562df00129c925339cd069ff",
+      "relative_root": ""
+    },
+    "@aragon/minime": {
+      "url": "https://github.com/aragon/minime",
+      "commit": "1d5251fc88eee5024ff318d95bc9f4c5de130430",
+      "relative_root": ""
+    },
+    "@aragon/apps-lido": {
+      "url": "https://github.com/lidofinance/aragon-apps/",
+      "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+      "relative_root": ""
+    },
+    "@aragon/apps-finance": {
+      "url": "https://github.com/lidofinance/aragon-apps/",
+      "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+      "relative_root": "apps/finance"
+    },
+    "@aragon/apps-vault": {
+      "url": "https://github.com/lidofinance/aragon-apps/",
+      "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+      "relative_root": "apps/vault"
+    },
+    "@aragon/apps-agent": {
+      "url": "https://github.com/lidofinance/aragon-apps/",
+      "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0",
+      "relative_root": "apps/agent"
+    },
+    "openzeppelin-solidity": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "06e265b38d3e9daeaa7b33f9035c700d6bc0c6a0",
+      "relative_root": ""
+    },
+    "solidity-bytes-utils": {
+      "url": "https://github.com/GNSPS/solidity-bytes-utils",
+      "commit": "9776282d181839fbb4b18f2cf218e316d6df871c",
+      "relative_root": ""
+    },
+    "@openzeppelin/contracts": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "fa64a1ced0b70ab89073d5d0b6e01b0778f7e7d6",
+      "relative_root": "contracts"
+    },
+    "@openzeppelin/contracts-v4.4": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "6bd6b76d1156e20e45d1016f355d154141c7e5b9",
+      "relative_root": "contracts"
+    },
+    "@openzeppelin/contracts-v5.2": {
+      "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+      "commit": "acd4ff74de833399287ed6b31b4debf6b2b35527",
+      "relative_root": "contracts"
+    }
+  },
+  "fail_on_bytecode_comparison_error": true,
+  "bytecode_comparison": {
+    "constructor_calldata": {},
+    "extra_sources": {
+      "0x17be979344f2c2cC806229a532D92f8742C10462": [
+        "contracts/common/interfaces/IPausableUntil.sol"
+      ]
+    },
+    "constructor_args": {
+      "0x3aa937Ac2ab89CDd363EdC6b5A4d4A42dF5bc043": [
+        "0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb",
+        "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84"
+      ],
+      "0xe4f03D1107d1905B6F2A28FCb6Af221E0CE19136": [
+        "0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb",
+        12,
+        1606824023
+      ],
+      "0x028271E30a695c0527A0C50cA30603feD004cDb0": [],
+      "0xFfDe8Acab9D7037f29198Ad03ad6d05bac8B0a2E": [
+        "0x17be979344f2c2cC806229a532D92f8742C10462"
+      ],
+      "0x17be979344f2c2cC806229a532D92f8742C10462": [
+        "0x57Cc953D3d27E7E8bAd04566bfd4Cd416c3B0855",
+        "0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb",
+        2900,
+        1,
+        30,
+        "0x0000000000000000000000000000000000000000000000000096000000000028",
+        "0x0000000000000000000000000000000000000000000000000096000000000028",
+        0
+      ],
+      "0x6Fb4c152F092373dD71f0C07C83c1E77406599aB": [
+        "0xFdDf38947aFB03C621C71b06C9C70bce73f12999",
+        "0xd907CE33B4Be423823d1CFFe80BD147E8b8554C8",
+        1,
+        4
+      ],
+      "0xF573E9E3de1f86B085417ab294f56E7920B4e9Be": [
+        "0x00000000219ab540356cBB839Cbe05303d7705Fa",
+        "0xFdDf38947aFB03C621C71b06C9C70bce73f12999",
+        6646,
+        200
+      ],
+      "0x0360002bf51DCae1c0267aE0AFDaBacAF7De686b": [
+        [
+          "0x852deD011285fe67063a08005c71a85690503Cee",
+          "0xF573E9E3de1f86B085417ab294f56E7920B4e9Be",
+          "0x388C818CA8B9251b393131C08a736A67ccB19297",
+          "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
+          "0x147f8d3cf3004FAf9Bf94E88B54b6C06De507be9",
+          "0x25e35855783bec3E49355a29e110f02Ed8b05ba9",
+          "0xE76c52750019b80B43E36DF30bf4060EB73F573a",
+          "0xFdDf38947aFB03C621C71b06C9C70bce73f12999",
+          "0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c",
+          "0x0De4Ea0184c2ad0BacA7183356Aea5B8d5Bf5c6e",
+          "0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1",
+          "0xB9D7934878B5FB9610B3fE8A5e441e8fad7E293f",
+          "0xbf05A929c3D7885a6aeAd833a992dA6E5ac23b09",
+          "0xbDb567672c867DB533119C2dcD4FB9d8b44EC82f",
+          "0xDC00116a0D3E064427dA2600449cfD2566B3037B",
+          "0x17be979344f2c2cC806229a532D92f8742C10462",
+          "0x23ED611be0e1a820978875C0122F92260804cdDf",
+          "0xF4bF42c6D6A0E38825785048124DBAD6c9eaaac3",
+          "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
+          "0x1d201BE093d847f6446530Efb0E8Fb426d176709",
+          "0x02Ca7772FF14a9F6c1a08aF385aA96bb1b34175A",
+          "0x5DB427080200c235F2Ae8Cd17A7be87921f7AD6c",
+          "0xC69685E89Cefc327b43B7234AC646451B27c544d",
+          "0x3FC2C71579D80790Aaa3fc7Be8B66ac39dC57374"
+        ]
+      ],
+      "0x98F1da239a199574A4F7f371fD8fc0a872022c73": [],
+      "0x147f8d3cf3004FAf9Bf94E88B54b6C06De507be9": [
+        "0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb",
+        "0x23ED611be0e1a820978875C0122F92260804cdDf",
+        "0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c",
+        [
+          57600,
+          57600,
+          1000,
+          50,
+          19200,
+          32,
+          2048,
+          8,
+          24,
+          7680,
+          750000,
+          360,
+          50,
+          93375,
+          32,
+          300
+        ]
+      ],
+      "0xDD76927045435C7605cf6f5F978cfb8CABDb5F80": [
+        "0x00000000219ab540356cBB839Cbe05303d7705Fa",
+        "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
+        "0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb",
+        32000000000000000000,
+        2048000000000000000000
+      ],
+      "0xc0be9942Fd8f54aB126A5F0Ba649A90049ccad14": [],
+      "0xb08dBc68C521cD7A4318dc4C807a42bEB20f1106": [
+        "0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb",
+        "0x0000000000000000000000000000000000000000000000000096000000000028",
+        "0x0000000000000000000000000000000000000000000000000096000000000028",
+        0,
+        32
+      ],
+      "0x2C3386b39db89eef0F362A3BE0C05a6811E809E3": [
+        12,
+        1606824023,
+        "0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb"
+      ],
+      "0xfB4521BD151BFB45DB6045D2d07e58e0f597e340": [
+        "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
+        "0x3e40D73EB977Dc6a537aF587D48316feE66E9C8c",
+        "0xDC00116a0D3E064427dA2600449cfD2566B3037B",
+        "0x17be979344f2c2cC806229a532D92f8742C10462",
+        "0x00000961Ef480Eb55e80D19ad83579A64c007002",
+        "0x0000BBdDc7CE488642fb579F8B00f3a590007251"
+      ],
+      "0xf98AC162eAB766bDB9507c3584c00C535B8F6216": []
+    },
+    "libraries": {
+      "contracts/common/lib/MinFirstAllocationStrategy.sol": {
+        "MinFirstAllocationStrategy": "0x98F1da239a199574A4F7f371fD8fc0a872022c73"
+      },
+      "contracts/0.8.25/lib/BeaconChainDepositor.sol": {
+        "BeaconChainDepositor": "0xf98AC162eAB766bDB9507c3584c00C535B8F6216"
+      },
+      "contracts/0.8.25/sr/SRLib.sol": {
+        "SRLib": "0xc0be9942Fd8f54aB126A5F0Ba649A90049ccad14"
+      }
+    },
+    "deployment_from": {
+      "0xF573E9E3de1f86B085417ab294f56E7920B4e9Be": "0x22c79cd20d8da8e6910e965086968075867447c0"
+    }
+  },
+  "allowed_diffs": {}
+}
