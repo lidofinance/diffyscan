@@ -1,0 +1,177 @@
+"contracts":
+  "0x3aa937Ac2ab89CDd363EdC6b5A4d4A42dF5bc043": "Accounting"
+  "0xe4f03D1107d1905B6F2A28FCb6Af221E0CE19136": "AccountingOracle"
+  "0x028271E30a695c0527A0C50cA30603feD004cDb0": "Lido"
+  "0xFfDe8Acab9D7037f29198Ad03ad6d05bac8B0a2E": "ConsolidationBus"
+  "0x17be979344f2c2cC806229a532D92f8742C10462": "ConsolidationGateway"
+  "0x6Fb4c152F092373dD71f0C07C83c1E77406599aB": "ConsolidationMigrator"
+  "0xF573E9E3de1f86B085417ab294f56E7920B4e9Be": "DepositSecurityModule"
+  "0x0360002bf51DCae1c0267aE0AFDaBacAF7De686b": "LidoLocator"
+  "0x98F1da239a199574A4F7f371fD8fc0a872022c73": "MinFirstAllocationStrategy"
+  "0x147f8d3cf3004FAf9Bf94E88B54b6C06De507be9": "OracleReportSanityChecker"
+  "0xDD76927045435C7605cf6f5F978cfb8CABDb5F80": "StakingRouter"
+  "0xc0be9942Fd8f54aB126A5F0Ba649A90049ccad14": "SRLib"
+  "0xb08dBc68C521cD7A4318dc4C807a42bEB20f1106": "TopUpGateway"
+  "0x2C3386b39db89eef0F362A3BE0C05a6811E809E3": "ValidatorsExitBusOracle"
+  "0xfB4521BD151BFB45DB6045D2d07e58e0f597e340": "WithdrawalVault"
+  "0xf98AC162eAB766bDB9507c3584c00C535B8F6216": "BeaconChainDepositor"
+"network": "mainnet"
+"explorer_hostname": "api.etherscan.io"
+"explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN"
+"explorer_chain_id": 1
+"github_repo":
+  "url": "https://github.com/lidofinance/core"
+  "commit": "7b658bbf59b45a5247d725dbcf170753fe368b57"
+  "relative_root": ""
+"dependencies":
+  "@aragon/os":
+    "url": "https://github.com/aragon/aragonOS"
+    "commit": "f3ae59b00f73984e562df00129c925339cd069ff"
+    "relative_root": ""
+  "@aragon/minime":
+    "url": "https://github.com/aragon/minime"
+    "commit": "1d5251fc88eee5024ff318d95bc9f4c5de130430"
+    "relative_root": ""
+  "@aragon/apps-lido":
+    "url": "https://github.com/lidofinance/aragon-apps/"
+    "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0"
+    "relative_root": ""
+  "@aragon/apps-finance":
+    "url": "https://github.com/lidofinance/aragon-apps/"
+    "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0"
+    "relative_root": "apps/finance"
+  "@aragon/apps-vault":
+    "url": "https://github.com/lidofinance/aragon-apps/"
+    "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0"
+    "relative_root": "apps/vault"
+  "@aragon/apps-agent":
+    "url": "https://github.com/lidofinance/aragon-apps/"
+    "commit": "b09834d29c0db211ddd50f50905cbeff257fc8e0"
+    "relative_root": "apps/agent"
+  "openzeppelin-solidity":
+    "url": "https://github.com/OpenZeppelin/openzeppelin-contracts"
+    "commit": "06e265b38d3e9daeaa7b33f9035c700d6bc0c6a0"
+    "relative_root": ""
+  "solidity-bytes-utils":
+    "url": "https://github.com/GNSPS/solidity-bytes-utils"
+    "commit": "9776282d181839fbb4b18f2cf218e316d6df871c"
+    "relative_root": ""
+  "@openzeppelin/contracts":
+    "url": "https://github.com/OpenZeppelin/openzeppelin-contracts"
+    "commit": "fa64a1ced0b70ab89073d5d0b6e01b0778f7e7d6"
+    "relative_root": "contracts"
+  "@openzeppelin/contracts-v4.4":
+    "url": "https://github.com/OpenZeppelin/openzeppelin-contracts"
+    "commit": "6bd6b76d1156e20e45d1016f355d154141c7e5b9"
+    "relative_root": "contracts"
+  "@openzeppelin/contracts-v5.2":
+    "url": "https://github.com/OpenZeppelin/openzeppelin-contracts"
+    "commit": "acd4ff74de833399287ed6b31b4debf6b2b35527"
+    "relative_root": "contracts"
+"fail_on_bytecode_comparison_error": true
+"bytecode_comparison":
+  "constructor_calldata":
+    "0x3aa937Ac2ab89CDd363EdC6b5A4d4A42dF5bc043": "0x000000000000000000000000c1d0b3de6792bf6b4b37eccdcc24e45978cfd2eb000000000000000000000000ae7ab96520de3a18e5e111b5eaab095312d7fe84"
+    "0xe4f03D1107d1905B6F2A28FCb6Af221E0CE19136": "0x000000000000000000000000c1d0b3de6792bf6b4b37eccdcc24e45978cfd2eb000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000005fc63057"
+    "0xFfDe8Acab9D7037f29198Ad03ad6d05bac8B0a2E": "0x00000000000000000000000017be979344f2c2cc806229a532d92f8742c10462"
+    "0x17be979344f2c2cC806229a532D92f8742C10462": "0x00000000000000000000000057cc953d3d27e7e8bad04566bfd4cd416c3b0855000000000000000000000000c1d0b3de6792bf6b4b37eccdcc24e45978cfd2eb0000000000000000000000000000000000000000000000000000000000000b540000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000001e000000000000000000000000000000000000000000000000009600000000002800000000000000000000000000000000000000000000000000960000000000280000000000000000000000000000000000000000000000000000000000000000"
+    "0x6Fb4c152F092373dD71f0C07C83c1E77406599aB": "0x000000000000000000000000fddf38947afb03c621c71b06c9c70bce73f12999000000000000000000000000d907ce33b4be423823d1cffe80bd147e8b8554c800000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000004"
+    "0xF573E9E3de1f86B085417ab294f56E7920B4e9Be": "0x00000000000000000000000000000000219ab540356cbb839cbe05303d7705fa000000000000000000000000fddf38947afb03c621c71b06c9c70bce73f1299900000000000000000000000000000000000000000000000000000000000019f600000000000000000000000000000000000000000000000000000000000000c8"
+    "0x0360002bf51DCae1c0267aE0AFDaBacAF7De686b": "0x000000000000000000000000852ded011285fe67063a08005c71a85690503cee000000000000000000000000f573e9e3de1f86b085417ab294f56e7920b4e9be000000000000000000000000388c818ca8b9251b393131c08a736a67ccb19297000000000000000000000000ae7ab96520de3a18e5e111b5eaab095312d7fe84000000000000000000000000147f8d3cf3004faf9bf94e88b54b6c06de507be900000000000000000000000025e35855783bec3e49355a29e110f02ed8b05ba9000000000000000000000000e76c52750019b80b43e36df30bf4060eb73f573a000000000000000000000000fddf38947afb03c621c71b06c9c70bce73f129990000000000000000000000003e40d73eb977dc6a537af587d48316fee66e9c8c0000000000000000000000000de4ea0184c2ad0baca7183356aea5b8d5bf5c6e000000000000000000000000889edc2edab5f40e902b864ad4d7ade8e412f9b1000000000000000000000000b9d7934878b5fb9610b3fe8a5e441e8fad7e293f000000000000000000000000bf05a929c3d7885a6aead833a992da6e5ac23b09000000000000000000000000bdb567672c867db533119c2dcd4fb9d8b44ec82f000000000000000000000000dc00116a0d3e064427da2600449cfd2566b3037b00000000000000000000000017be979344f2c2cc806229a532d92f8742c1046200000000000000000000000023ed611be0e1a820978875c0122f92260804cddf000000000000000000000000f4bf42c6d6a0e38825785048124dbad6c9eaaac30000000000000000000000007f39c581f595b53c5cb19bd0b3f8da6c935e2ca00000000000000000000000001d201be093d847f6446530efb0e8fb426d17670900000000000000000000000002ca7772ff14a9f6c1a08af385aa96bb1b34175a0000000000000000000000005db427080200c235f2ae8cd17a7be87921f7ad6c000000000000000000000000c69685e89cefc327b43b7234ac646451b27c544d0000000000000000000000003fc2c71579d80790aaa3fc7be8b66ac39dc57374"
+    "0x147f8d3cf3004FAf9Bf94E88B54b6C06De507be9": "0x000000000000000000000000c1d0b3de6792bf6b4b37eccdcc24e45978cfd2eb00000000000000000000000023ed611be0e1a820978875c0122f92260804cddf0000000000000000000000003e40d73eb977dc6a537af587d48316fee66e9c8c000000000000000000000000000000000000000000000000000000000000e100000000000000000000000000000000000000000000000000000000000000e10000000000000000000000000000000000000000000000000000000000000003e800000000000000000000000000000000000000000000000000000000000000320000000000000000000000000000000000000000000000000000000000004b0000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000180000000000000000000000000000000000000000000000000000000000001e0000000000000000000000000000000000000000000000000000000000000b71b0000000000000000000000000000000000000000000000000000000000000016800000000000000000000000000000000000000000000000000000000000000320000000000000000000000000000000000000000000000000000000000016cbf0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000012c"
+    "0xDD76927045435C7605cf6f5F978cfb8CABDb5F80": "0x00000000000000000000000000000000219ab540356cbb839cbe05303d7705fa000000000000000000000000ae7ab96520de3a18e5e111b5eaab095312d7fe84000000000000000000000000c1d0b3de6792bf6b4b37eccdcc24e45978cfd2eb000000000000000000000000000000000000000000000001bc16d674ec80000000000000000000000000000000000000000000000000006f05b59d3b20000000"
+    "0xb08dBc68C521cD7A4318dc4C807a42bEB20f1106": "0x000000000000000000000000c1d0b3de6792bf6b4b37eccdcc24e45978cfd2eb0000000000000000000000000000000000000000000000000096000000000028000000000000000000000000000000000000000000000000009600000000002800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020"
+    "0x2C3386b39db89eef0F362A3BE0C05a6811E809E3": "0x000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000005fc63057000000000000000000000000c1d0b3de6792bf6b4b37eccdcc24e45978cfd2eb"
+    "0xfB4521BD151BFB45DB6045D2d07e58e0f597e340": "0x000000000000000000000000ae7ab96520de3a18e5e111b5eaab095312d7fe840000000000000000000000003e40d73eb977dc6a537af587d48316fee66e9c8c000000000000000000000000dc00116a0d3e064427da2600449cfd2566b3037b00000000000000000000000017be979344f2c2cc806229a532d92f8742c1046200000000000000000000000000000961ef480eb55e80d19ad83579a64c0070020000000000000000000000000000bbddc7ce488642fb579f8b00f3a590007251"
+  "extra_sources":
+    "0x17be979344f2c2cC806229a532D92f8742C10462":
+    - "contracts/common/interfaces/IPausableUntil.sol"
+  "libraries":
+    "contracts/common/lib/MinFirstAllocationStrategy.sol":
+      "MinFirstAllocationStrategy": "0x98F1da239a199574A4F7f371fD8fc0a872022c73"
+    "contracts/0.8.25/lib/BeaconChainDepositor.sol":
+      "BeaconChainDepositor": "0xf98AC162eAB766bDB9507c3584c00C535B8F6216"
+    "contracts/0.8.25/sr/SRLib.sol":
+      "SRLib": "0xc0be9942Fd8f54aB126A5F0Ba649A90049ccad14"
+  "deployment_from":
+    "0xF573E9E3de1f86B085417ab294f56E7920B4e9Be": "0x22c79cd20d8da8e6910e965086968075867447c0"
+"allowed_diffs":
+  "bytecode":
+    "0x3aa937Ac2ab89CDd363EdC6b5A4d4A42dF5bc043":
+    - "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after the runtime code) differs; executable runtime bytecode is identical."
+      "cbor_metadata": true
+    "0xe4f03D1107d1905B6F2A28FCb6Af221E0CE19136":
+    - "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after the runtime code) differs; executable runtime bytecode is identical."
+      "cbor_metadata": true
+    "0x028271E30a695c0527A0C50cA30603feD004cDb0":
+    - "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after the runtime code) differs; executable runtime bytecode is identical."
+      "cbor_metadata": true
+    "0xFfDe8Acab9D7037f29198Ad03ad6d05bac8B0a2E":
+    - "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after the runtime code) differs; executable runtime bytecode is identical."
+      "cbor_metadata": true
+    "0x17be979344f2c2cC806229a532D92f8742C10462":
+    - "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after the runtime code) differs; executable runtime bytecode is identical."
+      "cbor_metadata": true
+    "0x6Fb4c152F092373dD71f0C07C83c1E77406599aB":
+    - "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after the runtime code) differs; executable runtime bytecode is identical."
+      "cbor_metadata": true
+    "0xF573E9E3de1f86B085417ab294f56E7920B4e9Be":
+    - "reason": "DepositSecurityModule exposes three bytes32 message-prefix immutables — ATTEST/PAUSE/UNVET_MESSAGE_PREFIX — each computed in the constructor as keccak256(<domain-const>, block.chainid, address(this)). diffyscan simulates the deployment at a synthetic address, so address(this) differs and all three prefixes differ; the compiler inlines each immutable at two read sites, hence six offsets: UNVET=643/2023, PAUSE=824/1388, ATTEST=882/4976. The pinned values equal the live on-chain getters (verified via eth_call), i.e. the genuine deployed prefixes. The STAKING_ROUTER and DEPOSIT_CONTRACT address immutables are supplied via exact constructor_calldata and match on-chain, so they are absent from this diff. Trailing CBOR metadata also differs. No runtime-logic difference."
+      "immutables":
+      - "offset": 643
+        "value": "0x90b2d3a4cbdc8a60c14ccf87f2bd90a9881cef5bd52d5bf4b3ec48497f97d06e"
+      - "offset": 824
+        "value": "0xe3fb87228adf6fbdd12dc1496751f0251453f29ac84ebbd3a699461b51f1de7b"
+      - "offset": 882
+        "value": "0x683df20ff74dc438e214ff44087d5e4b6ccf03b21e7f1ba074459a5212abd912"
+      - "offset": 1388
+        "value": "0xe3fb87228adf6fbdd12dc1496751f0251453f29ac84ebbd3a699461b51f1de7b"
+      - "offset": 2023
+        "value": "0x90b2d3a4cbdc8a60c14ccf87f2bd90a9881cef5bd52d5bf4b3ec48497f97d06e"
+      - "offset": 4976
+        "value": "0x683df20ff74dc438e214ff44087d5e4b6ccf03b21e7f1ba074459a5212abd912"
+      "cbor_metadata": true
+    "0x0360002bf51DCae1c0267aE0AFDaBacAF7De686b":
+    - "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after the runtime code) differs; executable runtime bytecode is identical."
+      "cbor_metadata": true
+    "0x98F1da239a199574A4F7f371fD8fc0a872022c73":
+    - "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after the runtime code) differs; executable runtime bytecode is identical."
+      "cbor_metadata": true
+    "0x147f8d3cf3004FAf9Bf94E88B54b6C06De507be9":
+    - "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after the runtime code) differs; executable runtime bytecode is identical."
+      "cbor_metadata": true
+    "0xDD76927045435C7605cf6f5F978cfb8CABDb5F80":
+    - "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after the runtime code) differs; executable runtime bytecode is identical."
+      "cbor_metadata": true
+    "0xc0be9942Fd8f54aB126A5F0Ba649A90049ccad14":
+    - "reason": "Library call-protection immutable holds the library's own deployed address (baked in at deploy); cannot match a simulated redeployment; runtime logic is identical."
+      "immutables":
+      - "offset": 7
+        "value": "0x000000000000000000000000c0be9942fd8f54ab126a5f0ba649a90049ccad14"
+      "cbor_metadata": true
+    "0xb08dBc68C521cD7A4318dc4C807a42bEB20f1106":
+    - "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after the runtime code) differs; executable runtime bytecode is identical."
+      "cbor_metadata": true
+    "0x2C3386b39db89eef0F362A3BE0C05a6811E809E3":
+    - "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after the runtime code) differs; executable runtime bytecode is identical."
+      "cbor_metadata": true
+    "0xfB4521BD151BFB45DB6045D2d07e58e0f597e340":
+    - "reason": "Trailing CBOR metadata (Solidity compiler/source-path hash appended after the runtime code) differs; executable runtime bytecode is identical."
+      "cbor_metadata": true
+    "0xf98AC162eAB766bDB9507c3584c00C535B8F6216":
+    - "reason": "Library call-protection immutable holds the library's own deployed address (baked in at deploy); cannot match a simulated redeployment; runtime logic is identical."
+      "immutables":
+      - "offset": 7
+        "value": "0x000000000000000000000000f98ac162eab766bdb9507c3584c00c535b8f6216"
+      "cbor_metadata": true
+  "source":
+    "0x6Fb4c152F092373dD71f0C07C83c1E77406599aB":
+    - "reason": "Etherscan verification artifact: the per-contract verified source of ConsolidationMigrator carries a 1-space indentation on the closing brace of struct StakingModule in SRTypes.sol that is absent at the GitHub commit. Formatting only (Etherscan verifies per-contract from a build-info snapshot); no declaration/logic change, runtime bytecode matches modulo CBOR metadata."
+      "line_ranges":
+      - "file": "contracts/0.8.25/sr/SRTypes.sol"
+        "github":
+          "start": 115
+          "count": 1
+        "explorer":
+          "start": 115
+          "count": 1
