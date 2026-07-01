@@ -687,30 +687,14 @@ def compile_contract_from_explorer(
     if "settings" not in solc_input:
         solc_input["settings"] = {}
 
-    # Link only libraries the contract uses; extras pollute its CBOR metadata.
+    # Add libraries to solc input before compilation if provided
     if libraries:
-        source_paths = set(get_solc_sources(solc_input).keys())
-        target_name = contract_code.get("name")
-        scoped_libraries: dict = {}
+        logger.okay(f"Adding libraries to solc input: {libraries}")
+        if "libraries" not in solc_input["settings"]:
+            solc_input["settings"]["libraries"] = {}
         for path, library_map in libraries.items():
-            if path not in source_paths:
-                continue
-            usable = {
-                name: address
-                for name, address in library_map.items()
-                if name != target_name
-            }
-            if usable:
-                scoped_libraries[path] = usable
-        skipped = sorted(set(libraries) - set(scoped_libraries))
-        if skipped:
-            logger.info(f"Libraries not used by this contract, skipped: {skipped}")
-        if scoped_libraries:
-            logger.okay(f"Adding libraries to solc input: {scoped_libraries}")
-            solc_input["settings"].setdefault("libraries", {})
-            for path, library_map in scoped_libraries.items():
-                solc_input["settings"]["libraries"].setdefault(path, {})
-                solc_input["settings"]["libraries"][path].update(library_map)
+            solc_input["settings"]["libraries"].setdefault(path, {})
+            solc_input["settings"]["libraries"][path].update(library_map)
 
     if evm_version:
         logger.okay("Using EVM version from explorer metadata", evm_version)

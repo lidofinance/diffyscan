@@ -304,10 +304,7 @@ def test_compile_contract_from_explorer_merges_libraries_and_evm_version(monkeyp
         "compiler": "v0.8.25+commit.b61c2a91",
         "solcInput": {
             "language": "Solidity",
-            "sources": {
-                "contracts/Demo.sol": {"content": "contract Demo {}"},
-                "contracts/Helper.sol": {"content": "library Helper {}"},
-            },
+            "sources": {"contracts/Demo.sol": {"content": "contract Demo {}"}},
             "settings": {
                 "libraries": {
                     "contracts/Existing.sol": {
@@ -353,19 +350,12 @@ def test_compile_contract_from_explorer_merges_libraries_and_evm_version(monkeyp
         lambda compiled_contracts, target_name: {"abi": [], "evm": {}},
     )
 
-    # A library links only if its file is in sources and it isn't the contract itself.
     result = compile_contract_from_explorer(
         contract_code,
         {
             "contracts/Helper.sol": {
                 "Helper": "0x1111111111111111111111111111111111111111"
-            },
-            "contracts/Missing.sol": {
-                "Missing": "0x3333333333333333333333333333333333333333"
-            },
-            "contracts/Demo.sol": {
-                "Demo": "0x4444444444444444444444444444444444444444"
-            },
+            }
         },
         "paris",
     )
