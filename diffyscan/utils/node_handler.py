@@ -5,7 +5,10 @@ from .logger import logger
 from .custom_exceptions import DeploymentSimulationError, NodeError
 
 DEFAULT_CALLER = "0x0000000000000000000000000000000000000000"
-DEFAULT_DEPLOYMENT_GAS_LIMIT = 100_000_000
+# EIP-7825 (Fusaka): max gas a single tx / contract creation may use. No real
+# deployment can exceed this, so it is the correct simulation ceiling; values
+# above it are rejected by strict/hosted nodes with an opaque "Invalid params".
+DEFAULT_DEPLOYMENT_GAS_LIMIT = 16_777_216  # 2**24
 
 
 def _rpc_call(rpc_url: str, method: str, params: list):

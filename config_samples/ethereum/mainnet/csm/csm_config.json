@@ -1,0 +1,38 @@
+{
+    "contracts": {
+        "0x107d287f178cd54792614d7d63c47d8242240bed": "ParametersRegistry",
+        "0xe768572cc5ae5c698345c59288d871a949ea8bd3": "Accounting",
+        "0x66adb8b3f58d3dfdf6badb595e41f19e947e5c14": "VettedGate",
+        "0xc0f110af6ea9119037a71c84d14506a22ae43dde": "MerkleGateFactory",
+        "0xece6e0cde61078f76b66ef0c338a6875e5d01f79": "FeeOracle",
+        "0x936da7cdb7eed1084d294e23ea1d7ad72dccfe0e": "FeeDistributor",
+        "0x63992a86f009fcc796a8369feefb68880aef4e3a": "CSModule",
+        "0xd25e7c3923d2e68c325980b0e15ed20d62b2691f": "ValidatorStrikes",
+        "0xa5b9e96e951089e629ab0834aeaf242a81394ea0": "ExitPenalties",
+        "0x610b517d380f287c239c93f8ef6ffbd567aa4ba5": "Ejector",
+        "0xb8cd8f059ad7a5db8cafde34aab007317f7156c8": "PermissionlessGate",
+        "0x711985e069f4d702e0457c0dacade3d3894ce4e3": "OneShotCurveSetup",
+        "0xfce7ab839e55de77730716d05b3553e45ab3a5ba": "Verifier"
+    },
+    "explorer_hostname": "api.etherscan.io",
+    "explorer_chain_id": 1,
+    "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+    "github_repo": {
+        "url": "https://github.com/lidofinance/staking-modules",
+        "commit": "4d3de6658499e1c1774951780a97d7ae25ca18b8",
+        "relative_root": ""
+    },
+    "dependencies": {
+        "node_modules/@openzeppelin/contracts": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts",
+            "commit": "c64a1ed",
+            "relative_root": "contracts"
+        },
+        "node_modules/@openzeppelin/contracts-upgradeable": {
+            "url": "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable",
+            "commit": "e725abd",
+            "relative_root": "contracts"
+        }
+    },
+    "fail_on_bytecode_comparison_error": true
+}

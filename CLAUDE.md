@@ -69,6 +69,8 @@ explorer_token_env_var: "ETHERSCAN_EXPLORER_TOKEN"
 github_repo:        { url, commit, relative_root }
 dependencies:       { "dep_name": { url, commit, relative_root } }
 bytecode_comparison: { constructor_calldata, constructor_args, libraries, deployment_from, extra_sources }
+                    # libraries keyed by the library's DEFINITION file: { "src/lib/Foo.sol": { "Foo": "0xaddr" } }
+                    # explorer-provided libraries are auto-detected and re-keyed to the definition file for solc linking
 allowed_diffs:      { bytecode: {...}, source: {...} }  # optional; see below
 ```
 
