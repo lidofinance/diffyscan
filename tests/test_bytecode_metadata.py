@@ -278,9 +278,8 @@ def test_get_contract_from_blockscout_extracts_and_merges_metadata(monkeypatch):
                 },
                 "external_libraries": [
                     {
-                        "file_path": "contracts/Helper.sol",
                         "name": "Helper",
-                        "address": "0x1111111111111111111111111111111111111111",
+                        "address_hash": "0x1111111111111111111111111111111111111111",
                     }
                 ],
             }
@@ -295,12 +294,55 @@ def test_get_contract_from_blockscout_extracts_and_merges_metadata(monkeypatch):
 
     assert contract["constructor_arguments"] == "deadbeef"
     assert contract["evm_version"] == "prague"
+    # external_libraries (name + address_hash, no path) repeats
+    # compiler_settings.libraries and can't map to a path, so it's excluded.
     assert contract["libraries"] == {
         "contracts/Existing.sol": {
             "Existing": "0x2222222222222222222222222222222222222222"
         },
-        "contracts/Helper.sol": {
-            "Helper": "0x1111111111111111111111111111111111111111"
+    }
+
+
+def test_get_contract_from_blockscout_strips_project_prefix_from_paths(monkeypatch):
+    def fake_fetch(url):
+        return DummyResponse(
+            {
+                "name": "Demo",
+                "file_path": "project:/contracts/Demo.sol",
+                "source_code": "import './Helper.sol'; contract Demo {}",
+                "additional_sources": [
+                    {
+                        "file_path": "project:/contracts/Helper.sol",
+                        "source_code": "library Helper {}",
+                    }
+                ],
+                "optimization_enabled": False,
+                "optimization_runs": 0,
+                "compiler_version": "v0.8.25+commit.b61c2a91",
+                "compiler_settings": {
+                    "libraries": {
+                        "project:/contracts/Existing.sol": {
+                            "Existing": "0x2222222222222222222222222222222222222222"
+                        }
+                    }
+                },
+            }
+        )
+
+    monkeypatch.setattr("diffyscan.utils.explorer.fetch", fake_fetch)
+
+    contract = _get_contract_from_blockscout(
+        "eth.blockscout.com",
+        "0x0000000000000000000000000000000000000001",
+    )
+
+    assert set(contract["solcInput"]["sources"]) == {
+        "contracts/Demo.sol",
+        "contracts/Helper.sol",
+    }
+    assert contract["libraries"] == {
+        "contracts/Existing.sol": {
+            "Existing": "0x2222222222222222222222222222222222222222"
         },
     }
 

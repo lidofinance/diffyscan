@@ -3,6 +3,7 @@ import os
 import copy
 import re
 import time
+from collections.abc import Callable
 
 from .common import fetch, load_cache, save_cache
 from .logger import logger
@@ -52,10 +53,12 @@ def _build_source_files(
     *,
     path_key: str,
     content_key: str,
+    normalize_path: Callable[[str], str] | None = None,
 ) -> dict[str, dict[str, str]]:
-    source_files = {primary_path: {"content": primary_source}}
+    normalize = normalize_path or (lambda value: value)
+    source_files = {normalize(primary_path): {"content": primary_source}}
     for entry in additional_sources or []:
-        source_files[entry[path_key]] = {"content": entry[content_key]}
+        source_files[normalize(entry[path_key])] = {"content": entry[content_key]}
     return source_files
 
 
@@ -296,6 +299,7 @@ def _get_contract_from_mantle(mantle_explorer_hostname: str, contract: str) -> d
 def _get_contract_from_blockscout(explorer_hostname: str, contract: str) -> dict:
     explorer_link = f"https://{explorer_hostname}/api/v2/smart-contracts/{contract}"
     response = fetch(explorer_link).json()
+    normalize_path = lambda path: path.removeprefix("project:/")
 
     if "name" not in response:
         _error_no_source_code_and_exit(contract)
@@ -311,9 +315,15 @@ def _get_contract_from_blockscout(explorer_hostname: str, contract: str) -> dict
         response.get("additional_sources"),
         path_key="file_path",
         content_key="source_code",
+        normalize_path=normalize_path,
     )
 
     compiler_settings = copy.deepcopy(response.get("compiler_settings") or {})
+    if isinstance(compiler_settings.get("libraries"), dict):
+        compiler_settings["libraries"] = {
+            normalize_path(str(path)): value
+            for path, value in compiler_settings["libraries"].items()
+        }
     optimization_runs = response.get(
         "optimization_runs", response.get("optimizations_runs", 0)
     )
@@ -323,13 +333,15 @@ def _get_contract_from_blockscout(explorer_hostname: str, contract: str) -> dict
         optimizer_runs=optimization_runs,
         settings=compiler_settings,
     )
+    # Libraries come from compiler_settings.libraries (keyed by source path).
+    # Blockscout's external_libraries repeats them with only name + address_hash,
+    # so it can't be mapped to a path when the library source isn't fetched.
     return _build_contract_payload(
         response["name"],
         response["compiler_version"],
         solc_input,
         constructor_arguments=response.get("constructor_args"),
         evm_version=response.get("evm_version"),
-        libraries=response.get("external_libraries"),
     )
 
 
