@@ -700,7 +700,7 @@ def compile_contract_from_explorer(
     evm_version: str | None = None,
 ) -> dict:
     required_platform = get_solc_native_platform_from_os()
-    # Etherscan reports "v0.8.33+commit...", Blockscout "0.8.33+commit..."
+    # Some explorers prefix the version with "v", others may not; strip it if present.
     build_name = contract_code["compiler"].removeprefix("v")
     build_info = get_compiler_info(required_platform, build_name)
     compiler_path = os.path.join(SOLC_DIR, build_info["path"])
