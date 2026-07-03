@@ -1,0 +1,59 @@
+contracts:
+  "0xDa5F930cE326EB5205085D66c72A4E79d60cB8C1": OssifiableProxy # CuratedModule proxy
+  "0x959fC67FE53c8A6C7a1AEd73430Aa07a36eD9337": CuratedModule
+  "0xffC1C5d59CeAC6F6c27E701F04a70cb50474607C": OssifiableProxy # ParametersRegistry proxy
+  "0xfF419BbBC5f44d46547079922a88d691886d192a": ParametersRegistry
+  "0xA64b339eebD3dC3De848298B6a140955932901d8": OssifiableProxy # MetaRegistry proxy
+  "0x6d852907463496622bb5FE5bc55cc30C4682E10e": MetaRegistry
+  "0xa4fCD4dDa0e4a847142E3592C97c77d8B9B3Cf5F": CuratedDepositAllocator # library
+  "0x2F91e3A8C5d6593bf4F8403fCfeCcd62dF59f6F6": OssifiableProxy # Accounting proxy
+  "0xB41F5d2721906b3BE4fC7ae08261266C801076C2": Accounting
+  "0x367d23c756599c20DCc8D6943F4976E8F88D60d7": OssifiableProxy # FeeDistributor proxy
+  "0x7C8FEE1dcC95Df60fC9b5BE7603c28Eb3af16753": FeeDistributor
+  "0x8EeFCdbD984c30E472BcbF545783D051CB5114e5": OssifiableProxy # FeeOracle proxy
+  "0x16804084408B6Caad10046F49aD421cBA56C0b5e": FeeOracle
+  "0x902D64c93F6595339aA46105627a085591051aFb": HashConsensus
+  "0xf4618370a1fBf46905B16C10817c8CFaD924D6db": OssifiableProxy # ValidatorStrikes proxy
+  "0x239Ee6ab18fB06370ad53Ce05097B32208fB0a30": ValidatorStrikes
+  "0x004aFb7DAA7dEA20EbAaB75c9F4892C879FaCCe0": OssifiableProxy # ExitPenalties proxy
+  "0x3766ABbA4635EE0fC3E6A7EB3EF169fe930df9c2": ExitPenalties
+  "0xe181A377A2d2BDE9A83f1474BC3DB7A412de091E": Ejector
+  "0xC392F457960f1B13Ebaf1aa6C065479dD507E1E3": Verifier
+  "0x3cb948FD454ad6b20DE67633f25DcbDbEaa0e849": CuratedGate
+  "0xDdE99d63b352A665d04339D4792E6852Ce89d1B7": MerkleGateFactory
+  "0x422f0d117615949E0620E998E1FE455eB6215E30": Dummy
+  "0x7A4C579e6Ed4017A03B4d43687f09b851F68d391": Dummy
+
+network: mainnet
+# explorer_hostname: api.etherscan.io
+explorer_hostname: eth.blockscout.com
+# explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+explorer_chain_id: 1
+
+github_repo:
+  url: https://github.com/lidofinance/staking-modules
+  commit: 3b0c016c77590c208f2b71ca51410cb55ea2dcc2
+  relative_root: ""
+
+dependencies:
+  node_modules/@openzeppelin/contracts:
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: c64a1ed # v5.4.0
+    relative_root: contracts
+  node_modules/@openzeppelin/contracts-upgradeable:
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable
+    commit: e725abd # v5.4.0
+    relative_root: contracts
+
+fail_on_bytecode_comparison_error: true
+
+allowed_diffs:
+  bytecode:
+    "0xa4fCD4dDa0e4a847142E3592C97c77d8B9B3Cf5F":
+    - reason: >-
+        CuratedDepositAllocator is a library. solc embeds the deploy address in
+        runtime bytes 1-20 as a delegatecall guard, and the eth_call simulation
+        deploys to a different address. The rest of the bytecode matches.
+      byte_ranges:
+      - offset: 1
+        length: 20
