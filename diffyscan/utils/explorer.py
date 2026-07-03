@@ -441,20 +441,31 @@ def _parse_libraries(
                 or item.get("contract_name")
             )
             file_path = item.get("file_path") or item.get("path")
-            address = item.get("address") or item.get("contract_address")
+            address = (
+                item.get("address")
+                or item.get("contract_address")
+                or item.get("address_hash")
+            )
 
             if not library_name or not address:
                 raise ExplorerError(
                     f"Explorer library entry is missing name/address: {item}"
                 )
 
-            if not file_path:
-                file_path = _infer_library_path(str(library_name), source_files)
+            if file_path:
+                lib_name = str(library_name)
+            else:
+                # Blockscout qualifies the name with the importing file
+                # ("src/Foo.sol:Lib"); split it and re-key to the definition file.
+                file_path, lib_name = _parse_qualified_library_name(
+                    str(library_name), source_files
+                )
+                file_path = _resolve_library_definition_path(
+                    lib_name, file_path, source_files
+                )
 
             parsed_list.setdefault(str(file_path), {})
-            parsed_list[str(file_path)][str(library_name)] = _normalize_library_address(
-                address
-            )
+            parsed_list[str(file_path)][lib_name] = _normalize_library_address(address)
         return parsed_list or None
 
     if isinstance(raw_libraries, str):
@@ -689,7 +700,8 @@ def compile_contract_from_explorer(
     evm_version: str | None = None,
 ) -> dict:
     required_platform = get_solc_native_platform_from_os()
-    build_name = contract_code["compiler"][1:]
+    # Etherscan reports "v0.8.33+commit...", Blockscout "0.8.33+commit..."
+    build_name = contract_code["compiler"].removeprefix("v")
     build_info = get_compiler_info(required_platform, build_name)
     compiler_path = os.path.join(SOLC_DIR, build_info["path"])
 
