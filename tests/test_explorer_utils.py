@@ -1,6 +1,6 @@
 import json
 
-from diffyscan.utils.explorer import get_contract_from_explorer, get_explorer_hostname
+from diffyscan.utils.explorer import get_contract_from_explorer
 
 
 class DummyResponse:
@@ -9,11 +9,6 @@ class DummyResponse:
 
     def json(self):
         return self.payload
-
-
-def test_get_explorer_hostname_direct():
-    cfg = {"explorer_hostname": "api.etherscan.io"}
-    assert get_explorer_hostname(cfg) == "api.etherscan.io"
 
 
 def test_get_contract_from_explorer_uses_cache(monkeypatch, tmp_path):

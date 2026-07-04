@@ -225,7 +225,28 @@ Recommended workflow to tighten a wildcard:
 2. Copy the `allowed_diffs` snippet it prints for the uncovered diff.
 3. Paste it into the config, replace the placeholder `reason` with the real explanation, and re-run to confirm it now passes.
 
-`--allow-bytecode-diff` and `--allow-source-diff` still work, but they are **deprecated** shorthands for `any: true` (diffyscan warns when they are used). Move those rules into the config file so the summary suggestions can help you tighten them over time.
+#### Linked libraries
+
+Contracts that use external (deployment-linked) libraries need those library
+addresses to recompile identical bytecode. Diffyscan reads them from the
+explorer metadata automatically and links them, so a manual override is rarely
+needed. When you do provide them, use `bytecode_comparison.libraries`, **keyed
+by the file that _defines_ the library** (this is how `solc` links placeholders):
+
+```json
+"bytecode_comparison": {
+  "libraries": {
+    "src/lib/AssetRecovererLib.sol": {
+      "AssetRecovererLib": "0x37ada408ae3c3992953688e2ccb9ee7a3dfda902"
+    }
+  }
+}
+```
+
+> **Troubleshooting:** if deployment simulation fails with `Invalid params` or
+> diffyscan reports `unlinked libraries`, a library address is missing or was
+> keyed by the wrong file — add it under `bytecode_comparison.libraries` keyed by
+> its definition file.
 
 Start the script
 

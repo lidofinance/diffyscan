@@ -46,13 +46,10 @@ def test_any_rule_does_not_suppress_compile_errors(monkeypatch):
 
     result = runner.process_config(
         "config.json",
-        hardhat_config_path=None,
         recursive_parsing=False,
         enable_binary_comparison=True,
         cache_explorer=False,
         cache_github=False,
-        cli_allowed_source_diffs=[],
-        cli_allowed_bytecode_diffs=[],
         skip_user_input=True,
     )
 
@@ -83,13 +80,10 @@ def test_any_rule_can_suppress_deployment_simulation_errors(monkeypatch):
 
     result = runner.process_config(
         "config.json",
-        hardhat_config_path=None,
         recursive_parsing=False,
         enable_binary_comparison=True,
         cache_explorer=False,
         cache_github=False,
-        cli_allowed_source_diffs=[],
-        cli_allowed_bytecode_diffs=[],
         skip_user_input=True,
     )
 
@@ -99,6 +93,45 @@ def test_any_rule_can_suppress_deployment_simulation_errors(monkeypatch):
         == config["allowed_diffs"]["bytecode"][ADDR][0]
     )
     assert result["bytecode_stats"][0]["matched_facets"] == ["any"]
+
+
+def test_process_config_normalizes_explorer_chain_id(monkeypatch):
+    config = {
+        "contracts": {ADDR: "Test"},
+        "explorer_hostname": "api.etherscan.io",
+        "explorer_chain_id": "1",
+        "source_comparison": False,
+    }
+    captured = {}
+    _stub_process_config_dependencies(monkeypatch, config)
+
+    def fake_get_contract_from_explorer(
+        token,
+        explorer_hostname,
+        contract_address,
+        contract_name_from_config,
+        chain_id=None,
+        use_cache: bool = False,
+    ):
+        captured["explorer_chain_id"] = chain_id
+        return {"name": "Test", "solcInput": {"sources": {}}}
+
+    monkeypatch.setattr(
+        runner,
+        "get_contract_from_explorer",
+        fake_get_contract_from_explorer,
+    )
+
+    runner.process_config(
+        "config.json",
+        recursive_parsing=False,
+        enable_binary_comparison=False,
+        cache_explorer=False,
+        cache_github=False,
+        skip_user_input=True,
+    )
+
+    assert captured["explorer_chain_id"] == 1
 
 
 def test_constructor_override_simulation_uses_deployment_gas_limit(monkeypatch):

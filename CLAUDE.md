@@ -63,18 +63,19 @@ Entry point: `diffyscan/diffyscan.py:main` — parses CLI args, loads config (JS
 Configs live in `config_samples/` organized by chain (ethereum, optimism, zksync, etc.):
 ```
 contracts:          { "0xaddr": "ContractName" }
-network:            "mainnet"  # required in TypedDict, unused at runtime
+network:            "mainnet"  # optional legacy label, unused at runtime
 explorer_hostname:  "api.etherscan.io"
 explorer_token_env_var: "ETHERSCAN_EXPLORER_TOKEN"
 github_repo:        { url, commit, relative_root }
 dependencies:       { "dep_name": { url, commit, relative_root } }
 bytecode_comparison: { constructor_calldata, constructor_args, libraries, deployment_from, extra_sources }
+                    # libraries keyed by the library's DEFINITION file: { "src/lib/Foo.sol": { "Foo": "0xaddr" } }
+                    # explorer-provided libraries are auto-detected and re-keyed to the definition file for solc linking
 allowed_diffs:      { bytecode: {...}, source: {...} }  # optional; see below
 ```
 
+`allowed_diffs` declares known/expected diffs per contract so a run still passes while everything else stays verified (validated by `diffyscan/utils/allowed_diffs.py`). Each rule needs a `reason`. **Prefer the tightest facet** — bytecode: `immutables`, `byte_ranges`, `cbor_metadata`, `constructor_args`/`constructor_calldata`; source: `line_ranges`, `files`. `any: true` is a blanket wildcard that hides all future drift — avoid it unless a diff genuinely can't be scoped, and say why in the `reason`. `tests/test_no_wildcard_regression.py` guards against new wildcards.
 `bytecode_comparison.extra_sources` (`{ "0xaddr": ["path/to/File.sol"] }`, optional) names additional source files to fetch from the configured GitHub repo/commit and add to the compilation — for contracts whose explorer-verified source set omits a file the pinned GitHub source imports (e.g. a newly-added interface). The files are fetched the same way as all others (honoring `dependencies`), so verification stays honest.
-
-`allowed_diffs` declares known/expected diffs per contract so a run still passes while everything else stays verified (validated by `diffyscan/utils/allowed_diffs.py`). Each rule needs a `reason`. **Prefer the tightest facet** — bytecode: `immutables`, `byte_ranges`, `cbor_metadata`, `constructor_args`/`constructor_calldata`; source: `line_ranges`, `files`. `any: true` is a blanket wildcard that hides all future drift — avoid it unless a diff genuinely can't be scoped, and say why in the `reason`. The deprecated `--allow-source-diff`/`--allow-bytecode-diff` CLI flags are just shorthands for `any: true`. `tests/test_no_wildcard_regression.py` guards against new wildcards.
 
 ### Environment variables
 
