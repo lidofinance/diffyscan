@@ -1,0 +1,120 @@
+# Hypernative Guard (HypernativeGuard) — redeployed after review
+# https://github.com/Hypernative-Labs/hypernative-guard/tree/5e7cbe19ebd5ea0139bed5f003c253d634a8b85c
+
+contracts:
+  "0x05Af8e10964Ad5536a643Ce7b9C831F45DC9D43e": HypernativeGuard
+  "0x95D3BD1547738fe6B5e43F7A2939e0c1c2Ac2661": HypernativeGuard
+  "0xFf4Adf0fAfc7475ba9BdfFdB90Fe7e07931CeBd6": HypernativeGuard
+  "0xD43a70D54E907b339BF77A31dA25d30Af4b4C73c": HypernativeGuard
+
+network: mainnet
+explorer_hostname: api.etherscan.io
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+explorer_chain_id: 1
+
+github_repo:
+  url: https://github.com/Hypernative-Labs/hypernative-guard
+  commit: 5e7cbe19ebd5ea0139bed5f003c253d634a8b85c
+  relative_root: ""
+
+dependencies:
+  lib/safe-smart-account:
+    url: https://github.com/safe-fndn/safe-smart-account
+    commit: c35264b99a389254a25f589c8271394ba5db7f38
+    relative_root: ""
+  lib/openzeppelin-contracts:
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: 6015d7ef79172976b949be6e4b6c495593983c99
+    relative_root: ""
+
+fail_on_bytecode_comparison_error: true
+
+bytecode_comparison:
+  # constructor(address _safeAddress, address _keeper)
+  constructor_args:
+    "0x05Af8e10964Ad5536a643Ce7b9C831F45DC9D43e":
+      - "0x95b521b4f55a447db89f6a27f951713fc2035f3f" # _safeAddress
+      - "0xc664b5be2f72bbeb23d1eed6bbd884a2f2d736b0" # _keeper
+    "0x95D3BD1547738fe6B5e43F7A2939e0c1c2Ac2661":
+      - "0x55897893c19e4b0c52731a3b7c689ec417005ad6" # _safeAddress
+      - "0xc664b5be2f72bbeb23d1eed6bbd884a2f2d736b0" # _keeper
+    "0xFf4Adf0fAfc7475ba9BdfFdB90Fe7e07931CeBd6":
+      - "0x606f77bf3dd6ed9790d9771c7003f269a385d942" # _safeAddress
+      - "0xc664b5be2f72bbeb23d1eed6bbd884a2f2d736b0" # _keeper
+    "0xD43a70D54E907b339BF77A31dA25d30Af4b4C73c":
+      - "0x87d93d9b2c672bf9c9642d853a8682546a5012b5" # _safeAddress
+      - "0xc664b5be2f72bbeb23d1eed6bbd884a2f2d736b0" # _keeper
+
+# Only the immutable slots derived from address(this) differ per deployment; they cannot be
+# reproduced when diffyscan re-runs the constructor via eth_call at a different address.
+# safeAddress, DOMAIN_SEPARATOR and revokingHash do not depend on address(this) and match exactly.
+allowed_diffs:
+  bytecode:
+    "0x05Af8e10964Ad5536a643Ce7b9C831F45DC9D43e":
+      - reason: >-
+          Bytecode differs only at immutable slots that depend on address(this): offsets 927 & 4143 =
+          disableRevokeTimelockHash, 1665 & 8166 = enablePassThroughModeHash, 1845 & 4102 = activateRevokeTimelockHash.
+        immutables:
+          - offset: 927 # disableRevokeTimelockHash
+            value: "0xa623e16b3410209eaeb57df5b0b41c8da4177206c5c8278100cd4b74d67df72d"
+          - offset: 1665 # enablePassThroughModeHash
+            value: "0x4cd879a333a4135b2b3f206eafdff7ca311a349811c9028deddbfece39760689"
+          - offset: 1845 # activateRevokeTimelockHash
+            value: "0x0c64af59a0757b888a485d07e676961ccb8f32748c98e012866d4487857b94c0"
+          - offset: 4102 # activateRevokeTimelockHash
+            value: "0x0c64af59a0757b888a485d07e676961ccb8f32748c98e012866d4487857b94c0"
+          - offset: 4143 # disableRevokeTimelockHash
+            value: "0xa623e16b3410209eaeb57df5b0b41c8da4177206c5c8278100cd4b74d67df72d"
+          - offset: 8166 # enablePassThroughModeHash
+            value: "0x4cd879a333a4135b2b3f206eafdff7ca311a349811c9028deddbfece39760689"
+    "0x95D3BD1547738fe6B5e43F7A2939e0c1c2Ac2661":
+      - reason: >-
+          Bytecode differs only at immutable slots that depend on address(this): offsets 927 & 4143 =
+          disableRevokeTimelockHash, 1665 & 8166 = enablePassThroughModeHash, 1845 & 4102 = activateRevokeTimelockHash.
+        immutables:
+          - offset: 927 # disableRevokeTimelockHash
+            value: "0x0be6c7918fa88468bf277334cff0190a549b7401bc49e42ba82474b73598f268"
+          - offset: 1665 # enablePassThroughModeHash
+            value: "0xf0dcbecf84bcc1853cd2c26d39f2a77c795fcbd10a94a67dd478f31ae3acfe4b"
+          - offset: 1845 # activateRevokeTimelockHash
+            value: "0x149e69286e5d32772cce1c6f5555e38654f79135598bd9c62b5581118c4604db"
+          - offset: 4102 # activateRevokeTimelockHash
+            value: "0x149e69286e5d32772cce1c6f5555e38654f79135598bd9c62b5581118c4604db"
+          - offset: 4143 # disableRevokeTimelockHash
+            value: "0x0be6c7918fa88468bf277334cff0190a549b7401bc49e42ba82474b73598f268"
+          - offset: 8166 # enablePassThroughModeHash
+            value: "0xf0dcbecf84bcc1853cd2c26d39f2a77c795fcbd10a94a67dd478f31ae3acfe4b"
+    "0xFf4Adf0fAfc7475ba9BdfFdB90Fe7e07931CeBd6":
+      - reason: >-
+          Bytecode differs only at immutable slots that depend on address(this): offsets 927 & 4143 =
+          disableRevokeTimelockHash, 1665 & 8166 = enablePassThroughModeHash, 1845 & 4102 = activateRevokeTimelockHash.
+        immutables:
+          - offset: 927 # disableRevokeTimelockHash
+            value: "0x9d83daa38068b2300ff34afb07f22461f9875f24afae0ca9beaf537be19752e5"
+          - offset: 1665 # enablePassThroughModeHash
+            value: "0x641fafee863cdd9c722e4066553e7684ffe235165d303e5cf9c1d135fc36822b"
+          - offset: 1845 # activateRevokeTimelockHash
+            value: "0xb58278ac4de6c7c2558f7d30f4743e805ba8aa263e5c826b920645e6038348cb"
+          - offset: 4102 # activateRevokeTimelockHash
+            value: "0xb58278ac4de6c7c2558f7d30f4743e805ba8aa263e5c826b920645e6038348cb"
+          - offset: 4143 # disableRevokeTimelockHash
+            value: "0x9d83daa38068b2300ff34afb07f22461f9875f24afae0ca9beaf537be19752e5"
+          - offset: 8166 # enablePassThroughModeHash
+            value: "0x641fafee863cdd9c722e4066553e7684ffe235165d303e5cf9c1d135fc36822b"
+    "0xD43a70D54E907b339BF77A31dA25d30Af4b4C73c":
+      - reason: >-
+          Bytecode differs only at immutable slots that depend on address(this): offsets 927 & 4143 =
+          disableRevokeTimelockHash, 1665 & 8166 = enablePassThroughModeHash, 1845 & 4102 = activateRevokeTimelockHash.
+        immutables:
+          - offset: 927 # disableRevokeTimelockHash
+            value: "0x6fb5538bce1bd7f6a0adc2c8aa9e8e0ee1b1722801b0677a19509de144fa3441"
+          - offset: 1665 # enablePassThroughModeHash
+            value: "0x1555ca669b5b591f4dce0919f2dbb6b171fb94269ad20c021fdf8407be71feee"
+          - offset: 1845 # activateRevokeTimelockHash
+            value: "0x8deaa9343e6d38aa4eaeaf07a0119da6876c3ea68524053ddc171c156bbc62f7"
+          - offset: 4102 # activateRevokeTimelockHash
+            value: "0x8deaa9343e6d38aa4eaeaf07a0119da6876c3ea68524053ddc171c156bbc62f7"
+          - offset: 4143 # disableRevokeTimelockHash
+            value: "0x6fb5538bce1bd7f6a0adc2c8aa9e8e0ee1b1722801b0677a19509de144fa3441"
+          - offset: 8166 # enablePassThroughModeHash
+            value: "0x1555ca669b5b591f4dce0919f2dbb6b171fb94269ad20c021fdf8407be71feee"
