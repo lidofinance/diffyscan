@@ -31,8 +31,7 @@ explorer_chain_id: 1
 
 github_repo:
   url: https://github.com/lidofinance/core
-  # TODO: pin the audited commit (currently PR #1900: https://github.com/lidofinance/core/pull/1900)
-  commit: 7b658bbf59b45a5247d725dbcf170753fe368b57
+  commit: af095e48bbc1c3841c2c9936219c8461af01056b
   relative_root: ""
 
 dependencies:
