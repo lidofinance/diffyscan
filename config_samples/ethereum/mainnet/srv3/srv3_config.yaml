@@ -1,0 +1,159 @@
+contracts:
+  "0x23ED611be0e1a820978875C0122F92260804cdDf": OssifiableProxy # Accounting proxy
+  "0x3aa937Ac2ab89CDd363EdC6b5A4d4A42dF5bc043": Accounting
+  "0x852deD011285fe67063a08005c71a85690503Cee": OssifiableProxy # AccountingOracle proxy
+  "0xe4f03D1107d1905B6F2A28FCb6Af221E0CE19136": AccountingOracle
+  "0x028271E30a695c0527A0C50cA30603feD004cDb0": Lido
+  "0xd907CE33B4Be423823d1CFFe80BD147E8b8554C8": OssifiableProxy # ConsolidationBus proxy
+  "0xFfDe8Acab9D7037f29198Ad03ad6d05bac8B0a2E": ConsolidationBus
+  "0x17be979344f2c2cC806229a532D92f8742C10462": ConsolidationGateway
+  "0x9Dc70b5A4f4F5E4AF9058C983D560564F031f1D7": OssifiableProxy # ConsolidationMigrator proxy
+  "0x6Fb4c152F092373dD71f0C07C83c1E77406599aB": ConsolidationMigrator
+  "0xF573E9E3de1f86B085417ab294f56E7920B4e9Be": DepositSecurityModule
+  "0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb": OssifiableProxy # LidoLocator proxy
+  "0x0360002bf51DCae1c0267aE0AFDaBacAF7De686b": LidoLocator
+  "0x98F1da239a199574A4F7f371fD8fc0a872022c73": MinFirstAllocationStrategy
+  "0x147f8d3cf3004FAf9Bf94E88B54b6C06De507be9": OracleReportSanityChecker
+  "0xFdDf38947aFB03C621C71b06C9C70bce73f12999": OssifiableProxy # StakingRouter proxy
+  "0xDD76927045435C7605cf6f5F978cfb8CABDb5F80": StakingRouter
+  "0xc0be9942Fd8f54aB126A5F0Ba649A90049ccad14": SRLib
+  "0x3FC2C71579D80790Aaa3fc7Be8B66ac39dC57374": OssifiableProxy # TopUpGateway proxy
+  "0xb08dBc68C521cD7A4318dc4C807a42bEB20f1106": TopUpGateway
+  "0x0De4Ea0184c2ad0BacA7183356Aea5B8d5Bf5c6e": OssifiableProxy # ValidatorsExitBusOracle proxy
+  "0x2C3386b39db89eef0F362A3BE0C05a6811E809E3": ValidatorsExitBusOracle
+  "0xfB4521BD151BFB45DB6045D2d07e58e0f597e340": WithdrawalVault
+  "0xf98AC162eAB766bDB9507c3584c00C535B8F6216": BeaconChainDepositor
+
+network: mainnet
+explorer_hostname: api.etherscan.io
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+explorer_chain_id: 1
+
+github_repo:
+  url: https://github.com/lidofinance/core
+  commit: af095e48bbc1c3841c2c9936219c8461af01056b
+  relative_root: ""
+
+dependencies:
+  "@aragon/os":
+    url: https://github.com/aragon/aragonOS
+    commit: f3ae59b00f73984e562df00129c925339cd069ff # v4.4.0
+    relative_root: ""
+  "@aragon/minime":
+    url: https://github.com/aragon/minime
+    commit: 1d5251fc88eee5024ff318d95bc9f4c5de130430 # v1.0.0
+    relative_root: ""
+  "@aragon/apps-lido":
+    url: https://github.com/lidofinance/aragon-apps/
+    commit: b09834d29c0db211ddd50f50905cbeff257fc8e0 # app-voting-v3.0.0-1
+    relative_root: ""
+  "@aragon/apps-finance":
+    url: https://github.com/lidofinance/aragon-apps/
+    commit: b09834d29c0db211ddd50f50905cbeff257fc8e0 # app-voting-v3.0.0-1
+    relative_root: apps/finance
+  "@aragon/apps-vault":
+    url: https://github.com/lidofinance/aragon-apps/
+    commit: b09834d29c0db211ddd50f50905cbeff257fc8e0 # app-voting-v3.0.0-1
+    relative_root: apps/vault
+  "@aragon/apps-agent":
+    url: https://github.com/lidofinance/aragon-apps/
+    commit: b09834d29c0db211ddd50f50905cbeff257fc8e0 # app-voting-v3.0.0-1
+    relative_root: apps/agent
+  openzeppelin-solidity:
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: 06e265b38d3e9daeaa7b33f9035c700d6bc0c6a0 # v2.0.0
+    relative_root: ""
+  "@openzeppelin/contracts":
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: fa64a1ced0b70ab89073d5d0b6e01b0778f7e7d6 # v3.4.0
+    relative_root: contracts
+  "@openzeppelin/contracts-v4.4":
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: 6bd6b76d1156e20e45d1016f355d154141c7e5b9 # v4.4.1
+    relative_root: contracts
+  "@openzeppelin/contracts-v5.2":
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: acd4ff74de833399287ed6b31b4debf6b2b35527 # v5.2.0
+    relative_root: contracts
+
+fail_on_bytecode_comparison_error: true
+
+bytecode_comparison:
+  extra_sources:
+    "0x17be979344f2c2cC806229a532D92f8742C10462":
+      - contracts/common/interfaces/IPausableUntil.sol
+
+  deployment_from:
+    # DepositSecurityModule uses msg.sender in the constructor so to match the on-chain 
+    # deployed bytecode we must simulate deployment from the same address.
+    "0xF573E9E3de1f86B085417ab294f56E7920B4e9Be": "0x22c79cd20d8da8e6910e965086968075867447c0"
+
+allowed_diffs:
+  bytecode:
+    "0xF573E9E3de1f86B085417ab294f56E7920B4e9Be":
+    - reason: >-
+        DepositSecurityModule computes three bytes32 message prefixes
+        (ATTEST/PAUSE/UNVET) from address(this) in the constructor. diffyscan
+        simulates deployment at a different address, so all three differ. Each is
+        inlined at two offsets (UNVET 643/2023, PAUSE 824/1388, ATTEST 882/4976).
+        The pinned values match the live on-chain getters (checked via eth_call).
+        Runtime logic is unchanged.
+      immutables:
+      - offset: 643
+        value: "0x90b2d3a4cbdc8a60c14ccf87f2bd90a9881cef5bd52d5bf4b3ec48497f97d06e"
+      - offset: 824
+        value: "0xe3fb87228adf6fbdd12dc1496751f0251453f29ac84ebbd3a699461b51f1de7b"
+      - offset: 882
+        value: "0x683df20ff74dc438e214ff44087d5e4b6ccf03b21e7f1ba074459a5212abd912"
+      - offset: 1388
+        value: "0xe3fb87228adf6fbdd12dc1496751f0251453f29ac84ebbd3a699461b51f1de7b"
+      - offset: 2023
+        value: "0x90b2d3a4cbdc8a60c14ccf87f2bd90a9881cef5bd52d5bf4b3ec48497f97d06e"
+      - offset: 4976
+        value: "0x683df20ff74dc438e214ff44087d5e4b6ccf03b21e7f1ba074459a5212abd912"
+
+    "0xc0be9942Fd8f54aB126A5F0Ba649A90049ccad14":
+    - reason: >-
+        Call protection bakes SRLib's own address in (it runs only via delegatecall),
+        so that immutable differs on the simulated redeploy. Linking
+        MinFirstAllocationStrategy also shifts the CBOR metadata vs the original
+        deploy. Runtime logic is identical.
+      immutables:
+      - offset: 7
+        value: "0x000000000000000000000000c0be9942fd8f54ab126a5f0ba649a90049ccad14"
+      cbor_metadata: true
+
+    "0xf98AC162eAB766bDB9507c3584c00C535B8F6216":
+    - reason: >-
+        A deployed library has its own address baked in as call protection (it only
+        runs via delegatecall). The simulated redeploy lands at a different address,
+        so that one immutable differs. Runtime logic is identical.
+      immutables:
+      - offset: 7
+        value: "0x000000000000000000000000f98ac162eab766bdb9507c3584c00c535b8f6216"
+
+    "0xDD76927045435C7605cf6f5F978cfb8CABDb5F80":
+    - reason: >-
+        StakingRouter links SRLib and BeaconChainDepositor. solc records the linked
+        libraries in the contract's CBOR metadata, and diffyscan's recompile records
+        them differently from the original deployment, so the metadata hash differs.
+        Runtime bytecode is identical.
+      cbor_metadata: true
+
+  source:
+    # TODO: ask Etherscan to fix the indentation upstream, then drop this allowance
+    "0x6Fb4c152F092373dD71f0C07C83c1E77406599aB":
+    - reason: >-
+        Etherscan verification artifact: the per-contract verified source of
+        ConsolidationMigrator carries a 1-space indentation on the closing brace of
+        struct StakingModule in SRTypes.sol that is absent at the GitHub commit.
+        Formatting only (Etherscan verifies per-contract from a build-info snapshot);
+        no declaration/logic change, runtime bytecode matches modulo CBOR metadata.
+      line_ranges:
+      - file: contracts/0.8.25/sr/SRTypes.sol
+        github:
+          start: 115
+          count: 1
+        explorer:
+          start: 115
+          count: 1

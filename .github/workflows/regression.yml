@@ -47,7 +47,7 @@ jobs:
             network: hoodi
           - config: config_samples/ethereum/hoodi/vaults/hoodi_vaults_easy_track_config.json
             network: hoodi
-          - config: config_samples/ethereum/hoodi/srv3/hoodi_srv3_config.json
+          - config: config_samples/ethereum/hoodi/srv3/hoodi_srv3_config.yaml
             network: hoodi
           - config: config_samples/ethereum/hoodi/srv3/hoodi_srv3_easy_track_config.json
             network: hoodi
