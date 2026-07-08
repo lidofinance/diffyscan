@@ -476,6 +476,26 @@ def test_parse_libraries_rekeys_importing_file_to_definition_file():
     }
 
 
+def test_parse_libraries_handles_blockscout_qualified_name_and_address_hash():
+    # Blockscout external_libraries entries qualify the name with the importing
+    # file and put the address under "address_hash".
+    parsed = _parse_libraries(
+        [
+            {
+                "name": "src/Accounting.sol:AssetRecovererLib",
+                "address_hash": "0x37ada408ae3c3992953688e2ccb9ee7a3dfda902",
+            }
+        ],
+        _ACCOUNTING_SOURCES,
+    )
+
+    assert parsed == {
+        "src/lib/AssetRecovererLib.sol": {
+            "AssetRecovererLib": "0x37ada408ae3c3992953688e2ccb9ee7a3dfda902"
+        }
+    }
+
+
 def test_parse_libraries_falls_back_when_definition_not_found():
     # No source declares the library -> keep the explorer-provided key.
     parsed = _parse_libraries(
