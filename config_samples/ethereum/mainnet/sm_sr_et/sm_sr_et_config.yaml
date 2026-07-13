@@ -1,0 +1,121 @@
+contracts:
+  # CSMv3 factories
+  "0xf3ec30B86c3dC1b8a1C754D885F9bE3160e15B4c": SetMerkleGateTree
+  "0xE330516a03bDdEBA4209b5591112f1aa3dd90F0A": ReportWithdrawalsForSlashedValidators
+  "0xB71755bE764abB4Ce26cb4dADf056Be57fB8880F": SettleGeneralDelayedPenalty
+  # CMv2 factories
+  "0xa121667D1780a1D54EAEd67AE17ee13d0f872D60": SetMerkleGateTree
+  "0x71862Abd99819597670007bb992A7a7562fE50f2": ReportWithdrawalsForSlashedValidators
+  "0xfffEFC16231eDC6Dc9C93e364ff4D4E3f787f416": SettleGeneralDelayedPenalty
+  "0x2fC78638b77381e9D040163Bd6EB1cac967bDBdF": CreateOrUpdateOperatorGroup
+  # SRv3 factories
+  "0x29e23B1EF0c9fffAc8330F9abaCebDDD827E4b5C": AllowConsolidationPair
+  "0x0C6703F1d8D9DdfB6c6e5F57b4f7432a6500D6D8": UpdateStakingModuleShareLimits
+
+network: mainnet
+explorer_hostname: api.etherscan.io
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+explorer_chain_id: 1
+
+github_repo:
+  url: https://github.com/lidofinance/easy-track
+  # https://github.com/lidofinance/audits#07-2026-mixbytes-lido-easy-track-factories-srv3-csmv3-cmv2-security-audit
+  commit: b5d74557448a7f65ea74abdc09ff954bd113c8c3
+  relative_root: ""
+
+dependencies:
+  "@openzeppelin/contracts-v4.3.2":
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: 0c4de6721d9668d7b5b2c5a9400fd0b2a5e8de90 # v4.3.2
+    relative_root: contracts
+
+allowed_diffs:
+  source:
+    "0xf3ec30B86c3dC1b8a1C754D885F9bE3160e15B4c":
+    - reason: Etherscan sources use root-relative imports, GitHub uses relative ones. Same files.
+      line_ranges:
+      - file: contracts/EVMScriptFactories/SetMerkleGateTree.sol
+        github: { start: 6, count: 4 }
+        explorer: { start: 6, count: 4 }
+    "0xE330516a03bDdEBA4209b5591112f1aa3dd90F0A":
+    - reason: Etherscan sources use root-relative imports, GitHub uses relative ones. Same files.
+      line_ranges:
+      - file: contracts/EVMScriptFactories/ReportWithdrawalsForSlashedValidators.sol
+        github: { start: 6, count: 4 }
+        explorer: { start: 6, count: 4 }
+    "0xB71755bE764abB4Ce26cb4dADf056Be57fB8880F":
+    - reason: Etherscan sources use root-relative imports, GitHub uses relative ones. Same files.
+      line_ranges:
+      - file: contracts/EVMScriptFactories/SettleGeneralDelayedPenalty.sol
+        github: { start: 6, count: 5 }
+        explorer: { start: 6, count: 5 }
+    "0xa121667D1780a1D54EAEd67AE17ee13d0f872D60":
+    - reason: Etherscan sources use root-relative imports, GitHub uses relative ones. Same files.
+      line_ranges:
+      - file: contracts/EVMScriptFactories/SetMerkleGateTree.sol
+        github: { start: 6, count: 4 }
+        explorer: { start: 6, count: 4 }
+    "0x71862Abd99819597670007bb992A7a7562fE50f2":
+    - reason: Etherscan sources use root-relative imports, GitHub uses relative ones. Same files.
+      line_ranges:
+      - file: contracts/EVMScriptFactories/ReportWithdrawalsForSlashedValidators.sol
+        github: { start: 6, count: 4 }
+        explorer: { start: 6, count: 4 }
+    "0xfffEFC16231eDC6Dc9C93e364ff4D4E3f787f416":
+    - reason: Etherscan sources use root-relative imports, GitHub uses relative ones. Same files.
+      line_ranges:
+      - file: contracts/EVMScriptFactories/SettleGeneralDelayedPenalty.sol
+        github: { start: 6, count: 5 }
+        explorer: { start: 6, count: 5 }
+    "0x2fC78638b77381e9D040163Bd6EB1cac967bDBdF":
+    - reason: Etherscan sources use root-relative imports, GitHub uses relative ones. Same files.
+      line_ranges:
+      - file: contracts/EVMScriptFactories/CreateOrUpdateOperatorGroup.sol
+        github: { start: 6, count: 7 }
+        explorer: { start: 6, count: 7 }
+      - file: contracts/interfaces/ICuratedModule.sol
+        github: { start: 6, count: 2 }
+        explorer: { start: 6, count: 2 }
+    "0x29e23B1EF0c9fffAc8330F9abaCebDDD827E4b5C":
+    - reason: Etherscan sources use root-relative imports, GitHub uses relative ones. Same files.
+      line_ranges:
+      - file: contracts/EVMScriptFactories/AllowConsolidationPair.sol
+        github: { start: 6, count: 7 }
+        explorer: { start: 6, count: 7 }
+      - file: contracts/interfaces/ICuratedModule.sol
+        github: { start: 6, count: 2 }
+        explorer: { start: 6, count: 2 }
+    "0x0C6703F1d8D9DdfB6c6e5F57b4f7432a6500D6D8":
+    - reason: Etherscan sources use root-relative imports, GitHub uses relative ones. Same files.
+      line_ranges:
+      - file: contracts/EVMScriptFactories/UpdateStakingModuleShareLimits.sol
+        github: { start: 6, count: 4 }
+        explorer: { start: 6, count: 4 }
+  bytecode:
+    "0xf3ec30B86c3dC1b8a1C754D885F9bE3160e15B4c":
+    - reason: Metadata hash differs due to the rewritten imports, runtime code matches byte-for-byte.
+      cbor_metadata: true
+    "0xE330516a03bDdEBA4209b5591112f1aa3dd90F0A":
+    - reason: Metadata hash differs due to the rewritten imports, runtime code matches byte-for-byte.
+      cbor_metadata: true
+    "0xB71755bE764abB4Ce26cb4dADf056Be57fB8880F":
+    - reason: Metadata hash differs due to the rewritten imports, runtime code matches byte-for-byte.
+      cbor_metadata: true
+    "0xa121667D1780a1D54EAEd67AE17ee13d0f872D60":
+    - reason: Metadata hash differs due to the rewritten imports, runtime code matches byte-for-byte.
+      cbor_metadata: true
+    "0x71862Abd99819597670007bb992A7a7562fE50f2":
+    - reason: Metadata hash differs due to the rewritten imports, runtime code matches byte-for-byte.
+      cbor_metadata: true
+    "0xfffEFC16231eDC6Dc9C93e364ff4D4E3f787f416":
+    - reason: Metadata hash differs due to the rewritten imports, runtime code matches byte-for-byte.
+      cbor_metadata: true
+    "0x2fC78638b77381e9D040163Bd6EB1cac967bDBdF":
+    - reason: Metadata hash differs due to the rewritten imports, runtime code matches byte-for-byte.
+      cbor_metadata: true
+    "0x29e23B1EF0c9fffAc8330F9abaCebDDD827E4b5C":
+    - reason: Metadata hash differs due to the rewritten imports, runtime code matches byte-for-byte.
+      cbor_metadata: true
+    "0x0C6703F1d8D9DdfB6c6e5F57b4f7432a6500D6D8":
+    - reason: Metadata hash differs due to the rewritten imports, runtime code matches byte-for-byte.
+      cbor_metadata: true
