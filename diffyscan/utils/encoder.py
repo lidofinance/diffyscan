@@ -67,6 +67,23 @@ def encode_bytes(data: str) -> str:
     return to_hex_with_alignment(byte_count) + raw + "0" * padding
 
 
+def encode_string_value(value: str) -> str:
+    """Encode dynamic `string` as [32-byte length, utf-8 data right-padded]."""
+    raw = value.encode("utf-8").hex()
+    padding = (64 - len(raw) % 64) % 64
+    return to_hex_with_alignment(len(raw) // 2) + raw + "0" * padding
+
+
+def _is_dynamic(abi_entry: dict) -> bool:
+    """True if the ABI type has dynamic size (must be encoded via an offset)."""
+    t = abi_entry["type"]
+    if t in ("bytes", "string") or t.endswith("[]"):
+        return True
+    if t == "tuple":
+        return any(_is_dynamic(c) for c in abi_entry["components"])
+    return False
+
+
 def _encode_static_value(arg_type: str, val) -> str:
     """Encode a single static ABI value (address, bool, intN, bytesN)."""
     if arg_type == "address":
@@ -100,8 +117,11 @@ def encode_tuple(components_abi: list, values: list) -> str:
     for comp, val in zip(components_abi, values):
         t = comp["type"]
 
-        if t == "tuple":
+        if t == "tuple" and not _is_dynamic(comp):
             static_parts.append(encode_tuple(comp["components"], val))
+        elif t == "tuple":
+            static_parts.append(None)  # placeholder for offset
+            dynamic_parts.append(encode_tuple(comp["components"], val))
         elif t.endswith("[]") or t in ("bytes", "string"):
             static_parts.append(None)  # placeholder for offset
             if t.endswith("[]"):
@@ -109,12 +129,13 @@ def encode_tuple(components_abi: list, values: list) -> str:
             elif t == "bytes":
                 dynamic_parts.append(encode_bytes(val))
             else:
-                raise EncoderError("'string' inside tuple not implemented")
+                dynamic_parts.append(encode_string_value(val))
         else:
             static_parts.append(_encode_static_value(t, val))
 
-    # Replace None placeholders with offsets
-    static_size = 32 * len(static_parts)
+    # Replace None placeholders with offsets. The head size is the sum of the
+    # actual part sizes (an inlined static tuple occupies more than one word).
+    static_size = sum(32 if p is None else len(p) // 2 for p in static_parts)
     dynamic_offset = 0
     dynamic_iter = iter(dynamic_parts)
 
@@ -180,6 +201,13 @@ def encode_constructor_arguments(
                 )
                 calldata_parts.append(offset)
                 compl_data.extend([length_hex, contents])
+
+            elif arg_type == "tuple" and _is_dynamic(abi_entry):
+                offset = 32 * len(constructor_abi) + sum(
+                    len(part) // 2 for part in compl_data
+                )
+                calldata_parts.append(to_hex_with_alignment(offset))
+                compl_data.append(encode_tuple(abi_entry["components"], arg_value))
 
             elif arg_type == "tuple":
                 calldata_parts.append(encode_tuple(abi_entry["components"], arg_value))
