@@ -9,6 +9,7 @@ from diffyscan.utils.encoder import (
     encode_fixed_bytes,
     encode_bytes,
     encode_array,
+    encode_constructor_arguments,
     _parse_int_type,
     _parse_bytesN,
     _encode_static_value,
@@ -91,6 +92,58 @@ class TestEncoder:
         ]
         result = encode_array("address", addrs)
         assert result.startswith(to_hex_with_alignment(2))
+
+    def test_encode_constructor_string_inside_tuple(self):
+        abi = [
+            {
+                "type": "tuple",
+                "components": [{"type": "address"}, {"type": "string"}],
+            }
+        ]
+        args = [["0x0000000000000000000000000000000000000001", "abc"]]
+        assert encode_constructor_arguments(abi, args) == (
+            to_hex_with_alignment(0x20)  # offset to the dynamic tuple
+            + to_hex_with_alignment(1)  # address
+            + to_hex_with_alignment(0x40)  # offset to string inside the tuple
+            + to_hex_with_alignment(3)  # string length
+            + "616263"
+            + "0" * 58  # "abc" right-padded
+        )
+
+    def test_encode_constructor_dynamic_tuple_with_inline_static_tuple(self):
+        abi = [
+            {
+                "type": "tuple",
+                "components": [
+                    {
+                        "type": "tuple",
+                        "components": [{"type": "address"}, {"type": "address"}],
+                    },
+                    {"type": "string"},
+                ],
+            },
+            {"type": "uint256"},
+        ]
+        args = [
+            [
+                [
+                    "0x0000000000000000000000000000000000000001",
+                    "0x0000000000000000000000000000000000000002",
+                ],
+                "abc",
+            ],
+            7,
+        ]
+        assert encode_constructor_arguments(abi, args) == (
+            to_hex_with_alignment(0x40)  # offset to the dynamic tuple
+            + to_hex_with_alignment(7)  # uint256
+            + to_hex_with_alignment(1)  # inlined static tuple, word 1
+            + to_hex_with_alignment(2)  # inlined static tuple, word 2
+            + to_hex_with_alignment(0x60)  # string offset counts inlined words
+            + to_hex_with_alignment(3)
+            + "616263"
+            + "0" * 58
+        )
 
 
 # --- calldata tests ---
