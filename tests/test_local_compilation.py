@@ -3,6 +3,7 @@ import json
 import pytest
 
 from diffyscan.diffyscan import _get_local_inputs
+from diffyscan.utils.common import load_config
 from diffyscan.utils.custom_exceptions import ExplorerError
 from diffyscan.utils.explorer import build_contract_from_local_input
 
@@ -82,6 +83,34 @@ def test_get_local_inputs_keeps_absolute_paths(tmp_path):
     }
     resolved = _get_local_inputs(config, str(tmp_path / "cfg.yaml"))
     assert resolved == {"0xabc0000000000000000000000000000000000001": absolute}
+
+
+def test_build_contract_from_local_input_null_settings(tmp_path):
+    payload = {
+        "language": "Solidity",
+        "sources": {"contracts/Foo.sol": {"content": "contract Foo {}"}},
+        "settings": None,
+    }
+    path = tmp_path / "input.json"
+    path.write_text(json.dumps(payload))
+
+    contract = build_contract_from_local_input("Foo", str(path), "v0.8.26")
+    output_selection = contract["solcInput"]["settings"]["outputSelection"]
+    assert "evm.deployedBytecode" in output_selection["*"]["*"]
+
+
+def test_yaml_unquoted_local_input_address_rejected(tmp_path):
+    path = tmp_path / "config.yaml"
+    path.write_text(
+        "contracts:\n"
+        '  "0x0000000000000000000000000000000000000001": Foo\n'
+        "local_compilation:\n"
+        "  compiler: v0.8.26\n"
+        "  inputs:\n"
+        "    0x0000000000000000000000000000000000000001: inputs/foo.json\n"
+    )
+    with pytest.raises(ValueError, match="local_compilation.inputs"):
+        load_config(str(path))
 
 
 def test_get_local_inputs_empty_when_absent(tmp_path):

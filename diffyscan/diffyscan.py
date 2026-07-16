@@ -628,13 +628,12 @@ def process_config(
             'Config "local_compilation.compiler" is required when '
             '"local_compilation.inputs" is set (e.g. "v0.8.26+commit.8a97fa7a")'
         )
-    unknown_local = sorted(
-        set(local_inputs) - {address.lower() for address in config["contracts"]}
-    )
+    contract_addresses = {address.lower() for address in config["contracts"]}
+    unknown_local = sorted(set(local_inputs) - contract_addresses)
     if unknown_local:
-        logger.warn(
-            '"local_compilation.inputs" addresses missing from "contracts"',
-            ", ".join(unknown_local),
+        raise ValueError(
+            '"local_compilation.inputs" addresses missing from "contracts": '
+            + ", ".join(unknown_local)
         )
     if local_inputs and not enable_binary_comparison:
         logger.warn(
@@ -642,10 +641,16 @@ def process_config(
             "with --skip-binary-comparison they are not verified at all"
         )
 
-    # The explorer token is only needed when some contract still uses the explorer
-    needs_explorer = any(
-        address.lower() not in local_inputs for address in config["contracts"]
+    # Apply contract filter if specified
+    filter_set = (
+        set(addr.lower() for addr in contract_filter) if contract_filter else None
     )
+    contracts_in_scope = (
+        contract_addresses & filter_set if filter_set else contract_addresses
+    )
+
+    # The explorer token is only needed when some in-scope contract uses the explorer
+    needs_explorer = any(address not in local_inputs for address in contracts_in_scope)
     explorer_token = _load_explorer_token(config) if needs_explorer else None
     github_api_token = load_env("GITHUB_API_TOKEN", masked=True, required=True)
 
@@ -678,17 +683,13 @@ def process_config(
             assert explorer_hostname is not None, "explorer_hostname is required"
             explorer_chain_id = get_explorer_chain_id(config)
 
-        # Apply contract filter if specified
-        filter_set = (
-            set(addr.lower() for addr in contract_filter) if contract_filter else None
-        )
-
         for contract_address, contract_name in config["contracts"].items():
-            if filter_set and contract_address.lower() not in filter_set:
+            address_key = contract_address.lower()
+            if filter_set and address_key not in filter_set:
                 continue
             matched_count += 1
             try:
-                local_input_path = local_inputs.get(contract_address.lower())
+                local_input_path = local_inputs.get(address_key)
                 if local_input_path:
                     logger.info(
                         f"Building {contract_address} from local solc input {local_input_path}"
@@ -706,30 +707,44 @@ def process_config(
                         cache_explorer,
                     )
 
-                address_key = contract_address.lower()
                 source_rules = effective_allowed_diffs["source"].get(address_key, [])
                 bytecode_rules = effective_allowed_diffs["bytecode"].get(
                     address_key, []
                 )
 
-                if enable_source_comparison and local_input_path:
-                    logger.warn(
-                        "Source comparison skipped: local solc input has no "
-                        "explorer-verified source to diff against",
-                        contract_address,
-                    )
-                if enable_source_comparison and not local_input_path:
-                    source_result = run_source_diff(
-                        contract_address,
-                        contract_code,
-                        config,
-                        github_api_token,
-                        source_rules,
-                        recursive_parsing,
-                        cache_github,
-                        skip_user_input,
-                    )
-                    source_stats.append(source_result)
+                if enable_source_comparison:
+                    if local_input_path:
+                        logger.warn(
+                            "Source comparison skipped: local solc input has no "
+                            "explorer-verified source to diff against",
+                            contract_address,
+                        )
+                        if source_rules:
+                            logger.warn(
+                                '"allowed_diffs.source" rules have no effect for '
+                                "local_compilation contracts",
+                                contract_address,
+                            )
+                        source_stats.append(
+                            {
+                                "contract_address": contract_address,
+                                "contract_name": contract_name,
+                                "status": "skipped",
+                                "files_with_diffs": 0,
+                            }
+                        )
+                    else:
+                        source_result = run_source_diff(
+                            contract_address,
+                            contract_code,
+                            config,
+                            github_api_token,
+                            source_rules,
+                            recursive_parsing,
+                            cache_github,
+                            skip_user_input,
+                        )
+                        source_stats.append(source_result)
 
                 if enable_binary_comparison:
                     try:
@@ -1051,6 +1066,7 @@ def _print_source_summary(all_results: list[dict]) -> None:
     total_contracts = len(source_stats)
     exact_matches = sum(stat["status"] == "exact" for stat in source_stats)
     allowed_diffs = sum(stat["status"] == "allowed" for stat in source_stats)
+    skipped = sum(stat["status"] == "skipped" for stat in source_stats)
     failed_diffs = [stat for stat in source_stats if stat["status"] == "failed"]
     total_files_with_diffs = sum(stat["files_with_diffs"] for stat in source_stats)
 
@@ -1059,6 +1075,8 @@ def _print_source_summary(all_results: list[dict]) -> None:
     logger.okay(f"Total contracts analyzed: {total_contracts}")
     logger.okay(f"Exact matches: {exact_matches}")
     logger.okay(f"Allowed diffs: {allowed_diffs}")
+    if skipped:
+        logger.okay(f"Skipped (local_compilation, bytecode-only): {skipped}")
     logger.okay(f"Failures: {len(failed_diffs)}")
     logger.okay(f"Total files with non-zero diffs: {total_files_with_diffs}")
 

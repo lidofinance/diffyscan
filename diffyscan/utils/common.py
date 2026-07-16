@@ -160,6 +160,14 @@ def _validate_yaml_hex_keys(config: dict, path: str) -> None:
                             ),
                         )
 
+    local_compilation = config.get("local_compilation")
+    if isinstance(local_compilation, dict):
+        _validate_yaml_address_keys(
+            local_compilation.get("inputs"),
+            path,
+            "local_compilation.inputs",
+        )
+
     allowed_diffs = config.get("allowed_diffs")
     if not isinstance(allowed_diffs, dict):
         return

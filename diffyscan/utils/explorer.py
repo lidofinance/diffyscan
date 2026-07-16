@@ -717,9 +717,11 @@ def build_contract_from_local_input(
     if not isinstance(solc_input, dict) or not solc_input.get("sources"):
         raise ExplorerError(f'Local solc input {input_path} has no "sources"')
 
-    solc_input.setdefault("settings", {})[
-        "outputSelection"
-    ] = _default_output_selection()
+    settings = solc_input.get("settings")
+    if not isinstance(settings, dict):
+        settings = {}
+        solc_input["settings"] = settings
+    settings["outputSelection"] = _default_output_selection()
     return _build_contract_payload(contract_name, compiler, solc_input)
 
 
