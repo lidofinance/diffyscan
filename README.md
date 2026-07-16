@@ -171,6 +171,29 @@ dependencies:
 
 > **Important:** In YAML configs, always quote contract addresses (e.g. `"0x1234..."`). Unquoted hex values will be parsed as integers by YAML, and diffyscan will raise an error if this happens.
 
+### Unverified contracts (`local_compilation`)
+
+Contracts with no explorer-verified source can still be checked at the bytecode
+level: supply a solc standard-JSON input file per address plus the exact
+compiler build. The input file provides the source-file manifest and compiler
+settings only — file contents are still fetched from the pinned GitHub
+repo/commit, so the check stays honest. The source diff is skipped for these
+contracts (there is nothing explorer-side to diff against); they are verified
+by the bytecode comparison alone.
+
+```yaml
+local_compilation:
+  compiler: v0.8.20+commit.a1b79de6   # full build string, required
+  inputs:                             # address -> solc input, relative to this config file
+    "0x4c8c4A15c1e810e481c412A9B06Be5f79dC02192": inputs/proxy-admin.json
+```
+
+A byte-for-byte match **including the CBOR metadata tail** proves the guessed
+source and settings are exactly right — the metadata hash covers both. A match
+that only passes with `allowed_diffs` rules such as `cbor_metadata` is much
+weaker evidence for an unverified contract, since there is no explorer anchor;
+prefer configurations that reproduce the deployed bytecode in full.
+
 ### Granular allowlists
 
 Use `allowed_diffs` to describe exactly which differences are expected. The same schema works in JSON and YAML.

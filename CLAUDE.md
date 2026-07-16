@@ -69,6 +69,9 @@ explorer_token_env_var: "ETHERSCAN_EXPLORER_TOKEN"
 github_repo:        { url, commit, relative_root }
 dependencies:       { "dep_name": { url, commit, relative_root } }
 bytecode_comparison: { constructor_calldata, constructor_args, libraries, deployment_from, extra_sources }
+local_compilation:  { compiler, inputs }  # optional; bytecode-only checks for explorer-unverified contracts
+                    # compiler: full solc build string ("v0.8.20+commit.a1b79de6"); inputs: { "0xaddr": "path/to/solc-input.json" } relative to the config file
+                    # the input supplies the source manifest + settings; contents still come from GitHub; source diff is skipped for these addresses
                     # libraries keyed by the library's DEFINITION file: { "src/lib/Foo.sol": { "Foo": "0xaddr" } }
                     # explorer-provided libraries are auto-detected and re-keyed to the definition file for solc linking
 allowed_diffs:      { bytecode: {...}, source: {...} }  # optional; see below

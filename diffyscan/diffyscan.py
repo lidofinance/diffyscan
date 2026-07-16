@@ -34,6 +34,7 @@ from .utils.custom_exceptions import (
     ExceptionHandler,
 )
 from .utils.explorer import (
+    build_contract_from_local_input,
     compile_contract_from_explorer,
     get_contract_from_explorer,
     get_explorer_chain_id,
@@ -509,6 +510,22 @@ def _load_explorer_token(config: dict) -> str:
     raise ValueError(error_msg)
 
 
+def _get_local_inputs(config: dict, config_path: str) -> dict[str, str]:
+    """Map lowercased address -> absolute solc-input path from local_compilation.
+
+    Paths are resolved relative to the config file directory.
+    """
+    local_compilation = config.get("local_compilation") or {}
+    inputs = local_compilation.get("inputs") or {}
+    base_dir = os.path.dirname(os.path.abspath(config_path))
+    resolved = {}
+    for address, input_path in inputs.items():
+        if not os.path.isabs(input_path):
+            input_path = os.path.join(base_dir, input_path)
+        resolved[address.lower()] = input_path
+    return resolved
+
+
 def _setup_binary_comparison(config: dict) -> str:
     """Load RPC URL and configure exception handling for bytecode comparison."""
     rpc_env_var = config.get("rpc_url_env_var", "REMOTE_RPC_URL")
@@ -603,7 +620,33 @@ def process_config(
     config: dict = load_config(path)  # type: ignore[assignment]
     effective_allowed_diffs = build_effective_allowed_diffs(config)
 
-    explorer_token = _load_explorer_token(config)
+    # Contracts whose sources/settings come from a local solc input, not an explorer
+    local_inputs = _get_local_inputs(config, path)
+    local_compiler = (config.get("local_compilation") or {}).get("compiler")
+    if local_inputs and not local_compiler:
+        raise CompileError(
+            'Config "local_compilation.compiler" is required when '
+            '"local_compilation.inputs" is set (e.g. "v0.8.26+commit.8a97fa7a")'
+        )
+    unknown_local = sorted(
+        set(local_inputs) - {address.lower() for address in config["contracts"]}
+    )
+    if unknown_local:
+        logger.warn(
+            '"local_compilation.inputs" addresses missing from "contracts"',
+            ", ".join(unknown_local),
+        )
+    if local_inputs and not enable_binary_comparison:
+        logger.warn(
+            "local_compilation contracts are checked by bytecode comparison only; "
+            "with --skip-binary-comparison they are not verified at all"
+        )
+
+    # The explorer token is only needed when some contract still uses the explorer
+    needs_explorer = any(
+        address.lower() not in local_inputs for address in config["contracts"]
+    )
+    explorer_token = _load_explorer_token(config) if needs_explorer else None
     github_api_token = load_env("GITHUB_API_TOKEN", masked=True, required=True)
 
     remote_rpc_url = None
@@ -628,10 +671,12 @@ def process_config(
             logger.okay("Remote chain ID", remote_chain_id)
 
         explorer_hostname = config.get("explorer_hostname")
-        if explorer_hostname is None:
-            logger.warn('Failed to find "explorer_hostname" in the config')
-        assert explorer_hostname is not None, "explorer_hostname is required"
-        explorer_chain_id = get_explorer_chain_id(config)
+        explorer_chain_id = None
+        if needs_explorer:
+            if explorer_hostname is None:
+                logger.warn('Failed to find "explorer_hostname" in the config')
+            assert explorer_hostname is not None, "explorer_hostname is required"
+            explorer_chain_id = get_explorer_chain_id(config)
 
         # Apply contract filter if specified
         filter_set = (
@@ -643,14 +688,23 @@ def process_config(
                 continue
             matched_count += 1
             try:
-                contract_code = get_contract_from_explorer(
-                    explorer_token,
-                    explorer_hostname,
-                    contract_address,
-                    contract_name,
-                    explorer_chain_id,
-                    cache_explorer,
-                )
+                local_input_path = local_inputs.get(contract_address.lower())
+                if local_input_path:
+                    logger.info(
+                        f"Building {contract_address} from local solc input {local_input_path}"
+                    )
+                    contract_code = build_contract_from_local_input(
+                        contract_name, local_input_path, local_compiler
+                    )
+                else:
+                    contract_code = get_contract_from_explorer(
+                        explorer_token,
+                        explorer_hostname,
+                        contract_address,
+                        contract_name,
+                        explorer_chain_id,
+                        cache_explorer,
+                    )
 
                 address_key = contract_address.lower()
                 source_rules = effective_allowed_diffs["source"].get(address_key, [])
@@ -658,7 +712,13 @@ def process_config(
                     address_key, []
                 )
 
-                if enable_source_comparison:
+                if enable_source_comparison and local_input_path:
+                    logger.warn(
+                        "Source comparison skipped: local solc input has no "
+                        "explorer-verified source to diff against",
+                        contract_address,
+                    )
+                if enable_source_comparison and not local_input_path:
                     source_result = run_source_diff(
                         contract_address,
                         contract_code,

@@ -67,6 +67,14 @@ class GithubRepo(TypedDict):
     relative_root: str
 
 
+class LocalCompilation(TypedDict):
+    # full solc build string, e.g. "v0.8.26+commit.8a97fa7a"
+    compiler: str
+    # contract address -> path of its solc standard-JSON input file,
+    # resolved relative to the config file
+    inputs: dict[str, str]
+
+
 class Config(TypedDict):
     contracts: dict[str, str]
     network: NotRequired[str]
@@ -79,6 +87,7 @@ class Config(TypedDict):
     rpc_url_env_var: NotRequired[str]
     deployment_gas_limit: NotRequired[int]
     bytecode_comparison: NotRequired[BinaryConfig]
+    local_compilation: NotRequired[LocalCompilation]
     allowed_diffs: NotRequired[AllowedDiffsConfig]
     fail_on_bytecode_comparison_error: NotRequired[bool]
     source_comparison: NotRequired[bool]
