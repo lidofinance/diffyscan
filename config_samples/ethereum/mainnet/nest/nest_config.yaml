@@ -15,7 +15,7 @@ explorer_chain_id: 1
 
 github_repo:
   url: https://github.com/lidofinance/stonks
-  commit: "afcb107f46d59d9be2d76a7f04f1a3658f3197f5" # 16.07.2026 deploy commit
+  commit: "10a249971099be1b36c27f43a3f0a520389fb62e" # 15.07.2026 final fixes
   relative_root: ""
 
 dependencies:
