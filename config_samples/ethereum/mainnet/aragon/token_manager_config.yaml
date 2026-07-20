@@ -1,0 +1,46 @@
+# Lido DAO Aragon TokenManager app (mainnet). Upstream Aragon code, no Lido
+# modifications; wraps the LDO MiniMe token (mint/assign/vest, forward() gate).
+# Proxy 0xf73a1260d222f447210581DDf212D915c09a3249.
+# Uses Blockscout: Etherscan verifies this contract as one flattened file
+# (not path-mappable); Blockscout serves it multi-file.
+
+contracts:
+  "0xde3A93028F2283cc28756B3674BD657eaFB992f4": TokenManager
+
+network: mainnet
+explorer_hostname: eth.blockscout.com
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+explorer_chain_id: 1
+
+github_repo:
+  url: https://github.com/lidofinance/aragon-apps
+  # Commit the deployed implementation was built from (fork master); it is release
+  # apps-token-manager-v2.1.0. Source differs from the tag only in the post-#1218
+  # @aragon/minime import paths and one radspec comment (no bytecode change).
+  # No Lido audit pins this commit.
+  commit: e44f928f1c4c2118ba547464b1547cbe32b1cd71
+  relative_root: apps/token-manager
+
+dependencies:
+  # @aragon/os@4.4.0
+  "@aragon/os":
+    url: https://github.com/aragon/aragonOS
+    commit: f3ae59b00f73984e562df00129c925339cd069ff
+    relative_root: ""
+  # @aragon/minime@1.0.0
+  "@aragon/minime":
+    url: https://github.com/aragon/minime
+    commit: 1d5251fc88eee5024ff318d95bc9f4c5de130430
+    relative_root: ""
+
+fail_on_bytecode_comparison_error: true
+
+bytecode_comparison:
+  constructor_calldata: {}
+  constructor_args: {}
+
+allowed_diffs:
+  bytecode:
+    "0xde3A93028F2283cc28756B3674BD657eaFB992f4":
+      - reason: "Trailing CBOR metadata hash differs (compiler/source-path fingerprint); executable runtime bytecode is identical."
+        cbor_metadata: true
