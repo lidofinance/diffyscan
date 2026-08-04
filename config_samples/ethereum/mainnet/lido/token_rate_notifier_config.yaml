@@ -1,0 +1,20 @@
+contracts:
+  "0xbe05d12Fd10919F1881125006523452F6aFF791b": TokenRateNotifier
+
+network: mainnet
+explorer_hostname: api.etherscan.io
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+explorer_chain_id: 1
+
+github_repo:
+  url: https://github.com/lidofinance/core
+  commit: dc9066b6f9b5c6c3b65f4a4aac338427198f0e98
+  relative_root: ""
+
+dependencies:
+  "@openzeppelin/contracts-v4.4":
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: 6bd6b76d1156e20e45d1016f355d154141c7e5b9 # v4.4.1
+    relative_root: contracts
+
+fail_on_bytecode_comparison_error: true
