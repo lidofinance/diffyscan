@@ -269,35 +269,33 @@ wheels = [
 
 [[package]]
 name = "gitlint"
-version = "0.19.1"
+version = "0.20.0.dev44"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "gitlint-core", extra = ["trusted-deps"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/95/d2/67e308b3f26394b2e98d2b0df594aa8c116e165d09d15094d45ecade7272/gitlint-0.19.1.tar.gz", hash = "sha256:b5b70fb894e80849b69abbb65ee7dbb3520fc3511f202a6e6b6ddf1a71ee8f61", size = 4799, upload-time = "2023-03-10T12:51:45.875Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c7/97/483c5afb7fae047547d79117f2446582e1ceb028d8b13cb08e2c0fa4840f/gitlint-0.20.0.dev44.tar.gz", hash = "sha256:f7e34225bb50316b11cf7d7119360e5101716b00d079c3a1989815368773adee", size = 5967, upload-time = "2023-07-14T05:00:03.589Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/84/90/8b6a29ddceb51272a054399d4864eefd28083530349f5735e0bb979c5f0f/gitlint-0.19.1-py3-none-any.whl", hash = "sha256:26bb085959148d99fbbc178b4e56fda6c3edd7646b7c2a24d8ee1f8e036ed85d", size = 2649, upload-time = "2023-03-10T12:51:44.191Z" },
+    { url = "https://files.pythonhosted.org/packages/b3/00/bdffa30453ee464d5ea40ba4f5182360ab7a17c4c4c8850882318269475d/gitlint-0.20.0.dev44-py3-none-any.whl", hash = "sha256:591dd757213a7a6699c411366d4ee99cb536d91feb390c5b2f1ad8a84d2351b4", size = 2795, upload-time = "2023-07-14T05:00:01.971Z" },
 ]
 
 [[package]]
 name = "gitlint-core"
-version = "0.19.1"
+version = "0.20.0.dev44"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "arrow" },
     { name = "click" },
-    { name = "sh", marker = "sys_platform != 'win32'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/73/51/b59270264aabcab5b933f3eb9bfb022464ca9205b04feef1bdc1635fd9b4/gitlint_core-0.19.1.tar.gz", hash = "sha256:7bf977b03ff581624a9e03f65ebb8502cc12dfaa3e92d23e8b2b54bbdaa29992", size = 36141, upload-time = "2023-03-10T12:51:42.713Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b5/c5/0113b440e3f61b6a4b3aaf541ce595897ff10d363b32ed295dc82a481d98/gitlint_core-0.20.0.dev44.tar.gz", hash = "sha256:dab6faa94792363446371438d31691109b2c6a47defe4fcc3a3fcff156fdd103", size = 36088, upload-time = "2023-07-14T04:59:56.853Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b0/57/dea471da24ceac6de8c3dc5d37e4ddde57a5c340d6bac90010898734de34/gitlint_core-0.19.1-py3-none-any.whl", hash = "sha256:f41effd1dcbc06ffbfc56b6888cce72241796f517b46bd9fd4ab1b145056988c", size = 44207, upload-time = "2023-03-10T12:51:41.054Z" },
+    { url = "https://files.pythonhosted.org/packages/90/78/0bfe811ceb18cff5ad5be6ff76771bd7c1b084e26006384d0eb576282d0d/gitlint_core-0.20.0.dev44-py3-none-any.whl", hash = "sha256:970e1d95b08cdb1b551e0d6124d3b0aa8582acb284cea6202a7736ae79ca2ed6", size = 44495, upload-time = "2023-07-14T04:59:55.407Z" },
 ]
 
 [package.optional-dependencies]
 trusted-deps = [
     { name = "arrow" },
     { name = "click" },
-    { name = "sh", marker = "sys_platform != 'win32'" },
 ]
 
 [[package]]
@@ -686,12 +684,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/ac/c3/e2a2b89f2d3e2179a
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a0/f4/c67b0b3f1b9245e8d266f0f112c500d50e5b4e83cb6f3b71b6528104182a/requests-2.34.2-py3-none-any.whl", hash = "sha256:2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0", size = 73075, upload-time = "2026-05-14T19:25:26.443Z" },
 ]
-
-[[package]]
-name = "sh"
-version = "1.14.3"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/b7/09/89c28aaf2a49f226fef8587c90c6386bd2cc03a0295bc4ff7fc6ee43c01d/sh-1.14.3.tar.gz", hash = "sha256:e4045b6c732d9ce75d571c79f5ac2234edd9ae4f5fa9d59b09705082bdca18c7", size = 62851, upload-time = "2022-07-18T07:17:50.947Z" }
 
 [[package]]
 name = "six"
