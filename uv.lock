@@ -7,18 +7,6 @@ resolution-markers = [
 ]
 
 [[package]]
-name = "arrow"
-version = "1.2.3"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "python-dateutil" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/7f/c0/c601ea7811f422700ef809f167683899cdfddec5aa3f83597edf97349962/arrow-1.2.3.tar.gz", hash = "sha256:3934b30ca1b9f292376d9db15b19446088d12ec58629bc3f0da28fd55fb633a1", size = 127552, upload-time = "2022-09-03T19:35:32.65Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/67/67/4bca5a595e2f89bff271724ddb1098e6c9e16f7f3d018d120255e3c30313/arrow-1.2.3-py3-none-any.whl", hash = "sha256:5a49ab92e3b7b71d96cd6bfcc4df14efefc9dfa96ea19045815914a6ab6b1fe2", size = 66391, upload-time = "2022-09-03T19:35:29.66Z" },
-]
-
-[[package]]
 name = "ast-serialize"
 version = "0.6.0"
 source = { registry = "https://pypi.org/simple" }
@@ -209,6 +197,15 @@ wheels = [
 ]
 
 [[package]]
+name = "conventional-pre-commit"
+version = "4.4.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/eb/6a/c4c902f9526c026b8f5d59ac099028bea7acb2415d5f6603668e92dfa22c/conventional_pre_commit-4.4.0.tar.gz", hash = "sha256:5426bef9039a162c3203cc7de3624954dea7120af8dec6f878d8f1c83c58af7b", size = 27161, upload-time = "2026-02-18T19:14:53.042Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3f/26/affaaa8928f04729d0e69b33b4643a9713eaa270e9712892347f3c683ce5/conventional_pre_commit-4.4.0-py3-none-any.whl", hash = "sha256:5d266cb32a857344e1c4d87660c290cca1646d1ae480dcef6388e27bbc7f022f", size = 16825, upload-time = "2026-02-18T19:14:51.485Z" },
+]
+
+[[package]]
 name = "diffyscan"
 version = "0.0.0"
 source = { editable = "." }
@@ -222,7 +219,7 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "black" },
-    { name = "gitlint" },
+    { name = "conventional-pre-commit" },
     { name = "mypy" },
     { name = "pre-commit" },
     { name = "pytest" },
@@ -241,7 +238,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "black", specifier = ">=26.5.1,<27" },
-    { name = "gitlint", specifier = ">=0.19,<1" },
+    { name = "conventional-pre-commit", specifier = ">=4.4,<5" },
     { name = "mypy", specifier = ">=2.3.0,<3" },
     { name = "pre-commit", specifier = ">=4.6.1,<5" },
     { name = "pytest", specifier = ">=9.1.1,<10" },
@@ -265,37 +262,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/94/b8/00651a0f559862f3bb7d6f7477b192afe3f583cc5e26403b44e59a55ab34/filelock-3.25.2.tar.gz", hash = "sha256:b64ece2b38f4ca29dd3e810287aa8c48182bbecd1ae6e9ae126c9b35f1382694", size = 40480, upload-time = "2026-03-11T20:45:38.487Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a4/a5/842ae8f0c08b61d6484b52f99a03510a3a72d23141942d216ebe81fefbce/filelock-3.25.2-py3-none-any.whl", hash = "sha256:ca8afb0da15f229774c9ad1b455ed96e85a81373065fb10446672f64444ddf70", size = 26759, upload-time = "2026-03-11T20:45:37.437Z" },
-]
-
-[[package]]
-name = "gitlint"
-version = "0.20.0.dev44"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "gitlint-core", extra = ["trusted-deps"] },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/c7/97/483c5afb7fae047547d79117f2446582e1ceb028d8b13cb08e2c0fa4840f/gitlint-0.20.0.dev44.tar.gz", hash = "sha256:f7e34225bb50316b11cf7d7119360e5101716b00d079c3a1989815368773adee", size = 5967, upload-time = "2023-07-14T05:00:03.589Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/b3/00/bdffa30453ee464d5ea40ba4f5182360ab7a17c4c4c8850882318269475d/gitlint-0.20.0.dev44-py3-none-any.whl", hash = "sha256:591dd757213a7a6699c411366d4ee99cb536d91feb390c5b2f1ad8a84d2351b4", size = 2795, upload-time = "2023-07-14T05:00:01.971Z" },
-]
-
-[[package]]
-name = "gitlint-core"
-version = "0.20.0.dev44"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "arrow" },
-    { name = "click" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/b5/c5/0113b440e3f61b6a4b3aaf541ce595897ff10d363b32ed295dc82a481d98/gitlint_core-0.20.0.dev44.tar.gz", hash = "sha256:dab6faa94792363446371438d31691109b2c6a47defe4fcc3a3fcff156fdd103", size = 36088, upload-time = "2023-07-14T04:59:56.853Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/90/78/0bfe811ceb18cff5ad5be6ff76771bd7c1b084e26006384d0eb576282d0d/gitlint_core-0.20.0.dev44-py3-none-any.whl", hash = "sha256:970e1d95b08cdb1b551e0d6124d3b0aa8582acb284cea6202a7736ae79ca2ed6", size = 44495, upload-time = "2023-07-14T04:59:55.407Z" },
-]
-
-[package.optional-dependencies]
-trusted-deps = [
-    { name = "arrow" },
-    { name = "click" },
 ]
 
 [[package]]
@@ -548,18 +514,6 @@ wheels = [
 ]
 
 [[package]]
-name = "python-dateutil"
-version = "2.9.0.post0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "six" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/66/c0/0c8b6ad9f17a802ee498c46e004a0eb49bc148f2fd230864601a86dcf6db/python-dateutil-2.9.0.post0.tar.gz", hash = "sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3", size = 342432, upload-time = "2024-03-01T18:36:20.211Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/ec/57/56b9bcc3c9c6a792fcbaf139543cee77261f3651ca9da0c93f5c1221264b/python_dateutil-2.9.0.post0-py2.py3-none-any.whl", hash = "sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427", size = 229892, upload-time = "2024-03-01T18:36:18.57Z" },
-]
-
-[[package]]
 name = "python-discovery"
 version = "1.1.3"
 source = { registry = "https://pypi.org/simple" }
@@ -683,15 +637,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/ac/c3/e2a2b89f2d3e2179abd6d00ebd70bff6273f37fb3e0cc209f48b39d00cbf/requests-2.34.2.tar.gz", hash = "sha256:f288924cae4e29463698d6d60bc6a4da69c89185ad1e0bcc4104f584e960b9ed", size = 142856, upload-time = "2026-05-14T19:25:27.735Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a0/f4/c67b0b3f1b9245e8d266f0f112c500d50e5b4e83cb6f3b71b6528104182a/requests-2.34.2-py3-none-any.whl", hash = "sha256:2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0", size = 73075, upload-time = "2026-05-14T19:25:26.443Z" },
-]
-
-[[package]]
-name = "six"
-version = "1.17.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81", size = 34031, upload-time = "2024-12-04T17:35:28.174Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274", size = 11050, upload-time = "2024-12-04T17:35:26.475Z" },
 ]
 
 [[package]]

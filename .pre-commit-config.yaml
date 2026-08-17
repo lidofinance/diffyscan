@@ -19,10 +19,10 @@ repos:
         types_or:
           - python
         require_serial: true
-      - id: gitlint
-        name: gitlint
-        entry: .venv/bin/gitlint --msg-filename
+      - id: conventional-pre-commit
+        name: conventional-pre-commit
+        entry: .venv/bin/conventional-pre-commit
         language: system
         stages:
           - commit-msg
-        always_run: true
+        args: [fix, feat, chore, docs, style, refactor, perf, test, revert, ci, build]
