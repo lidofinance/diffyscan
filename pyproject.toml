@@ -24,10 +24,10 @@ diffyscan = "diffyscan.diffyscan:main"
 dev = [
     "black>=26.5.1,<27",
     "gitlint>=0.19,<1",
-    "mypy>=2.2.0,<3",
-    "pre-commit>=4.6.0,<5",
-    "types-pyyaml>=6.0,<7",
-    "types-requests>=2.32,<3",
+    "mypy>=2.3.0,<3",
+    "pre-commit>=4.6.1,<5",
+    "types-pyyaml>=6.0.12.20260724,<7",
+    "types-requests>=2.33.0.20260712,<3",
     "pytest>=9.1.1,<10",
 ]
 
