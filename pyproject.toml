@@ -23,7 +23,7 @@ diffyscan = "diffyscan.diffyscan:main"
 [dependency-groups]
 dev = [
     "black>=26.5.1,<27",
-    "gitlint>=0.19,<1",
+    "conventional-pre-commit>=4.4,<5",
     "mypy>=2.3.0,<3",
     "pre-commit>=4.6.1,<5",
     "types-pyyaml>=6.0.12.20260724,<7",
