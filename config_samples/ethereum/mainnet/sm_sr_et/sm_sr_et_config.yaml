@@ -10,7 +10,7 @@ contracts:
   "0x2fC78638b77381e9D040163Bd6EB1cac967bDBdF": CreateOrUpdateOperatorGroup
   # SRv3 factories
   "0x29e23B1EF0c9fffAc8330F9abaCebDDD827E4b5C": AllowConsolidationPair
-  "0x0C6703F1d8D9DdfB6c6e5F57b4f7432a6500D6D8": UpdateStakingModuleShareLimits
+  "0xde3e46E3129fA4e4e3f66c9024B0A3Ad509b27a1": UpdateStakingModuleShareLimits
 
 network: mainnet
 explorer_hostname: api.etherscan.io
@@ -85,7 +85,7 @@ allowed_diffs:
       - file: contracts/interfaces/ICuratedModule.sol
         github: { start: 6, count: 2 }
         explorer: { start: 6, count: 2 }
-    "0x0C6703F1d8D9DdfB6c6e5F57b4f7432a6500D6D8":
+    "0xde3e46E3129fA4e4e3f66c9024B0A3Ad509b27a1":
     - reason: Etherscan sources use root-relative imports, GitHub uses relative ones. Same files.
       line_ranges:
       - file: contracts/EVMScriptFactories/UpdateStakingModuleShareLimits.sol
@@ -116,6 +116,6 @@ allowed_diffs:
     "0x29e23B1EF0c9fffAc8330F9abaCebDDD827E4b5C":
     - reason: Metadata hash differs due to the rewritten imports, runtime code matches byte-for-byte.
       cbor_metadata: true
-    "0x0C6703F1d8D9DdfB6c6e5F57b4f7432a6500D6D8":
+    "0xde3e46E3129fA4e4e3f66c9024B0A3Ad509b27a1":
     - reason: Metadata hash differs due to the rewritten imports, runtime code matches byte-for-byte.
       cbor_metadata: true
