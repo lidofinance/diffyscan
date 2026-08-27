@@ -2,7 +2,7 @@
 
 [Back to README](../README.md)
 
-Diffyscan accepts JSON, YAML, and YML files. Working configurations are under
+Diffyscan accepts JSON, YAML, and YML files. Configuration samples are under
 [`config_samples/`](../config_samples/).
 
 ```yaml
@@ -23,6 +23,27 @@ dependencies: {}
 fail_on_bytecode_comparison_error: true
 ```
 
+The same fields are accepted in JSON:
+
+```json
+{
+  "contracts": {
+    "0x6019cB557978296Ba3C08a7B73225C0975dfb2f7": "CircuitBreaker"
+  },
+  "explorer_hostname": "api.etherscan.io",
+  "explorer_chain_id": 1,
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+  "rpc_url_env_var": "REMOTE_RPC_URL",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/circuit-breaker",
+    "commit": "b4b2fbc921b3191560a3fc62d502d4bb98ad99e1",
+    "relative_root": ""
+  },
+  "dependencies": {},
+  "fail_on_bytecode_comparison_error": true
+}
+```
+
 ## Core fields
 
 | Field | Description |
@@ -35,7 +56,7 @@ fail_on_bytecode_comparison_error: true
 | `github_repo` | Repository URL, pinned commit, and source root expected to match the deployment |
 | `dependencies` | Imported source trees pinned to their repositories and commits |
 | `source_comparison` | Enables source comparison; defaults to `true` |
-| `fail_on_bytecode_comparison_error` | Treats bytecode processing errors as failures; defaults to `true` |
+| `fail_on_bytecode_comparison_error` | Controls whether the outer per-contract handler re-raises caught errors; defaults to `true` |
 | `deployment_gas_limit` | Optional gas limit for constructor simulation |
 | `bytecode_comparison` | Manual constructor, library, caller, and source overrides |
 | `allowed_diffs` | Expected source or bytecode differences, scoped by contract |
@@ -43,6 +64,10 @@ fail_on_bytecode_comparison_error: true
 If `explorer_token_env_var` is absent, Diffyscan falls back to
 `ETHERSCAN_EXPLORER_TOKEN`. Set the field when a config uses another explorer
 or token.
+
+`fail_on_bytecode_comparison_error: false` does not suppress compilation,
+calldata, deployment-simulation, or RPC failures. Diffyscan records those as
+failed bytecode results, and they still produce exit status 1.
 
 ## GitHub sources
 
@@ -72,8 +97,9 @@ The dependency key must match the imported path prefix.
 
 ## Environment variables
 
-Diffyscan loads a local `.env` file before reading credentials. A standard run
-needs:
+A local checkout loads the repository's `.env` file before reading credentials.
+An installed CLI does not load `.env` from the working directory; export the
+variables in the shell instead. A standard run needs:
 
 - `GITHUB_API_TOKEN`;
 - the token named by `explorer_token_env_var`;

@@ -14,8 +14,7 @@ in the current directory.
 | --- | --- |
 | `-V, --version` | Print the installed Diffyscan version |
 | `-Y, --yes` | Disable confirmation prompts before contract checks |
-| `--support-brownie` | Resolve flattened imports with recursive GitHub lookup |
-| `--no-support-brownie` | Disable Brownie import handling |
+| `--support-brownie`, `--no-support-brownie` | Enable or explicitly keep Brownie import handling disabled; disabled by default |
 | `-S, --skip-binary-comparison` | Run source comparison without bytecode comparison |
 | `-E, --cache-explorer` | Cache verified sources and metadata from the explorer |
 | `-G, --cache-github` | Cache source files fetched from GitHub |

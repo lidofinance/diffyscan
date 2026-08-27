@@ -10,11 +10,26 @@ Pin a release tag or commit so that later runs use the same Diffyscan code:
 uv tool install git+https://github.com/lidofinance/diffyscan@<tag-or-commit>
 ```
 
+Export the credentials named by your config. For example:
+
+```sh
+export GITHUB_API_TOKEN=<github-token>
+export ETHERSCAN_EXPLORER_TOKEN=<explorer-token>
+export REMOTE_RPC_URL=<rpc-url>
+```
+
 Run the installed command with your config:
 
 ```sh
 diffyscan path/to/config.yaml
 ```
+
+## Use the Dev Container
+
+The repository's Dev Container uses the same Dockerfile as the regression
+workflow. Open the checkout in a Dev Container-compatible editor. Its
+post-create script installs dependencies and Git hooks, then copies
+`.env.example` to `.env` when needed.
 
 ## Run a local checkout
 
@@ -24,8 +39,8 @@ cp .env.example .env
 uv run diffyscan config_samples/ethereum/mainnet/circuit-breaker/circuit_breaker_config.yaml
 ```
 
-Diffyscan loads `.env` from the current directory. Set `GITHUB_API_TOKEN`, the
-explorer token named by the config, and the RPC URL used by that config.
+Diffyscan loads the checkout's `.env` file. Set `GITHUB_API_TOKEN`, the explorer
+token named by the config, and the RPC URL used by that config.
 
 ## Run every config in a directory
 
@@ -82,6 +97,12 @@ diffyscan path/to/config.yaml --cache-explorer --cache-github
 Explorer entries are stored in `.diffyscan_cache/`. GitHub entries are stored
 in `.diffyscan_cache/github/`. Diffyscan validates cache metadata and content
 hashes before reuse.
+
+Remove both caches when you need fresh remote inputs:
+
+```sh
+rm -rf .diffyscan_cache/
+```
 
 ## Run in CI
 

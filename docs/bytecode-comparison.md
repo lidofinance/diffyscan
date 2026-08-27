@@ -20,15 +20,17 @@ missing or does not describe the deployment being checked.
 
 ## Manual overrides
 
-`bytecode_comparison` accepts per-contract overrides:
+`bytecode_comparison` accepts per-contract constructor, caller, and extra-source
+overrides. `libraries` is a global mapping applied to every contract in the
+config.
 
-| Field | Purpose |
-| --- | --- |
-| `constructor_args` | ABI-encoded by Diffyscan and appended to creation bytecode |
-| `constructor_calldata` | Complete encoded constructor calldata |
-| `deployment_from` | Caller used for constructor simulation when `msg.sender` matters |
-| `libraries` | Linked-library addresses keyed by the file that defines each library |
-| `extra_sources` | GitHub source files absent from the explorer submission but required to compile |
+| Field | Scope | Purpose |
+| --- | --- | --- |
+| `constructor_args` | Per contract | ABI-encoded by Diffyscan and appended to creation bytecode |
+| `constructor_calldata` | Per contract | Complete encoded constructor calldata |
+| `deployment_from` | Per contract | Caller used for constructor simulation when `msg.sender` matters |
+| `libraries` | All contracts | Linked-library addresses keyed by the file that defines each library |
+| `extra_sources` | Per contract | GitHub source files absent from the explorer submission but required to compile |
 
 ```yaml
 bytecode_comparison:
@@ -60,6 +62,14 @@ bytecode_comparison:
 The outer key must name the file that defines the library. This matches the link
 placeholders produced by `solc`. A consumer file that imports the library is not
 a valid key.
+
+The manual `libraries` mapping applies to every contract in the config. Use
+separate config files when deployments require different addresses for the same
+source path and library name.
+
+If deployment simulation fails with `Invalid params`, or Diffyscan reports
+`unlinked libraries`, check that every library address is present and keyed by
+the file that defines the library.
 
 ## Allowed differences
 
@@ -104,6 +114,10 @@ allowed_diffs:
 | `files` | Every changed hunk in named files |
 | `any: true` | Every source difference for the contract |
 
+`any: true` must be the only facet in its rule. It cannot be combined with
+`immutables`, `cbor_metadata`, `byte_ranges`, `constructor_args`,
+`constructor_calldata`, `line_ranges`, or `files`.
+
 Diffyscan prints a suggested rule for each uncovered difference in the final
 summary. Immutable-backed differences are suggested as exact immutable values
 before Diffyscan falls back to byte ranges.
@@ -122,8 +136,8 @@ To replace a wildcard:
 
 The regression test in
 [`tests/test_no_wildcard_regression.py`](../tests/test_no_wildcard_regression.py)
-rejects new wildcard rules unless the repository records an explicit
-justification.
+checks rules under `config_samples/` and rejects new wildcards there unless the
+repository records an explicit justification.
 
 ## Reports
 

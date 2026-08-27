@@ -45,12 +45,18 @@ uv run diffyscan config_samples/ethereum/mainnet/circuit-breaker/circuit_breaker
 - explorer-verified sources against files at the pinned GitHub commit
 - compiled runtime bytecode against code deployed on-chain
 - constructor-set immutable values through remote `eth_call` simulation
-- linked libraries, constructor calldata, compiler settings, and EVM version
 - expected differences declared with granular `allowed_diffs` rules
+
+To reproduce deployment bytecode, Diffyscan trusts explorer-provided constructor
+calldata, linked-library addresses, compiler settings, and EVM version as inputs.
 
 ## Development
 
+The [Dev Container](docs/how-to.md#use-the-dev-container) uses the same image as
+the regression workflow. For a manual checkout:
+
 ```sh
+uv run pre-commit install
 uv run pytest -q
 uv run mypy
 uv run black --check diffyscan tests
