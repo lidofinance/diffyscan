@@ -1,0 +1,175 @@
+# Core implementations and factories — Robinhood deployment
+#
+
+contracts:
+  # Factory
+  "0x00000000741292C88f9fF5050b07051C4f592EBf": TransparentUpgradeableProxy
+  "0x0000000072BAfCeAff1AD0237Ea58f06cfc4467F": Factory
+
+  # Consensus
+  "0xAfef40968b5304135677f0C89203948e1A145105": TransparentUpgradeableProxy
+  "0x000000007e6b679B9196a1609e5Bc2405eDFd6Aa": Consensus
+
+  # DepositQueue
+  "0xF429ba2a8437E7de85078CF7481E8Ad52df7E58c": TransparentUpgradeableProxy
+  "0x00000000B2d2373aAF1C370cFE4e1Ee8BDE7C546": DepositQueue
+  "0x000000001CC8c3E40856E956db870095EF6C98bd": SyncDepositQueue
+  "0x000000000Af33501e5BDAF9B481Ad2712a024727": SignatureDepositQueue
+
+  # FeeManager
+  "0x52d56c20B0C8d403888880d0A1610e5ed17addA8": TransparentUpgradeableProxy
+  "0x00000000C18039E1F415fe07C33A316232238648": FeeManager
+
+  # Oracle
+  "0x727c295b5D99b15280Ca8736b6F97ABA6aEd0E88": TransparentUpgradeableProxy
+  "0x000000009adE4dAE1f868775A3f087945983f062": Oracle
+
+  # RedeemQueue
+  "0xe08dc488bD6756323F8bf478869529D03db627ef": TransparentUpgradeableProxy
+  "0x0000000045d70ee8145135f08309fF5B1A63d43F": RedeemQueue
+  "0x000000008D14Ef3658805765107d9F12776f4138": SignatureRedeemQueue
+
+  # RiskManager
+  "0x9885215ef8DB25C87466E73018061e532784D716": TransparentUpgradeableProxy
+  "0x00000000CC26BC741E75B181738Ac2B16156179b": RiskManager
+
+  # ShareManager
+  "0xDA2a7aE07B6803feF9d95E47Ab83c8a5A09929F0": TransparentUpgradeableProxy
+  "0x00000000861e8B90B81f35C18cA14858Cc91d1Df": TokenizedShareManager
+  "0x00000000e5F0cddA56447b2a29e2847A52c8725D": BasicShareManager
+  "0x00000000C534B8680e3aa7165DeDc3Ab8781f602": BurnableTokenizedShareManager
+
+  # Subvault
+  "0xA64e324DFF04e3C0613ff0706867868C7b370a45": TransparentUpgradeableProxy
+  "0x00000000CA30010B8417f791250AE221FdaD5920": Subvault
+
+  # Verifier
+  "0x9fBAF5AEB9F52bA57E1cC1D3050eac6d75Df8ae7": TransparentUpgradeableProxy
+  "0x000000007e86a96e279662108cc19bA4c32EdE3C": Verifier
+
+  # Vault
+  "0xBBCD2aC50aF2EA12Cc9cb7B16dBDa85859BeB3da": TransparentUpgradeableProxy
+  "0x0000000070f44289ec5ea3E5972f058f75B29801": Vault
+
+  # SwapModule
+  "0xC5a52E4bB718Dfe86938e5cB967362EdA1E62698": TransparentUpgradeableProxy
+  "0x00000000a00c7cf7e467bfD2aDeF6ce698D8D63a": SwapModule
+
+  "0x0000000009E9368ad21fc19DCE1cFcf9Af6dE339": BitmaskVerifier
+
+  # ERC20Verifier
+  "0x711F6236e325634AA8c1F692b5312bfF3A8558D0": TransparentUpgradeableProxy
+  "0x00000000ACD80376E999Af8c424e5e33BD224A08": ERC20Verifier
+
+  "0x0000000005a67199ABE0f9C995EAB9DaDfA31Ccd": VaultConfigurator
+
+  # Hooks
+  "0x00000000176dD23550c3845746b2036E90DC5912": BasicRedeemHook
+  "0x0000000024ABbd08686Abb2987831dEa88eF1180": RedirectingDepositHook
+
+  "0x000000007d2552AD746Af5c13f91B5e72f97c2B7": OracleHelper
+
+  # MellowAccount
+  "0x870DB41df0905cc5a790f6582a3dA99A4A33F923": TransparentUpgradeableProxy
+  "0x00000000860913f37fab81ce8ce4E5BD1f664482": MellowAccountV1
+
+rpc_url_env_var: ROBINHOOD_RPC_URL
+
+explorer_hostname: robinhoodchain.blockscout.com
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+explorer_chain_id: 4663
+
+github_repo:
+  url: https://github.com/mellow-finance/flexible-vaults
+  # Latest audit: https://github.com/lidofinance/audits/blob/main/earn/2026-03-02_Nethermind_NM-0758_Mellow.pdf
+  commit: c9c71818f0a8bead183f9860db3b8bbceb7b8f37
+  relative_root: ""
+
+dependencies:
+  lib/contracts:
+    url: https://github.com/cowprotocol/contracts
+    commit: c94c595a791681cf8ba7495117dcde397b932885
+    relative_root: ""
+  lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts:
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: e4f70216d759d8e6a64144a9e1f7bbeed78e7079
+    relative_root: contracts
+    # version 5.3.0
+  lib/openzeppelin-contracts-upgradeable/contracts:
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable
+    commit: 60b305a8f3ff0c7688f02ac470417b6bbf1c4d27
+    relative_root: contracts
+    # version 5.3.0
+
+allowed_diffs:
+  bytecode:
+    "0x00000000741292C88f9fF5050b07051C4f592EBf":
+      - reason: ProxyAdmin is created in the proxy constructor
+        immutables:
+          - offset: 16
+            value: "0x00000000000000000000000044231e174c4662c197443b02eb5e9e71f368a6d9"
+    "0xAfef40968b5304135677f0C89203948e1A145105":
+      - reason: ProxyAdmin is created in the proxy constructor
+        immutables:
+          - offset: 16
+            value: "0x0000000000000000000000009edd95ed9a618911acb8ad43894344fcc5fbadde"
+    "0xF429ba2a8437E7de85078CF7481E8Ad52df7E58c":
+      - reason: ProxyAdmin is created in the proxy constructor
+        immutables:
+          - offset: 16
+            value: "0x0000000000000000000000002ddb00912601f9447ee818b8574a475e9b4beba1"
+    "0x52d56c20B0C8d403888880d0A1610e5ed17addA8":
+      - reason: ProxyAdmin is created in the proxy constructor
+        immutables:
+          - offset: 16
+            value: "0x000000000000000000000000e552f353b1df4265c1852c52fcca08b0889bd2a9"
+    "0x727c295b5D99b15280Ca8736b6F97ABA6aEd0E88":
+      - reason: ProxyAdmin is created in the proxy constructor
+        immutables:
+          - offset: 16
+            value: "0x00000000000000000000000024e54579e6931a1de1dbb0de15119be5d9fb68be"
+    "0xe08dc488bD6756323F8bf478869529D03db627ef":
+      - reason: ProxyAdmin is created in the proxy constructor
+        immutables:
+          - offset: 16
+            value: "0x000000000000000000000000c494d937ecbcef9d48b398a765ce5893ea780b62"
+    "0x9885215ef8DB25C87466E73018061e532784D716":
+      - reason: ProxyAdmin is created in the proxy constructor
+        immutables:
+          - offset: 16
+            value: "0x000000000000000000000000968a436697ac3ed0ac79c3ff55da180d428f16d9"
+    "0xDA2a7aE07B6803feF9d95E47Ab83c8a5A09929F0":
+      - reason: ProxyAdmin is created in the proxy constructor
+        immutables:
+          - offset: 16
+            value: "0x00000000000000000000000066e406ccbe6982604e63cbc1e5e60404f3663780"
+    "0xA64e324DFF04e3C0613ff0706867868C7b370a45":
+      - reason: ProxyAdmin is created in the proxy constructor
+        immutables:
+          - offset: 16
+            value: "0x0000000000000000000000002e1658b8c3228ced031c016c404e0f00b74e0391"
+    "0x9fBAF5AEB9F52bA57E1cC1D3050eac6d75Df8ae7":
+      - reason: ProxyAdmin is created in the proxy constructor
+        immutables:
+          - offset: 16
+            value: "0x00000000000000000000000012b433eb13ada311688ada7d81b047e43fe416c5"
+    "0xBBCD2aC50aF2EA12Cc9cb7B16dBDa85859BeB3da":
+      - reason: ProxyAdmin is created in the proxy constructor
+        immutables:
+          - offset: 16
+            value: "0x0000000000000000000000009577f0bd67e77ea8aea8e40b1444d4823c4e13d3"
+    "0xC5a52E4bB718Dfe86938e5cB967362EdA1E62698":
+      - reason: ProxyAdmin is created in the proxy constructor
+        immutables:
+          - offset: 16
+            value: "0x0000000000000000000000003f24b894cf23e2ccbd92deac837ba63ff27233cc"
+    "0x711F6236e325634AA8c1F692b5312bfF3A8558D0":
+      - reason: ProxyAdmin is created in the proxy constructor
+        immutables:
+          - offset: 16
+            value: "0x000000000000000000000000792bcab07ab5bc9efdb98cf66ad4a3b481540ae9"
+    "0x870DB41df0905cc5a790f6582a3dA99A4A33F923":
+      - reason: ProxyAdmin is created in the proxy constructor
+        immutables:
+          - offset: 16
+            value: "0x000000000000000000000000b29abad2d971377c9a38389184b592bda1287045"
