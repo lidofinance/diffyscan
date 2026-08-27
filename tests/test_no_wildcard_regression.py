@@ -27,6 +27,11 @@ CONFIG_GLOB = os.path.join(REPO_ROOT, "config_samples", "**", "*")
 # it cannot currently be tightened to a granular facet.
 KNOWN_WILDCARDS: dict[tuple[str, str, str], str] = {
     (
+        "ethereum/mainnet/vaults/vaults_voting_config.json",
+        "bytecode",
+        "0x34e01ecfebd403370b0879c628f8a5319ddb8507",
+    ): "V3Template: constructor depends on historical StakingRouter module names and now reverts on latest state",
+    (
         "ethereum/hoodi/vaults/hoodi_vaults_testnet_config.json",
         "bytecode",
         "0x933b84d2c01b04c2f53cd2fb1b7055241e122c83",

@@ -146,3 +146,12 @@ allowed_diffs:
         value: "0x000000000000000000000000f94e7a95c559728aca33bfa7136ea5de40b0338e"
       - offset: 19040
         value: "0x000000000000000000000000f94e7a95c559728aca33bfa7136ea5de40b0338e"
+    "0xf94e7A95C559728AcA33bFa7136Ea5De40B0338E":
+    - reason: >-
+        UpgradeConfig resolves immutable dependency addresses from live protocol
+        state in its constructor; the deployed values predate later upgrades.
+      immutables:
+      - offset: 1429
+        value: "0x000000000000000000000000ffa96d84def2ea035c7ab153d8b991128e3d72fd"
+      - offset: 6126
+        value: "0x000000000000000000000000c72b58aa02e0e98cf8a4a0e9dce75e763800802c"
