@@ -15,10 +15,10 @@
 
 <p align="center">
   <a href="#quick-start">Quick Start</a> ·
-  <a href="config_samples/">Config Samples</a> ·
-  <a href="#what-it-checks">What It Checks</a> ·
-  <a href="#development">Development</a> ·
-  <a href="SECURITY.md">Security</a>
+  <a href="docs/how-to.md">How-To Guides</a> ·
+  <a href="docs/configuration.md">Configuration Reference</a> ·
+  <a href="docs/cli.md">CLI Reference</a> ·
+  <a href="docs/bytecode-comparison.md">Bytecode Comparison</a>
 </p>
 
 Diffyscan compares deployed EVM contracts with source code pinned to a GitHub commit. It retrieves explorer-verified sources, generates source diffs, recompiles the pinned revision, and compares the resulting runtime bytecode with live chain state. Unapproved differences produce a non-zero exit code for local and CI use.
