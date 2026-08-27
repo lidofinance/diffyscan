@@ -81,7 +81,23 @@ explorer_chain_id: 4663
 
 github_repo:
   url: https://github.com/mellow-finance/flexible-vaults
-  # Latest audit: https://github.com/lidofinance/audits/blob/main/earn/2026-03-02_Nethermind_NM-0758_Mellow.pdf
+  # Audit coverage for the configured implementations:
+  # - Core vaults, final audited commit 72f689f965e4ac1a4c2bcfb645a8b5416cf740c7:
+  #   https://github.com/lidofinance/audits/blob/main/earn/2025-09-03_Nethermind_Mellow-Core-Vaults.pdf
+  # - Delta to c9c71818f0a8bead183f9860db3b8bbceb7b8f37:
+  #   https://github.com/mellow-finance/flexible-vaults/compare/72f689f965e4ac1a4c2bcfb645a8b5416cf740c7...c9c71818f0a8bead183f9860db3b8bbceb7b8f37
+  #   The only changed core implementation is the one-line RedeemQueue fee fix,
+  #   reviewed at 685be83:
+  #   https://github.com/lidofinance/audits/blob/main/earn/2026-01-21_Nethermind_NM-0812_Mellow.pdf
+  #   Added configured implementations are unchanged from scoped reviews:
+  #   SwapModule (688382e):
+  #   https://github.com/lidofinance/audits/blob/main/earn/2025-11-19_Nethermind_NM-0735_Mellow.pdf
+  #   BurnableTokenizedShareManager (09d8155):
+  #   https://github.com/lidofinance/audits/blob/main/earn/2026-01-07_Nethermind_NM-0798_Mellow.pdf
+  #   MellowAccountV1 (6ca2926):
+  #   https://github.com/NethermindEth/PublicAuditReports/blob/main/NM0829-FINAL_MELLOW_FINANCE.pdf
+  #   SyncDepositQueue and SyncQueue (c9c71818):
+  #   https://github.com/lidofinance/audits/blob/main/earn/2026-03-02_Nethermind_NM-0758_Mellow.pdf
   commit: c9c71818f0a8bead183f9860db3b8bbceb7b8f37
   relative_root: ""
 

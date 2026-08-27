@@ -42,7 +42,17 @@ explorer_chain_id: 4663
 
 github_repo:
   url: https://github.com/mellow-finance/flexible-vaults
-  # Latest audit: https://github.com/lidofinance/audits/blob/main/earn/2026-03-02_Nethermind_NM-0758_Mellow.pdf
+  # Audit coverage for the configured implementations:
+  # - Core vaults, final audited commit 72f689f965e4ac1a4c2bcfb645a8b5416cf740c7:
+  #   https://github.com/lidofinance/audits/blob/main/earn/2025-09-03_Nethermind_Mellow-Core-Vaults.pdf
+  # - Delta to c9c71818f0a8bead183f9860db3b8bbceb7b8f37:
+  #   https://github.com/mellow-finance/flexible-vaults/compare/72f689f965e4ac1a4c2bcfb645a8b5416cf740c7...c9c71818f0a8bead183f9860db3b8bbceb7b8f37
+  #   The implementations covered by the core review are unchanged. The two
+  #   added implementations are unchanged from their scoped review commits:
+  #   OracleSubmitter (d3bf393):
+  #   https://github.com/lidofinance/audits/blob/main/earn/2025-11-17_Nethermind_NM-0703_Mellow.pdf
+  #   BurnableTokenizedShareManager (09d8155):
+  #   https://github.com/lidofinance/audits/blob/main/earn/2026-01-07_Nethermind_NM-0798_Mellow.pdf
   commit: c9c71818f0a8bead183f9860db3b8bbceb7b8f37
   relative_root: ""
 
