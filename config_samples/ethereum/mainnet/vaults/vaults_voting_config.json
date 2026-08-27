@@ -76,5 +76,15 @@
         300
       ]
     }
+  },
+  "allowed_diffs": {
+    "bytecode": {
+      "0x34E01ecFebd403370b0879C628f8A5319dDb8507": [
+        {
+          "reason": "V3Template constructor reads live StakingRouter module names; after the SR v3 upgrade eth_call reverts before the bytecode diff can be analyzed.",
+          "any": true
+        }
+      ]
+    }
   }
 }
