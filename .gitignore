@@ -11,3 +11,4 @@ cache
 .diffyscan_cache
 .buildx-cache
 .env
+node_modules
