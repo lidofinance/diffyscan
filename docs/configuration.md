@@ -50,6 +50,7 @@ The same fields are accepted in JSON:
 | --- | --- |
 | `contracts` | Map of deployed addresses to contract names |
 | `explorer_hostname` | API hostname used to fetch verified source and compiler metadata |
+| `explorer_hostname_env_var` | Environment variable containing the API hostname; used when `explorer_hostname` is absent |
 | `explorer_chain_id` | Chain ID sent to explorers that support multi-chain requests |
 | `explorer_token_env_var` | Environment variable that contains the explorer API token |
 | `rpc_url_env_var` | Environment variable that contains the RPC URL; defaults to `REMOTE_RPC_URL` |
@@ -65,9 +66,16 @@ If `explorer_token_env_var` is absent, Diffyscan falls back to
 `ETHERSCAN_EXPLORER_TOKEN`. Set the field when a config uses another explorer
 or token.
 
+An explicit `explorer_hostname` takes precedence over
+`explorer_hostname_env_var`.
+
 `fail_on_bytecode_comparison_error: false` does not suppress compilation,
 calldata, deployment-simulation, or RPC failures. Diffyscan records those as
 failed bytecode results, and they still produce exit status 1.
+
+The optional `network`, `audit_url`, and `metadata` fields carry information for
+people and external tooling. Diffyscan preserves them while loading a config but
+does not use them during verification.
 
 ## GitHub sources
 

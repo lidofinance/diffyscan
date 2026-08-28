@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="assets/banner.webp" alt="Diffyscan" width="100%" />
+  <img src="https://raw.githubusercontent.com/lidofinance/diffyscan/main/assets/banner.webp" alt="Diffyscan" width="100%" />
 </h1>
 
 <p align="center">
@@ -8,17 +8,17 @@
 
 <p align="center">
   <a href="https://github.com/lidofinance/diffyscan/actions/workflows/regression.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/lidofinance/diffyscan/regression.yml?branch=main&style=flat-square&label=CI" /></a>
-  <a href="pyproject.toml"><img alt="Python 3.11 to 3.x" src="https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white" /></a>
-  <a href="pyproject.toml"><img alt="uv managed" src="https://img.shields.io/badge/uv-managed-DE5FE9?style=flat-square" /></a>
-  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/lidofinance/diffyscan?style=flat-square" /></a>
+  <a href="https://github.com/lidofinance/diffyscan/blob/main/pyproject.toml"><img alt="Python 3.11 to 3.x" src="https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white" /></a>
+  <a href="https://github.com/lidofinance/diffyscan/blob/main/pyproject.toml"><img alt="uv managed" src="https://img.shields.io/badge/uv-managed-DE5FE9?style=flat-square" /></a>
+  <a href="https://github.com/lidofinance/diffyscan/blob/main/LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/lidofinance/diffyscan?style=flat-square" /></a>
 </p>
 
 <p align="center">
   <a href="#quick-start">Quick Start</a> ·
-  <a href="docs/how-to.md">How-To Guides</a> ·
-  <a href="docs/configuration.md">Configuration Reference</a> ·
-  <a href="docs/cli.md">CLI Reference</a> ·
-  <a href="docs/bytecode-comparison.md">Bytecode Comparison</a>
+  <a href="https://github.com/lidofinance/diffyscan/blob/main/docs/how-to.md">How-To Guides</a> ·
+  <a href="https://github.com/lidofinance/diffyscan/blob/main/docs/configuration.md">Configuration Reference</a> ·
+  <a href="https://github.com/lidofinance/diffyscan/blob/main/docs/cli.md">CLI Reference</a> ·
+  <a href="https://github.com/lidofinance/diffyscan/blob/main/docs/bytecode-comparison.md">Bytecode Comparison</a>
 </p>
 
 Diffyscan compares deployed EVM contracts with source code pinned to a GitHub commit. It retrieves explorer-verified sources, generates source diffs, recompiles the pinned revision, and compares the resulting runtime bytecode with live chain state. Unapproved differences produce a non-zero exit code for local and CI use.
@@ -52,7 +52,7 @@ calldata, linked-library addresses, compiler settings, and EVM version as inputs
 
 ## Development
 
-The [Dev Container](docs/how-to.md#use-the-dev-container) uses the same image as
+The [Dev Container](https://github.com/lidofinance/diffyscan/blob/main/docs/how-to.md#use-the-dev-container) uses the same image as
 the regression workflow. For a manual checkout:
 
 ```sh
@@ -63,8 +63,8 @@ uv run black --check diffyscan tests
 uv run pre-commit run --all-files
 ```
 
-Pull requests, bug reports, and feature requests are welcome. Report security issues through [private vulnerability reporting](SECURITY.md).
+Pull requests, bug reports, and feature requests are welcome. Report security issues through [private vulnerability reporting](https://github.com/lidofinance/diffyscan/blob/main/SECURITY.md).
 
 ## License
 
-[MIT](LICENSE)
+[MIT](https://github.com/lidofinance/diffyscan/blob/main/LICENSE)
