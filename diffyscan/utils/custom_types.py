@@ -72,7 +72,7 @@ class Config(TypedDict):
     network: NotRequired[str]
     github_repo: GithubRepo
     dependencies: NotRequired[dict[str, GithubRepo]]
-    explorer_hostname: str
+    explorer_hostname: NotRequired[str]
     explorer_hostname_env_var: NotRequired[str]
     explorer_token_env_var: NotRequired[str]
     explorer_chain_id: NotRequired[int | str]

@@ -629,6 +629,11 @@ def process_config(
 
         explorer_hostname = config.get("explorer_hostname")
         if explorer_hostname is None:
+            explorer_hostname_env_var = config.get("explorer_hostname_env_var")
+            if explorer_hostname_env_var is not None:
+                explorer_hostname = load_env(explorer_hostname_env_var, required=True)
+                config["explorer_hostname"] = explorer_hostname
+        if explorer_hostname is None:
             logger.warn('Failed to find "explorer_hostname" in the config')
         assert explorer_hostname is not None, "explorer_hostname is required"
         explorer_chain_id = get_explorer_chain_id(config)
@@ -853,7 +858,7 @@ def main() -> None:
         if config_path is None:
             error_msg = (
                 "No config file found. Create config.json or config.yaml in the current "
-                "directory, or specify a path with --path."
+                "directory, or pass a path as the first argument."
             )
             logger.error(error_msg)
             raise FileNotFoundError(error_msg)

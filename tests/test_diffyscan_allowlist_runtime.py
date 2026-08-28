@@ -134,6 +134,45 @@ def test_process_config_normalizes_explorer_chain_id(monkeypatch):
     assert captured["explorer_chain_id"] == 1
 
 
+def test_process_config_resolves_explorer_hostname_from_env(monkeypatch):
+    config = {
+        "contracts": {ADDR: "Test"},
+        "explorer_hostname_env_var": "EXPLORER_API_HOSTNAME",
+        "source_comparison": False,
+    }
+    captured = {}
+    _stub_process_config_dependencies(monkeypatch, config)
+
+    def fake_load_env(variable_name, **kwargs):
+        return {
+            "GITHUB_API_TOKEN": "github-token",
+            "EXPLORER_API_HOSTNAME": "api.example.com",
+        }[variable_name]
+
+    def fake_get_contract_from_explorer(token, explorer_hostname, *args, **kwargs):
+        captured["explorer_hostname"] = explorer_hostname
+        return {"name": "Test", "solcInput": {"sources": {}}}
+
+    monkeypatch.setattr(runner, "load_env", fake_load_env)
+    monkeypatch.setattr(
+        runner,
+        "get_contract_from_explorer",
+        fake_get_contract_from_explorer,
+    )
+
+    runner.process_config(
+        "config.json",
+        recursive_parsing=False,
+        enable_binary_comparison=False,
+        cache_explorer=False,
+        cache_github=False,
+        skip_user_input=True,
+    )
+
+    assert captured["explorer_hostname"] == "api.example.com"
+    assert config["explorer_hostname"] == "api.example.com"
+
+
 def test_constructor_override_simulation_uses_deployment_gas_limit(monkeypatch):
     config = {
         "bytecode_comparison": {},
