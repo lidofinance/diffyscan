@@ -1,9 +1,7 @@
 import hashlib
 import json
 import os
-from functools import wraps
 
-import requests
 import yaml
 
 from urllib.parse import urlparse
@@ -11,7 +9,6 @@ from urllib.parse import urlparse
 from .allowed_diffs import validate_allowed_diffs_config
 from .logger import logger
 from .custom_types import Config
-from .custom_exceptions import NodeError, ExplorerError
 
 
 def load_env(
@@ -208,32 +205,6 @@ def _validate_yaml_hex_keys(config: dict, path: str) -> None:
                     )
 
 
-def _handle_request_errors(error_class: type[BaseException]):
-    """Decorator to handle HTTP request errors and convert them to custom exceptions."""
-
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs) -> requests.Response:
-            try:
-                response: requests.Response = func(*args, **kwargs)
-                response.raise_for_status()
-                return response
-            except requests.exceptions.HTTPError as exc:
-                body = ""
-                if exc.response is not None:
-                    try:
-                        body = f" Response: {exc.response.text}"
-                    except Exception:
-                        pass
-                raise error_class(f"HTTP error: {exc}{body}")
-            except requests.exceptions.RequestException as exc:
-                raise error_class(str(exc))
-
-        return wrapper
-
-    return decorator
-
-
 def build_hashed_cache_key(*parts: str) -> str:
     return hashlib.sha256(":".join(parts).encode()).hexdigest()
 
@@ -324,22 +295,6 @@ def save_cache(
         logger.info(f"Saved {cache_kind} to cache: {display_name}")
     except Exception as exc:
         logger.warn(f"Failed to save {cache_kind} to cache: {exc}")
-
-
-@_handle_request_errors(ExplorerError)
-def fetch(url: str, headers: dict | None = None) -> requests.Response:
-    """Fetch data from a URL with error handling."""
-    logger.log(f"Fetch: {mask_text(url)}")
-    return requests.get(url, headers=headers)
-
-
-@_handle_request_errors(NodeError)
-def pull(
-    url: str, payload: str | None = None, headers: dict | None = None
-) -> requests.Response:
-    """Post data to a URL with error handling."""
-    logger.log(f"Pull: {mask_text(url)}")
-    return requests.post(url, data=payload, headers=headers)
 
 
 def mask_text(text: str, show_start: int = 3, show_end: int = 3) -> str:

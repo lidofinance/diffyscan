@@ -251,8 +251,7 @@ def test_get_contract_from_etherscan_retries_rate_limit(monkeypatch):
 
 
 def test_get_contract_from_blockscout_extracts_and_merges_metadata(monkeypatch):
-    def fake_fetch(url, headers=None):
-        assert headers and headers.get("User-Agent", "").startswith("Mozilla/5.0")
+    def fake_fetch(url):
         return DummyResponse(
             {
                 "name": "Demo",
