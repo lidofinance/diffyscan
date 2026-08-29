@@ -41,6 +41,12 @@ def _handle_request_errors(error_class: type[BaseException]):
             except requests.exceptions.HTTPError as exc:
                 body = ""
                 if exc.response is not None:
+                    if exc.response.headers.get("cf-mitigated") == "challenge":
+                        raise error_class(
+                            f"HTTP error: {exc}. The host is behind a Cloudflare "
+                            f"challenge that rejected the request; try overriding "
+                            f"the User-Agent via {USER_AGENT_ENV_VAR}"
+                        )
                     try:
                         body = f" Response: {exc.response.text}"
                     except Exception:

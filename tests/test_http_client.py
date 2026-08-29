@@ -111,6 +111,47 @@ def test_pull_sends_default_user_agent(monkeypatch, post_calls):
     ]
 
 
+class FailingResponse:
+    def __init__(self, headers, text):
+        self.headers = headers
+        self.text = text
+
+    def raise_for_status(self):
+        import requests
+
+        raise requests.exceptions.HTTPError(
+            "403 Client Error: Forbidden", response=self  # type: ignore[arg-type]
+        )
+
+
+def _fetch_error_message(monkeypatch, response) -> str:
+    from diffyscan.utils.custom_exceptions import ExplorerError
+
+    monkeypatch.setattr(
+        f"{HTTP_CLIENT_MODULE}.requests.get", lambda url, headers=None: response
+    )
+    with pytest.raises(ExplorerError) as exc_info:
+        fetch("https://example.com/api")
+    return str(exc_info.value)
+
+
+def test_cloudflare_challenge_error_gives_hint_instead_of_html(monkeypatch):
+    challenge_html = "<html>Just a moment...</html>" * 100
+    message = _fetch_error_message(
+        monkeypatch, FailingResponse({"cf-mitigated": "challenge"}, challenge_html)
+    )
+
+    assert "Cloudflare challenge" in message
+    assert USER_AGENT_ENV_VAR in message
+    assert "Just a moment" not in message
+
+
+def test_plain_http_error_still_includes_response_body(monkeypatch):
+    message = _fetch_error_message(monkeypatch, FailingResponse({}, "rate limited"))
+
+    assert "Response: rate limited" in message
+
+
 def test_no_direct_requests_usage_outside_http_client():
     package_dir = pathlib.Path(__file__).parent.parent / "diffyscan"
     direct_call_re = re.compile(r"\brequests\.(get|post|request|Session)\b")
