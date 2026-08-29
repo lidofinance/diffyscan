@@ -106,8 +106,11 @@ rm -rf .diffyscan_cache/
 
 ## Accept an expected difference
 
-A run that exits with status 1 prints every uncovered difference in the final
-summary, each with a suggested `allowed_diffs` entry.
+A run that fails because of uncovered source or bytecode differences prints
+each one in the final summary with a suggested `allowed_diffs` entry.
+Operational failures (compilation, calldata, RPC, deployment simulation) and
+contract filters that match nothing also exit with status 1 but produce no
+suggestion. Fix the cause instead of adding a rule.
 
 1. Open the HTML diff under `digest/<timestamp>/diffs/<contract-address>/` for
    source differences, or read the reported byte offsets for bytecode

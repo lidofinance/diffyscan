@@ -30,10 +30,12 @@ It verifies the rest independently: file contents against the GitHub commit,
 compiled runtime bytecode against `eth_getCode`, and constructor-set immutable
 values through simulation against on-chain state.
 
-Wrong explorer metadata surfaces as a source or bytecode mismatch rather than
-a silent pass, because the deployed bytecode is the reference. Add manual
-overrides only when that metadata is missing or does not describe the
-deployment being checked.
+Trusted metadata that changes the compiled or simulated runtime bytecode
+surfaces as a mismatch, because the deployed bytecode is the reference.
+Metadata without runtime effect goes unchecked: constructor calldata, for
+example, is never read when the compiled runtime bytecode already matches the
+chain. Add manual overrides only when that metadata is missing or does not
+describe the deployment being checked.
 
 ## Manual overrides
 

@@ -93,6 +93,11 @@ The Etherscan path reads the token from the variable named by
 `explorer_token_env_var`. With `explorer_chain_id` set, requests go to the
 multi-chain `/v2/api` endpoint; without it, to the legacy `/api` endpoint.
 
+The Token column describes what the request sends. Diffyscan resolves a token
+before selecting the explorer, so the variable named by
+`explorer_token_env_var` (or the `ETHERSCAN_EXPLORER_TOKEN` fallback) must
+hold a value even for explorers that do not use it.
+
 The Blockscout domains are matched literally. A Blockscout instance on any
 other domain falls into the Etherscan path and fails with a response-format
 error. Extend `_get_explorer_fetcher` in
