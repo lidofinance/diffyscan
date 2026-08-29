@@ -104,6 +104,26 @@ Remove both caches when you need fresh remote inputs:
 rm -rf .diffyscan_cache/
 ```
 
+## Accept an expected difference
+
+A run that exits with status 1 prints every uncovered difference in the final
+summary, each with a suggested `allowed_diffs` entry.
+
+1. Open the HTML diff under `digest/<timestamp>/diffs/<contract-address>/` for
+   source differences, or read the reported byte offsets for bytecode
+   differences.
+2. Confirm the difference is expected. A difference you cannot explain is a
+   finding, not a rule to add.
+3. Copy the suggested entry from the summary into the config and replace the
+   placeholder `reason` with the actual justification.
+4. Rerun the config. The run passes once every difference is covered.
+
+Prefer the narrowest facet the suggestion offers: exact `immutables` or
+`line_ranges` over `byte_ranges` or `files`, and never `any: true` for a
+difference that can be scoped. See
+[Bytecode Comparison](bytecode-comparison.md#allowed-differences) for the
+facet reference.
+
 ## Run in CI
 
 Use `--yes` to disable confirmation prompts and `--quiet` to hide informational
