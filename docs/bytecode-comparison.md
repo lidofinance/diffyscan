@@ -14,9 +14,26 @@ For each configured contract, Diffyscan:
    prevent a direct match;
 6. evaluates any `allowed_diffs` rules and reports uncovered differences.
 
-Diffyscan reuses explorer-provided constructor calldata, linked-library
-addresses, and EVM version. Add manual overrides only when that metadata is
-missing or does not describe the deployment being checked.
+## Trust model
+
+Contract sources always come from the pinned GitHub commit. The explorer
+submission only shapes how they are compiled and simulated. Diffyscan takes
+these explorer inputs on trust:
+
+- compiler version and settings, including optimizer configuration;
+- EVM version;
+- constructor calldata;
+- linked-library addresses;
+- the set of source file paths in the verified submission.
+
+It verifies the rest independently: file contents against the GitHub commit,
+compiled runtime bytecode against `eth_getCode`, and constructor-set immutable
+values through simulation against on-chain state.
+
+Wrong explorer metadata surfaces as a source or bytecode mismatch rather than
+a silent pass, because the deployed bytecode is the reference. Add manual
+overrides only when that metadata is missing or does not describe the
+deployment being checked.
 
 ## Manual overrides
 
