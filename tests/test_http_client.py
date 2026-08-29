@@ -154,7 +154,10 @@ def test_plain_http_error_still_includes_response_body(monkeypatch):
 
 def test_no_direct_requests_usage_outside_http_client():
     package_dir = pathlib.Path(__file__).parent.parent / "diffyscan"
-    direct_call_re = re.compile(r"\brequests\.(get|post|request|Session)\b")
+    direct_call_re = re.compile(
+        r"\brequests\.(get|post|put|patch|delete|head|options|request|Session)\b"
+        r"|\bfrom\s+requests\s+import\b"
+    )
 
     offenders = [
         str(path.relative_to(package_dir))
