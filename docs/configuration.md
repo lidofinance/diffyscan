@@ -77,6 +77,28 @@ The optional `network`, `audit_url`, and `metadata` fields carry information for
 people and external tooling. Diffyscan preserves them while loading a config but
 does not use them during verification.
 
+## Supported explorers
+
+`explorer_hostname` selects the explorer API by pattern:
+
+| Hostname | API | Token |
+| --- | --- | --- |
+| Starts with `zksync` | zkSync contract verification API | Not used |
+| Ends with `mantle.xyz` | Mantle Etherscan-style API | Not used |
+| Ends with `lineascan.build` | Etherscan-style API | Not used |
+| Ends with `blockscout.com`, `mode.network`, `swellnetwork.io`, `lisk.com`, `inkonchain.com`, `routescan.io`, or `monadvision.com` | Blockscout API v2 | Not used |
+| Anything else | Etherscan API | Required |
+
+The Etherscan path reads the token from the variable named by
+`explorer_token_env_var`. With `explorer_chain_id` set, requests go to the
+multi-chain `/v2/api` endpoint; without it, to the legacy `/api` endpoint.
+
+The Blockscout domains are matched literally. A Blockscout instance on any
+other domain falls into the Etherscan path and fails with a response-format
+error. Extend `_get_explorer_fetcher` in
+[`diffyscan/utils/explorer.py`](../diffyscan/utils/explorer.py) to add a
+domain.
+
 ## GitHub sources
 
 `github_repo` pins the source being verified:
@@ -119,6 +141,10 @@ Optional:
   request. The default is a browser-like string ending in
   `diffyscan/<version>`: Cloudflare in front of some Blockscout instances
   rejects non-browser User-Agents.
+
+Names such as `L1_EXPLORER_API_HOSTNAME` and `ETHEREUM_RPC_URL` in
+[`.env.example`](../.env.example) carry no built-in meaning. Configs reference
+them through `explorer_hostname_env_var` and `rpc_url_env_var`.
 
 Keep secrets and RPC credentials out of the config file.
 
