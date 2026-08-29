@@ -23,6 +23,10 @@ HEX_ADDRESS_RE = re.compile(r"^0x[a-fA-F0-9]{40}$")
 LIBRARY_REFERENCE_RE = re.compile(r"\blibrary\s+([A-Za-z_][A-Za-z0-9_]*)\b")
 ETHERSCAN_RATE_LIMIT_RETRY_COUNT = 5
 ETHERSCAN_RATE_LIMIT_RETRY_DELAY_SECONDS = 1.0
+BROWSER_USER_AGENT = (
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+)
 
 
 def _default_output_selection() -> dict:
@@ -295,7 +299,7 @@ def _get_contract_from_mantle(mantle_explorer_hostname: str, contract: str) -> d
 
 def _get_contract_from_blockscout(explorer_hostname: str, contract: str) -> dict:
     explorer_link = f"https://{explorer_hostname}/api/v2/smart-contracts/{contract}"
-    response = fetch(explorer_link).json()
+    response = fetch(explorer_link, headers={"User-Agent": BROWSER_USER_AGENT}).json()
 
     if "name" not in response:
         _error_no_source_code_and_exit(contract)
