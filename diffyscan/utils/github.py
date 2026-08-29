@@ -4,11 +4,11 @@ import os
 
 from .common import (
     build_hashed_cache_key,
-    fetch,
     load_cache,
     parse_repo_link,
     save_cache,
 )
+from .http_client import fetch
 from .logger import logger
 
 # Cache directory for storing GitHub files

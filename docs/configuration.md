@@ -113,6 +113,13 @@ variables in the shell instead. A standard run needs:
 - the token named by `explorer_token_env_var`;
 - the RPC URL named by `rpc_url_env_var` when bytecode comparison is enabled.
 
+Optional:
+
+- `DIFFYSCAN_USER_AGENT` replaces the User-Agent sent with every outgoing HTTP
+  request. The default is a browser-like string ending in
+  `diffyscan/<version>`: Cloudflare in front of some Blockscout instances
+  rejects non-browser User-Agents.
+
 Keep secrets and RPC credentials out of the config file.
 
 ## YAML addresses

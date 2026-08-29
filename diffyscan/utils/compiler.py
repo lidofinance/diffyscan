@@ -6,7 +6,7 @@ import stat
 import sys
 from pathlib import Path
 
-from .common import fetch
+from .http_client import fetch
 from .logger import logger
 from .custom_exceptions import CompileError
 

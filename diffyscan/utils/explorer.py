@@ -4,7 +4,8 @@ import copy
 import re
 import time
 
-from .common import fetch, load_cache, save_cache
+from .common import load_cache, save_cache
+from .http_client import fetch
 from .logger import logger
 from .compiler import (
     get_solc_native_platform_from_os,

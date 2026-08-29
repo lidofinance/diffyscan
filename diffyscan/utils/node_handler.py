@@ -1,6 +1,7 @@
 import json
 
-from .common import pull, mask_text
+from .common import mask_text
+from .http_client import pull
 from .logger import logger
 from .custom_exceptions import DeploymentSimulationError, NodeError
 
