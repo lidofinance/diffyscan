@@ -13,7 +13,7 @@ dependencies:
     url: https://github.com/OpenZeppelin/openzeppelin-contracts
     commit: dbb6104ce834628e473d2173bbc9d47f81a9eec3
     relative_root: contracts
-fail_on_comparison_error: false
+fail_on_bytecode_comparison_error: false
 bytecode_comparison:
   constructor_args:
     '0x98FC7b149767302647D8e1dA1463F0051978826B':
