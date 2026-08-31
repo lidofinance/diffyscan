@@ -1,0 +1,55 @@
+{
+  "contracts": {
+    "0x68009122a394504E8fD7fee58F92Cd73c6A60717": "SetDepositsReserveTarget"
+  },
+  "explorer_hostname": "api.etherscan.io",
+  "explorer_chain_id": 560048,
+  "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
+  "github_repo": {
+    "url": "https://github.com/lidofinance/easy-track",
+    "commit": "0b6e57a91e4eaffbab71951f25ba97df8756c278",
+    "relative_root": ""
+  },
+  "dependencies": {},
+  "fail_on_bytecode_comparison_error": true,
+  "allowed_diffs": {
+    "source": {
+      "0x68009122a394504E8fD7fee58F92Cd73c6A60717": [
+        {
+          "reason": "Brownie verification rewrote the four relative imports ('../...') to project-root paths ('contracts/...') in SetDepositsReserveTarget.sol; the imported files themselves are identical.",
+          "line_ranges": [
+            {
+              "file": "contracts/EVMScriptFactories/SetDepositsReserveTarget.sol",
+              "github": {
+                "start": 6,
+                "count": 4
+              },
+              "explorer": {
+                "start": 6,
+                "count": 4
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "bytecode": {
+      "0x68009122a394504E8fD7fee58F92Cd73c6A60717": [
+        {
+          "reason": "Only the CBOR metadata hash differs: brownie's import-path rewrite changes the source text, so the solc metadata hash cannot match. The executable bytecode is identical.",
+          "cbor_metadata": true
+        }
+      ]
+    }
+  },
+  "bytecode_comparison": {
+    "constructor_calldata": {},
+    "constructor_args": {
+      "0x68009122a394504E8fD7fee58F92Cd73c6A60717": [
+        "00000000000000000000000084dffcfb232594975c608de92544ff239a24c9e9",
+        "0000000000000000000000000000000000000000000002086ac3510526000000",
+        "0000000000000000000000003508a952176b3c15387c97be809eaffb1982176a"
+      ]
+    }
+  }
+}
