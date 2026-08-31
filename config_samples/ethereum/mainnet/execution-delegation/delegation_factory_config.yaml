@@ -1,0 +1,25 @@
+contracts:
+  "0xD990770eB2B4b6062EDdB06892fF179C693b46e6": DelegationFactory
+
+explorer_hostname: api.etherscan.io
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+explorer_chain_id: 1
+
+github_repo:
+  url: https://github.com/lidofinance/execution-delegation-framework/
+  # https://github.com/lidofinance/execution-delegation-framework/blob/main/artifacts/mainnet/deploy-mainnet.json
+  commit: 557299104ad3eb1a74198933bd016328c490e276
+  relative_root: ""
+
+dependencies:
+  # Explorer-verified source paths keep the Foundry "node_modules/" prefix
+  "node_modules/@openzeppelin/contracts":
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: c64a1edb67b6e3f4a15cca8909c9482ad33a02b0 # v5.4.0
+    relative_root: contracts
+
+fail_on_bytecode_comparison_error: true
+
+bytecode_comparison:
+  constructor_calldata: {}
+  constructor_args: {}
