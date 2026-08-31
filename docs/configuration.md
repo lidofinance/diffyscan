@@ -99,8 +99,12 @@ before selecting the explorer, so the variable named by
 hold a value even for explorers that do not use it.
 
 The Blockscout domains are matched literally. A Blockscout instance on any
-other domain falls into the Etherscan path and fails with a response-format
-error. Extend `_get_explorer_fetcher` in
+other domain falls into the Etherscan path instead of the Blockscout v2 path.
+Depending on the host and `explorer_chain_id`, the request may fail or an
+Etherscan-compatible endpoint may return only the primary source under the
+contract name while omitting additional sources. The latter case fails later
+with missing-GitHub-source or compilation errors. Extend
+`_get_explorer_fetcher` in
 [`diffyscan/utils/explorer.py`](../diffyscan/utils/explorer.py) to add a
 domain.
 
