@@ -89,7 +89,7 @@ Use `api.etherscan.io` as the hostname with `explorer_chain_id` to activate the 
 "explorer_chain_id": 1
 ```
 
-Common chain IDs: Ethereum=1, Optimism=10, Base=8453, BSC=56, Linea=59144, Scroll=534352, Sepolia=11155111, Hoodi=560048, Ink=57073, MegaETH=4326.
+Common chain IDs: Ethereum=1, Optimism=10, Base=8453, BSC=56, Linea=59144, Hoodi=560048.
 
 ### Legacy per-chain Etherscan hostnames (still work, used in older configs)
 
