@@ -124,3 +124,12 @@ bytecode_comparison:
       - 0
       - 0
       - 0
+allowed_diffs:
+  bytecode:
+    '0x61b7C2351F63b7f9840736D020eE65D2803A00fb':
+    - reason: Escrow stores own deployed address as immutable (self-referential)
+      immutables:
+      - offset: 1093
+        value: '0x00000000000000000000000061b7c2351f63b7f9840736d020ee65d2803a00fb'
+      - offset: 6887
+        value: '0x00000000000000000000000061b7c2351f63b7f9840736d020ee65d2803a00fb'

@@ -119,3 +119,11 @@ bytecode_comparison:
     - 0000000000000000000000000000000000000000000000000000000000002bc0
     - '0000000000000000000000000000000000000000000000000000000000000001'
     - '0000000000000000000000000000000000000000000000000000000000000030'
+allowed_diffs:
+  bytecode:
+    '0xd5F04A81ac472B2cB32073CE9dDABa6FaF022827':
+    - reason: Trailing CBOR metadata hash differs (compiler/source-path fingerprint); executable runtime bytecode is identical
+      cbor_metadata: true
+    '0x95F00b016bB31b7182D96D25074684518246E42a':
+    - reason: Trailing CBOR metadata hash differs (compiler/source-path fingerprint); executable runtime bytecode is identical
+      cbor_metadata: true

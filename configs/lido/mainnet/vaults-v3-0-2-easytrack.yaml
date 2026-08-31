@@ -26,3 +26,45 @@ bytecode_comparison:
     - '0x18A1065c81b0Cc356F1b1C843ddd5E14e4AefffF'
     - '0xC1d0b3DE6792Bf6b4b37EccdcC24e45978Cfd2Eb'
     - 1000000000000000000000000
+allowed_diffs:
+  source:
+    '0x17305dB55c908e84C58BbDCa57258A7D1f7eEa7c':
+    - reason: Solidity import paths differ between GitHub repo and explorer-verified source
+      line_ranges:
+      - file: contracts/EVMScriptFactories/vaultFactories/RegisterGroupsInOperatorGrid.sol
+        github:
+          start: 6
+          count: 5
+        explorer:
+          start: 6
+          count: 5
+    '0x6b535F441F95046562406F4E2518D9AD7Db2dc0D':
+    - reason: Solidity import paths differ between GitHub repo and explorer-verified source
+      line_ranges:
+      - file: contracts/EVMScriptFactories/vaultFactories/RegisterTiersInOperatorGrid.sol
+        github:
+          start: 6
+          count: 5
+        explorer:
+          start: 6
+          count: 5
+    '0x37d9B09EDA477a84E3913fCB4d032EFb0BF9B62E':
+    - reason: Solidity import paths differ between GitHub repo and explorer-verified source
+      line_ranges:
+      - file: contracts/EVMScriptFactories/vaultFactories/AlterTiersInOperatorGrid.sol
+        github:
+          start: 6
+          count: 5
+        explorer:
+          start: 6
+          count: 5
+  bytecode:
+    '0x17305dB55c908e84C58BbDCa57258A7D1f7eEa7c':
+    - reason: CBOR metadata hash differs due to differing import paths in source
+      cbor_metadata: true
+    '0x6b535F441F95046562406F4E2518D9AD7Db2dc0D':
+    - reason: CBOR metadata hash differs due to differing import paths in source
+      cbor_metadata: true
+    '0x37d9B09EDA477a84E3913fCB4d032EFb0BF9B62E':
+    - reason: CBOR metadata hash differs due to differing import paths in source
+      cbor_metadata: true
