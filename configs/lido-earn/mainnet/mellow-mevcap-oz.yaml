@@ -2,6 +2,7 @@ contracts:
   '0x5fD13359Ba15A84B76f7F87568309040176167cd': TransparentUpgradeableProxy
   '0xc24891B75ef55fedC377c5e6Ec59A850b12E23ac': ProxyAdmin
 explorer_hostname: api.etherscan.io
+explorer_chain_id: 1
 explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
 github_repo:
   url: https://github.com/OpenZeppelin/openzeppelin-contracts

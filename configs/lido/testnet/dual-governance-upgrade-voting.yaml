@@ -1,7 +1,8 @@
 contracts:
   '0x46862627C20b28AE79E25a0E06C5c66D07f8aa43': DGUpgradeStateVerifierHoodi
   '0x5ad3254119b12Cf8DEfDb3A9A2Cb04E58E00dca4': DGUpgradeOmnibusHoodi
-explorer_hostname: api-hoodi.etherscan.io
+explorer_hostname: api.etherscan.io
+explorer_chain_id: 560048
 github_repo:
   url: https://github.com/lidofinance/dual-governance
   commit: 0e5d6873cff71d495b31c1b97488b8b77ae62bc7

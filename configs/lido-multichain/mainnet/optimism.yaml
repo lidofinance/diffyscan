@@ -7,7 +7,8 @@ contracts:
   '0xe9b65dA5DcBe92f1b397991C464FF568Dc98D761': ERC20RebasableBridgedPermit
   '0x8E01013243a96601a86eb3153F0d9Fa4fbFb6957': OssifiableProxy
   '0x2734602C0CEbbA68662552CacD5553370B283E2E': L2ERC20ExtendedTokensBridge
-explorer_hostname: api-optimistic.etherscan.io
+explorer_hostname: api.etherscan.io
+explorer_chain_id: 10
 explorer_token_env_var: OPTISCAN_EXPLORER_TOKEN
 github_repo:
   url: https://github.com/lidofinance/lido-l2-with-steth

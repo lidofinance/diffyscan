@@ -1,6 +1,7 @@
 contracts:
   '0xEfa0dB536d2c8089685630fafe88CF7805966FC3': OptimismBridgeExecutor
-explorer_hostname: api-optimistic.etherscan.io
+explorer_hostname: api.etherscan.io
+explorer_chain_id: 10
 explorer_token_env_var: OPTISCAN_EXPLORER_TOKEN
 github_repo:
   url: https://github.com/lidofinance/governance-crosschain-bridges

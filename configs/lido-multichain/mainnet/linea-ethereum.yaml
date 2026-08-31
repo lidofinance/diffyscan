@@ -2,6 +2,7 @@ contracts:
   '0x051F1D88f0aF5763fB888eC4378b4D8B29ea3319': TransparentUpgradeableProxy
   '0x5b0bb17755fba06028530682e2fd5bc373931768': ProxyAdmin
 explorer_hostname: api.etherscan.io
+explorer_chain_id: 1
 explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
 github_repo:
   url: https://github.com/lidofinance/linea-contracts-fix

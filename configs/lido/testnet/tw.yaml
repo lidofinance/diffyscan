@@ -7,7 +7,8 @@ contracts:
   '0x95F00b016bB31b7182D96D25074684518246E42a': NodeOperatorsRegistry
   '0xFd4386A8795956f4B6D01cbb6dB116749731D7bD': ValidatorExitDelayVerifier
   '0x6679090D92b08a2a686eF8614feECD8cDFE209db': TriggerableWithdrawalsGateway
-explorer_hostname: api-hoodi.etherscan.io
+explorer_hostname: api.etherscan.io
+explorer_chain_id: 560048
 explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
 github_repo:
   url: https://github.com/lidofinance/core

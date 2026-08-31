@@ -8,6 +8,7 @@ contracts:
   '0xEDc0D2cb2289BBa1587424dd42bDD1ca7eAbDF17': WormholeAdapter
 explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
 explorer_hostname: api.etherscan.io
+explorer_chain_id: 1
 github_repo:
   url: https://github.com/lidofinance/aave-delivery-infrastructure
   commit: 41c81975c2ce5b430b283e6f4aab922c3bde1555

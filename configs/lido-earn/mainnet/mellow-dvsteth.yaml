@@ -3,6 +3,7 @@ contracts:
   '0xA1b3a352c3fC7cfcBD36381CC2D0b157d6843473': ManagedValidator
   '0x078b1C03d14652bfeeDFadf7985fdf2D8a2e8108': SimpleDVTStakingStrategy
 explorer_hostname: api.etherscan.io
+explorer_chain_id: 1
 explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
 github_repo:
   url: https://github.com/mellow-finance/mellow-lrt

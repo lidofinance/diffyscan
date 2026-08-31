@@ -3,7 +3,8 @@ contracts:
   '0x8375029773953d91CaCfa452b7D24556b9F318AA': L1LidoTokensBridge
   '0x10cA9008D7dcea1Bed4d5394F8c58F3113A2814D': TokenRateNotifier
   '0x4067B05a6B2f6801Bfb8d4fF417eD32e71c216d9': OpStackTokenRatePusher
-explorer_hostname: api-sepolia.etherscan.io
+explorer_hostname: api.etherscan.io
+explorer_chain_id: 11155111
 explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
 github_repo:
   url: https://github.com/lidofinance/lido-l2-with-steth

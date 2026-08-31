@@ -9,6 +9,7 @@ contracts:
   '0x966a3b1c9d477D113630290F037b12349649d1bd': WStethRatiosAggregatorV3
   '0xB8eF363E1909665c18BF0CB72Cba9a8152413A2E': DefaultProxyImplementation
 explorer_hostname: api.etherscan.io
+explorer_chain_id: 1
 explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
 github_repo:
   url: https://github.com/mellow-finance/mellow-lrt

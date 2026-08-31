@@ -4,6 +4,7 @@ contracts:
   '0xA0ea6d4fe369104eD4cc18951B95C3a43573C0F6': DefaultBondStrategy
   '0x41A1FBEa7Ace3C3a6B66a73e96E5ED07CDB2A34d': DepositWrapper
 explorer_hostname: api.etherscan.io
+explorer_chain_id: 1
 explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
 github_repo:
   url: https://github.com/mellow-finance/mellow-lrt

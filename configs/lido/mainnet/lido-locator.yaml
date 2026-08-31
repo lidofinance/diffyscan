@@ -1,6 +1,7 @@
 contracts:
   '0x39aFE23cE59e8Ef196b81F0DCb165E9aD38b9463': LidoLocator
 explorer_hostname: api.etherscan.io
+explorer_chain_id: 1
 explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
 github_repo:
   url: https://github.com/lidofinance/lido-dao

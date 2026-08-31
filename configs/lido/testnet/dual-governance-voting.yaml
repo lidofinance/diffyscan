@@ -3,7 +3,8 @@ contracts:
   '0x54637835765a367389aa849F008BA0F6DBC64ca3': DGLaunchOmnibusHoodi
   '0x9CCe5BfAcDcf80DAd2287106b57197284DacaE3F': DGLaunchRolesValidatorHoodi
   '0xB26Fd3b50280AbC55c572EE73071778A51088408': TimeConstraints
-explorer_hostname: api-hoodi.etherscan.io
+explorer_hostname: api.etherscan.io
+explorer_chain_id: 560048
 github_repo:
   url: https://github.com/lidofinance/dual-governance
   commit: c5726f98a1cb4936a3589892cda01826fd959e2b

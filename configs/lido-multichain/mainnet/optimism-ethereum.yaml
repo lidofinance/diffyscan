@@ -4,6 +4,7 @@ contracts:
   '0x76943C0D61395d8F2edF9060e1533529cAe05dE6': OssifiableProxy
   '0x168Cfea1Ad879d7032B3936eF3b0E90790b6B6D4': L1LidoTokensBridge
 explorer_hostname: api.etherscan.io
+explorer_chain_id: 1
 explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
 github_repo:
   url: https://github.com/lidofinance/lido-l2-with-steth
