@@ -34,3 +34,18 @@ def test_contract_addresses_format():
             assert (
                 addr.startswith("0x") and len(addr) == 42
             ), f"Bad addr {addr} in {path}"
+
+
+def test_etherscan_v2_configs_accept_canonical_token():
+    for path in config_paths():
+        cfg = load_config(str(path))
+        if cfg.get("explorer_hostname") != "api.etherscan.io":
+            continue
+        if "explorer_chain_id" not in cfg:
+            continue
+
+        assert cfg.get("explorer_token_env_var") in (
+            None,
+            "ETHERSCAN_TOKEN",
+            "ETHERSCAN_EXPLORER_TOKEN",
+        ), f"{path} prevents use of ETHERSCAN_EXPLORER_TOKEN"
