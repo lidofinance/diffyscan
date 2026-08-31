@@ -1,4 +1,4 @@
-"""Guard against `any: true` wildcards creeping back into sample configs.
+"""Guard against `any: true` wildcards creeping back into configs.
 
 `allowed_diffs … any: true` is a blanket escape hatch: it suppresses *every*
 diff for a contract, so it hides unexpected drift and provides no audit trail of
@@ -21,33 +21,33 @@ import os
 import yaml
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CONFIG_GLOB = os.path.join(REPO_ROOT, "config_samples", "**", "*")
+CONFIG_GLOB = os.path.join(REPO_ROOT, "configs", "**", "*")
 
-# (config path relative to config_samples, diff_kind, lowercased address) -> why
+# (config path relative to configs, diff_kind, lowercased address) -> why
 # it cannot currently be tightened to a granular facet.
 KNOWN_WILDCARDS: dict[tuple[str, str, str], str] = {
     (
-        "ethereum/mainnet/vaults/vaults_voting_config.json",
+        "lido/mainnet/vaults-voting.yaml",
         "bytecode",
         "0x34e01ecfebd403370b0879c628f8a5319ddb8507",
     ): "V3Template: constructor depends on historical StakingRouter module names and now reverts on latest state",
     (
-        "ethereum/hoodi/vaults/hoodi_vaults_testnet_config.json",
+        "lido/testnet/vaults.yaml",
         "bytecode",
         "0x933b84d2c01b04c2f53cd2fb1b7055241e122c83",
     ): "V3TemporaryAdmin: testnet deployed an earlier V3 iteration; whole bytecode differs",
     (
-        "ethereum/hoodi/vaults/hoodi_vaults_testnet_config.json",
+        "lido/testnet/vaults.yaml",
         "bytecode",
         "0xe22486ea7ce77dae718ffa7b7114fd50cf73cbac",
     ): "V3VoteScript: testnet deployed an earlier V3 iteration; whole bytecode differs",
     (
-        "ethereum/hoodi/vaults/hoodi_vaults_testnet_config.json",
+        "lido/testnet/vaults.yaml",
         "bytecode",
         "0xd253b0ca059343e70474e685beb2974f10ccfa67",
     ): "V3Template: testnet deployed an earlier V3 iteration; whole bytecode differs",
     (
-        "ethereum/hoodi/vaults/hoodi_vaults_testnet_config.json",
+        "lido/testnet/vaults.yaml",
         "bytecode",
         "0x2f0303f20e0795e6ccd17bd5efe791a586f28e03",
     ): "DepositSecurityModule: constructor deployment reverts on testnet (eth_call), bytecode cannot be simulated",
@@ -75,7 +75,7 @@ def _iter_wildcards():
         allowed_diffs = data.get("allowed_diffs")
         if not isinstance(allowed_diffs, dict):
             continue
-        rel = os.path.relpath(path, os.path.join(REPO_ROOT, "config_samples"))
+        rel = os.path.relpath(path, os.path.join(REPO_ROOT, "configs"))
         for diff_kind in ("source", "bytecode"):
             for address, rules in (allowed_diffs.get(diff_kind) or {}).items():
                 if not isinstance(rules, list):

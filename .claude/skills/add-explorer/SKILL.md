@@ -91,7 +91,7 @@ Handles both Etherscan v2 and legacy Etherscan APIs.
 ## Steps: adding a new Etherscan v2 chain (no code changes)
 
 1. Find the chain ID (e.g. from chainlist.org)
-2. Create `config_samples/<chain>/<config>.json`:
+2. Create `configs/<project>/<mainnet|testnet>/<config>.yaml`:
    ```json
    {
      "contracts": { ... },
@@ -125,7 +125,7 @@ Handles both Etherscan v2 and legacy Etherscan APIs.
 
 4. **Add tests** in `tests/test_explorer_utils.py` -- follow the existing pattern: monkeypatch `fetch` to return a `DummyResponse`, call `get_contract_from_explorer()`, assert the result.
 
-5. **Add a config sample** in `config_samples/<chain>/`.
+5. **Add a config** in `configs/<project>/<mainnet|testnet>/`.
 
 ## Config fields reference
 
@@ -147,6 +147,6 @@ Handles both Etherscan v2 and legacy Etherscan APIs.
 - [ ] If Etherscan v2: config-only with `explorer_hostname` + `explorer_chain_id`
 - [ ] If new Blockscout domain: added suffix to `_get_explorer_fetcher()` tuple
 - [ ] If new API type: implemented fetcher, added dispatcher rule, used shared helpers
-- [ ] Config sample created in `config_samples/<chain>/`
+- [ ] Config created in `configs/<project>/<mainnet|testnet>/`
 - [ ] Tests added in `tests/test_explorer_utils.py`
 - [ ] `.env.example` updated if a new token env var is needed

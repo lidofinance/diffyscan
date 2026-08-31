@@ -2,8 +2,8 @@
 
 [Back to README](../README.md)
 
-Diffyscan accepts JSON, YAML, and YML files. Configuration samples are under
-[`config_samples/`](../config_samples/).
+Diffyscan accepts JSON, YAML, and YML files. Existing configs live under
+[`configs/`](../configs/), laid out state-mate-style as `configs/<project>/<mainnet|testnet>/<file>.yaml`.
 
 ```yaml
 contracts:

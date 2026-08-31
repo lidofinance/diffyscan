@@ -2,7 +2,7 @@ import json
 import yaml
 from pathlib import Path
 
-CONFIG_DIR = Path("config_samples")
+CONFIG_DIR = Path("configs")
 REQUIRED_GITHUB_KEYS = {"url", "commit", "relative_root"}
 
 

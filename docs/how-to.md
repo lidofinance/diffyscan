@@ -36,7 +36,7 @@ post-create script installs dependencies and Git hooks, then copies
 ```sh
 uv sync --locked
 cp .env.example .env
-uv run diffyscan config_samples/ethereum/mainnet/circuit-breaker/circuit_breaker_config.yaml
+uv run diffyscan configs/<project>/<mainnet|testnet>/<config>.yaml
 ```
 
 Diffyscan loads the checkout's `.env` file. Set `GITHUB_API_TOKEN`, the explorer
