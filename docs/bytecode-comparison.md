@@ -14,9 +14,39 @@ For each configured contract, Diffyscan:
    prevent a direct match;
 6. evaluates any `allowed_diffs` rules and reports uncovered differences.
 
-Diffyscan reuses explorer-provided constructor calldata, linked-library
-addresses, and EVM version. Add manual overrides only when that metadata is
-missing or does not describe the deployment being checked.
+## Trust model
+
+Diffyscan relies on two trust anchors that it does not verify:
+
+- the pinned GitHub commit supplies the expected contract sources;
+- the configured RPC supplies deployed runtime bytecode through `eth_getCode`
+  and chain state for deployment simulation through `eth_call`.
+
+The explorer submission shapes how the GitHub sources are compiled and
+simulated. Diffyscan takes these explorer inputs on trust:
+
+- compiler version and settings, including optimizer configuration;
+- EVM version;
+- constructor calldata;
+- linked-library addresses;
+- the set of source file paths in the verified submission.
+
+Within these trust boundaries, Diffyscan compares explorer file contents with
+the pinned GitHub commit, compiled runtime bytecode with the value returned by
+the configured RPC, and constructor-set immutable values through simulation
+against that RPC's state.
+
+Diffyscan logs the RPC chain ID but does not compare it with
+`explorer_chain_id`. Configure the explorer and RPC for the same chain. A wrong
+or compromised RPC controls both the deployed bytecode reference and the state
+used for simulation.
+
+Trusted metadata that changes the compiled or simulated runtime bytecode
+surfaces as a mismatch, because the deployed bytecode is the reference.
+Metadata without runtime effect goes unchecked: constructor calldata, for
+example, is never read when the compiled runtime bytecode already matches the
+chain. Add manual overrides only when that metadata is missing or does not
+describe the deployment being checked.
 
 ## Manual overrides
 
