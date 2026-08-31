@@ -92,14 +92,17 @@ Handles both Etherscan v2 and legacy Etherscan APIs.
 
 1. Find the chain ID (e.g. from chainlist.org)
 2. Create `configs/<project>/<mainnet|testnet>/<config>.yaml`:
-   ```json
-   {
-     "contracts": { ... },
-     "explorer_hostname": "api.etherscan.io",
-     "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
-     "explorer_chain_id": <chain-id>,
-     "github_repo": { ... }
-   }
+   ```yaml
+   contracts:
+     "<contract-address>": <contract-name>
+   explorer_hostname: api.etherscan.io
+   explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+   explorer_chain_id: <chain-id>
+   github_repo:
+     url: https://github.com/<org>/<repo>
+     commit: <commit>
+     relative_root: ""
+   dependencies: {}
    ```
 3. Test: `uv run diffyscan <config> --yes --cache-explorer`
 
