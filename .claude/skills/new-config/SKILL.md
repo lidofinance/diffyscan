@@ -10,7 +10,7 @@ Create a new diffyscan config file for verifying a deployed smart contract. The 
 ## Required information
 
 1. **Chain**: Which blockchain (ethereum, optimism, base, zksync, linea, scroll, mantle, bsc, lisk, soneium, unichain, ink, swell, megaeth, plasma, mode, etc.)
-2. **Network**: mainnet or testnet (hoodi/holesky/sepolia for Ethereum)
+2. **Network**: mainnet or testnet (hoodi/sepolia for Ethereum)
 3. **Contract address(es)**: One or more `0x`-prefixed addresses and their contract names
 4. **GitHub repo**: URL, commit hash, and relative root within the repo
 5. **Explorer**: hostname and token env var name
@@ -89,7 +89,7 @@ Use `api.etherscan.io` as the hostname with `explorer_chain_id` to activate the 
 "explorer_chain_id": 1
 ```
 
-Common chain IDs: Ethereum=1, Optimism=10, Base=8453, BSC=56, Linea=59144, Scroll=534352, Sepolia=11155111, Hoodi=560048, Holesky=17000, Ink=57073, MegaETH=4326.
+Common chain IDs: Ethereum=1, Optimism=10, Base=8453, BSC=56, Linea=59144, Hoodi=560048.
 
 ### Legacy per-chain Etherscan hostnames (still work, used in older configs)
 
@@ -102,7 +102,6 @@ These are Etherscan-compatible and fall through to the default `_get_contract_fr
 | `api.lineascan.build` | `LINEA_EXPLORER_TOKEN` | Linea mainnet (special: token is ignored by dispatcher) |
 | `api.scrollscan.com` | `ETHERSCAN_EXPLORER_TOKEN` (fallback) | Scroll mainnet |
 | `api.bscscan.com` | `BSCSCAN_TOKEN` | BSC mainnet |
-| `api-holesky.etherscan.io` | `ETHERSCAN_EXPLORER_TOKEN` | Holesky testnet |
 | `api-hoodi.etherscan.io` | `ETHERSCAN_EXPLORER_TOKEN` | Hoodi testnet |
 | `api-sepolia.etherscan.io` | `ETHERSCAN_EXPLORER_TOKEN` | Sepolia testnet |
 
@@ -128,7 +127,7 @@ Some configs (soneium, unichain) use `explorer_hostname_env_var` instead of `exp
 
 ## File placement
 
-Save configs to `config_samples/<chain>/<network>/` following existing naming conventions. Look at existing configs in that directory for patterns. Some older configs live directly under `config_samples/` (e.g. `lido_dao_holesky_config.json`) or under `config_samples/<chain>/` without a network subdirectory.
+Save configs to `configs/<project>/<mainnet|testnet>/<file>.yaml` (state-mate-style layout). Kebab-case file names; the chain goes into the file name for cross-chain projects. Look at existing configs for patterns.
 
 ## Best practices
 

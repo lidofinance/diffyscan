@@ -1,0 +1,17 @@
+contracts:
+  '0xe6793B9e4FbA7DE0ee833F9D02bba7DB5EB27823': TokenRateNotifier
+  '0xd54c1c6413caac3477AC14b2a80D5398E3c32FfE': OpStackTokenRatePusher
+  '0x76943C0D61395d8F2edF9060e1533529cAe05dE6': OssifiableProxy
+  '0x168Cfea1Ad879d7032B3936eF3b0E90790b6B6D4': L1LidoTokensBridge
+explorer_hostname: api.etherscan.io
+explorer_chain_id: 1
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+github_repo:
+  url: https://github.com/lidofinance/lido-l2-with-steth
+  commit: 8f19e1101a211c8f3d42af7ffcb87ab0ebcf750c
+  relative_root: ''
+dependencies:
+  '@openzeppelin/contracts':
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: d4fb3a89f9d0a39c7ee6f2601d33ffbf30085322
+    relative_root: contracts

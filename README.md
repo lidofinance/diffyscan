@@ -37,7 +37,7 @@ cp .env.example .env
 Set the API tokens and RPC URLs required by your config, then run it:
 
 ```sh
-uv run diffyscan config_samples/ethereum/mainnet/circuit-breaker/circuit_breaker_config.yaml
+uv run diffyscan configs/<project>/<mainnet|testnet>/<config>.yaml
 ```
 
 ## What it checks

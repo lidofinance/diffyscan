@@ -10,7 +10,7 @@ FIXTURES_DIR = Path(__file__).parent / "fixtures"
 FULL_JSON_FIXTURE = FIXTURES_DIR / "full_config.json"
 FULL_YAML_FIXTURE = FIXTURES_DIR / "full_config.yaml"
 
-# Every top-level key found across all 113 config_samples
+# Every top-level key found across all configs under configs/
 ALL_TOP_LEVEL_KEYS = {
     "contracts",
     "github_repo",

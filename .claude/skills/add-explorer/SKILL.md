@@ -91,15 +91,18 @@ Handles both Etherscan v2 and legacy Etherscan APIs.
 ## Steps: adding a new Etherscan v2 chain (no code changes)
 
 1. Find the chain ID (e.g. from chainlist.org)
-2. Create `config_samples/<chain>/<config>.json`:
-   ```json
-   {
-     "contracts": { ... },
-     "explorer_hostname": "api.etherscan.io",
-     "explorer_token_env_var": "ETHERSCAN_EXPLORER_TOKEN",
-     "explorer_chain_id": <chain-id>,
-     "github_repo": { ... }
-   }
+2. Create `configs/<project>/<mainnet|testnet>/<config>.yaml`:
+   ```yaml
+   contracts:
+     "<contract-address>": <contract-name>
+   explorer_hostname: api.etherscan.io
+   explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+   explorer_chain_id: <chain-id>
+   github_repo:
+     url: https://github.com/<org>/<repo>
+     commit: <commit>
+     relative_root: ""
+   dependencies: {}
    ```
 3. Test: `uv run diffyscan <config> --yes --cache-explorer`
 
@@ -125,7 +128,7 @@ Handles both Etherscan v2 and legacy Etherscan APIs.
 
 4. **Add tests** in `tests/test_explorer_utils.py` -- follow the existing pattern: monkeypatch `fetch` to return a `DummyResponse`, call `get_contract_from_explorer()`, assert the result.
 
-5. **Add a config sample** in `config_samples/<chain>/`.
+5. **Add a config** in `configs/<project>/<mainnet|testnet>/`.
 
 ## Config fields reference
 
@@ -147,6 +150,6 @@ Handles both Etherscan v2 and legacy Etherscan APIs.
 - [ ] If Etherscan v2: config-only with `explorer_hostname` + `explorer_chain_id`
 - [ ] If new Blockscout domain: added suffix to `_get_explorer_fetcher()` tuple
 - [ ] If new API type: implemented fetcher, added dispatcher rule, used shared helpers
-- [ ] Config sample created in `config_samples/<chain>/`
+- [ ] Config created in `configs/<project>/<mainnet|testnet>/`
 - [ ] Tests added in `tests/test_explorer_utils.py`
 - [ ] `.env.example` updated if a new token env var is needed

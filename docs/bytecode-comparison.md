@@ -166,7 +166,7 @@ To replace a wildcard:
 
 The regression test in
 [`tests/test_no_wildcard_regression.py`](../tests/test_no_wildcard_regression.py)
-checks rules under `config_samples/` and rejects new wildcards there unless the
+checks rules under `configs/` and rejects new wildcards there unless the
 repository records an explicit justification.
 
 ## Reports

@@ -23,7 +23,7 @@ uv run pytest tests/test_config_loading.py -q
 uv run pytest tests/test_config_loading.py::test_name -q
 
 # Run the CLI
-uv run diffyscan config_samples/lido_dao_sepolia_config.json
+uv run diffyscan configs/<project>/<mainnet|testnet>/<config>.yaml
 
 # Format code
 uv run black diffyscan/ tests/
@@ -60,7 +60,7 @@ Entry point: `diffyscan/diffyscan.py:main` — parses CLI args, loads config (JS
 
 ### Config schema
 
-Configs live in `config_samples/` organized by chain (ethereum, optimism, zksync, etc.):
+Configs live in `configs/`, laid out state-mate-style as `configs/<project>/<mainnet|testnet>/<file>.yaml`:
 ```
 contracts:          { "0xaddr": "ContractName" }
 network:            "mainnet"  # optional legacy label, unused at runtime

@@ -42,7 +42,7 @@ target-version = ["py311"]
 packages = ["diffyscan"]
 
 [tool.hatch.build.targets.sdist]
-exclude = ["config_samples"]
+exclude = ["configs"]
 
 [tool.mypy]
 python_version = "3.11"

@@ -1,8 +1,8 @@
-import json
-import yaml
 from pathlib import Path
 
-CONFIG_DIR = Path("config_samples")
+from diffyscan.utils.common import load_config
+
+CONFIG_DIR = Path("configs")
 REQUIRED_GITHUB_KEYS = {"url", "commit", "relative_root"}
 
 
@@ -11,18 +11,11 @@ def config_paths():
     return sorted(p for p in CONFIG_DIR.rglob("*") if p.suffix.lower() in supported)
 
 
-def load(path):
-    with open(path) as f:
-        if path.suffix.lower() in (".yaml", ".yml"):
-            return yaml.safe_load(f)
-        return json.load(f)
-
-
 def test_config_fields_present():
     for path in config_paths():
         print(path)
 
-        cfg = load(path)
+        cfg = load_config(str(path))
         assert "contracts" in cfg and cfg["contracts"], f"{path} missing contracts"
         assert "github_repo" in cfg
         assert REQUIRED_GITHUB_KEYS <= set(
@@ -36,8 +29,23 @@ def test_contract_addresses_format():
     for path in config_paths():
         print(path)
 
-        cfg = load(path)
+        cfg = load_config(str(path))
         for addr in cfg.get("contracts", {}):
             assert (
                 addr.startswith("0x") and len(addr) == 42
             ), f"Bad addr {addr} in {path}"
+
+
+def test_etherscan_v2_configs_accept_canonical_token():
+    for path in config_paths():
+        cfg = load_config(str(path))
+        if cfg.get("explorer_hostname") != "api.etherscan.io":
+            continue
+        if "explorer_chain_id" not in cfg:
+            continue
+
+        assert cfg.get("explorer_token_env_var") in (
+            None,
+            "ETHERSCAN_TOKEN",
+            "ETHERSCAN_EXPLORER_TOKEN",
+        ), f"{path} prevents use of ETHERSCAN_EXPLORER_TOKEN"
