@@ -1,5 +1,6 @@
 from functools import wraps
 import os
+import time
 
 import requests
 
@@ -17,6 +18,9 @@ DEFAULT_USER_AGENT = (
     "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 "
     f"diffyscan/{__version__}"
 )
+RPC_MAX_ATTEMPTS = 3
+RPC_RETRY_DELAY_SECONDS = 1.0
+RPC_RETRYABLE_STATUS_CODES = frozenset({408, 429, 500, 502, 503, 504})
 
 
 def get_user_agent() -> str:
@@ -73,4 +77,31 @@ def pull(
 ) -> requests.Response:
     """Post data to a URL with error handling."""
     logger.log(f"Pull: {mask_text(url)}")
-    return requests.post(url, data=payload, headers=_build_headers(headers))
+    for attempt in range(RPC_MAX_ATTEMPTS):
+        request_error: requests.exceptions.RequestException
+        try:
+            response = requests.post(url, data=payload, headers=_build_headers(headers))
+            response.raise_for_status()
+            return response
+        except requests.exceptions.HTTPError as exc:
+            request_error = exc
+            status = exc.response.status_code if exc.response is not None else None
+            retryable = status in RPC_RETRYABLE_STATUS_CODES
+        except (
+            requests.exceptions.ConnectionError,
+            requests.exceptions.Timeout,
+        ) as exc:
+            request_error = exc
+            retryable = True
+
+        if not retryable or attempt == RPC_MAX_ATTEMPTS - 1:
+            raise request_error
+
+        delay = RPC_RETRY_DELAY_SECONDS * (2**attempt)
+        logger.warn(
+            "Transient RPC request failed; retrying",
+            f"attempt {attempt + 2}/{RPC_MAX_ATTEMPTS} in {delay:.1f}s",
+        )
+        time.sleep(delay)
+
+    raise AssertionError("unreachable")

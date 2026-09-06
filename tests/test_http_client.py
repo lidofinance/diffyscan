@@ -111,6 +111,68 @@ def test_pull_sends_default_user_agent(monkeypatch, post_calls):
     ]
 
 
+def test_pull_retries_transient_rpc_http_errors(monkeypatch):
+    calls = []
+    delays = []
+
+    class Response:
+        headers = {}
+        text = "temporary upstream failure"
+
+        def __init__(self, status_code):
+            self.status_code = status_code
+
+        def raise_for_status(self):
+            if self.status_code >= 400:
+                import requests
+
+                raise requests.exceptions.HTTPError(
+                    f"{self.status_code} Server Error", response=self
+                )
+
+    responses = iter((Response(500), Response(502), Response(200)))
+
+    def fake_post(url, data=None, headers=None):
+        calls.append(url)
+        return next(responses)
+
+    monkeypatch.setattr(f"{HTTP_CLIENT_MODULE}.requests.post", fake_post)
+    monkeypatch.setattr(f"{HTTP_CLIENT_MODULE}.time.sleep", delays.append)
+
+    response = pull("https://example.com/rpc", "{}")
+
+    assert response.status_code == 200
+    assert calls == ["https://example.com/rpc"] * 3
+    assert delays == [1.0, 2.0]
+
+
+def test_pull_does_not_retry_non_transient_http_errors(monkeypatch):
+    calls = []
+
+    class Response:
+        status_code = 400
+        headers = {}
+        text = "bad request"
+
+        def raise_for_status(self):
+            import requests
+
+            raise requests.exceptions.HTTPError("400 Client Error", response=self)
+
+    def fake_post(url, data=None, headers=None):
+        calls.append(url)
+        return Response()
+
+    monkeypatch.setattr(f"{HTTP_CLIENT_MODULE}.requests.post", fake_post)
+
+    from diffyscan.utils.custom_exceptions import NodeError
+
+    with pytest.raises(NodeError, match="400 Client Error"):
+        pull("https://example.com/rpc", "{}")
+
+    assert calls == ["https://example.com/rpc"]
+
+
 class FailingResponse:
     def __init__(self, headers, text):
         self.headers = headers
