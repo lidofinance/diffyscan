@@ -5,7 +5,7 @@ import json
 import pytest
 
 import diffyscan.diffyscan as runner
-from diffyscan.utils.logger import Logger
+from diffyscan.utils.logger import Logger, bgGreen, bgRed
 
 ADDR = "0x0000000000000000000000000000000000000001"
 
@@ -76,6 +76,7 @@ def _result(source_stats, bytecode_stats, path="config.yaml", contract_errors=No
         "config_path": path,
         "matched_count": 1,
         "interrupted": False,
+        "error": None,
     }
 
 
@@ -183,6 +184,13 @@ def test_logger_stdout_can_be_muted(capsys, tmp_path):
     assert "hidden" in (tmp_path / "logs.txt").read_text()
 
 
+def test_logger_raw_logs_uncolored_line(capsys, tmp_path):
+    log = Logger(str(tmp_path / "logs.txt"))
+    log.raw(f"0001 60 PUSH1 {bgRed('0x01')} {bgGreen('0x02')}")
+    assert (tmp_path / "logs.txt").read_text() == "0001 60 PUSH1 0x01 0x02\n"
+    assert bgRed("0x01") in capsys.readouterr().out
+
+
 def _run_main(monkeypatch, argv, process_config):
     monkeypatch.setattr(runner.sys, "argv", ["diffyscan", *argv])
     monkeypatch.setattr(runner, "load_dotenv", lambda: None)
@@ -219,6 +227,21 @@ def test_json_mode_reports_exceptions_instead_of_crashing(monkeypatch, capsys):
     report = json.loads(capsys.readouterr().out)
     assert report["status"] == "error"
     assert report["error"] == "RuntimeError: explorer is down"
+
+
+def test_json_mode_keeps_results_completed_before_fatal_error(monkeypatch, capsys):
+    def partial(path, *args):
+        result = _result([], [_bytecode_stat()], path)
+        result["error"] = RuntimeError("explorer is down")
+        return result
+
+    code = _run_main(monkeypatch, ["config.yaml", "--json"], partial)
+
+    assert code == 1
+    report = json.loads(capsys.readouterr().out)
+    assert report["status"] == "error"
+    assert report["error"] == "RuntimeError: explorer is down"
+    assert report["summary"]["bytecode"]["exact"] == 1
 
 
 def test_json_mode_reports_interrupted_run_as_error(monkeypatch, capsys):
@@ -263,4 +286,18 @@ def test_human_mode_still_raises(monkeypatch):
     monkeypatch.setattr(runner, "process_config", boom)
     monkeypatch.setattr(runner.os.path, "isfile", lambda path: path == "config.yaml")
     with pytest.raises(RuntimeError):
+        runner.main()
+
+
+def test_human_mode_reraises_error_returned_by_process_config(monkeypatch):
+    def partial(path, *args):
+        result = _result([], [_bytecode_stat()], path)
+        result["error"] = RuntimeError("explorer is down")
+        return result
+
+    monkeypatch.setattr(runner.sys, "argv", ["diffyscan", "config.yaml"])
+    monkeypatch.setattr(runner, "load_dotenv", lambda: None)
+    monkeypatch.setattr(runner, "process_config", partial)
+    monkeypatch.setattr(runner.os.path, "isfile", lambda path: path == "config.yaml")
+    with pytest.raises(RuntimeError, match="explorer is down"):
         runner.main()

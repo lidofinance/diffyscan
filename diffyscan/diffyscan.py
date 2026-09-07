@@ -628,6 +628,7 @@ def process_config(
     contract_errors = []
     matched_count = 0
     interrupted = False
+    error: Exception | None = None
 
     try:
         if enable_binary_comparison:
@@ -747,6 +748,10 @@ def process_config(
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt by user")
         interrupted = True
+    except Exception as exc:
+        # Hand the exception back with the results collected so far, so a fatal
+        # error on one contract does not discard verified diffs of the others.
+        error = exc
 
     return {
         "source_stats": source_stats,
@@ -755,6 +760,7 @@ def process_config(
         "config_path": path,
         "matched_count": matched_count,
         "interrupted": interrupted,
+        "error": error,
     }
 
 
@@ -1048,6 +1054,8 @@ def main() -> None:
                 # Partial results must never read as a verified run
                 error = "KeyboardInterrupt: run interrupted by user"
                 break
+            if result["error"] is not None:
+                raise result["error"]
     except Exception as exc:
         # In JSON mode the report must still reach stdout; keep the traceback on stderr.
         if not args.json:

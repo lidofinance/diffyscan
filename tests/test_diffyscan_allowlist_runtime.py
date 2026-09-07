@@ -97,6 +97,41 @@ def test_any_rule_can_suppress_deployment_simulation_errors(monkeypatch):
     assert result["bytecode_stats"][0]["matched_facets"] == ["any"]
 
 
+def test_process_config_keeps_results_when_a_later_contract_fails(monkeypatch):
+    second = "0x0000000000000000000000000000000000000002"
+    config = _config_with_any_rule()
+    config["contracts"] = {ADDR: "Test", second: "Broken"}
+    _stub_process_config_dependencies(monkeypatch, config)
+
+    def explorer(token, hostname, address, *args, **kwargs):
+        if address == second:
+            raise RuntimeError("explorer returned 401")
+        return {"name": "Test", "solcInput": {"sources": {}}}
+
+    monkeypatch.setattr(runner, "get_contract_from_explorer", explorer)
+    monkeypatch.setattr(
+        runner,
+        "run_bytecode_diff",
+        lambda address, name, *args, **kwargs: {
+            "contract_address": address,
+            "contract_name": name,
+            "status": "exact",
+        },
+    )
+
+    result = runner.process_config(
+        "config.json",
+        recursive_parsing=False,
+        enable_binary_comparison=True,
+        cache_explorer=False,
+        cache_github=False,
+        skip_user_input=True,
+    )
+
+    assert [stat["contract_address"] for stat in result["bytecode_stats"]] == [ADDR]
+    assert str(result["error"]) == "explorer returned 401"
+
+
 def test_process_config_normalizes_explorer_chain_id(monkeypatch):
     config = {
         "contracts": {ADDR: "Test"},
