@@ -2,9 +2,9 @@
 
 [Back to README](../README.md) · [CLI Reference](cli.md)
 
-`diffyscan <config> --json` writes exactly one JSON object to stdout and nothing
-else. Human-readable logs go to the file named in `log_file`; tracebacks go to
-stderr. `--json` implies `--yes`, so the run never waits for input.
+`diffyscan <config> --json` writes one JSON object to stdout. The
+human-readable log goes to the file named in `log_file`, tracebacks go to
+stderr. `--json` implies `--yes`, so the run does not prompt.
 
 ```sh
 diffyscan path/to/config.yaml --json -E -G
@@ -12,26 +12,26 @@ diffyscan path/to/config.yaml --json -E -G
 
 ## Rules for parsers
 
-- Keys whose value would be `null` or an empty list are omitted. Treat a missing
-  key as "nothing to report". `summary` and `contracts` are always present.
-- Check `status` before the exit code. A contract skipped because of an error
-  keeps the exit code at 0 when the config sets
-  `fail_on_bytecode_comparison_error: false`, but `status` becomes `error`.
-- Addresses are printed as written in the config (checksummed or not). Compare
-  them case-insensitively.
-- New keys may be added in later versions; unknown keys should be ignored.
+- Keys with a `null` or empty-list value are omitted. A missing key means
+  nothing to report. `summary` and `contracts` are present in every report.
+- Read `status` before the exit code. With
+  `fail_on_bytecode_comparison_error: false` a contract skipped because of an
+  error leaves the exit code at 0, while `status` becomes `error`.
+- Addresses appear as written in the config, checksummed or not. Compare them
+  case-insensitively.
+- Later versions may add keys. Ignore unknown keys.
 
 ## Top level
 
 | Key | Type | Meaning |
 | --- | --- | --- |
-| `status` | `"passed"`, `"failed"`, `"error"` | `passed`: exit code 0 and every contract verified. `failed`: an unallowed diff, or `--contract` matched nothing. `error`: the run aborted, or at least one contract was skipped because of an error. |
-| `exit_code` | int | Process exit code, same as without `--json`. |
-| `error` | string | Only when the run aborted (missing config, bad token). `"<ExceptionType>: <message>"`. |
+| `status` | `"passed"`, `"failed"`, `"error"` | `passed`: exit code 0 and each contract verified. `failed`: an unallowed diff, or `--contract` matched nothing. `error`: the run aborted, or at least one contract was skipped because of an error. |
+| `exit_code` | int | Process exit code, the same as without `--json`. |
+| `error` | string | Present when the run aborted, for example on a missing config or a bad token. Format: `"<ExceptionType>: <message>"`. |
 | `duration_seconds` | float | Wall time of the run. |
-| `log_file` | string | Path to the full human-readable log of this run. |
-| `summary` | object | Counters, see below. |
-| `contracts` | array | One entry per checked contract, see below. |
+| `log_file` | string | Path to the human-readable log of this run. |
+| `summary` | object | Counters, described below. |
+| `contracts` | array | One entry per checked contract, described below. |
 
 ### `summary`
 
@@ -43,48 +43,48 @@ diffyscan path/to/config.yaml --json -E -G
 }
 ```
 
-`source` or `bytecode` is absent when that comparison did not run for any
-contract. `contract_errors` is absent when zero.
+`source` or `bytecode` is absent when that comparison ran for no contract.
+`contract_errors` is absent when zero.
 
 ## `contracts[]`
 
-Every entry has `config` (path of the config file), `address`, and `name`.
-Then one of:
+Each entry has `config` (path of the config file), `address`, and `name`, plus
+either:
 
-- `source` and/or `bytecode`: the comparison results.
-- `error`: the contract was skipped before any comparison finished. `source`
-  and `bytecode` are absent.
+- `source` and/or `bytecode` with the comparison results, or
+- `error` when the contract was skipped before a comparison finished. `source`
+  and `bytecode` are then absent.
 
 ### `source`
 
 | Key | Present when | Meaning |
 | --- | --- | --- |
-| `status` | always | `exact`, `allowed`, or `failed`. |
-| `files` | always | Number of source files in the explorer-verified set. |
-| `missing` | some files not found on GitHub | Count of files missing at the pinned commit. |
-| `with_diffs` | some files differ | Count of files with at least one hunk. |
-| `diffs` | any file differs or is missing | One object per such file: `path`, `report` (HTML diff path), `missing: true` when absent on GitHub, `hunks`. |
+| `status` | in every entry | `exact`, `allowed`, or `failed`. |
+| `files` | in every entry | Number of source files in the explorer-verified set. |
+| `missing` | a file is absent on GitHub | Count of files absent at the pinned commit. |
+| `with_diffs` | a file differs | Count of files with at least one hunk. |
+| `diffs` | a file differs or is absent | One object per such file: `path`, `report` (path of the HTML diff), `missing: true` when absent on GitHub, `hunks`. |
 | `facets`, `reason` | `status` is `allowed` | Facets of the matching `allowed_diffs` rule (`line_ranges`, `files`, `any`) and its `reason`. |
-| `suggested_rule` | `status` is `failed` | Ready `allowed_diffs.source` entry covering the uncovered diff. Replace its placeholder `reason`. |
+| `suggested_rule` | `status` is `failed` | An `allowed_diffs.source` entry that covers the uncovered diff. Replace its placeholder `reason` before use. |
 
-A hunk is one `SequenceMatcher` opcode with 1-based line numbers:
+A hunk is one `difflib.SequenceMatcher` opcode with 1-based line numbers:
 
 ```json
 { "github": { "start": 12, "count": 1 }, "explorer": { "start": 12, "count": 2 }, "tag": "replace" }
 ```
 
-`tag` is `replace`, `insert`, or `delete`, from the GitHub side to the explorer
-side. `count: 0` marks the insertion point on the side that has no lines.
+`tag` is `replace`, `insert`, or `delete`, read from the GitHub side to the
+explorer side. `count: 0` marks the insertion point on the side without lines.
 
 ### `bytecode`
 
 | Key | Present when | Meaning |
 | --- | --- | --- |
-| `status` | always | `exact`, `allowed`, or `failed`. |
+| `status` | in every entry | `exact`, `allowed`, or `failed`. |
 | `uncovered` | `status` is `failed` and the comparison ran | Labels of differences no rule covers: `offset=<n> length=<n>[ immutable]`, `cbor_metadata`, `string_literal`, `runtime_length`. |
-| `error` | the comparison itself failed | Compile, calldata, or deployment-simulation error text. `status` is `failed`. |
+| `error` | the comparison itself failed | Text of the compile, calldata, or deployment-simulation error. `status` is `failed`. |
 | `facets`, `reason` | `status` is `allowed` | Facets of the matching rule (`immutables`, `byte_ranges`, `cbor_metadata`, `constructor_args`, `constructor_calldata`, `any`) and its `reason`. |
-| `suggested_rule` | `status` is `failed` and a diff was analyzed | Ready `allowed_diffs.bytecode` entry: `immutables` with observed on-chain values when only immutable slots differ, otherwise `byte_ranges`, plus `cbor_metadata: true` when metadata differs. |
+| `suggested_rule` | `status` is `failed` and a diff was analyzed | An `allowed_diffs.bytecode` entry: `immutables` with the observed on-chain values when only immutable slots differ, otherwise `byte_ranges`; `cbor_metadata: true` is added when metadata differs. |
 
 ## Example
 
@@ -128,7 +128,7 @@ side. `count: 0` marks the insertion point on the side that has no lines.
 }
 ```
 
-Useful `jq` one-liners:
+`jq` examples:
 
 ```sh
 # Overall verdict
@@ -137,6 +137,6 @@ diffyscan cfg.yaml --json | jq -r .status
 # Contracts that need attention
 diffyscan cfg.yaml --json | jq '.contracts[] | select(.error or .source.status=="failed" or .bytecode.status=="failed")'
 
-# Ready-to-paste allowlist suggestions
+# Allowlist suggestions
 diffyscan cfg.yaml --json | jq '.contracts[] | {address, source: .source.suggested_rule, bytecode: .bytecode.suggested_rule} | select(.source or .bytecode)'
 ```
