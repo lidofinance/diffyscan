@@ -18,6 +18,7 @@
   <a href="https://github.com/lidofinance/diffyscan/blob/main/docs/how-to.md">How-To Guides</a> ·
   <a href="https://github.com/lidofinance/diffyscan/blob/main/docs/configuration.md">Configuration Reference</a> ·
   <a href="https://github.com/lidofinance/diffyscan/blob/main/docs/cli.md">CLI Reference</a> ·
+  <a href="https://github.com/lidofinance/diffyscan/blob/main/docs/json-output.md">JSON Output</a> ·
   <a href="https://github.com/lidofinance/diffyscan/blob/main/docs/bytecode-comparison.md">Bytecode Comparison</a>
 </p>
 

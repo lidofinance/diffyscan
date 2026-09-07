@@ -20,6 +20,7 @@ in the current directory.
 | `-G, --cache-github` | Cache source files fetched from GitHub |
 | `--log-level <level>` | Set `info`, `okay`, `warn`, or `error`; defaults to `info` |
 | `-Q, --quiet` | Use the `okay` log level |
+| `-J, --json` | Print one JSON report to stdout instead of human-readable logs; implies `--yes` |
 | `-C, --contract <address>` | Check one configured address; repeat for more addresses |
 
 ## Examples
@@ -51,3 +52,12 @@ diffyscan path/to/config.yaml -E -G
 Diffyscan exits with status 1 when a source or bytecode check fails, or when a
 contract filter matches no configured address. Exact matches and differences
 covered by `allowed_diffs` do not fail the run.
+
+## JSON output
+
+`--json` replaces the logs on stdout with one JSON report for scripts and
+coding agents. The format is specified in [JSON Output Format](json-output.md).
+
+```sh
+diffyscan path/to/config.yaml --json -E -G | jq '.summary'
+```

@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 import termtables
@@ -13,6 +14,7 @@ BOLD = "\033[1m"
 
 END = "\033[0m"
 
+_ANSI_ESCAPE = re.compile(r"\x1b\[[0-9;]*m")
 
 _LOG_LEVELS = {
     "info": (0, "🔵 [INFO] ", BLUE),
@@ -26,6 +28,7 @@ class Logger:
     def __init__(self, log_file):
         self.log_file = log_file
         self.level = 0
+        self.stdout_enabled = True
 
     def set_level(self, level_name: str):
         self.level = _LOG_LEVELS.get(level_name.lower(), (0,))[0]
@@ -36,8 +39,15 @@ class Logger:
             logs.write(text + "\n")
 
     def stdout(self, text, overwrite=False):
+        if not self.stdout_enabled:
+            return
         end_char = "\r" if overwrite else "\n"
         print(text, end=end_char, flush=overwrite)
+
+    def raw(self, text):
+        """Write a pre-formatted line to the log (uncolored) and to stdout as is."""
+        self.log(_ANSI_ESCAPE.sub("", text))
+        self.stdout(text)
 
     def _emit(self, level_name, text, value=None, overwrite=False):
         threshold, emoji, color = _LOG_LEVELS[level_name]
