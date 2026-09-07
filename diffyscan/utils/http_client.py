@@ -1,5 +1,6 @@
 from functools import wraps
 import os
+from urllib.parse import urlsplit
 
 import requests
 
@@ -28,14 +29,27 @@ def _build_headers(headers: dict | None) -> dict:
     return {"User-Agent": get_user_agent(), **(headers or {})}
 
 
+def _redact_url(message: str, url: str) -> str:
+    """Hide the request URL in error text: RPC paths and explorer queries carry API keys."""
+    message = message.replace(url, "[redacted URL]")
+    parsed = urlsplit(url)
+    request_target = parsed.path or "/"
+    if parsed.query:
+        request_target += f"?{parsed.query}"
+    # urllib3 connection errors include only the path and query.
+    if request_target != "/":
+        message = message.replace(request_target, "[redacted URL]")
+    return message
+
+
 def _handle_request_errors(error_class: type[BaseException]):
     """Decorator to handle HTTP request errors and convert them to custom exceptions."""
 
     def decorator(func):
         @wraps(func)
-        def wrapper(*args, **kwargs) -> requests.Response:
+        def wrapper(url: str, *args, **kwargs) -> requests.Response:
             try:
-                response: requests.Response = func(*args, **kwargs)
+                response: requests.Response = func(url, *args, **kwargs)
                 response.raise_for_status()
                 return response
             except requests.exceptions.HTTPError as exc:
@@ -43,17 +57,21 @@ def _handle_request_errors(error_class: type[BaseException]):
                 if exc.response is not None:
                     if exc.response.headers.get("cf-mitigated") == "challenge":
                         raise error_class(
-                            f"HTTP error: {exc}. The host is behind a Cloudflare "
-                            f"challenge that rejected the request; try overriding "
-                            f"the User-Agent via {USER_AGENT_ENV_VAR}"
-                        )
+                            _redact_url(f"HTTP error: {exc}", url)
+                            + ". The host is behind a Cloudflare challenge that "
+                            f"rejected the request; try overriding the User-Agent "
+                            f"via {USER_AGENT_ENV_VAR}"
+                        ) from None
                     try:
                         body = f" Response: {exc.response.text}"
                     except Exception:
                         pass
-                raise error_class(f"HTTP error: {exc}{body}")
+                # `from None` keeps the unredacted requests exception out of tracebacks
+                raise error_class(
+                    _redact_url(f"HTTP error: {exc}{body}", url)
+                ) from None
             except requests.exceptions.RequestException as exc:
-                raise error_class(str(exc))
+                raise error_class(_redact_url(str(exc), url)) from None
 
         return wrapper
 

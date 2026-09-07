@@ -277,6 +277,68 @@ def test_json_mode_reports_unmatched_filter_as_failed(monkeypatch, capsys):
     assert report["contracts"] == []
 
 
+def test_json_mode_reports_empty_configs_as_failed(monkeypatch, capsys):
+    def nothing_to_check(path, *args):
+        result = _result([], [], path)
+        result["matched_count"] = 0
+        return result
+
+    code = _run_main(monkeypatch, ["config.yaml", "--json"], nothing_to_check)
+
+    assert code == 1
+    report = json.loads(capsys.readouterr().out)
+    assert report["status"] == "failed"
+    assert "error" not in report
+
+
+@pytest.mark.parametrize("json_mode", [False, True])
+def test_run_rejects_disabled_comparisons(monkeypatch, capsys, json_mode):
+    monkeypatch.setattr(
+        runner,
+        "load_config",
+        lambda path: {
+            "contracts": {ADDR: "Test"},
+            "explorer_hostname": "api.etherscan.io",
+            "source_comparison": False,
+        },
+    )
+    monkeypatch.setattr(runner, "_load_explorer_token", lambda cfg: "dummy")
+    monkeypatch.setattr(runner, "load_env", lambda *args, **kwargs: "dummy")
+    monkeypatch.setattr(runner, "get_contract_from_explorer", lambda *args: {})
+    argv = ["config.yaml", "--skip-binary-comparison"]
+    if json_mode:
+        code = _run_main(monkeypatch, [*argv, "--json"], runner.process_config)
+        report = json.loads(capsys.readouterr().out)
+        assert code == 1
+        assert report["status"] == "error"
+        assert "Both source and bytecode comparisons are disabled" in report["error"]
+    else:
+        with pytest.raises(
+            ValueError, match="Both source and bytecode comparisons are disabled"
+        ):
+            _run_main(monkeypatch, argv, runner.process_config)
+
+
+def test_json_mode_reports_interrupt_during_setup_as_error(monkeypatch, capsys):
+    def interrupted(*args):
+        raise KeyboardInterrupt
+
+    code = _run_main(monkeypatch, ["config.yaml", "--json"], interrupted)
+
+    assert code == 1
+    report = json.loads(capsys.readouterr().out)
+    assert report["status"] == "error"
+    assert report["error"] == "KeyboardInterrupt: run interrupted by user"
+
+
+def test_directory_without_config_files_is_an_error(tmp_path):
+    (tmp_path / "mainnet").mkdir()
+    (tmp_path / "mainnet" / "core.yaml").write_text("contracts: {}\n")
+
+    with pytest.raises(FileNotFoundError, match="not recursive"):
+        runner._collect_config_paths(str(tmp_path))
+
+
 def test_human_mode_still_raises(monkeypatch):
     def boom(*args):
         raise RuntimeError("explorer is down")

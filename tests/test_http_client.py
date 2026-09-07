@@ -152,6 +152,79 @@ def test_plain_http_error_still_includes_response_body(monkeypatch):
     assert "Response: rate limited" in message
 
 
+def test_http_error_hides_request_url_with_credentials(monkeypatch):
+    from diffyscan.utils.custom_exceptions import ExplorerError
+
+    url = "https://example.com/api?apikey=SECRET-TOKEN"
+
+    class LeakyResponse(FailingResponse):
+        def raise_for_status(self):
+            import requests
+
+            raise requests.exceptions.HTTPError(
+                f"401 Client Error: Unauthorized for url: {url}",
+                response=self,  # type: ignore[arg-type]
+            )
+
+    monkeypatch.setattr(
+        f"{HTTP_CLIENT_MODULE}.requests.get",
+        lambda url, headers=None: LeakyResponse({}, "denied"),
+    )
+    with pytest.raises(ExplorerError) as exc_info:
+        fetch(url)
+
+    message = str(exc_info.value)
+    assert "SECRET-TOKEN" not in message
+    assert "401 Client Error" in message
+    assert "Response: denied" in message
+    # The chained requests exception would print the raw URL in tracebacks
+    assert exc_info.value.__cause__ is None
+    assert exc_info.value.__suppress_context__ is True
+
+
+def test_connection_error_hides_request_url(monkeypatch):
+    import requests
+
+    from diffyscan.utils.custom_exceptions import NodeError
+
+    url = "https://rpc.example.com/v3/SECRET-KEY"
+
+    def failing_post(url, data=None, headers=None):
+        raise requests.exceptions.ConnectionError(f"Failed to connect to {url}")
+
+    monkeypatch.setattr(f"{HTTP_CLIENT_MODULE}.requests.post", failing_post)
+    with pytest.raises(NodeError) as exc_info:
+        pull(url, "{}")
+
+    assert "SECRET-KEY" not in str(exc_info.value)
+
+
+@pytest.mark.parametrize("path", ["/v3/SECRET-KEY", "/api?apikey=SECRET-KEY"])
+def test_connection_error_hides_relative_request_url(monkeypatch, path):
+    import traceback
+
+    import requests
+    from urllib3.connectionpool import HTTPSConnectionPool
+    from urllib3.exceptions import MaxRetryError
+
+    from diffyscan.utils.custom_exceptions import NodeError
+
+    def failing_post(url, data=None, headers=None):
+        raise requests.exceptions.ConnectionError(
+            MaxRetryError(
+                HTTPSConnectionPool("rpc.example.com"), path, OSError("offline")
+            )
+        )
+
+    monkeypatch.setattr(f"{HTTP_CLIENT_MODULE}.requests.post", failing_post)
+    with pytest.raises(NodeError) as exc_info:
+        pull(f"https://rpc.example.com{path}", "{}")
+
+    assert "SECRET-KEY" not in str(exc_info.value)
+    assert "SECRET-KEY" not in "".join(traceback.format_exception(exc_info.value))
+    assert "Max retries exceeded" in str(exc_info.value)
+
+
 def test_no_direct_requests_usage_outside_http_client():
     package_dir = pathlib.Path(__file__).parent.parent / "diffyscan"
     direct_call_re = re.compile(

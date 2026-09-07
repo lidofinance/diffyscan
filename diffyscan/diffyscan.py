@@ -610,6 +610,13 @@ def process_config(
     config: dict = load_config(path)  # type: ignore[assignment]
     effective_allowed_diffs = build_effective_allowed_diffs(config)
 
+    enable_source_comparison = config.get("source_comparison", True)
+    if not enable_source_comparison and not enable_binary_comparison:
+        raise ValueError(
+            f"Both source and bytecode comparisons are disabled in {path}. "
+            "Enable source_comparison or remove --skip-binary-comparison."
+        )
+
     explorer_token = _load_explorer_token(config)
     github_api_token = load_env("GITHUB_API_TOKEN", masked=True, required=True)
 
@@ -617,7 +624,6 @@ def process_config(
     if enable_binary_comparison:
         remote_rpc_url = _setup_binary_comparison(config)
 
-    enable_source_comparison = config.get("source_comparison", True)
     if not enable_source_comparison:
         logger.warn(
             f'Source code comparison is disabled in {path}. To enable, set "source_comparison": true in the config'
@@ -882,12 +888,20 @@ def _collect_config_paths(path: str | None) -> list[str]:
     if os.path.isfile(path):
         return [path]
     if os.path.isdir(path):
-        return [
+        config_paths = [
             os.path.join(path, filename)
             for filename in sorted(os.listdir(path))
             if os.path.isfile(os.path.join(path, filename))
             and filename.lower().endswith(supported_extensions)
         ]
+        if not config_paths:
+            error_msg = (
+                f"No config files found directly in {path}. Discovery is not "
+                "recursive; pass a nested directory or a config file instead."
+            )
+            logger.error(error_msg)
+            raise FileNotFoundError(error_msg)
+        return config_paths
     error_msg = f"Specified config path {path} not found"
     logger.error(error_msg)
     raise FileNotFoundError(error_msg)
@@ -1056,6 +1070,11 @@ def main() -> None:
                 break
             if result["error"] is not None:
                 raise result["error"]
+    except KeyboardInterrupt:
+        # Ctrl+C outside process_config (e.g. while loading a config)
+        if not args.json:
+            raise
+        error = "KeyboardInterrupt: run interrupted by user"
     except Exception as exc:
         # In JSON mode the report must still reach stdout; keep the traceback on stderr.
         if not args.json:
@@ -1063,24 +1082,25 @@ def main() -> None:
         traceback.print_exc()
         error = f"{type(exc).__name__}: {exc}"
 
-    # A contract filter that matches nothing across all configs is a usage error
-    filter_unmatched = (
-        error is None
-        and bool(args.contract_filter)
-        and sum(r["matched_count"] for r in all_results) == 0
+    # A run that checked no contracts must never read as a verified run
+    nothing_checked = (
+        error is None and sum(r["matched_count"] for r in all_results) == 0
     )
-    if filter_unmatched:
-        logger.error(
-            "No contracts matched the --contract filter",
-            ", ".join(args.contract_filter),
-        )
+    if nothing_checked:
+        if args.contract_filter:
+            logger.error(
+                "No contracts matched the --contract filter",
+                ", ".join(args.contract_filter),
+            )
+        else:
+            logger.error("No contracts to check in the given configs")
         if not args.json:
             sys.exit(1)
 
     execution_time = time.time() - START_TIME
     enable_source_comparison = any(result["source_stats"] for result in all_results)
 
-    if error is None and not filter_unmatched:
+    if error is None and not nothing_checked:
         print_final_summary(
             all_results, enable_source_comparison, enable_binary_comparison
         )
@@ -1099,7 +1119,7 @@ def main() -> None:
     logger.okay(f"Done in {round(execution_time, 3)}s ✨" + " " * 100)
 
     exit_code = 0
-    if error is not None or filter_unmatched:
+    if error is not None or nothing_checked:
         exit_code = 1
     elif source_failures + bytecode_failures > 0:
         logger.error(

@@ -52,6 +52,7 @@ diffyscan path/to/configs
 ```
 
 Directory discovery is not recursive. Pass a nested directory separately.
+A directory without config files directly inside it is an error.
 
 With no path, Diffyscan checks for `config.json`, `config.yaml`, then
 `config.yml` in the current directory.

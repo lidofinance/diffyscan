@@ -137,10 +137,11 @@ def test_process_config_normalizes_explorer_chain_id(monkeypatch):
         "contracts": {ADDR: "Test"},
         "explorer_hostname": "api.etherscan.io",
         "explorer_chain_id": "1",
-        "source_comparison": False,
+        "source_comparison": True,
     }
     captured = {}
     _stub_process_config_dependencies(monkeypatch, config)
+    monkeypatch.setattr(runner, "run_source_diff", lambda *args: {})
 
     def fake_get_contract_from_explorer(
         token,
@@ -175,10 +176,11 @@ def test_process_config_resolves_explorer_hostname_from_env(monkeypatch):
     config = {
         "contracts": {ADDR: "Test"},
         "explorer_hostname_env_var": "EXPLORER_API_HOSTNAME",
-        "source_comparison": False,
+        "source_comparison": True,
     }
     captured = {}
     _stub_process_config_dependencies(monkeypatch, config)
+    monkeypatch.setattr(runner, "run_source_diff", lambda *args: {})
 
     def fake_load_env(variable_name, **kwargs):
         return {

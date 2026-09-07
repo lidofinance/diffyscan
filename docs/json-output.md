@@ -6,6 +6,9 @@
 human-readable log goes to the file named in `log_file`, tracebacks go to
 stderr. `--json` implies `--yes`, so the run does not prompt.
 
+A config with `source_comparison: false` combined with
+`--skip-binary-comparison` is an error: at least one comparison must be enabled.
+
 ```sh
 diffyscan path/to/config.yaml --json -E -G
 ```
@@ -25,7 +28,7 @@ diffyscan path/to/config.yaml --json -E -G
 
 | Key | Type | Meaning |
 | --- | --- | --- |
-| `status` | `"passed"`, `"failed"`, `"error"` | `passed`: exit code 0 and each contract verified. `failed`: an unallowed diff, or `--contract` matched nothing. `error`: the run aborted or was interrupted, or at least one contract was skipped because of an error. |
+| `status` | `"passed"`, `"failed"`, `"error"` | `passed`: exit code 0 and each contract verified. `failed`: an unallowed diff, or no contract was checked (empty configs, or `--contract` matched nothing). `error`: the run aborted or was interrupted, or at least one contract was skipped because of an error. |
 | `exit_code` | int | Process exit code, the same as without `--json`. |
 | `error` | string | Present when the run aborted, for example on a missing config or a bad token, or was interrupted with Ctrl+C. Format: `"<ExceptionType>: <message>"`. Contracts checked before the abort stay in `summary` and `contracts`. |
 | `duration_seconds` | float | Wall time of the run. |
