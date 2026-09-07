@@ -86,7 +86,7 @@ uv run diffyscan <config-path> --yes --cache-explorer --cache-github
 - `--cache-explorer` (`-E`) reuses cached explorer responses from `.diffyscan_cache/`
 - `--cache-github` (`-G`) reuses cached GitHub file fetches
 - `--support-brownie` enables recursive retrieval for brownie-verified contracts with flattened import paths
-- `--json` (`-J`) prints one JSON report to stdout instead of logs: per-contract `source`/`bytecode` status, diff hunks, `uncovered` bytecode ranges, error text, and ready `suggested_rule` entries for `allowed_diffs`. Prefer it when re-running to inspect results; check `status` (a skipped contract makes it `error` even with exit code 0)
+- `--json` (`-J`) prints one JSON report to stdout instead of logs: per-contract `source`/`bytecode` status, diff hunks, `uncovered` bytecode ranges, error text, and ready `suggested_rule` entries for `allowed_diffs`. Prefer it when re-running to inspect results; the format is specified in `docs/json-output.md`. Check `status`, not only the exit code (a skipped contract makes it `error` even with exit code 0)
 
 To accept known diffs, use config `allowed_diffs` rules. (The former `--allow-source-diff` / `--allow-bytecode-diff` CLI flags have been removed; they were blanket `any: true` shorthands.) When a diff is uncovered, diffyscan prints a ready-to-paste `allowed_diffs` snippet in the final summary — paste it into the config and replace the placeholder `reason`, tightening `any: true` to a granular facet (`immutables`, `byte_ranges`, `cbor_metadata`, `line_ranges`, `files`) wherever possible. See the "Granular allowlists" section of the README.
 

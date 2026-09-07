@@ -88,27 +88,48 @@ def test_report_merges_source_and_bytecode_per_contract():
 
     assert report["status"] == "failed"
     assert report["exit_code"] == 1
-    assert report["error"] is None
+    assert "error" not in report
     assert report["duration_seconds"] == 1.235
     assert report["summary"] == {
         "source": {"total": 1, "exact": 0, "allowed": 0, "failed": 1},
         "bytecode": {"total": 1, "exact": 1, "allowed": 0, "failed": 0},
-        "contract_errors": 0,
     }
 
-    [config] = report["configs"]
-    assert config["path"] == "config.yaml"
-    [contract] = config["contracts"]
+    [contract] = report["contracts"]
+    assert contract["config"] == "config.yaml"
     assert contract["address"] == ADDR
     assert contract["name"] == "Test"
-    assert contract["bytecode"]["status"] == "exact"
+    # Clean results carry only their status; empty fields are omitted.
+    assert contract["bytecode"] == {"status": "exact"}
     assert contract["source"]["status"] == "failed"
+    assert contract["source"]["files"] == 2
+    assert contract["source"]["with_diffs"] == 1
+    assert "missing" not in contract["source"]
     assert contract["source"]["suggested_rule"] == {"reason": "TODO", "line_ranges": []}
     # Only files that differ or are missing are listed.
-    assert [f["path"] for f in contract["source"]["diff_files"]] == [
-        "contracts/Changed.sol"
-    ]
-    assert contract["source"]["diff_files"][0]["hunks"][0]["tag"] == "replace"
+    [diff] = contract["source"]["diffs"]
+    assert diff["path"] == "contracts/Changed.sol"
+    assert diff["report"] == "digest/1/diffs/Changed.sol.html"
+    assert diff["hunks"][0]["tag"] == "replace"
+
+
+def test_allowed_diff_keeps_reason_and_facets_only():
+    stat = _bytecode_stat("allowed")
+    stat["matched_rule"] = {
+        "reason": "proxy admin immutable",
+        "immutables": [{"offset": 1, "value": "0x01"}],
+    }
+    stat["matched_facets"] = ["immutables"]
+
+    report = runner.build_json_report(
+        [_result([], [stat])], exit_code=0, error=None, duration_seconds=0
+    )
+
+    assert report["contracts"][0]["bytecode"] == {
+        "status": "allowed",
+        "facets": ["immutables"],
+        "reason": "proxy admin immutable",
+    }
 
 
 def test_report_status_reflects_error_and_pass():
@@ -116,14 +137,16 @@ def test_report_status_reflects_error_and_pass():
         [_result([], [_bytecode_stat()])], exit_code=0, error=None, duration_seconds=0
     )
     assert passed["status"] == "passed"
-    assert passed["configs"][0]["contracts"][0]["source"] is None
+    assert "source" not in passed["contracts"][0]
+    assert "source" not in passed["summary"]
 
     errored = runner.build_json_report(
         [], exit_code=1, error="FileNotFoundError: nope", duration_seconds=0
     )
     assert errored["status"] == "error"
     assert errored["error"] == "FileNotFoundError: nope"
-    assert errored["configs"] == []
+    assert errored["contracts"] == []
+    assert errored["summary"] == {}
 
 
 def test_swallowed_contract_errors_surface_as_error_status():
@@ -143,10 +166,10 @@ def test_swallowed_contract_errors_surface_as_error_status():
     # report must not read as "passed" when nothing was verified.
     assert report["status"] == "error"
     assert report["exit_code"] == 0
-    assert report["summary"]["contract_errors"] == 1
-    [contract] = report["configs"][0]["contracts"]
+    assert report["summary"] == {"contract_errors": 1}
+    [contract] = report["contracts"]
     assert contract["error"] == failure["error"]
-    assert contract["source"] is None and contract["bytecode"] is None
+    assert "source" not in contract and "bytecode" not in contract
 
 
 def test_logger_stdout_can_be_muted(capsys, tmp_path):

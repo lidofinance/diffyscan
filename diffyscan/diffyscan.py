@@ -813,7 +813,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--json",
         "-J",
-        help="Print a single JSON report to stdout instead of human-readable logs (implies --yes). Logs are still written to digest/<timestamp>/logs.txt.",
+        help="Print a single JSON report to stdout instead of human-readable logs (implies --yes). Logs are still written to digest/<timestamp>/logs.txt. Format: docs/json-output.md",
         action="store_true",
     )
     parser.add_argument(
@@ -884,8 +884,19 @@ def _collect_config_paths(path: str | None) -> list[str]:
     raise FileNotFoundError(error_msg)
 
 
-def _json_counts(all_results: list[dict], key: str) -> dict:
+def _compact(mapping: dict) -> dict:
+    """Drop keys whose value is None or an empty list so reports stay short."""
+    return {
+        key: value
+        for key, value in mapping.items()
+        if value is not None and value != []
+    }
+
+
+def _json_counts(all_results: list[dict], key: str) -> dict | None:
     stats = [stat for result in all_results for stat in result[key]]
+    if not stats:
+        return None
     return {
         "total": len(stats),
         "exact": sum(stat["status"] == "exact" for stat in stats),
@@ -894,39 +905,50 @@ def _json_counts(all_results: list[dict], key: str) -> dict:
     }
 
 
-def _json_source_entry(stat: dict) -> dict:
+def _json_rule_fields(stat: dict) -> dict:
+    rule = stat["matched_rule"] or {}
     return {
-        "status": stat["status"],
-        "files_count": stat["files_count"],
-        "files_found": stat["files_found"],
-        "identical_files": stat["identical_files"],
-        "files_with_diffs": stat["files_with_diffs"],
-        "matched_rule": stat["matched_rule"],
-        "matched_facets": stat["matched_facets"],
-        "diff_files": [
-            {
-                "path": file_result["path"],
-                "file_found": file_result["file_found"],
-                "diff_report": file_result["diff_report_filename"],
-                "hunks": file_result["hunks"],
-            }
-            for file_result in stat["files"]
-            if file_result["hunks"] or not file_result["file_found"]
-        ],
+        "facets": stat["matched_facets"],
+        "reason": rule.get("reason"),
         "suggested_rule": stat["suggestion_entry"],
     }
+
+
+def _json_source_entry(stat: dict) -> dict:
+    diffs = [
+        _compact(
+            {
+                "path": file_result["path"],
+                "missing": True if not file_result["file_found"] else None,
+                "report": file_result["diff_report_filename"],
+                "hunks": file_result["hunks"],
+            }
+        )
+        for file_result in stat["files"]
+        if file_result["hunks"] or not file_result["file_found"]
+    ]
+    missing = stat["files_count"] - stat["files_found"]
+    return _compact(
+        {
+            "status": stat["status"],
+            "files": stat["files_count"],
+            "missing": missing or None,
+            "with_diffs": stat["files_with_diffs"] or None,
+            "diffs": diffs,
+            **_json_rule_fields(stat),
+        }
+    )
 
 
 def _json_bytecode_entry(stat: dict) -> dict:
-    return {
-        "status": stat["status"],
-        "match": stat["match"],
-        "matched_rule": stat["matched_rule"],
-        "matched_facets": stat["matched_facets"],
-        "uncovered": stat["uncovered"],
-        "error": stat["error"],
-        "suggested_rule": stat["suggestion_entry"],
-    }
+    return _compact(
+        {
+            "status": stat["status"],
+            "uncovered": stat["uncovered"],
+            "error": stat["error"],
+            **_json_rule_fields(stat),
+        }
+    )
 
 
 def build_json_report(
@@ -936,38 +958,29 @@ def build_json_report(
     error: str | None,
     duration_seconds: float,
 ) -> dict:
-    configs = []
+    contracts: list[dict] = []
     for result in all_results:
-        contracts: dict[str, dict] = {}
-        for kind, key, to_entry in (
-            ("source", "source_stats", _json_source_entry),
-            ("bytecode", "bytecode_stats", _json_bytecode_entry),
-        ):
-            for stat in result[key]:
-                contract = contracts.setdefault(
-                    stat["contract_address"],
-                    {
-                        "address": stat["contract_address"],
-                        "name": stat["contract_name"],
-                        "source": None,
-                        "bytecode": None,
-                    },
-                )
-                contract[kind] = to_entry(stat)
-        for failure in result["contract_errors"]:
-            contract = contracts.setdefault(
-                failure["contract_address"],
-                {
-                    "address": failure["contract_address"],
-                    "name": failure["contract_name"],
-                    "source": None,
-                    "bytecode": None,
-                },
+        by_address: dict[str, dict] = {}
+
+        def entry(address: str, name: str) -> dict:
+            return by_address.setdefault(
+                address,
+                {"config": result["config_path"], "address": address, "name": name},
             )
-            contract["error"] = failure["error"]
-        configs.append(
-            {"path": result["config_path"], "contracts": list(contracts.values())}
-        )
+
+        for stat in result["source_stats"]:
+            entry(stat["contract_address"], stat["contract_name"])["source"] = (
+                _json_source_entry(stat)
+            )
+        for stat in result["bytecode_stats"]:
+            entry(stat["contract_address"], stat["contract_name"])["bytecode"] = (
+                _json_bytecode_entry(stat)
+            )
+        for failure in result["contract_errors"]:
+            entry(failure["contract_address"], failure["contract_name"])["error"] = (
+                failure["error"]
+            )
+        contracts.extend(by_address.values())
 
     contract_error_count = sum(len(r["contract_errors"]) for r in all_results)
     if error is not None or contract_error_count:
@@ -977,19 +990,21 @@ def build_json_report(
     else:
         status = "passed"
 
+    # "summary" and "contracts" are always present so consumers can rely on them.
     return {
-        "diffyscan_version": __version__,
         "status": status,
         "exit_code": exit_code,
-        "error": error,
+        **({"error": error} if error is not None else {}),
         "duration_seconds": round(duration_seconds, 3),
         "log_file": LOGS_PATH,
-        "summary": {
-            "source": _json_counts(all_results, "source_stats"),
-            "bytecode": _json_counts(all_results, "bytecode_stats"),
-            "contract_errors": contract_error_count,
-        },
-        "configs": configs,
+        "summary": _compact(
+            {
+                "source": _json_counts(all_results, "source_stats"),
+                "bytecode": _json_counts(all_results, "bytecode_stats"),
+                "contract_errors": contract_error_count or None,
+            }
+        ),
+        "contracts": contracts,
     }
 
 
