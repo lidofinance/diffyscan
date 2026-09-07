@@ -234,6 +234,54 @@ def _get_contract_from_etherscan(
     )
 
 
+def get_etherscan_creation_calldata(
+    token: str,
+    contract: str,
+    chain_id: int,
+    compiled_creation_code: str,
+) -> str:
+    """Extract arguments only after the audited creation code matches exactly."""
+    url = (
+        f"https://api.etherscan.io/v2/api?chainid={chain_id}"
+        f"&module=contract&action=getcontractcreation&contractaddresses={contract}"
+        f"&apikey={token}"
+    )
+    response = _fetch_etherscan_response(url, contract)
+    if response.get("status") != "1":
+        raise ExplorerError(f"Creation lookup failed: {response.get('result')}")
+    records = response.get("result") or []
+    record = next(
+        (
+            r
+            for r in records
+            if r.get("contractAddress", "").lower() == contract.lower()
+        ),
+        None,
+    )
+    if record is None:
+        raise ExplorerError(f"Creation lookup has no record for {contract}")
+    creation = _normalize_hex_string(record.get("creationBytecode"), prefix=False)
+    compiled = _normalize_hex_string(compiled_creation_code, prefix=False)
+    if (
+        not creation
+        or not compiled
+        or not creation.lower().startswith(compiled.lower())
+    ):
+        raise ExplorerError(
+            f"Creation bytecode does not start with compiled audited code for {contract}"
+        )
+    calldata = creation[len(compiled) :]
+    if not calldata:
+        raise ExplorerError(
+            f"Creation bytecode has no constructor arguments for {contract}"
+        )
+    logger.info(
+        "Constructor arguments recovered from creation transaction",
+        record.get("txHash"),
+    )
+    return calldata
+
+
 def _get_contract_from_zksync(zksync_explorer_hostname: str, contract: str) -> dict:
     zksync_explorer_link = (
         f"https://{zksync_explorer_hostname}/contract_verification/info/{contract}"

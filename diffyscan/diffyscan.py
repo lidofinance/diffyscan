@@ -36,6 +36,7 @@ from .utils.custom_exceptions import (
 from .utils.explorer import (
     compile_contract_from_explorer,
     get_contract_from_explorer,
+    get_etherscan_creation_calldata,
     get_explorer_chain_id,
     get_solc_sources,
     merge_libraries,
@@ -227,6 +228,29 @@ def run_bytecode_diff(
         return exact_match()
 
     logger.info("Static bytecodes do not match, simulating constructor via eth_call")
+
+    binary_config = config.get("bytecode_comparison") or {}
+    manual_constructor = any(
+        contract_address_from_config in (binary_config.get(key) or {})
+        for key in ("constructor_args", "constructor_calldata")
+    )
+    explorer_chain_id = get_explorer_chain_id(config)
+    if (
+        not explorer_constructor_arguments
+        and not manual_constructor
+        and config.get("explorer_hostname") == "api.etherscan.io"
+        and explorer_chain_id is not None
+        and any(
+            entry.get("type") == "constructor" and entry.get("inputs")
+            for entry in target_compiled_contract.get("abi", [])
+        )
+    ):
+        explorer_constructor_arguments = get_etherscan_creation_calldata(
+            _load_explorer_token(config),
+            contract_address_from_config,
+            explorer_chain_id,
+            contract_creation_code,
+        )
 
     calldata = get_calldata(
         contract_address_from_config,

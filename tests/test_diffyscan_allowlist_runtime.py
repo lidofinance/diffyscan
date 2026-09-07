@@ -1,7 +1,49 @@
+import pytest
+
 import diffyscan.diffyscan as runner
 from diffyscan.utils.custom_exceptions import CompileError, DeploymentSimulationError
 
 ADDR = "0x0000000000000000000000000000000000000001"
+
+
+@pytest.mark.parametrize("manual", [False, True])
+def test_missing_constructor_uses_creation_fallback_and_preserves_overrides(
+    monkeypatch, manual
+):
+    config = {"explorer_hostname": "api.etherscan.io", "explorer_chain_id": 1}
+    if manual:
+        config["bytecode_comparison"] = {"constructor_calldata": {ADDR: "abcd"}}
+    compiled = {
+        "abi": [{"type": "constructor", "inputs": [{"name": "n", "type": "uint256"}]}]
+    }
+    monkeypatch.setattr(runner, "_build_github_solc_input", lambda *args: ({}, []))
+    monkeypatch.setattr(
+        runner, "compile_contract_from_explorer", lambda *args: compiled
+    )
+    monkeypatch.setattr(
+        runner, "parse_compiled_contract", lambda *args: ("0x6001", "0x00", {})
+    )
+    monkeypatch.setattr(runner, "get_bytecode_from_node", lambda *args: "0x6002")
+    monkeypatch.setattr(runner, "_load_explorer_token", lambda *args: "token")
+    recovered = []
+    simulated = []
+
+    def recover(*args):
+        recovered.append(args)
+        return "abcd"
+
+    def simulate(data, *args, **kwargs):
+        simulated.append(data)
+        return "0x6002"
+
+    monkeypatch.setattr(runner, "get_etherscan_creation_calldata", recover)
+    monkeypatch.setattr(runner, "simulate_deployment", simulate)
+    result = runner.run_bytecode_diff(
+        ADDR, "Demo", {}, config, "github", False, False, "rpc", []
+    )
+    assert result["status"] == "exact"
+    assert simulated == ["0x6001abcd"]
+    assert recovered == ([] if manual else [("token", ADDR, 1, "0x6001")])
 
 
 def _config_with_any_rule() -> dict:

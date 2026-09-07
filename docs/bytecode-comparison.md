@@ -74,6 +74,11 @@ bytecode_comparison:
       - src/interfaces/IMissingInterface.sol
 ```
 
+When Etherscan V2 omits constructor arguments, Diffyscan tries
+`getcontractcreation`. It extracts the argument suffix only if the creation
+bytecode starts with the exact creation code compiled from the pinned sources.
+Manual overrides still take precedence; runtime comparison remains required.
+
 `constructor_args` and `constructor_calldata` describe the same input. Configure
 one of them for a contract.
 

@@ -3,13 +3,19 @@ import json
 import pytest
 
 from diffyscan.utils.calldata import get_calldata
-from diffyscan.utils.custom_exceptions import CalldataError, CompileError, NodeError
+from diffyscan.utils.custom_exceptions import (
+    CalldataError,
+    CompileError,
+    ExplorerError,
+    NodeError,
+)
 from diffyscan.utils.explorer import (
     _assert_libraries_linked,
     _get_contract_from_blockscout,
     _get_contract_from_etherscan,
     _parse_libraries,
     compile_contract_from_explorer,
+    get_etherscan_creation_calldata,
 )
 from diffyscan.utils.node_handler import (
     DEFAULT_DEPLOYMENT_GAS_LIMIT,
@@ -23,6 +29,43 @@ class DummyResponse:
 
     def json(self):
         return self.payload
+
+
+def test_creation_calldata_requires_exact_audited_creation_prefix(monkeypatch):
+    address = "0x0000000000000000000000000000000000000001"
+    payload = {
+        "status": "1",
+        "result": [
+            {
+                "contractAddress": address,
+                "creationBytecode": "0x60016002abcd",
+                "txHash": "0x123",
+            }
+        ],
+    }
+    monkeypatch.setattr(
+        "diffyscan.utils.explorer.fetch", lambda url: DummyResponse(payload)
+    )
+    assert get_etherscan_creation_calldata("token", address, 1, "0x60016002") == "abcd"
+    with pytest.raises(ExplorerError, match="compiled audited code"):
+        get_etherscan_creation_calldata("token", address, 1, "0x60016003")
+    with pytest.raises(ExplorerError, match="no constructor arguments"):
+        get_etherscan_creation_calldata("token", address, 1, "0x60016002abcd")
+
+
+def test_creation_calldata_rejects_wrong_address_and_api_failure(monkeypatch):
+    payload = {
+        "status": "1",
+        "result": [{"contractAddress": "0x02", "creationBytecode": "0x6001abcd"}],
+    }
+    monkeypatch.setattr(
+        "diffyscan.utils.explorer.fetch", lambda url: DummyResponse(payload)
+    )
+    with pytest.raises(ExplorerError, match="no record"):
+        get_etherscan_creation_calldata("token", "0x01", 1, "0x6001")
+    payload.update(status="0", result="Free API access is not supported")
+    with pytest.raises(ExplorerError, match="Creation lookup failed"):
+        get_etherscan_creation_calldata("token", "0x01", 1, "0x6001")
 
 
 def test_get_calldata_prefers_manual_config_over_explorer_metadata():
