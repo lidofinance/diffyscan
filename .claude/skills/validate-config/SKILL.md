@@ -32,7 +32,9 @@ Then inspect what the loader does not fully validate:
 
 Read [bytecode comparison](../../../docs/bytecode-comparison.md). Cross-check per-contract keys against `contracts`; flag unused entries. Preserve exact address spelling for `constructor_args` and `constructor_calldata`: their runtime lookup is case-sensitive, unlike allowed-diff rules. Check calldata hex, argument list shapes, mutually exclusive constructor overrides, `deployment_from` addresses and `extra_sources` paths. Library keys identify the definition file and apply to all contracts in the config.
 
-`load_config` validates `allowed_diffs` through `diffyscan/utils/allowed_diffs.py`. Schema validity does not justify a rule: inspect reason and scope. Use [allowed-diffs](../allowed-diffs/SKILL.md) when tightening or adding exceptions. `fail_on_bytecode_comparison_error: false` can let an outer contract error continue, but caught bytecode errors still produce failed results.
+`load_config` validates `allowed_diffs` through `diffyscan/utils/allowed_diffs.py`. Schema validity does not justify a rule: inspect reason and scope. Use [allowed-diffs](../allowed-diffs/SKILL.md) when tightening or adding exceptions.
+
+With bytecode comparison enabled, `fail_on_bytecode_comparison_error: false` lets outer per-contract errors continue, including explorer/source errors. With `--skip-binary-comparison`, that config flag is not applied. Caught bytecode errors produce failed results, except that a bytecode `any: true` rule marks `DeploymentSimulationError` as allowed.
 
 For changes under `configs/`, run:
 

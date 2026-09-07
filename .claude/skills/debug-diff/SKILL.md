@@ -29,7 +29,7 @@ Read [configuration](../../../docs/configuration.md) for prerequisites and [byte
 | Evidence | Check next |
 | --- | --- |
 | Missing source or GitHub 404 | Commit, `relative_root` and import-prefix resolution in `diffyscan/utils/github.py`; distinguish a wrong path from a missing dependency. |
-| Source hunks | Inspect report HTML and actual changes. Confirm deployment provenance before changing the pinned commit. Use `--support-brownie` only for flattened import-path resolution. |
+| Source hunks | Inspect report HTML and actual changes. Confirm deployment provenance before changing the pinned commit. `--support-brownie` enables recursive filename lookup that can select the first same-named file in another directory; confirm the resolved path before trusting the comparison. |
 | Compilation error | `run_bytecode_diff` in `diffyscan/diffyscan.py`, compiler/settings, dependencies, `extra_sources` and library definition paths. |
 | Calldata or simulation error | `diffyscan/utils/calldata.py`, explorer metadata, constructor ABI, `deployment_from`, RPC state and `deployment_gas_limit`. Recover calldata from exact creation input and ABI, not an address substring or cross-chain address match. |
 | Bytecode differences | `analyze_bytecode_diff` in `diffyscan/utils/binary_verifier.py` and evaluation in `diffyscan/utils/allowed_diffs.py`; inspect uncovered ranges, metadata, runtime length and immutable values. |

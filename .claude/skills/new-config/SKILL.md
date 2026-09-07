@@ -23,7 +23,7 @@ Use YAML unless another format is requested. Quote addresses and hexadecimal val
 - `github_repo`: `url`, full commit SHA, and `relative_root`;
 - `dependencies`: import-prefix mappings pinned to full commits, or `{}` for repository config tests.
 
-`network` is optional descriptive metadata. Add other optional fields only when needed. Store credential environment-variable names, not secrets. The runtime loads an explorer token and `GITHUB_API_TOKEN` even for adapters that do not send the explorer token. Bytecode comparison also needs the configured RPC URL; confirm its chain.
+`network` is optional descriptive metadata. Add other optional fields only when needed. Store credential environment-variable names, not secrets. Set `explorer_token_env_var` to an available token variable, or confirm the `ETHERSCAN_EXPLORER_TOKEN` fallback is available. The runtime loads an explorer token and `GITHUB_API_TOKEN` even for adapters that do not send the explorer token. Bytecode comparison also needs the configured RPC URL; confirm its chain.
 
 Read [bytecode comparison](../../../docs/bytecode-comparison.md) before adding manual overrides. Prefer explorer constructor metadata when it describes the deployment; manual calldata is not required for every constructor. Set only one of `constructor_args` and `constructor_calldata` per address. Key libraries by their definition file; the mapping applies to every contract in the config. Use `deployment_from` for a constructor that depends on its caller and `extra_sources` for required GitHub files missing from the explorer source set.
 

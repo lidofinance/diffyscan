@@ -33,7 +33,7 @@ Distinguish CREATE from CREATE2 when reasoning about cross-chain addresses. CREA
 | `missing GitHub sources for bytecode compilation` | Inspect the listed paths against commit, `relative_root` and dependency prefixes. Use `extra_sources` only for required files absent from the explorer set. |
 | `Failed to infer source path for library` or `unlinked libraries` | Locate the library declaration and solc link references; correct the definition-file key and address. |
 | Constructor address in both override maps | Keep the one supported by deployment evidence; match address casing to `contracts`. |
-| `intrinsic gas too low` during simulation | Inspect the request gas cap and chain/RPC limits; use a supported `deployment_gas_limit` instead of disabling bytecode comparison. |
+| `intrinsic gas too low` during simulation | Inspect request gas and chain/RPC limits. `deployment_gas_limit` is a top-level config key; its default is `2**24`. Do not raise it blindly: strict nodes can reject values above their cap. Check constructor inputs and RPC state before changing it. |
 | Contract-name mismatch | Compare requested address, chain, config name and returned name; establish verification status separately. |
 | Immutable mismatch | Map the exact offset/value to compiler immutable references and deployment behavior. Use a justified exact-value rule only after explaining the difference. |
 | Clean source diff but bytecode mismatch | Compare compiler version, settings, EVM version, linked libraries and constructor simulation; clean source alone does not prove bytecode. |

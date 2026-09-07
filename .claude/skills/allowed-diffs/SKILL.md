@@ -5,17 +5,21 @@ description: Adds, reviews or tightens Diffyscan allowed_diffs rules for explain
 
 Encode an explained difference without accepting unrelated drift. Run commands from the repository root.
 
+For review-only requests, inspect existing evidence and report findings or proposed rules; edit configs and run live diagnostics only when the task includes those actions.
+
 ## 1. Establish evidence
 
 Read the target config, [bytecode comparison](../../../docs/bytecode-comparison.md) and [JSON output](../../../docs/json-output.md). Confirm chain, contract, pinned source and why the difference is intended. If unknown, use [debug-diff](../debug-diff/SKILL.md) before changing policy.
 
 Use `suggested_rule` and actual diff evidence as a starting point. Suggestions describe observations; they do not justify accepting them. To replace a wildcard, remove only that rule for a diagnostic run or use a temporary config copy, then inspect uncovered differences. Preserve other rules and contract scope.
 
+A `files` suggestion can come from a source file missing on GitHub. Resolve the missing file's provenance, path or dependency before accepting the suggestion; it would otherwise allow the entire source omission.
+
 ## 2. Choose a rule
 
 Inspect `evaluate_source_rules`, `evaluate_bytecode_rules` and matchers in `diffyscan/utils/allowed_diffs.py` when coverage is unclear. Rules are alternatives: one rule must cover the differences; separate entries do not accumulate coverage. Combine necessary facets within one rule.
 
-- Prefer source `line_ranges` for exact hunks. Coordinates are 1-based; `count: 0` represents insertion/deletion. `files` accepts future changes throughout named files.
+- Prefer source `line_ranges` for exact hunk coordinates. Coordinates are 1-based; `count: 0` represents insertion/deletion. These rules do not pin line contents: different edits at the same coordinates are also accepted. `files` accepts future changes throughout named files.
 - Prefer bytecode `immutables` with exact on-chain values at compiler-derived offsets when those values explain the difference. `byte_ranges` constrains offsets and lengths but does not pin values there.
 - Add `cbor_metadata: true` for explained metadata differences, combined with other necessary facets in the same rule.
 - Use `constructor_args` or `constructor_calldata` for an explained alternate simulation, respecting mutual exclusion. Verify the resulting runtime; an override alone does not prove a match.
@@ -24,6 +28,8 @@ Inspect `evaluate_source_rules`, `evaluate_bytecode_rules` and matchers in `diff
 Every rule needs a concrete `reason` describing deployment evidence and intended scope. `any: true` excludes other facets and accepts future drift. Bytecode `any` can also suppress deployment-simulation errors, but not arbitrary compilation or calldata failures. Difficulty reproducing bytecode alone does not justify it. If a wildcard is justified within the requested policy change, document the limitation and align `KNOWN_WILDCARDS` in `tests/test_no_wildcard_regression.py`. Remove stale registry entries when removing wildcards; do not weaken the guard.
 
 The exclusivity of `any` applies inside one `allowed_diffs` rule. A constructor override in the separate `bytecode_comparison` section can coexist with an `any` rule; that combination is broad policy, not a schema conflict.
+
+Constructor overrides inside rules are evaluated only after the base simulation succeeds and still differs. They cannot recover missing base calldata or a reverting base constructor. Evidence-backed overrides in `bytecode_comparison` supply the base simulation inputs.
 
 ## 3. Verify the result
 

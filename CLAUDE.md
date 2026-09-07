@@ -62,7 +62,7 @@ Entry point: `diffyscan/diffyscan.py:main` — parses CLI args, loads config (JS
 
 - **explorer.py** — largest module; fetches/parses contracts from blockchain explorers, handles multi-chain API differences, library detection, EVM version normalization, solc compilation
 - **github.py** — GitHub API integration, file fetching with caching, dependency resolution (e.g. `@openzeppelin/contracts-v4.4`)
-- **binary_verifier.py** — EVM bytecode parsing into instructions, metadata trimming, deep comparison with immutable region exclusion
+- **binary_verifier.py** — EVM bytecode parsing into instructions, metadata separation, and difference analysis with immutable region annotations
 - **compiler.py** — solc binary download (platform-aware), SHA256 verification, compilation via standard JSON
 - **encoder.py** — ABI encoding for constructor arguments (address, bool, int/uint, bytes, tuples, arrays)
 - **calldata.py** — resolves constructor calldata from config or explorer metadata
