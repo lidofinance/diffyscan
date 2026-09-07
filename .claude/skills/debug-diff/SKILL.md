@@ -1,106 +1,47 @@
 ---
 name: debug-diff
-description: Debug a failed diffyscan verification run. Analyzes diffs, identifies root causes. Use when diffyscan exits with non-zero or shows unexpected diffs.
-argument-hint: [config-path-or-contract-address]
+description: Diagnoses failed or incomplete Diffyscan runs, unexpected source or bytecode differences, compilation failures and explorer or RPC errors. Use also when JSON reports error despite exit code 0. Explained exception changes belong to allowed-diffs; static config review belongs to validate-config.
+argument-hint: "[config-path-or-contract-address]"
 ---
 
-Help debug a failed diffyscan verification. The user may provide a config path, contract address, or describe the failure.
+Find the cause while preserving requested verification scope. Run commands from the repository root.
 
-## Diagnostic steps
+## 1. Establish the failing run
 
-### 1. Check the digest output
-Each run creates a timestamped directory under `digest/`. The timestamp is `int(time.time())` captured at process start (see `diffyscan/utils/constants.py`):
-- `digest/{timestamp}/logs.txt` -- full run log (written by `Logger` in `diffyscan/utils/logger.py`)
-- `digest/{timestamp}/diffs/{contract_address}/{filename}.html` -- per-file HTML source diff reports
+Use the supplied JSON report and its `log_file`, or locate the digest matching the config, command and contract. Do not assume the newest digest belongs to the task. Read [JSON output](../../../docs/json-output.md) for status and partial-result semantics.
 
-Find the most recent run:
-```bash
-ls -lt digest/ | grep "^d" | head -5
+When a rerun is needed:
+
+```sh
+uv run diffyscan path/to/config.yaml --json -E -G --contract 0xADDRESS
 ```
 
-Then inspect its contents:
-```bash
-# View the log
-cat digest/<timestamp>/logs.txt
+Omit the filter for the full config. `--json` implies `--yes`; stdout is the report and tracebacks go to stderr. Read `status`, top-level and contract errors, comparison results and coverage. Exit code 0 alone is insufficient. Missing entries after an abort are not verified contracts. Distinguish an unmatched filter, an empty config and both comparisons disabled from success.
 
-# List HTML diff reports for a specific contract
-ls digest/<timestamp>/diffs/<contract_address>/
-```
+Caches accelerate diagnosis. Omit `-E` if explorer metadata may be stale; do not delete shared caches indiscriminately. Keep tokens and credential-bearing URLs out of shared output.
 
-### 2. Identify the type of failure
+Use [diagnostic recipes](references/diagnostic-recipes.md) for locating digest evidence, recovering constructor calldata or following an error-specific check.
 
-**Source code diffs** -- files differ between GitHub and the blockchain explorer:
-- Check if the `commit` in `github_repo` matches what was actually deployed
-- Check if `relative_root` is correct (sources may live in a subdirectory of the repo)
-- Check if entries in `dependencies` have the right `commit` hashes and `relative_root` paths
-- Look for import path mismatches (flat vs nested -- may need `--support-brownie` for brownie-verified contracts)
-- Open the HTML diff files (`digest/{timestamp}/diffs/{address}/*.html`) to see exactly which lines differ
-- The report table in logs shows columns: `#`, `Filename`, `Found`, `Diffs`, `Origin`, `Report`
+## 2. Trace the cause
 
-**Bytecode diffs** -- compiled bytecode does not match on-chain:
-- Missing or wrong constructor arguments -- see `constructor_calldata` or `constructor_args` under the `bytecode_comparison` config key
-- Missing libraries -- check if the contract uses external libraries that need addresses in `bytecode_comparison.libraries`
-- Wrong EVM version -- the explorer may report a different version than expected
-- Immutable variables -- `deep_match_bytecode()` in `diffyscan/utils/binary_verifier.py` compares instruction-by-instruction and tolerates differences that fall within known immutable reference regions. If all diffs are in immutable positions it logs a warning and reports a non-match. To accept it, add a granular `allowed_diffs.bytecode` rule with the exact on-chain `immutables` values (diffyscan prints a ready-to-paste suggestion in the final summary) rather than a blanket wildcard. Differences outside immutable regions raise `BinVerifierError`, which `process_config` catches and records as a non-match (`match=False`) — it does not abort the run
-- Optimizer settings mismatch -- the solcInput from the explorer includes optimizer settings; the GitHub recompilation must match
-- Flat-source contracts -- see **Known limitations** section below
+Read [configuration](../../../docs/configuration.md) for prerequisites and [bytecode comparison](../../../docs/bytecode-comparison.md) for the trust model and overrides. Consult the relevant implementation:
 
-**Compilation errors** (raised as `CompileError`):
-- Missing GitHub sources -- a dependency is not configured or has a wrong `relative_root`. The error message is: `"missing GitHub sources for bytecode compilation; count=N; first=path1, path2..."` (from `run_bytecode_diff()` in `diffyscan/diffyscan.py`)
-- Solc version mismatch -- check that the compiler version exists for the platform (solc binaries are cached in `~/.cache/diffyscan/solc/` or equivalent via `XDG_CACHE_HOME`)
+| Evidence | Check next |
+| --- | --- |
+| Missing source or GitHub 404 | Commit, `relative_root` and import-prefix resolution in `diffyscan/utils/github.py`; distinguish a wrong path from a missing dependency. |
+| Source hunks | Inspect report HTML and actual changes. Confirm deployment provenance before changing the pinned commit. `--support-brownie` enables recursive filename lookup that can select the first same-named file in another directory; confirm the resolved path before trusting the comparison. |
+| Compilation error | `run_bytecode_diff` in `diffyscan/diffyscan.py`, compiler/settings, dependencies, `extra_sources` and library definition paths. |
+| Calldata or simulation error | `diffyscan/utils/calldata.py`, explorer metadata, constructor ABI, `deployment_from`, RPC state and `deployment_gas_limit`. Recover calldata from exact creation input and ABI, not an address substring or cross-chain address match. |
+| Bytecode differences | `analyze_bytecode_diff` in `diffyscan/utils/binary_verifier.py` and evaluation in `diffyscan/utils/allowed_diffs.py`; inspect uncovered ranges, metadata, runtime length and immutable values. |
+| Explorer error | Dispatch in `diffyscan/utils/explorer.py`, token lookup, response shape and verification status. A name mismatch may mean the wrong name, address or chain; it does not alone prove the contract is unverified. |
+| HTTP challenge or RPC error | `diffyscan/utils/http_client.py`, `DIFFYSCAN_USER_AGENT`, endpoint availability, chain and supported RPC methods. |
 
-**Constructor calldata errors** (raised as `CalldataError` from `diffyscan/utils/calldata.py`):
-- `"No constructor calldata found for 0x... (not in config and not in explorer metadata)"` -- need to add `constructor_calldata` or `constructor_args` to the config
-- `"Contract 0x... found in both 'constructor_args' and 'constructor_calldata'"` -- only one should be specified per contract
+Flattened submissions may lack settings needed to reproduce bytecode. Inspect the payload and compilation before attributing a mismatch to that limitation. Proxy immutable differences need an explanation for the observed values. Neither case alone justifies a wildcard or dropping bytecode verification.
 
-**Network/API errors**:
-- Explorer API rate limiting -- try `--cache-explorer` to reuse cached responses (cached in `.diffyscan_cache/`)
-- RPC errors -- check that `REMOTE_RPC_URL` env var is valid and the node supports `eth_call`
-- Explorer token missing -- the config key `explorer_token_env_var` names the env var holding the API token; if absent, falls back to `ETHERSCAN_EXPLORER_TOKEN`
+Draft exception examples only for observed and explained differences. In particular, flattened source does not by itself establish a metadata mismatch: omit `cbor_metadata` unless that difference is evidenced. Leave unknown causes and values unresolved rather than filling them into a plausible `reason`.
 
-### 3. Common fixes
+## 3. Fix and verify
 
-| Symptom | Likely fix |
-|---------|-----------|
-| `"missing GitHub sources for bytecode compilation"` | Add the missing dependency to `dependencies` in the config with correct `url`, `commit`, and `relative_root` |
-| Source diffs in OpenZeppelin or other dependency imports | Check the dependency `commit` hash matches what was used at deploy time |
-| Bytecode mismatch after constructor | Add `constructor_calldata` (raw hex) or `constructor_args` (ABI-typed values) for the contract under `bytecode_comparison` |
-| `"Failed to infer source path for library '...' from explorer metadata"` | Add library addresses to `bytecode_comparison.libraries` keyed by `"path/to/File.sol": {"LibName": "0xAddr"}` |
-| All files show diffs | Wrong `commit` or `relative_root` in `github_repo` |
-| Single contract fails | May need a per-contract `constructor_calldata` or `constructor_args` entry |
-| `"Failed in binary comparison: Bytecodes have differences not on the immutable reference position"` | Real bytecode mismatch -- check compiler version, optimizer settings, EVM version, and library addresses |
-| `"Exiting with non-zero code due to unallowed diffs"` | Either fix the diffs or add a granular `allowed_diffs` rule to the config for known-acceptable diffs (copy the suggestion diffyscan prints in the final summary; prefer `immutables`/`byte_ranges`/`line_ranges`/`files`/`cbor_metadata` over `any: true`) |
-| `"Contract name in config does not match with blockchain explorer ... !="` | Contract not verified on explorer — comment it out or verify it on the explorer first |
-| `"Failed to get calldata: Explorer metadata has empty constructor calldata for 0x..."` | Factory-created contract — Etherscan has no constructor args. Add `constructor_calldata` manually (extract via `getsourcecode` API `ConstructorArguments`, `debug_traceTransaction` trace, or cross-chain reuse) |
-| `"HTTP error: 404 ... contents/<path>.sol"` | Missing or wrong `dependencies` entry — the explorer source uses a path prefix not covered by config dependencies. Add a mapping for that prefix |
-| `"err: intrinsic gas too low"` | Chain gas model needs a higher deployment gas cap (known on Mantle) — set `deployment_gas_limit` in the config (e.g. `30000000000`) |
-| All proxy bytecode diffs say "immutable reference position" | Normal for TransparentUpgradeableProxy — ProxyAdmin address baked in as immutable. Add an `allowed_diffs.bytecode` rule with the exact `immutables` values (from the printed suggestion) to accept it |
+Make the smallest correction supported by evidence. For diagnosis-only requests, report it without editing. For intended differences, use [allowed-diffs](../allowed-diffs/SKILL.md). Keep unresolved contracts in scope instead of commenting them out or disabling comparisons to pass.
 
-### 4. Suggest a re-run command
-After fixing, suggest:
-```bash
-uv run diffyscan <config-path> --yes --cache-explorer --cache-github
-```
-
-- `--yes` (`-Y`) skips the interactive prompt before each contract
-- `--cache-explorer` (`-E`) reuses cached explorer responses from `.diffyscan_cache/`
-- `--cache-github` (`-G`) reuses cached GitHub file fetches
-- `--support-brownie` enables recursive retrieval for brownie-verified contracts with flattened import paths
-- `--json` (`-J`) prints one JSON report to stdout instead of logs: per-contract `source`/`bytecode` status, diff hunks, `uncovered` bytecode ranges, error text, and ready `suggested_rule` entries for `allowed_diffs`. Prefer it when re-running to inspect results; the format is specified in `docs/json-output.md`. Check `status`, not only the exit code (a skipped contract makes it `error` even with exit code 0)
-
-To accept known diffs, use config `allowed_diffs` rules. (The former `--allow-source-diff` / `--allow-bytecode-diff` CLI flags have been removed; they were blanket `any: true` shorthands.) When a diff is uncovered, diffyscan prints a ready-to-paste `allowed_diffs` snippet in the final summary — paste it into the config and replace the placeholder `reason`, tightening `any: true` to a granular facet (`immutables`, `byte_ranges`, `cbor_metadata`, `line_ranges`, `files`) wherever possible. See the "Granular allowlists" section of the README.
-
-## Known limitations
-
-If any of these apply, **explicitly tell the user** — these are inherent constraints of the tool, not bugs to debug.
-
-### Flat-source (non-standard-JSON) contracts
-
-When a contract was verified on the explorer as a single flattened file (the explorer's `SourceCode` is a plain string, not JSON wrapped in `{{}}`), diffyscan **cannot reliably reproduce the bytecode**. Two problems arise:
-
-1. **Lost compiler settings** — diffyscan reconstructs a minimal solc input with only basic optimizer settings. Remappings, via-IR, and other original compiler settings are not available from the explorer for flat-verified contracts. Bytecode mismatches are **expected** even when source diffs are clean.
-2. **Contract name used as source key** — the explorer's `ContractName` field is used as the solc source file key (e.g. `{"sources": {"MyContract": {...}}}`). If the explorer does not return `ContractName`, or the name does not match the actual `contract` declaration in the Solidity source, the compiled output cannot be remapped and `get_target_compiled_contract()` will fail.
-
-**How to detect**: check the explorer response or logs — if the solc input has a source key that looks like a contract name (no `.sol` extension, no path separators) rather than a file path, the contract was flat-verified.
-
-**What to tell the user**: explain that bytecode comparison is unreliable for this contract due to the flat-source limitation. Recommend accepting the mismatch with an `allowed_diffs.bytecode` rule (use `any: true` here only because the bytecode genuinely cannot be reproduced — and say so in the `reason`), and note that source comparison is still valid.
+Rerun the affected contract after a fix, then the requested scope when available. Report root cause, evidence paths, changed fields, final statuses and unknowns. State any missing credentials or external dependency that prevented live confirmation.

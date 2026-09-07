@@ -1,130 +1,51 @@
 ---
 name: validate-config
-description: Validate a diffyscan config file for correctness before running verification. Checks schema, required fields, type correctness, and common mistakes.
-argument-hint: [config-path]
+description: Reviews an existing Diffyscan YAML or JSON config for load errors, runtime prerequisites, pinned sources, address mappings and broad exceptions. Use for config review or preflight validation; failed live runs belong to debug-diff and new deployment setup to new-config.
+argument-hint: "[config-path]"
 ---
 
-Validate the diffyscan config file at `$ARGUMENTS` (or ask for the path if not provided).
+Validate the requested config without claiming static checks prove a deployment matches. Run commands from the repository root.
 
-Read the config file using the Read tool. Use the TypedDict definitions in `diffyscan/utils/custom_types.py` as the schema reference.
+## 1. Load and inspect
 
-## Schema reference
+Read the config, [configuration reference](../../../docs/configuration.md), `diffyscan/utils/common.py` and `diffyscan/utils/custom_types.py`. TypedDicts describe structure; they do not enforce it at runtime. Check the actual loader:
 
-The `Config` TypedDict (`diffyscan/utils/custom_types.py`) defines:
+```sh
+uv run python - path/to/config.yaml <<'PY'
+import sys
+from diffyscan.utils.common import load_config
+load_config(sys.argv[1])
+print("Config load passed")
+PY
+```
 
-**Required fields:**
-- `contracts` — `dict[str, str]` mapping address to contract name
-- `network` — `str` (declared required in TypedDict but currently unused at runtime; include it for forward-compatibility)
-- `explorer_hostname` — `str`
-- `github_repo` — `GithubRepo` with required keys: `url`, `commit`, `relative_root`
+Then inspect what the loader does not fully validate:
 
-**Optional fields (NotRequired):**
-- `dependencies` — `dict[str, GithubRepo]`
-- `explorer_token_env_var` — `str`
-- `explorer_chain_id` — `int`
-- `bytecode_comparison` — `BinaryConfig`
-- `fail_on_bytecode_comparison_error` — `bool`
-- `source_comparison` — `bool`
+- Nonempty `contracts`, string names and valid 20-byte hexadecimal addresses. Quote YAML hex keys and values, including nested overrides.
+- `github_repo` and each dependency have `url`, a full commit SHA and `relative_root`. Dependency prefixes match published source paths. Repository config tests require `dependencies`, including when empty.
+- An explicit explorer hostname or `explorer_hostname_env_var`; the runtime resolves the latter when the explicit hostname is absent. `network`, `audit_url` and `metadata` are optional descriptive fields.
+- `get_explorer_chain_id` in `diffyscan/utils/explorer.py` converts the configured value with `int()`. Check that it identifies the intended chain; conversion alone does not validate a chain ID. Confirm the API and RPC agree; the CLI does not compare their chain IDs.
+- Credential variable names and availability without printing values. Explorer token fallback is supported; an omitted token variable name is not inherently invalid. A token value is loaded even for adapters that do not send it.
+- Boolean flags and enabled comparisons. `source_comparison: false` combined with `--skip-binary-comparison` is rejected.
 
-**Additional fields found in real configs but not in the TypedDict:**
-- `explorer_hostname_env_var` — `str` (CI convention only — diffyscan does NOT resolve this at runtime; external tooling must set `explorer_hostname` before invoking)
-- `audit_url` — `str`
-- `metadata` — `dict` (free-form project metadata)
+## 2. Review overrides and exceptions
 
-The `BinaryConfig` TypedDict has all-optional fields:
-- `constructor_calldata` — `dict[str, str]` mapping address to raw hex calldata
-- `constructor_args` — `dict[str, list]` mapping address to a list of ABI-encodable arguments
-- `libraries` — `dict[str, dict[str, str]]` mapping source path to `{LibraryName: "0xAddress"}`
+Read [bytecode comparison](../../../docs/bytecode-comparison.md). Cross-check per-contract keys against `contracts`; flag unused entries. Preserve exact address spelling for `constructor_args` and `constructor_calldata`: their runtime lookup is case-sensitive, unlike allowed-diff rules. Check calldata hex, argument list shapes, mutually exclusive constructor overrides, `deployment_from` addresses and `extra_sources` paths. Library keys identify the definition file and apply to all contracts in the config.
 
-## Checks to perform
+`load_config` validates `allowed_diffs` through `diffyscan/utils/allowed_diffs.py`. Schema validity does not justify a rule: inspect reason and scope. Use [allowed-diffs](../allowed-diffs/SKILL.md) when tightening or adding exceptions.
 
-### 1. Required fields
+With bytecode comparison enabled, `fail_on_bytecode_comparison_error: false` lets outer per-contract errors continue, including explorer/source errors. With `--skip-binary-comparison`, that config flag is not applied. Caught bytecode errors produce failed results, except that a bytecode `any: true` rule marks `DeploymentSimulationError` as allowed.
 
-- `contracts` must be present and be a non-empty dict
-- `explorer_hostname` must be a string (or alternatively `explorer_hostname_env_var` must be present; real configs use one or both -- see `tests/test_configs.py` line 32)
-- `github_repo` must be present and contain all three keys: `url`, `commit`, `relative_root`
-- `network` is declared required in the TypedDict. Warn if missing, noting it is not used at runtime today but may be in the future
+For changes under `configs/`, run:
 
-### 2. YAML hex coercion (what the codebase actually validates)
+```sh
+uv run pytest -q tests/test_configs.py tests/test_no_wildcard_regression.py
+```
 
-The function `_validate_yaml_hex_keys` in `diffyscan/utils/common.py` checks YAML configs for hex values that PyYAML silently coerced from strings to integers. It raises `ValueError` if any are found. Specifically it checks:
+These tests inspect repository configs, not arbitrary files outside `configs/`. Loader success alone does not cover all schema fields, source availability, compiler reproduction or on-chain correctness.
 
-- **`contracts` keys** (address) -- raises if parsed as `int`
-- **`contracts` values** (contract name) -- raises if parsed as `int`
-- **`bytecode_comparison.constructor_args` keys** -- raises if parsed as `int`
-- **`bytecode_comparison.constructor_calldata` keys** -- raises if parsed as `int`
-- **`bytecode_comparison.libraries` values** (the library address strings) -- raises if parsed as `int`
+## 3. Report
 
-This validation only runs for YAML files, not JSON. It only detects `int` coercion; it does NOT validate address format (0x prefix, 42 chars, valid hex, checksum).
+List concrete errors with config keys and locations, then evidence gaps or recommendations. Separate loader success, repository tests and live verification. If live verification was requested, run it with `--json` and inspect status, errors and coverage using [JSON output](../../../docs/json-output.md); otherwise report the static verdict and its limits. Edit the config only when the task includes fixes.
 
-### 3. Address format (best-practice recommendation only)
-
-The codebase does NOT validate address format at config load time. There is no runtime check for 0x prefix, 42-character length, or hex validity on addresses in the config. Addresses are passed directly to the explorer API and RPC node.
-
-However, the test suite (`tests/test_configs.py:test_contract_addresses_format`) asserts all `contracts` keys start with `0x` and are 42 characters. Recommend the same for any address in the config:
-- Contract addresses in `contracts` keys
-- Addresses in `bytecode_comparison.constructor_calldata` keys
-- Addresses in `bytecode_comparison.constructor_args` keys
-- Library addresses in `bytecode_comparison.libraries` values
-
-### 4. Explorer configuration
-
-- If `explorer_token_env_var` is missing, the runtime warns and falls back to `ETHERSCAN_EXPLORER_TOKEN` (see `_load_explorer_token` in `diffyscan/diffyscan.py`). Warn if absent.
-- `explorer_chain_id` is optional; the runtime does not warn if missing (retrieved with `warn_if_missing=False`)
-- `explorer_hostname` is retrieved with `warn_if_missing=True`; if absent the runtime logs a warning
-
-### 5. GitHub repo fields
-
-- `github_repo.url` should look like a GitHub URL
-- `github_repo.commit` should ideally be a full 40-character SHA hex string (warn if short or non-hex)
-- `github_repo.relative_root` can be an empty string (commonly is for root-level repos)
-
-### 6. Dependencies
-
-- Each dependency value must have `url`, `commit`, `relative_root` (same `GithubRepo` shape)
-- Dependency keys should match import path prefixes used in Solidity sources (e.g. `@openzeppelin/contracts`, `lib/openzeppelin-contracts-upgradeable/contracts`)
-- The runtime resolves dependencies by checking if a source file path starts with `"{dep_name}/"` (see `resolve_dep` in `diffyscan/utils/github.py`)
-
-### 7. Bytecode comparison
-
-- `constructor_calldata` values should be hex strings (the runtime strips `0x` prefix via `normalize_calldata` and validates hex content)
-- `constructor_args` values must be lists (arrays of ABI-encodable values)
-- A contract address must NOT appear in both `constructor_calldata` and `constructor_args` -- the runtime raises `CalldataError` if it does (see `get_calldata` in `diffyscan/utils/calldata.py`)
-- `libraries` maps Solidity source file paths to `{LibraryName: "0xAddress"}` dicts
-
-### 8. Cross-reference checks
-
-What the runtime actually does:
-- Addresses in `bytecode_comparison.constructor_calldata` and `constructor_args` are looked up by contract address at runtime -- if a contract has a constructor but its address is not in either dict and the explorer has no constructor arguments, the runtime raises `CalldataError`
-- Contracts listed in `contracts` that have no corresponding entry in `bytecode_comparison` will still work -- they fall back to explorer-provided constructor arguments
-- There is no compile-time cross-reference validation in the codebase; all checks happen at runtime
-
-Recommended cross-reference warnings:
-- Warn if an address appears in `constructor_calldata` or `constructor_args` but not in `contracts` (it would be unused)
-- Warn if a contract is in both `constructor_calldata` and `constructor_args` (runtime error)
-
-### 9. Allowed diffs
-
-`allowed_diffs` (optional) declares expected diffs. It is validated at config-load time by `validate_allowed_diffs_config` in `diffyscan/utils/allowed_diffs.py`, which raises `ValueError` on:
-- top-level not a mapping, or a key other than `bytecode` / `source`
-- an address not present in `contracts` (case-insensitive; a casing mismatch logs a warning)
-- an empty rule list, or a rule missing a non-empty `reason`
-- `any` combined with any other facet, or `any` not literally `true`
-- a rule with no facet and no `any`
-- bytecode: both `constructor_args` and `constructor_calldata`; `cbor_metadata` not `true`; duplicate/negative immutable `offset`; non-positive `byte_ranges.length`; invalid/odd-length hex in `value`/`constructor_calldata`
-- source: `line_ranges` span with `start < 1` or `count < 0`; empty `files`; unknown keys
-
-Beyond schema validity, **flag every `any: true` rule as a smell**: it suppresses all diffs for that contract and hides future drift. Recommend tightening it to a granular facet (`immutables`, `byte_ranges`, `cbor_metadata`, `line_ranges`, `files`) using the suggestion diffyscan prints in its final summary. `any: true` is acceptable only when a diff genuinely cannot be scoped (e.g. unreproducible bytecode), and the `reason` should say so. Note: `tests/test_no_wildcard_regression.py` fails CI on any new wildcard not listed in its `KNOWN_WILDCARDS`.
-
-### 10. Optional flags
-
-- `fail_on_bytecode_comparison_error` defaults to `true` if absent
-- `source_comparison` defaults to `true` if absent; set to `false` to skip source diffs
-
-## Output
-
-Report issues in two categories:
-- **Errors** (must fix): missing required fields, type mismatches, YAML hex coercion, duplicate entries in both `constructor_calldata` and `constructor_args`
-- **Warnings** (should review): missing `explorer_token_env_var`, short commit SHA, addresses not matching 0x/42-char format, missing `network`, unused bytecode_comparison entries
-
-If the config looks good, confirm it passes validation.
+Treat placeholder-looking addresses and commits as unverified inputs, not proof that a fetch will fail. An empty `dependencies` map is not an error without evidence of unresolved imports: those sources may belong to the primary repository. Report supported defaults as defaults rather than missing-field findings, and keep a review-only answer focused on findings instead of rewriting a valid config.
