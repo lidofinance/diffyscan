@@ -34,9 +34,19 @@ uv run black diffyscan/ tests/
 # Run pre-commit hooks
 uv run pre-commit run --all-files
 
-# Install git hooks (pre-commit + commit-msg via gitlint)
+# Install git hooks (pre-commit + commit-msg)
 uv run pre-commit install --hook-type pre-commit --hook-type commit-msg
 ```
+
+## Task workflows
+
+Use the relevant repository skill; read linked references only when needed:
+
+- [new-config](.claude/skills/new-config/SKILL.md): create or extend a deployment config.
+- [validate-config](.claude/skills/validate-config/SKILL.md): review config structure and runtime prerequisites.
+- [debug-diff](.claude/skills/debug-diff/SKILL.md): diagnose failed or incomplete verification.
+- [allowed-diffs](.claude/skills/allowed-diffs/SKILL.md): justify and scope expected differences or tighten wildcards.
+- [add-explorer](.claude/skills/add-explorer/SKILL.md): extend explorer routing or response parsing.
 
 ## Architecture
 
@@ -57,7 +67,8 @@ Entry point: `diffyscan/diffyscan.py:main` — parses CLI args, loads config (JS
 - **encoder.py** — ABI encoding for constructor arguments (address, bool, int/uint, bytes, tuples, arrays)
 - **calldata.py** — resolves constructor calldata from config or explorer metadata
 - **node_handler.py** — RPC calls: `eth_getCode`, `eth_chainId`, `eth_call`
-- **common.py** — config loading (with YAML hex address validation), HTTP helpers, caching with SHA256 validation
+- **common.py** — config loading (with YAML hex address validation), caching with SHA256 validation
+- **http_client.py** — shared HTTP requests, User-Agent and error handling
 - **custom_types.py** — TypedDict definitions: `Config`, `BinaryConfig`, `ExplorerContract`, `GithubRepo`
 - **custom_exceptions.py** — exception hierarchy; `ExceptionHandler` controls fail-or-log behavior
 
@@ -87,5 +98,5 @@ Supports loading from `.env` (see `.env.example`), or set directly: `GITHUB_API_
 ## Code style
 
 - Formatter: **black** (enforced via pre-commit)
-- Commit messages: validated by **gitlint**
+- Commit messages: validated by **conventional-pre-commit**
 - Python >=3.11
