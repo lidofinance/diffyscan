@@ -135,3 +135,10 @@ messages:
 ```sh
 diffyscan path/to/configs --yes --quiet
 ```
+
+For scripts and coding agents, `--json` replaces the logs on stdout with one
+JSON report (see [CLI Reference](cli.md#json-output)):
+
+```sh
+diffyscan path/to/configs --json
+```

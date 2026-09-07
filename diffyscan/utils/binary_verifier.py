@@ -371,7 +371,7 @@ def _format_instruction_diff(local_instruction, remote_instruction, immutables):
 def _print_instruction_diffs(instruction_pairs, checkpoints, immutables):
     for prev_idx, cur_idx in zip(checkpoints, checkpoints[1:]):
         if prev_idx != cur_idx - 1:
-            print("...")
+            logger.stdout("...")
 
         local_instruction, remote_instruction = instruction_pairs[cur_idx]
         (opcode, opname, params), _ = _format_instruction_diff(
@@ -379,7 +379,7 @@ def _print_instruction_diffs(instruction_pairs, checkpoints, immutables):
             remote_instruction,
             immutables,
         )
-        print(f"{to_hex(cur_idx, 4)} {opcode} {opname} {params}")
+        logger.stdout(f"{to_hex(cur_idx, 4)} {opcode} {opname} {params}")
 
 
 def _log_string_literal_analysis(analysis: dict) -> None:

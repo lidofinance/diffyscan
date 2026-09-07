@@ -25,6 +25,9 @@ uv run pytest tests/test_config_loading.py::test_name -q
 # Run the CLI
 uv run diffyscan configs/<project>/<mainnet|testnet>/<config>.yaml
 
+# Machine-readable run (one JSON document on stdout, logs only in digest/<ts>/logs.txt)
+uv run diffyscan configs/<project>/<mainnet|testnet>/<config>.yaml --json -E -G
+
 # Format code
 uv run black diffyscan/ tests/
 

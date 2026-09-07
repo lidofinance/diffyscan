@@ -25,7 +25,7 @@ from .utils.allowed_diffs import (
 from .utils.binary_verifier import analyze_bytecode_diff, log_bytecode_diff_analysis
 from .utils.calldata import get_calldata
 from .utils.common import load_config, load_env
-from .utils.constants import DIFFS_DIR, START_TIME
+from .utils.constants import DIFFS_DIR, LOGS_PATH, START_TIME
 from .utils.custom_exceptions import (
     BaseCustomException,
     CalldataError,
@@ -127,6 +127,8 @@ def _bytecode_result(
     matched_rule: dict | None = None,
     matched_facets: list | None = None,
     suggestion_entry: dict | None = None,
+    uncovered: list[str] | None = None,
+    error: str | None = None,
 ) -> dict:
     return {
         "contract_address": contract_address,
@@ -137,6 +139,8 @@ def _bytecode_result(
         "matched_rule": matched_rule,
         "matched_facets": matched_facets or [],
         "suggestion_entry": suggestion_entry,
+        "uncovered": uncovered or [],
+        "error": error,
     }
 
 
@@ -298,6 +302,7 @@ def run_bytecode_diff(
     )
 
     suggestion_entry = None
+    uncovered: list[str] = []
     if evaluation["status"] == "allowed":
         _log_allowed_diff("bytecode", address_name, evaluation)
     else:
@@ -305,6 +310,7 @@ def run_bytecode_diff(
         log_bytecode_diff_analysis(best_analysis)
         _log_uncovered_bytecode_diff(best_analysis)
         suggestion_entry = build_bytecode_suggestion_entry(best_analysis)
+        uncovered = summarize_bytecode_uncovered(best_analysis)
 
     return _bytecode_result(
         contract_address_from_config,
@@ -314,6 +320,7 @@ def run_bytecode_diff(
         matched_rule=evaluation["matched_rule"],
         matched_facets=evaluation["matched_facets"],
         suggestion_entry=suggestion_entry,
+        uncovered=uncovered,
     )
 
 
@@ -618,6 +625,7 @@ def process_config(
 
     source_stats = []
     bytecode_stats = []
+    contract_errors = []
     matched_count = 0
 
     try:
@@ -722,17 +730,26 @@ def process_config(
                                     contract_name,
                                     status="failed",
                                     match=False,
+                                    error=str(exc),
                                 )
                             )
             except BaseCustomException as custom_exc:
                 ExceptionHandler.raise_exception_or_log(custom_exc)
                 traceback.print_exc()
+                contract_errors.append(
+                    {
+                        "contract_address": contract_address,
+                        "contract_name": contract_name,
+                        "error": str(custom_exc),
+                    }
+                )
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt by user")
 
     return {
         "source_stats": source_stats,
         "bytecode_stats": bytecode_stats,
+        "contract_errors": contract_errors,
         "config_path": path,
         "matched_count": matched_count,
     }
@@ -794,6 +811,12 @@ def parse_arguments() -> argparse.Namespace:
         action="store_true",
     )
     parser.add_argument(
+        "--json",
+        "-J",
+        help="Print a single JSON report to stdout instead of human-readable logs (implies --yes). Logs are still written to digest/<timestamp>/logs.txt.",
+        action="store_true",
+    )
+    parser.add_argument(
         "--contract",
         "-C",
         dest="contract_filter",
@@ -827,26 +850,10 @@ def print_final_summary(
     logger.info("=" * 80)
 
 
-def main() -> None:
-    load_dotenv()
-    args = parse_arguments()
-    if args.quiet:
-        logger.set_level("okay")
-    else:
-        logger.set_level(args.log_level)
-
-    if args.version:
-        print(f"Diffyscan {__version__}")
-        return
-
-    logger.info("Welcome to Diffyscan!")
-    logger.divider()
-
-    enable_binary_comparison = not args.skip_binary_comparison
-    config_paths = []
+def _collect_config_paths(path: str | None) -> list[str]:
     supported_extensions = (".json", ".yaml", ".yml")
 
-    if args.path is None:
+    if path is None:
         config_path = next(
             (
                 candidate
@@ -862,46 +869,190 @@ def main() -> None:
             )
             logger.error(error_msg)
             raise FileNotFoundError(error_msg)
-        config_paths.append(config_path)
-    elif os.path.isfile(args.path):
-        config_paths.append(args.path)
-    elif os.path.isdir(args.path):
-        for filename in sorted(os.listdir(args.path)):
-            full_path = os.path.join(args.path, filename)
-            if os.path.isfile(full_path) and filename.lower().endswith(
-                supported_extensions
-            ):
-                config_paths.append(full_path)
-    else:
-        error_msg = f"Specified config path {args.path} not found"
-        logger.error(error_msg)
-        raise FileNotFoundError(error_msg)
+        return [config_path]
+    if os.path.isfile(path):
+        return [path]
+    if os.path.isdir(path):
+        return [
+            os.path.join(path, filename)
+            for filename in sorted(os.listdir(path))
+            if os.path.isfile(os.path.join(path, filename))
+            and filename.lower().endswith(supported_extensions)
+        ]
+    error_msg = f"Specified config path {path} not found"
+    logger.error(error_msg)
+    raise FileNotFoundError(error_msg)
 
-    all_results = []
-    for config_path in config_paths:
-        result = process_config(
-            config_path,
-            args.support_brownie,
-            enable_binary_comparison,
-            args.cache_explorer,
-            args.cache_github,
-            args.yes,
-            args.contract_filter,
+
+def _json_counts(all_results: list[dict], key: str) -> dict:
+    stats = [stat for result in all_results for stat in result[key]]
+    return {
+        "total": len(stats),
+        "exact": sum(stat["status"] == "exact" for stat in stats),
+        "allowed": sum(stat["status"] == "allowed" for stat in stats),
+        "failed": sum(stat["status"] == "failed" for stat in stats),
+    }
+
+
+def _json_source_entry(stat: dict) -> dict:
+    return {
+        "status": stat["status"],
+        "files_count": stat["files_count"],
+        "files_found": stat["files_found"],
+        "identical_files": stat["identical_files"],
+        "files_with_diffs": stat["files_with_diffs"],
+        "matched_rule": stat["matched_rule"],
+        "matched_facets": stat["matched_facets"],
+        "diff_files": [
+            {
+                "path": file_result["path"],
+                "file_found": file_result["file_found"],
+                "diff_report": file_result["diff_report_filename"],
+                "hunks": file_result["hunks"],
+            }
+            for file_result in stat["files"]
+            if file_result["hunks"] or not file_result["file_found"]
+        ],
+        "suggested_rule": stat["suggestion_entry"],
+    }
+
+
+def _json_bytecode_entry(stat: dict) -> dict:
+    return {
+        "status": stat["status"],
+        "match": stat["match"],
+        "matched_rule": stat["matched_rule"],
+        "matched_facets": stat["matched_facets"],
+        "uncovered": stat["uncovered"],
+        "error": stat["error"],
+        "suggested_rule": stat["suggestion_entry"],
+    }
+
+
+def build_json_report(
+    all_results: list[dict],
+    *,
+    exit_code: int,
+    error: str | None,
+    duration_seconds: float,
+) -> dict:
+    configs = []
+    for result in all_results:
+        contracts: dict[str, dict] = {}
+        for kind, key, to_entry in (
+            ("source", "source_stats", _json_source_entry),
+            ("bytecode", "bytecode_stats", _json_bytecode_entry),
+        ):
+            for stat in result[key]:
+                contract = contracts.setdefault(
+                    stat["contract_address"],
+                    {
+                        "address": stat["contract_address"],
+                        "name": stat["contract_name"],
+                        "source": None,
+                        "bytecode": None,
+                    },
+                )
+                contract[kind] = to_entry(stat)
+        for failure in result["contract_errors"]:
+            contract = contracts.setdefault(
+                failure["contract_address"],
+                {
+                    "address": failure["contract_address"],
+                    "name": failure["contract_name"],
+                    "source": None,
+                    "bytecode": None,
+                },
+            )
+            contract["error"] = failure["error"]
+        configs.append(
+            {"path": result["config_path"], "contracts": list(contracts.values())}
         )
-        all_results.append(result)
+
+    contract_error_count = sum(len(r["contract_errors"]) for r in all_results)
+    if error is not None or contract_error_count:
+        status = "error"
+    elif exit_code:
+        status = "failed"
+    else:
+        status = "passed"
+
+    return {
+        "diffyscan_version": __version__,
+        "status": status,
+        "exit_code": exit_code,
+        "error": error,
+        "duration_seconds": round(duration_seconds, 3),
+        "log_file": LOGS_PATH,
+        "summary": {
+            "source": _json_counts(all_results, "source_stats"),
+            "bytecode": _json_counts(all_results, "bytecode_stats"),
+            "contract_errors": contract_error_count,
+        },
+        "configs": configs,
+    }
+
+
+def main() -> None:
+    load_dotenv()
+    args = parse_arguments()
+    if args.quiet:
+        logger.set_level("okay")
+    else:
+        logger.set_level(args.log_level)
+    if args.json:
+        logger.stdout_enabled = False
+
+    if args.version:
+        print(f"Diffyscan {__version__}")
+        return
+
+    logger.info("Welcome to Diffyscan!")
+    logger.divider()
+
+    enable_binary_comparison = not args.skip_binary_comparison
+    all_results: list[dict] = []
+    error: str | None = None
+
+    try:
+        for config_path in _collect_config_paths(args.path):
+            all_results.append(
+                process_config(
+                    config_path,
+                    args.support_brownie,
+                    enable_binary_comparison,
+                    args.cache_explorer,
+                    args.cache_github,
+                    args.yes or args.json,
+                    args.contract_filter,
+                )
+            )
+    except Exception as exc:
+        # In JSON mode the report must still reach stdout; keep the traceback on stderr.
+        if not args.json:
+            raise
+        traceback.print_exc()
+        error = f"{type(exc).__name__}: {exc}"
 
     # A contract filter that matches nothing across all configs is a usage error
-    if args.contract_filter and sum(r["matched_count"] for r in all_results) == 0:
-        logger.error(
-            "No contracts matched the --contract filter",
-            ", ".join(args.contract_filter),
-        )
-        sys.exit(1)
+    if (
+        error is None
+        and args.contract_filter
+        and sum(r["matched_count"] for r in all_results) == 0
+    ):
+        filter_label = ", ".join(args.contract_filter)
+        logger.error("No contracts matched the --contract filter", filter_label)
+        if not args.json:
+            sys.exit(1)
+        error = f"No contracts matched the --contract filter: {filter_label}"
 
     execution_time = time.time() - START_TIME
     enable_source_comparison = any(result["source_stats"] for result in all_results)
 
-    print_final_summary(all_results, enable_source_comparison, enable_binary_comparison)
+    if error is None:
+        print_final_summary(
+            all_results, enable_source_comparison, enable_binary_comparison
+        )
 
     source_failures = sum(
         stat["status"] == "failed"
@@ -916,14 +1067,26 @@ def main() -> None:
 
     logger.okay(f"Done in {round(execution_time, 3)}s ✨" + " " * 100)
 
-    if source_failures + bytecode_failures > 0:
+    exit_code = 0
+    if error is not None:
+        exit_code = 1
+    elif source_failures + bytecode_failures > 0:
         logger.error(
             "Exiting with non-zero code due to unallowed diffs",
             f"source={source_failures}, bytecode={bytecode_failures}",
         )
-        sys.exit(1)
+        exit_code = 1
 
-    sys.exit(0)
+    if args.json:
+        report = build_json_report(
+            all_results,
+            exit_code=exit_code,
+            error=error,
+            duration_seconds=execution_time,
+        )
+        print(json.dumps(report, indent=2, default=str))
+
+    sys.exit(exit_code)
 
 
 def is_standard_json_contract(source_files: dict) -> bool:

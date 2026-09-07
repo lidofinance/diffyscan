@@ -63,6 +63,8 @@ def test_any_rule_does_not_suppress_compile_errors(monkeypatch):
             "matched_rule": None,
             "matched_facets": [],
             "suggestion_entry": None,
+            "uncovered": [],
+            "error": "Failed to compile contract: boom",
         }
     ]
 
