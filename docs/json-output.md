@@ -25,9 +25,9 @@ diffyscan path/to/config.yaml --json -E -G
 
 | Key | Type | Meaning |
 | --- | --- | --- |
-| `status` | `"passed"`, `"failed"`, `"error"` | `passed`: exit code 0 and each contract verified. `failed`: an unallowed diff, or `--contract` matched nothing. `error`: the run aborted, or at least one contract was skipped because of an error. |
+| `status` | `"passed"`, `"failed"`, `"error"` | `passed`: exit code 0 and each contract verified. `failed`: an unallowed diff, or `--contract` matched nothing. `error`: the run aborted or was interrupted, or at least one contract was skipped because of an error. |
 | `exit_code` | int | Process exit code, the same as without `--json`. |
-| `error` | string | Present when the run aborted, for example on a missing config or a bad token. Format: `"<ExceptionType>: <message>"`. |
+| `error` | string | Present when the run aborted, for example on a missing config or a bad token, or was interrupted with Ctrl+C. Format: `"<ExceptionType>: <message>"`. |
 | `duration_seconds` | float | Wall time of the run. |
 | `log_file` | string | Path to the human-readable log of this run. |
 | `summary` | object | Counters, described below. |

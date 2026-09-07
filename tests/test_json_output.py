@@ -75,6 +75,7 @@ def _result(source_stats, bytecode_stats, path="config.yaml", contract_errors=No
         "contract_errors": contract_errors or [],
         "config_path": path,
         "matched_count": 1,
+        "interrupted": False,
     }
 
 
@@ -218,6 +219,39 @@ def test_json_mode_reports_exceptions_instead_of_crashing(monkeypatch, capsys):
     report = json.loads(capsys.readouterr().out)
     assert report["status"] == "error"
     assert report["error"] == "RuntimeError: explorer is down"
+
+
+def test_json_mode_reports_interrupted_run_as_error(monkeypatch, capsys):
+    def interrupted(path, *args):
+        result = _result([], [_bytecode_stat()], path)
+        result["interrupted"] = True
+        return result
+
+    code = _run_main(monkeypatch, ["config.yaml", "--json"], interrupted)
+
+    assert code == 1
+    report = json.loads(capsys.readouterr().out)
+    assert report["status"] == "error"
+    assert report["error"] == "KeyboardInterrupt: run interrupted by user"
+    # Partial results are still reported so the consumer sees what was checked.
+    assert report["summary"]["bytecode"]["exact"] == 1
+
+
+def test_json_mode_reports_unmatched_filter_as_failed(monkeypatch, capsys):
+    def nothing_matched(path, *args):
+        result = _result([], [], path)
+        result["matched_count"] = 0
+        return result
+
+    code = _run_main(
+        monkeypatch, ["config.yaml", "--json", "--contract", ADDR], nothing_matched
+    )
+
+    assert code == 1
+    report = json.loads(capsys.readouterr().out)
+    assert report["status"] == "failed"
+    assert "error" not in report
+    assert report["contracts"] == []
 
 
 def test_human_mode_still_raises(monkeypatch):

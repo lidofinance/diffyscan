@@ -627,6 +627,7 @@ def process_config(
     bytecode_stats = []
     contract_errors = []
     matched_count = 0
+    interrupted = False
 
     try:
         if enable_binary_comparison:
@@ -745,6 +746,7 @@ def process_config(
                 )
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt by user")
+        interrupted = True
 
     return {
         "source_stats": source_stats,
@@ -752,6 +754,7 @@ def process_config(
         "contract_errors": contract_errors,
         "config_path": path,
         "matched_count": matched_count,
+        "interrupted": interrupted,
     }
 
 
@@ -1031,17 +1034,20 @@ def main() -> None:
 
     try:
         for config_path in _collect_config_paths(args.path):
-            all_results.append(
-                process_config(
-                    config_path,
-                    args.support_brownie,
-                    enable_binary_comparison,
-                    args.cache_explorer,
-                    args.cache_github,
-                    args.yes or args.json,
-                    args.contract_filter,
-                )
+            result = process_config(
+                config_path,
+                args.support_brownie,
+                enable_binary_comparison,
+                args.cache_explorer,
+                args.cache_github,
+                args.yes or args.json,
+                args.contract_filter,
             )
+            all_results.append(result)
+            if result["interrupted"]:
+                # Partial results must never read as a verified run
+                error = "KeyboardInterrupt: run interrupted by user"
+                break
     except Exception as exc:
         # In JSON mode the report must still reach stdout; keep the traceback on stderr.
         if not args.json:
@@ -1050,21 +1056,23 @@ def main() -> None:
         error = f"{type(exc).__name__}: {exc}"
 
     # A contract filter that matches nothing across all configs is a usage error
-    if (
+    filter_unmatched = (
         error is None
-        and args.contract_filter
+        and bool(args.contract_filter)
         and sum(r["matched_count"] for r in all_results) == 0
-    ):
-        filter_label = ", ".join(args.contract_filter)
-        logger.error("No contracts matched the --contract filter", filter_label)
+    )
+    if filter_unmatched:
+        logger.error(
+            "No contracts matched the --contract filter",
+            ", ".join(args.contract_filter),
+        )
         if not args.json:
             sys.exit(1)
-        error = f"No contracts matched the --contract filter: {filter_label}"
 
     execution_time = time.time() - START_TIME
     enable_source_comparison = any(result["source_stats"] for result in all_results)
 
-    if error is None:
+    if error is None and not filter_unmatched:
         print_final_summary(
             all_results, enable_source_comparison, enable_binary_comparison
         )
@@ -1083,7 +1091,7 @@ def main() -> None:
     logger.okay(f"Done in {round(execution_time, 3)}s ✨" + " " * 100)
 
     exit_code = 0
-    if error is not None:
+    if error is not None or filter_unmatched:
         exit_code = 1
     elif source_failures + bytecode_failures > 0:
         logger.error(
