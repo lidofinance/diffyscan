@@ -1,0 +1,77 @@
+contracts:
+  "0x39BB5d491e98A44D1bfe8047A737a81E296a63E0": DepositSecurityModule
+  "0x60E09F1791F1168d0450E4F100616B4a3F95119C": LidoLocator
+network: mainnet
+explorer_hostname: api.etherscan.io
+explorer_chain_id: 1
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+rpc_url_env_var: REMOTE_RPC_URL
+github_repo:
+  url: https://github.com/lidofinance/core
+  commit: 8c4cee2be76a4ed8067026e30b5bdc64a4e3cb29
+  relative_root: ""
+dependencies:
+  "@openzeppelin/contracts-v4.4":
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: 6bd6b76d1156e20e45d1016f355d154141c7e5b9
+    relative_root: contracts
+fail_on_bytecode_comparison_error: true
+bytecode_comparison:
+  deployment_from:
+    "0x39BB5d491e98A44D1bfe8047A737a81E296a63E0": "0x70D78Ec75CF859d6FF337349489f32ed2DA1aa3E"
+    "0x60E09F1791F1168d0450E4F100616B4a3F95119C": "0x70D78Ec75CF859d6FF337349489f32ed2DA1aa3E"
+  constructor_args:
+    # Creation tx 0x7ffbc6a5a8e8db2be70bd8cd4ab8beb60e71f80e23549789bf1d7f3bf689d602; block 25940562.
+    "0x39BB5d491e98A44D1bfe8047A737a81E296a63E0":
+      - "00000000000000000000000000000000219ab540356cbb839cbe05303d7705fa" # _depositContract
+      - "000000000000000000000000fddf38947afb03c621c71b06c9c70bce73f12999" # _stakingRouter
+      - "00000000000000000000000000000000000000000000000000000000000019f6" # _pauseIntentValidityPeriodBlocks
+      - "00000000000000000000000000000000000000000000000000000000000000c8" # _maxOperatorsPerUnvetting
+    # Creation tx 0x485bc670994189b18a93d47c6d14aabd5122b833866059ba8aa7cfb9f4ca8e0e; block 25940593.
+    "0x60E09F1791F1168d0450E4F100616B4a3F95119C":
+      - # struct LidoLocator.Config, in constructor ABI order
+        - "000000000000000000000000852ded011285fe67063a08005c71a85690503cee" # accountingOracle
+        - "00000000000000000000000039bb5d491e98a44d1bfe8047a737a81e296a63e0" # depositSecurityModule
+        - "000000000000000000000000388c818ca8b9251b393131c08a736a67ccb19297" # elRewardsVault
+        - "000000000000000000000000ae7ab96520de3a18e5e111b5eaab095312d7fe84" # lido
+        - "000000000000000000000000147f8d3cf3004faf9bf94e88b54b6c06de507be9" # oracleReportSanityChecker
+        - "000000000000000000000000be05d12fd10919f1881125006523452f6aff791b" # postTokenRebaseReceiver
+        - "000000000000000000000000e76c52750019b80b43e36df30bf4060eb73f573a" # burner
+        - "000000000000000000000000fddf38947afb03c621c71b06c9c70bce73f12999" # stakingRouter
+        - "0000000000000000000000003e40d73eb977dc6a537af587d48316fee66e9c8c" # treasury
+        - "0000000000000000000000000de4ea0184c2ad0baca7183356aea5b8d5bf5c6e" # validatorsExitBusOracle
+        - "000000000000000000000000889edc2edab5f40e902b864ad4d7ade8e412f9b1" # withdrawalQueue
+        - "000000000000000000000000b9d7934878b5fb9610b3fe8a5e441e8fad7e293f" # withdrawalVault
+        - "000000000000000000000000bf05a929c3d7885a6aead833a992da6e5ac23b09" # oracleDaemonConfig
+        - "000000000000000000000000bdb567672c867db533119c2dcd4fb9d8b44ec82f" # validatorExitDelayVerifier
+        - "000000000000000000000000dc00116a0d3e064427da2600449cfd2566b3037b" # triggerableWithdrawalsGateway
+        - "00000000000000000000000017be979344f2c2cc806229a532d92f8742c10462" # consolidationGateway
+        - "00000000000000000000000023ed611be0e1a820978875c0122f92260804cddf" # accounting
+        - "000000000000000000000000f4bf42c6d6a0e38825785048124dbad6c9eaaac3" # predepositGuarantee
+        - "0000000000000000000000007f39c581f595b53c5cb19bd0b3f8da6c935e2ca0" # wstETH
+        - "0000000000000000000000001d201be093d847f6446530efb0e8fb426d176709" # vaultHub
+        - "00000000000000000000000002ca7772ff14a9f6c1a08af385aa96bb1b34175a" # vaultFactory
+        - "0000000000000000000000005db427080200c235f2ae8cd17a7be87921f7ad6c" # lazyOracle
+        - "000000000000000000000000c69685e89cefc327b43b7234ac646451b27c544d" # operatorGrid
+        - "0000000000000000000000003fc2c71579d80790aaa3fc7be8b66ac39dc57374" # topUpGateway
+allowed_diffs:
+  bytecode:
+    "0x39BB5d491e98A44D1bfe8047A737a81E296a63E0":
+      - reason: >-
+          ATTEST/PAUSE/UNVET_MESSAGE_PREFIX include address(this), which differs
+          during constructor simulation. Values were recomputed for chain ID 1
+          and this DSM, then checked on mainnet at block 25940635. Offsets come
+          from solc 0.8.9 immutableReferences. All other runtime bytes must match.
+        immutables:
+          - offset: 605
+            value: "0x99bd4a87e9bc0c178ba39911d31c6bdf380c5e3cbb4c97fdb7c51bfa2ce63ee5"
+          - offset: 805
+            value: "0xa6a4eb10689f3fe113d10e7c766fd9a028fff96deed9529406ed39bf0cdfebf6"
+          - offset: 882
+            value: "0x3348689a23b894997fda00331dfedcb1c416ef8624150ccef065758e2cc043b2"
+          - offset: 2574
+            value: "0x99bd4a87e9bc0c178ba39911d31c6bdf380c5e3cbb4c97fdb7c51bfa2ce63ee5"
+          - offset: 3397
+            value: "0xa6a4eb10689f3fe113d10e7c766fd9a028fff96deed9529406ed39bf0cdfebf6"
+          - offset: 5002
+            value: "0x3348689a23b894997fda00331dfedcb1c416ef8624150ccef065758e2cc043b2"
