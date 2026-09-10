@@ -8,7 +8,7 @@ explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
 rpc_url_env_var: REMOTE_RPC_URL
 github_repo:
   url: https://github.com/lidofinance/core
-  commit: e4d0404c85b043b1b9fb1dd42d85c2535a7f30d8
+  commit: 8c4cee2be76a4ed8067026e30b5bdc64a4e3cb29
   relative_root: ""
 dependencies:
   "@openzeppelin/contracts-v4.4":
