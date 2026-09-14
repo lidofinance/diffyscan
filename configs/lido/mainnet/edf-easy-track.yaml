@@ -1,8 +1,11 @@
+# Mainnet factory enabled by scripts PR #682.
+# https://research.lido.fi/t/proposal-add-easy-track-factory-for-deposit-reserve-target-management-by-cmc/11827
 contracts:
-  '0x68009122a394504E8fD7fee58F92Cd73c6A60717': SetDepositsReserveTarget
+  '0x62E9Dc68BDCBC46362f40e0bb9c154C9a42E62b0': SetDepositsReserveTarget
 explorer_hostname: api.etherscan.io
-explorer_chain_id: 560048
+explorer_chain_id: 1
 explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+rpc_url_env_var: REMOTE_RPC_URL
 audit_url: https://github.com/lidofinance/audits/blob/main/MixBytes%20Easy%20Track%20for%20Deposit%20Reserve%20Target%20management%20Audit%20Report%2009-2026.pdf
 github_repo:
   url: https://github.com/lidofinance/easy-track
@@ -12,7 +15,7 @@ dependencies: {}
 fail_on_bytecode_comparison_error: true
 allowed_diffs:
   source:
-    '0x68009122a394504E8fD7fee58F92Cd73c6A60717':
+    '0x62E9Dc68BDCBC46362f40e0bb9c154C9a42E62b0':
       - reason: Brownie verification rewrote the four relative imports ('../...') to project-root paths ('contracts/...') in SetDepositsReserveTarget.sol; the imported files themselves are identical.
         line_ranges:
           - file: contracts/EVMScriptFactories/SetDepositsReserveTarget.sol
@@ -23,13 +26,12 @@ allowed_diffs:
               start: 6
               count: 4
   bytecode:
-    '0x68009122a394504E8fD7fee58F92Cd73c6A60717':
-      - reason: 'Only the CBOR metadata hash differs: brownie''s import-path rewrite changes the source text, so the solc metadata hash cannot match. The executable bytecode is identical.'
+    '0x62E9Dc68BDCBC46362f40e0bb9c154C9a42E62b0':
+      - reason: 'Only the CBOR metadata hash differs: Brownie''s import-path rewrite changes the source text, so the solc metadata hash cannot match. The executable bytecode is identical.'
         cbor_metadata: true
 bytecode_comparison:
-  constructor_calldata: {}
   constructor_args:
-    '0x68009122a394504E8fD7fee58F92Cd73c6A60717':
-      - '00000000000000000000000084dffcfb232594975c608de92544ff239a24c9e9'
-      - '0000000000000000000000000000000000000000000002086ac3510526000000'
-      - '0000000000000000000000003508a952176b3c15387c97be809eaffb1982176a'
+    '0x62E9Dc68BDCBC46362f40e0bb9c154C9a42E62b0':
+      - '0x2570e0b22AD904501dfB0d49575991ACB801dD91' # CMC
+      - 9600000000000000000000 # 9600 ETH
+      - '0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84' # Lido
