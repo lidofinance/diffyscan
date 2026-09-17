@@ -63,7 +63,10 @@ def test_fetch_sends_default_user_agent(monkeypatch, get_calls):
     fetch("https://example.com/api")
 
     assert get_calls == [
-        ("https://example.com/api", {"User-Agent": DEFAULT_USER_AGENT})
+        (
+            "https://example.com/api",
+            {"User-Agent": DEFAULT_USER_AGENT, "Referer": "https://example.com/"},
+        )
     ]
 
 
@@ -72,7 +75,10 @@ def test_fetch_sends_overridden_user_agent(monkeypatch, get_calls):
 
     fetch("https://example.com/api")
 
-    assert get_calls[0][1] == {"User-Agent": "custom-agent/1.0"}
+    assert get_calls[0][1] == {
+        "User-Agent": "custom-agent/1.0",
+        "Referer": "https://example.com/",
+    }
 
 
 def test_fetch_preserves_caller_headers(monkeypatch, get_calls):
@@ -82,6 +88,7 @@ def test_fetch_preserves_caller_headers(monkeypatch, get_calls):
 
     assert get_calls[0][1] == {
         "User-Agent": DEFAULT_USER_AGENT,
+        "Referer": "https://example.com/",
         "Authorization": "token secret",
     }
 
@@ -91,7 +98,10 @@ def test_fetch_lets_caller_override_user_agent(monkeypatch, get_calls):
 
     fetch("https://example.com/api", headers={"User-Agent": "explicit/1.0"})
 
-    assert get_calls[0][1] == {"User-Agent": "explicit/1.0"}
+    assert get_calls[0][1] == {
+        "User-Agent": "explicit/1.0",
+        "Referer": "https://example.com/",
+    }
 
 
 def test_pull_sends_default_user_agent(monkeypatch, post_calls):
@@ -112,9 +122,10 @@ def test_pull_sends_default_user_agent(monkeypatch, post_calls):
 
 
 class FailingResponse:
-    def __init__(self, headers, text):
+    def __init__(self, headers, text, status_code=403):
         self.headers = headers
         self.text = text
+        self.status_code = status_code
 
     def raise_for_status(self):
         import requests
@@ -239,3 +250,114 @@ def test_no_direct_requests_usage_outside_http_client():
     ]
 
     assert not offenders, f"Use http_client.fetch/pull instead of requests: {offenders}"
+
+
+def test_fetch_sends_a_same_origin_referer(monkeypatch, get_calls):
+    """Cloudflare in front of some Blockscout instances answers 403 to a request carrying no
+    Referer, whatever its User-Agent says."""
+    monkeypatch.delenv(USER_AGENT_ENV_VAR, raising=False)
+
+    fetch("https://explorer.example/api/v2/smart-contracts/0xabc")
+
+    assert get_calls[0][1]["Referer"] == "https://explorer.example/"
+
+
+def test_the_referer_carries_the_origin_and_never_the_query(monkeypatch, get_calls):
+    """An explorer URL carries the API key in its query string -- which is why this module
+    redacts URLs from its own error text. A Referer is logged at the other end, so it gets the
+    origin and nothing else."""
+    monkeypatch.delenv(USER_AGENT_ENV_VAR, raising=False)
+
+    fetch("https://api.explorer.example/api?module=contract&apikey=SECRET")
+
+    referer = get_calls[0][1]["Referer"]
+    assert referer == "https://api.explorer.example/"
+    assert "SECRET" not in referer and "?" not in referer
+
+
+def test_a_caller_s_own_referer_is_left_alone(monkeypatch, get_calls):
+    monkeypatch.delenv(USER_AGENT_ENV_VAR, raising=False)
+
+    fetch("https://explorer.example/api", headers={"Referer": "https://elsewhere.example/"})
+
+    assert get_calls[0][1]["Referer"] == "https://elsewhere.example/"
+
+
+def test_a_url_with_no_host_gets_no_referer(monkeypatch, get_calls):
+    """A relative or malformed URL has no origin to send back, and inventing one would be a
+    header that says something untrue."""
+    monkeypatch.delenv(USER_AGENT_ENV_VAR, raising=False)
+
+    fetch("not-a-url")
+
+    assert "Referer" not in get_calls[0][1]
+
+
+def test_posting_to_a_node_sends_no_referer(monkeypatch, post_calls):
+    """`pull` talks to JSON-RPC nodes, not to websites. Nothing there asks for a Referer, and
+    the header would only widen what a node operator sees."""
+    monkeypatch.delenv(USER_AGENT_ENV_VAR, raising=False)
+
+    pull("https://node.example/rpc", "{}", {"Content-Type": "application/json"})
+
+    assert "Referer" not in post_calls[0][2]
+
+
+def test_each_host_gets_its_own_queue(monkeypatch):
+    """One queue for every explorer paced them all at whichever tier was hard-coded. A run
+    reading etherscan at three a second hit a Blockscout instance allowing ten a minute
+    eighteen times too fast, and every call came back 429."""
+    from diffyscan.utils.http_client import reserve_slot, reset_pacing
+
+    reset_pacing()
+    assert reserve_slot("https://api.etherscan.io/v2/api", now=100.0) == 0
+    assert reserve_slot("https://one.blockscout.com/api", now=100.0) == 0
+    assert reserve_slot("https://api.etherscan.io/v2/api", now=100.0) == pytest.approx(1 / 3)
+
+
+def test_a_known_limit_is_used_before_any_refusal():
+    """Earning it costs a 429, and for a scrape one per address until the pacer catches up."""
+    from diffyscan.utils.http_client import reserve_slot, reset_pacing
+
+    reset_pacing()
+    reserve_slot("https://one.blockscout.com/api", now=100.0)
+    assert reserve_slot("https://one.blockscout.com/api", now=100.0) == pytest.approx(6.0)
+    reserve_slot("https://unknown.example/api", now=100.0)
+    assert reserve_slot("https://unknown.example/api", now=100.0) == pytest.approx(1 / 3)
+
+
+def test_a_hosts_limit_is_taken_from_the_refusal_that_states_it(monkeypatch):
+    from diffyscan.utils.http_client import learn_rate_limit, reserve_slot, reset_pacing
+
+    reset_pacing()
+    learn_rate_limit("https://one.blockscout.com/api", {"X-RateLimit-Limit": "10"}, now=100.0)
+
+    assert reserve_slot("https://one.blockscout.com/api", now=106.0) == 0
+    assert reserve_slot("https://one.blockscout.com/api", now=106.0) == pytest.approx(6.0)
+
+
+def test_retry_after_says_when_to_resume():
+    from diffyscan.utils.http_client import learn_rate_limit, reserve_slot, reset_pacing
+
+    reset_pacing()
+    learn_rate_limit("https://two.blockscout.com/api", {"Retry-After": "30"}, now=100.0)
+
+    assert reserve_slot("https://two.blockscout.com/api", now=100.0) == pytest.approx(30.0)
+
+
+def test_the_interval_doubles_when_the_host_states_nothing():
+    from diffyscan.utils.http_client import learn_rate_limit, reset_pacing
+
+    reset_pacing()
+    assert learn_rate_limit("https://quiet.example/api", {}, now=100.0) == pytest.approx(2 / 3)
+    assert learn_rate_limit("https://quiet.example/api", {}, now=100.0) == pytest.approx(4 / 3)
+
+
+def test_backing_off_stops_at_a_minute():
+    from diffyscan.utils.http_client import learn_rate_limit, reset_pacing
+
+    reset_pacing()
+    interval = 0.0
+    for _ in range(20):
+        interval = learn_rate_limit("https://stubborn.example/api", {}, now=100.0)
+    assert interval == 60.0
