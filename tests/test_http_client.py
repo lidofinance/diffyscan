@@ -315,6 +315,17 @@ def test_each_host_gets_its_own_queue(monkeypatch):
     assert reserve_slot("https://api.etherscan.io/v2/api", now=100.0) == pytest.approx(1 / 3)
 
 
+def test_a_known_limit_is_used_before_any_refusal():
+    """Earning it costs a 429, and for a scrape one per address until the pacer catches up."""
+    from diffyscan.utils.http_client import reserve_slot, reset_pacing
+
+    reset_pacing()
+    reserve_slot("https://one.blockscout.com/api", now=100.0)
+    assert reserve_slot("https://one.blockscout.com/api", now=100.0) == pytest.approx(6.0)
+    reserve_slot("https://unknown.example/api", now=100.0)
+    assert reserve_slot("https://unknown.example/api", now=100.0) == pytest.approx(1 / 3)
+
+
 def test_a_hosts_limit_is_taken_from_the_refusal_that_states_it(monkeypatch):
     from diffyscan.utils.http_client import learn_rate_limit, reserve_slot, reset_pacing
 

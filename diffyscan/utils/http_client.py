@@ -45,9 +45,24 @@ DEFAULT_INTERVAL_SECONDS = 1 / 3  # the free etherscan tier
 MAX_INTERVAL_SECONDS = 60.0
 
 
+#: Limits known before any host has refused anything, by host suffix, longest first.
+KNOWN_LIMITS: tuple[tuple[str, int], ...] = (
+    # measured 2026-09-17: the instance states X-RateLimit-Limit 10 on refusal
+    ("blockscout.com", 10),
+    ("api.etherscan.io", 180),
+)
+
+
+def _opening_interval(host: str) -> float:
+    for suffix, per_minute in KNOWN_LIMITS:
+        if host == suffix or host.endswith("." + suffix):
+            return min(60.0 / per_minute, MAX_INTERVAL_SECONDS)
+    return DEFAULT_INTERVAL_SECONDS
+
+
 def _pace_for(url: str) -> dict[str, float]:
-    host = urlsplit(url).netloc or url
-    return _pace.setdefault(host, {"interval": DEFAULT_INTERVAL_SECONDS, "next_at": 0.0})
+    host = (urlsplit(url).netloc or url).lower()
+    return _pace.setdefault(host, {"interval": _opening_interval(host), "next_at": 0.0})
 
 
 def reserve_slot(url: str, now: float | None = None) -> float:
