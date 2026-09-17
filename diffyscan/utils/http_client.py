@@ -25,8 +25,27 @@ def get_user_agent() -> str:
     return os.getenv(USER_AGENT_ENV_VAR) or DEFAULT_USER_AGENT
 
 
-def _build_headers(headers: dict | None) -> dict:
-    return {"User-Agent": get_user_agent(), **(headers or {})}
+def _same_origin_referer(url: str) -> str | None:
+    """`https://host/` for a URL, or None when it has no host.
+
+    The origin only, never the full URL. A Referer is the sort of header the other end logs, and
+    explorer URLs carry API keys in their query string -- which is why this module already
+    redacts them from error text.
+    """
+    parsed = urlsplit(url)
+    if not parsed.scheme or not parsed.netloc:
+        return None
+    return f"{parsed.scheme}://{parsed.netloc}/"
+
+
+def _build_headers(headers: dict | None, url: str | None = None) -> dict:
+    built = {"User-Agent": get_user_agent()}
+    # A browser reading an explorer's API sends a Referer, and Cloudflare in front of some
+    # Blockscout instances answers 403 without one, whatever the User-Agent says.
+    referer = _same_origin_referer(url) if url else None
+    if referer:
+        built["Referer"] = referer
+    return {**built, **(headers or {})}
 
 
 def _redact_url(message: str, url: str) -> str:
@@ -59,8 +78,10 @@ def _handle_request_errors(error_class: type[BaseException]):
                         raise error_class(
                             _redact_url(f"HTTP error: {exc}", url)
                             + ". The host is behind a Cloudflare challenge that "
-                            f"rejected the request; try overriding the User-Agent "
-                            f"via {USER_AGENT_ENV_VAR}"
+                            "rejected the request. A browser-like User-Agent and a "
+                            "same-origin Referer are already sent; try another "
+                            f"User-Agent via {USER_AGENT_ENV_VAR}, or reach the "
+                            "contract through a different explorer for this chain"
                         ) from None
                     try:
                         body = f" Response: {exc.response.text}"
@@ -82,7 +103,7 @@ def _handle_request_errors(error_class: type[BaseException]):
 def fetch(url: str, headers: dict | None = None) -> requests.Response:
     """Fetch data from a URL with error handling."""
     logger.log(f"Fetch: {mask_text(url)}")
-    return requests.get(url, headers=_build_headers(headers))
+    return requests.get(url, headers=_build_headers(headers, url))
 
 
 @_handle_request_errors(NodeError)
