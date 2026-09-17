@@ -122,9 +122,10 @@ def test_pull_sends_default_user_agent(monkeypatch, post_calls):
 
 
 class FailingResponse:
-    def __init__(self, headers, text):
+    def __init__(self, headers, text, status_code=403):
         self.headers = headers
         self.text = text
+        self.status_code = status_code
 
     def raise_for_status(self):
         import requests
@@ -300,3 +301,52 @@ def test_posting_to_a_node_sends_no_referer(monkeypatch, post_calls):
     pull("https://node.example/rpc", "{}", {"Content-Type": "application/json"})
 
     assert "Referer" not in post_calls[0][2]
+
+
+def test_each_host_gets_its_own_queue(monkeypatch):
+    """One queue for every explorer paced them all at whichever tier was hard-coded. A run
+    reading etherscan at three a second hit a Blockscout instance allowing ten a minute
+    eighteen times too fast, and every call came back 429."""
+    from diffyscan.utils.http_client import reserve_slot, reset_pacing
+
+    reset_pacing()
+    assert reserve_slot("https://api.etherscan.io/v2/api", now=100.0) == 0
+    assert reserve_slot("https://one.blockscout.com/api", now=100.0) == 0
+    assert reserve_slot("https://api.etherscan.io/v2/api", now=100.0) == pytest.approx(1 / 3)
+
+
+def test_a_hosts_limit_is_taken_from_the_refusal_that_states_it(monkeypatch):
+    from diffyscan.utils.http_client import learn_rate_limit, reserve_slot, reset_pacing
+
+    reset_pacing()
+    learn_rate_limit("https://one.blockscout.com/api", {"X-RateLimit-Limit": "10"}, now=100.0)
+
+    assert reserve_slot("https://one.blockscout.com/api", now=106.0) == 0
+    assert reserve_slot("https://one.blockscout.com/api", now=106.0) == pytest.approx(6.0)
+
+
+def test_retry_after_says_when_to_resume():
+    from diffyscan.utils.http_client import learn_rate_limit, reserve_slot, reset_pacing
+
+    reset_pacing()
+    learn_rate_limit("https://two.blockscout.com/api", {"Retry-After": "30"}, now=100.0)
+
+    assert reserve_slot("https://two.blockscout.com/api", now=100.0) == pytest.approx(30.0)
+
+
+def test_the_interval_doubles_when_the_host_states_nothing():
+    from diffyscan.utils.http_client import learn_rate_limit, reset_pacing
+
+    reset_pacing()
+    assert learn_rate_limit("https://quiet.example/api", {}, now=100.0) == pytest.approx(2 / 3)
+    assert learn_rate_limit("https://quiet.example/api", {}, now=100.0) == pytest.approx(4 / 3)
+
+
+def test_backing_off_stops_at_a_minute():
+    from diffyscan.utils.http_client import learn_rate_limit, reset_pacing
+
+    reset_pacing()
+    interval = 0.0
+    for _ in range(20):
+        interval = learn_rate_limit("https://stubborn.example/api", {}, now=100.0)
+    assert interval == 60.0

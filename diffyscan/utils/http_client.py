@@ -1,5 +1,6 @@
 from functools import wraps
 import os
+import time
 from urllib.parse import urlsplit
 
 import requests
@@ -38,6 +39,55 @@ def _same_origin_referer(url: str) -> str | None:
     return f"{parsed.scheme}://{parsed.netloc}/"
 
 
+#: One queue per host: two explorers in one run have separate limits and separate queues.
+_pace: dict[str, dict[str, float]] = {}
+DEFAULT_INTERVAL_SECONDS = 1 / 3  # the free etherscan tier
+MAX_INTERVAL_SECONDS = 60.0
+
+
+def _pace_for(url: str) -> dict[str, float]:
+    host = urlsplit(url).netloc or url
+    return _pace.setdefault(host, {"interval": DEFAULT_INTERVAL_SECONDS, "next_at": 0.0})
+
+
+def reserve_slot(url: str, now: float | None = None) -> float:
+    """How long this request waits, booking the slot for it."""
+    now = time.monotonic() if now is None else now
+    pace = _pace_for(url)
+    slot = max(now, pace["next_at"])
+    pace["next_at"] = slot + pace["interval"]
+    return slot - now
+
+
+def learn_rate_limit(url: str, headers=None, now: float | None = None) -> float:
+    """Take a host's limit from its own refusal.
+
+    `RateLimit-Limit` and `Retry-After` are what a server states when it turns a request away,
+    and reading them beats measuring by trial. Without either the interval doubles.
+    """
+    now = time.monotonic() if now is None else now
+    pace = _pace_for(url)
+    per_minute = _number((headers or {}).get("RateLimit-Limit") or (headers or {}).get("X-RateLimit-Limit"))
+    retry_after = _number((headers or {}).get("Retry-After"))
+    if per_minute and per_minute > 0:
+        pace["interval"] = min(60.0 / per_minute, MAX_INTERVAL_SECONDS)
+    else:
+        pace["interval"] = min(pace["interval"] * 2, MAX_INTERVAL_SECONDS)
+    pace["next_at"] = max(pace["next_at"], now + (retry_after or pace["interval"]))
+    return pace["interval"]
+
+
+def reset_pacing() -> None:
+    _pace.clear()
+
+
+def _number(value) -> float | None:
+    try:
+        return float(str(value).strip())
+    except (TypeError, ValueError):
+        return None
+
+
 def _build_headers(headers: dict | None, url: str | None = None) -> dict:
     built = {"User-Agent": get_user_agent()}
     # A browser reading an explorer's API sends a Referer, and Cloudflare in front of some
@@ -74,6 +124,8 @@ def _handle_request_errors(error_class: type[BaseException]):
             except requests.exceptions.HTTPError as exc:
                 body = ""
                 if exc.response is not None:
+                    if exc.response.status_code == 429:
+                        learn_rate_limit(url, exc.response.headers)
                     if exc.response.headers.get("cf-mitigated") == "challenge":
                         raise error_class(
                             _redact_url(f"HTTP error: {exc}", url)
@@ -103,6 +155,9 @@ def _handle_request_errors(error_class: type[BaseException]):
 def fetch(url: str, headers: dict | None = None) -> requests.Response:
     """Fetch data from a URL with error handling."""
     logger.log(f"Fetch: {mask_text(url)}")
+    delay = reserve_slot(url)
+    if delay > 0:
+        time.sleep(delay)
     return requests.get(url, headers=_build_headers(headers, url))
 
 
