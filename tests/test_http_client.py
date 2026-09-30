@@ -15,6 +15,8 @@ HTTP_CLIENT_MODULE = "diffyscan.utils.http_client"
 
 
 class DummyResponse:
+    status_code = 200
+
     def raise_for_status(self):
         return None
 
@@ -278,7 +280,10 @@ def test_the_referer_carries_the_origin_and_never_the_query(monkeypatch, get_cal
 def test_a_caller_s_own_referer_is_left_alone(monkeypatch, get_calls):
     monkeypatch.delenv(USER_AGENT_ENV_VAR, raising=False)
 
-    fetch("https://explorer.example/api", headers={"Referer": "https://elsewhere.example/"})
+    fetch(
+        "https://explorer.example/api",
+        headers={"Referer": "https://elsewhere.example/"},
+    )
 
     assert get_calls[0][1]["Referer"] == "https://elsewhere.example/"
 
@@ -312,28 +317,28 @@ def test_each_host_gets_its_own_queue(monkeypatch):
     reset_pacing()
     assert reserve_slot("https://api.etherscan.io/v2/api", now=100.0) == 0
     assert reserve_slot("https://one.blockscout.com/api", now=100.0) == 0
-    assert reserve_slot("https://api.etherscan.io/v2/api", now=100.0) == pytest.approx(1 / 3)
+    assert reserve_slot("https://api.etherscan.io/v2/api", now=100.0) == pytest.approx(
+        1 / 3
+    )
 
 
-def test_a_known_limit_is_used_before_any_refusal():
-    """Earning it costs a 429, and for a scrape one per address until the pacer catches up."""
+def test_blockscout_has_no_assumed_per_minute_limit():
     from diffyscan.utils.http_client import reserve_slot, reset_pacing
 
     reset_pacing()
     reserve_slot("https://one.blockscout.com/api", now=100.0)
-    assert reserve_slot("https://one.blockscout.com/api", now=100.0) == pytest.approx(6.0)
-    reserve_slot("https://unknown.example/api", now=100.0)
-    assert reserve_slot("https://unknown.example/api", now=100.0) == pytest.approx(1 / 3)
+    assert reserve_slot("https://one.blockscout.com/api", now=100.0) == pytest.approx(
+        1 / 3
+    )
 
 
-def test_a_hosts_limit_is_taken_from_the_refusal_that_states_it(monkeypatch):
-    from diffyscan.utils.http_client import learn_rate_limit, reserve_slot, reset_pacing
+def test_bare_limit_does_not_imply_a_window():
+    from diffyscan.utils.http_client import learn_rate_limit, reset_pacing
 
     reset_pacing()
-    learn_rate_limit("https://one.blockscout.com/api", {"X-RateLimit-Limit": "10"}, now=100.0)
-
-    assert reserve_slot("https://one.blockscout.com/api", now=106.0) == 0
-    assert reserve_slot("https://one.blockscout.com/api", now=106.0) == pytest.approx(6.0)
+    assert learn_rate_limit(
+        "https://one.blockscout.com/api", {"X-RateLimit-Limit": "10"}, now=100.0
+    ) == pytest.approx(2 / 3)
 
 
 def test_retry_after_says_when_to_resume():
@@ -342,15 +347,21 @@ def test_retry_after_says_when_to_resume():
     reset_pacing()
     learn_rate_limit("https://two.blockscout.com/api", {"Retry-After": "30"}, now=100.0)
 
-    assert reserve_slot("https://two.blockscout.com/api", now=100.0) == pytest.approx(30.0)
+    assert reserve_slot("https://two.blockscout.com/api", now=100.0) == pytest.approx(
+        30.0
+    )
 
 
 def test_the_interval_doubles_when_the_host_states_nothing():
     from diffyscan.utils.http_client import learn_rate_limit, reset_pacing
 
     reset_pacing()
-    assert learn_rate_limit("https://quiet.example/api", {}, now=100.0) == pytest.approx(2 / 3)
-    assert learn_rate_limit("https://quiet.example/api", {}, now=100.0) == pytest.approx(4 / 3)
+    assert learn_rate_limit(
+        "https://quiet.example/api", {}, now=100.0
+    ) == pytest.approx(2 / 3)
+    assert learn_rate_limit(
+        "https://quiet.example/api", {}, now=100.0
+    ) == pytest.approx(4 / 3)
 
 
 def test_backing_off_stops_at_a_minute():
@@ -361,3 +372,96 @@ def test_backing_off_stops_at_a_minute():
     for _ in range(20):
         interval = learn_rate_limit("https://stubborn.example/api", {}, now=100.0)
     assert interval == 60.0
+
+
+@pytest.fixture(autouse=True)
+def pacing_clock(monkeypatch):
+    from diffyscan.utils.http_client import reset_pacing
+
+    reset_pacing()
+    sleeps: list[float] = []
+    clock = {"now": 100.0, "sleeps": sleeps}
+
+    def sleep(delay):
+        sleeps.append(delay)
+        clock["now"] += delay
+
+    monkeypatch.setattr(f"{HTTP_CLIENT_MODULE}.time.monotonic", lambda: clock["now"])
+    monkeypatch.setattr(f"{HTTP_CLIENT_MODULE}.time.sleep", sleep)
+    return clock
+
+
+@pytest.mark.parametrize(
+    "authority", ["user:SECRET@host.example:8443", "user:SECRET@[::1]:8443"]
+)
+def test_referer_strips_userinfo(get_calls, authority):
+    fetch(f"https://{authority}/api?apikey=OTHER")
+    assert get_calls[0][1]["Referer"] == f"https://{authority.rsplit('@', 1)[-1]}/"
+
+
+@pytest.mark.parametrize("retry_after", ["120", "Wed, 30 Sep 2026 14:02:00 GMT"])
+def test_fetch_retries_current_get_after_explicit_cooldown(
+    monkeypatch, pacing_clock, retry_after
+):
+    from datetime import datetime, timezone
+
+    epoch = datetime(2026, 9, 30, 14, 0, tzinfo=timezone.utc).timestamp()
+    monkeypatch.setattr(f"{HTTP_CLIENT_MODULE}.time.time", lambda: epoch)
+    calls = []
+    success = DummyResponse()
+
+    def get(url, headers=None):
+        calls.append(url)
+        return (
+            FailingResponse({"Retry-After": retry_after}, "limited", 429)
+            if len(calls) == 1
+            else success
+        )
+
+    monkeypatch.setattr(f"{HTTP_CLIENT_MODULE}.requests.get", get)
+    assert fetch("https://example.com/api") is success
+    assert len(calls) == 2
+    assert pacing_clock["sleeps"] == [120.0]
+
+
+@pytest.mark.parametrize("retry_after", ["invalid", "NaN", "inf"])
+def test_invalid_retry_after_uses_backoff(monkeypatch, pacing_clock, retry_after):
+    responses = iter(
+        [FailingResponse({"Retry-After": retry_after}, "limited", 429), DummyResponse()]
+    )
+    monkeypatch.setattr(
+        f"{HTTP_CLIENT_MODULE}.requests.get", lambda *args, **kwargs: next(responses)
+    )
+    fetch("https://example.com/api")
+    assert pacing_clock["sleeps"] == [pytest.approx(2 / 3)]
+
+
+def test_get_retries_are_bounded(monkeypatch):
+    from diffyscan.utils.custom_exceptions import ExplorerError
+    from diffyscan.utils.http_client import MAX_RATE_LIMIT_RETRIES
+
+    calls = []
+
+    def get(*args, **kwargs):
+        calls.append(args)
+        return FailingResponse({}, "limited", 429)
+
+    monkeypatch.setattr(f"{HTTP_CLIENT_MODULE}.requests.get", get)
+    with pytest.raises(ExplorerError):
+        fetch("https://example.com/api")
+    assert len(calls) == MAX_RATE_LIMIT_RETRIES + 1
+
+
+def test_post_is_not_retried_on_rate_limit(monkeypatch):
+    from diffyscan.utils.custom_exceptions import NodeError
+
+    calls = []
+
+    def post(*args, **kwargs):
+        calls.append(args)
+        return FailingResponse({}, "limited", 429)
+
+    monkeypatch.setattr(f"{HTTP_CLIENT_MODULE}.requests.post", post)
+    with pytest.raises(NodeError):
+        pull("https://node.example/rpc", "{}")
+    assert len(calls) == 1

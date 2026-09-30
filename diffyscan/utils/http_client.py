@@ -1,4 +1,6 @@
 from functools import wraps
+from email.utils import parsedate_to_datetime
+import math
 import os
 import time
 from urllib.parse import urlsplit
@@ -36,7 +38,7 @@ def _same_origin_referer(url: str) -> str | None:
     parsed = urlsplit(url)
     if not parsed.scheme or not parsed.netloc:
         return None
-    return f"{parsed.scheme}://{parsed.netloc}/"
+    return f"{parsed.scheme}://{parsed.netloc.rsplit('@', 1)[-1]}/"
 
 
 #: One queue per host: two explorers in one run have separate limits and separate queues.
@@ -45,24 +47,15 @@ DEFAULT_INTERVAL_SECONDS = 1 / 3  # the free etherscan tier
 MAX_INTERVAL_SECONDS = 60.0
 
 
-#: Limits known before any host has refused anything, by host suffix, longest first.
-KNOWN_LIMITS: tuple[tuple[str, int], ...] = (
-    # measured 2026-09-17: the instance states X-RateLimit-Limit 10 on refusal
-    ("blockscout.com", 10),
-    ("api.etherscan.io", 180),
-)
-
-
-def _opening_interval(host: str) -> float:
-    for suffix, per_minute in KNOWN_LIMITS:
-        if host == suffix or host.endswith("." + suffix):
-            return min(60.0 / per_minute, MAX_INTERVAL_SECONDS)
-    return DEFAULT_INTERVAL_SECONDS
+MAX_RATE_LIMIT_RETRIES = 5
 
 
 def _pace_for(url: str) -> dict[str, float]:
-    host = (urlsplit(url).netloc or url).lower()
-    return _pace.setdefault(host, {"interval": _opening_interval(host), "next_at": 0.0})
+    parsed = urlsplit(url)
+    host = (parsed.netloc.rsplit("@", 1)[-1] or url).lower()
+    return _pace.setdefault(
+        host, {"interval": DEFAULT_INTERVAL_SECONDS, "next_at": 0.0}
+    )
 
 
 def reserve_slot(url: str, now: float | None = None) -> float:
@@ -75,20 +68,18 @@ def reserve_slot(url: str, now: float | None = None) -> float:
 
 
 def learn_rate_limit(url: str, headers=None, now: float | None = None) -> float:
-    """Take a host's limit from its own refusal.
+    """Back off after a refusal, honoring the server's explicit cooldown.
 
-    `RateLimit-Limit` and `Retry-After` are what a server states when it turns a request away,
-    and reading them beats measuring by trial. Without either the interval doubles.
+    A bare RateLimit-Limit does not specify its time window.
     """
     now = time.monotonic() if now is None else now
     pace = _pace_for(url)
-    per_minute = _number((headers or {}).get("RateLimit-Limit") or (headers or {}).get("X-RateLimit-Limit"))
-    retry_after = _number((headers or {}).get("Retry-After"))
-    if per_minute and per_minute > 0:
-        pace["interval"] = min(60.0 / per_minute, MAX_INTERVAL_SECONDS)
-    else:
-        pace["interval"] = min(pace["interval"] * 2, MAX_INTERVAL_SECONDS)
-    pace["next_at"] = max(pace["next_at"], now + (retry_after or pace["interval"]))
+    retry_after = _retry_after((headers or {}).get("Retry-After"))
+    pace["interval"] = min(pace["interval"] * 2, MAX_INTERVAL_SECONDS)
+    pace["next_at"] = max(
+        pace["next_at"],
+        now + (retry_after if retry_after is not None else pace["interval"]),
+    )
     return pace["interval"]
 
 
@@ -96,11 +87,17 @@ def reset_pacing() -> None:
     _pace.clear()
 
 
-def _number(value) -> float | None:
-    try:
-        return float(str(value).strip())
-    except (TypeError, ValueError):
+def _retry_after(value: str | None) -> float | None:
+    if value is None:
         return None
+    try:
+        seconds = float(value)
+    except ValueError:
+        try:
+            seconds = parsedate_to_datetime(value).timestamp() - time.time()
+        except (TypeError, ValueError, OverflowError):
+            return None
+    return max(0.0, seconds) if math.isfinite(seconds) else None
 
 
 def _build_headers(headers: dict | None, url: str | None = None) -> dict:
@@ -139,8 +136,6 @@ def _handle_request_errors(error_class: type[BaseException]):
             except requests.exceptions.HTTPError as exc:
                 body = ""
                 if exc.response is not None:
-                    if exc.response.status_code == 429:
-                        learn_rate_limit(url, exc.response.headers)
                     if exc.response.headers.get("cf-mitigated") == "challenge":
                         raise error_class(
                             _redact_url(f"HTTP error: {exc}", url)
@@ -170,10 +165,19 @@ def _handle_request_errors(error_class: type[BaseException]):
 def fetch(url: str, headers: dict | None = None) -> requests.Response:
     """Fetch data from a URL with error handling."""
     logger.log(f"Fetch: {mask_text(url)}")
-    delay = reserve_slot(url)
-    if delay > 0:
-        time.sleep(delay)
-    return requests.get(url, headers=_build_headers(headers, url))
+    for attempt in range(MAX_RATE_LIMIT_RETRIES + 1):
+        delay = reserve_slot(url)
+        if delay > 0:
+            time.sleep(delay)
+        response = requests.get(url, headers=_build_headers(headers, url))
+        if response.status_code != 429:
+            return response
+        learn_rate_limit(url, response.headers)
+        if attempt == MAX_RATE_LIMIT_RETRIES:
+            return response
+        logger.warn("Explorer rate limit reached; retrying", mask_text(url))
+
+    raise AssertionError("unreachable")
 
 
 @_handle_request_errors(NodeError)
