@@ -116,7 +116,7 @@ HTTP 429, 502, 503 and 504 retry the current GET up to five times; HTTP 500
 also retries when the response identifies Blockscout with `bypass-429-option`.
 `Retry-After` accepts decimal integer seconds or an HTTP-date, interpreted in
 UTC. Blockscout's `x-ratelimit-reset` is milliseconds until reset and is used
-only when that identifying header is present; GitHub's epoch reset is not read
+only on a 429 that carries that identifying header; GitHub's epoch reset is not read
 as a Blockscout cooldown. Without a valid cooldown, exponential backoff applies
 to this request only, up to 60 seconds per delay.
 

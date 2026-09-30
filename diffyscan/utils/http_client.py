@@ -69,13 +69,18 @@ def reserve_slot(url: str, now: float | None = None) -> float:
 
 
 def learn_rate_limit(
-    url: str, headers=None, now: float | None = None, backoff: float = 2 / 3
+    url: str,
+    headers=None,
+    now: float | None = None,
+    backoff: float = 2 / 3,
+    status: int = 429,
 ) -> float:
     """Share a cooldown, without persisting one request's exponential backoff."""
     now = time.monotonic() if now is None else now
     headers = requests.structures.CaseInsensitiveDict(headers or {})
     delay = _retry_after(headers.get("Retry-After"))
-    if delay is None and "bypass-429-option" in headers:
+    # Blockscout sends x-ratelimit-reset on every response; only a 429 makes it a cooldown.
+    if delay is None and status == 429 and "bypass-429-option" in headers:
         reset = headers.get("x-ratelimit-reset", "")
         if re.fullmatch(r"[0-9]+", reset):
             delay = float(reset) / 1000
@@ -190,14 +195,18 @@ def fetch(url: str, headers: dict | None = None) -> requests.Response:
         if not transient or response.headers.get("cf-mitigated") == "challenge":
             return response
         if attempt == MAX_RATE_LIMIT_RETRIES:
-            learn_rate_limit(url, response.headers, backoff=0)
+            learn_rate_limit(
+                url, response.headers, backoff=0, status=response.status_code
+            )
             raise ExplorerError(
                 f"HTTP {response.status_code} after {attempt + 1} attempts and {waited:g}s waiting"
             )
         backoff = min(
             DEFAULT_INTERVAL_SECONDS * 2 ** (attempt + 1), MAX_INTERVAL_SECONDS
         )
-        wait = learn_rate_limit(url, response.headers, backoff=backoff)
+        wait = learn_rate_limit(
+            url, response.headers, backoff=backoff, status=response.status_code
+        )
         logger.warn(
             f"HTTP {response.status_code}; retry {attempt + 1}/{MAX_RATE_LIMIT_RETRIES} in {wait:g}s",
             mask_text(url),

@@ -552,6 +552,14 @@ def test_success_does_not_leave_backoff_for_next_request(monkeypatch, pacing_clo
         (503, {"Retry-After": "2"}),
         (504, {}),
         (500, {"bypass-429-option": "no_bypass"}),
+        (
+            500,
+            {
+                "bypass-429-option": "no_bypass",
+                "x-ratelimit-remaining": "149",
+                "x-ratelimit-reset": "128353",
+            },
+        ),
     ],
 )
 def test_transient_get_recovers(monkeypatch, pacing_clock, status, headers):
