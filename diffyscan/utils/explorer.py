@@ -339,19 +339,22 @@ def _get_contract_from_blockscout(explorer_hostname: str, contract: str) -> dict
     optimization_runs = response.get(
         "optimization_runs", response.get("optimizations_runs", 0)
     )
-    if optimization_runs is not None and not isinstance(optimization_runs, (int, str)):
+    if isinstance(optimization_runs, bool) or (
+        optimization_runs is not None and not isinstance(optimization_runs, (int, str))
+    ):
         raise ExplorerError(f"Invalid Blockscout optimization_runs for {contract}")
     try:
-        solc_input = _build_solc_input(
-            source_files,
-            optimizer_enabled=response.get("optimization_enabled", False),
-            optimizer_runs=optimization_runs if optimization_runs is not None else 0,
-            settings=compiler_settings,
-        )
-    except (TypeError, ValueError):
+        optimization_runs = int(optimization_runs or 0)
+    except ValueError:
         raise ExplorerError(
             f"Invalid Blockscout optimization_runs for {contract}"
         ) from None
+    solc_input = _build_solc_input(
+        source_files,
+        optimizer_enabled=response.get("optimization_enabled", False),
+        optimizer_runs=optimization_runs,
+        settings=compiler_settings,
+    )
     return _build_contract_payload(
         response["name"],
         response["compiler_version"],

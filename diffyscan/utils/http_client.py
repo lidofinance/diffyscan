@@ -1,5 +1,7 @@
 from functools import wraps
 from email.utils import parsedate_to_datetime
+from datetime import timezone
+import re
 import math
 import os
 import time
@@ -48,14 +50,13 @@ MAX_INTERVAL_SECONDS = 60.0
 
 
 MAX_RATE_LIMIT_RETRIES = 5
+MAX_RETRY_WAIT_SECONDS = 300.0
 
 
 def _pace_for(url: str) -> dict[str, float]:
     parsed = urlsplit(url)
     host = (parsed.netloc.rsplit("@", 1)[-1] or url).lower()
-    return _pace.setdefault(
-        host, {"interval": DEFAULT_INTERVAL_SECONDS, "next_at": 0.0}
-    )
+    return _pace.setdefault(host, {"next_at": 0.0})
 
 
 def reserve_slot(url: str, now: float | None = None) -> float:
@@ -63,24 +64,29 @@ def reserve_slot(url: str, now: float | None = None) -> float:
     now = time.monotonic() if now is None else now
     pace = _pace_for(url)
     slot = max(now, pace["next_at"])
-    pace["next_at"] = slot + pace["interval"]
+    pace["next_at"] = slot + DEFAULT_INTERVAL_SECONDS
     return slot - now
 
 
-def learn_rate_limit(url: str, headers=None, now: float | None = None) -> float:
-    """Back off after a refusal, honoring the server's explicit cooldown.
-
-    A bare RateLimit-Limit does not specify its time window.
-    """
+def learn_rate_limit(
+    url: str, headers=None, now: float | None = None, backoff: float = 2 / 3
+) -> float:
+    """Share a cooldown, without persisting one request's exponential backoff."""
     now = time.monotonic() if now is None else now
+    headers = requests.structures.CaseInsensitiveDict(headers or {})
+    delay = _retry_after(headers.get("Retry-After"))
+    if delay is None and "bypass-429-option" in headers:
+        reset = headers.get("x-ratelimit-reset", "")
+        if re.fullmatch(r"[0-9]+", reset):
+            delay = float(reset) / 1000
+    wait = backoff if delay is None else delay
+    if not math.isfinite(wait) or wait > MAX_RETRY_WAIT_SECONDS:
+        raise ExplorerError(
+            f"HTTP cooldown {wait:g}s exceeds the {MAX_RETRY_WAIT_SECONDS:g}s wait budget"
+        )
     pace = _pace_for(url)
-    retry_after = _retry_after((headers or {}).get("Retry-After"))
-    pace["interval"] = min(pace["interval"] * 2, MAX_INTERVAL_SECONDS)
-    pace["next_at"] = max(
-        pace["next_at"],
-        now + (retry_after if retry_after is not None else pace["interval"]),
-    )
-    return pace["interval"]
+    pace["next_at"] = max(pace["next_at"], now + wait)
+    return wait
 
 
 def reset_pacing() -> None:
@@ -90,14 +96,16 @@ def reset_pacing() -> None:
 def _retry_after(value: str | None) -> float | None:
     if value is None:
         return None
+    value = value.strip()
+    if re.fullmatch(r"[0-9]+", value):
+        return float(value)
     try:
-        seconds = float(value)
-    except ValueError:
-        try:
-            seconds = parsedate_to_datetime(value).timestamp() - time.time()
-        except (TypeError, ValueError, OverflowError):
-            return None
-    return max(0.0, seconds) if math.isfinite(seconds) else None
+        date = parsedate_to_datetime(value)
+        if date.tzinfo is None:
+            date = date.replace(tzinfo=timezone.utc)
+        return max(0.0, date.timestamp() - time.time())
+    except (TypeError, ValueError, OverflowError):
+        return None
 
 
 def _build_headers(headers: dict | None, url: str | None = None) -> dict:
@@ -165,17 +173,35 @@ def _handle_request_errors(error_class: type[BaseException]):
 def fetch(url: str, headers: dict | None = None) -> requests.Response:
     """Fetch data from a URL with error handling."""
     logger.log(f"Fetch: {mask_text(url)}")
+    waited = 0.0
     for attempt in range(MAX_RATE_LIMIT_RETRIES + 1):
         delay = reserve_slot(url)
+        if not math.isfinite(delay) or waited + delay > MAX_RETRY_WAIT_SECONDS:
+            raise ExplorerError(
+                f"HTTP retry needs {delay:g}s more after {waited:g}s; wait budget is {MAX_RETRY_WAIT_SECONDS:g}s"
+            )
         if delay > 0:
             time.sleep(delay)
+            waited += delay
         response = requests.get(url, headers=_build_headers(headers, url))
-        if response.status_code != 429:
+        transient = response.status_code in (429, 502, 503, 504) or (
+            response.status_code == 500 and "bypass-429-option" in response.headers
+        )
+        if not transient or response.headers.get("cf-mitigated") == "challenge":
             return response
-        learn_rate_limit(url, response.headers)
         if attempt == MAX_RATE_LIMIT_RETRIES:
-            return response
-        logger.warn("Explorer rate limit reached; retrying", mask_text(url))
+            learn_rate_limit(url, response.headers, backoff=0)
+            raise ExplorerError(
+                f"HTTP {response.status_code} after {attempt + 1} attempts and {waited:g}s waiting"
+            )
+        backoff = min(
+            DEFAULT_INTERVAL_SECONDS * 2 ** (attempt + 1), MAX_INTERVAL_SECONDS
+        )
+        wait = learn_rate_limit(url, response.headers, backoff=backoff)
+        logger.warn(
+            f"HTTP {response.status_code}; retry {attempt + 1}/{MAX_RATE_LIMIT_RETRIES} in {wait:g}s",
+            mask_text(url),
+        )
 
     raise AssertionError("unreachable")
 

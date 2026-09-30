@@ -112,10 +112,19 @@ domain.
 
 GET requests send a same-origin Referer without URL userinfo, paths or queries.
 Requests are paced independently per host, initially at three per second.
-HTTP 429 retries the current GET up to five times. Numeric and HTTP-date
-`Retry-After` cooldowns are honored, including waits longer than a minute;
-otherwise the interval doubles up to 60 seconds. Bare rate-limit counts do not
-establish a time window. RPC POST requests are not retried.
+HTTP 429, 502, 503 and 504 retry the current GET up to five times; HTTP 500
+also retries when the response identifies Blockscout with `bypass-429-option`.
+`Retry-After` accepts decimal integer seconds or an HTTP-date, interpreted in
+UTC. Blockscout's `x-ratelimit-reset` is milliseconds until reset and is used
+only when that identifying header is present; GitHub's epoch reset is not read
+as a Blockscout cooldown. Without a valid cooldown, exponential backoff applies
+to this request only, up to 60 seconds per delay.
+
+The total pacing and retry wait budget is 300 seconds per GET. A cooldown above
+the budget fails explicitly; Diffyscan does not retry before the requested time.
+Retry warnings show the delay and attempt. This limits waits, not network request
+duration: the existing HTTP client has no explicit request timeout. RPC POST
+requests are not retried.
 
 Malformed Blockscout JSON or source fields raise `ExplorerError`. The existing
 per-contract error policy still applies: by default the run aborts. With bytecode

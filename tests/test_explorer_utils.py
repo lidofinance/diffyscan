@@ -158,6 +158,7 @@ def test_blockscout_rejects_missing_required_fields(monkeypatch, field):
         ("compiler_settings", "invalid"),
         ("optimization_runs", "invalid"),
         ("optimization_runs", []),
+        ("optimization_runs", True),
     ],
 )
 def test_blockscout_rejects_invalid_optional_fields(monkeypatch, field, value):
