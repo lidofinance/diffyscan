@@ -207,7 +207,7 @@ wheels = [
 
 [[package]]
 name = "diffyscan"
-version = "1.0.3"
+version = "1.0.4"
 source = { editable = "." }
 dependencies = [
     { name = "python-dotenv" },
