@@ -296,15 +296,36 @@ def _get_contract_from_mantle(mantle_explorer_hostname: str, contract: str) -> d
 
 def _get_contract_from_blockscout(explorer_hostname: str, contract: str) -> dict:
     explorer_link = f"https://{explorer_hostname}/api/v2/smart-contracts/{contract}"
-    response = fetch(explorer_link).json()
+    try:
+        response = fetch(explorer_link).json()
+    except ValueError:
+        raise ExplorerError(f"Invalid Blockscout JSON for {contract}") from None
 
-    if "name" not in response:
+    if not isinstance(response, dict):
+        raise ExplorerError(f"Expected a Blockscout response object for {contract}")
+
+    if not response.get("name"):
         _error_no_source_code_and_exit(contract)
 
-    if "file_path" not in response or "source_code" not in response:
-        raise ExplorerError(
-            f"Blockscout response missing file_path or source_code for {contract}"
-        )
+    for field in ("name", "file_path", "source_code", "compiler_version"):
+        if not isinstance(response.get(field), str) or not response[field]:
+            raise ExplorerError(f"Invalid Blockscout {field} for {contract}")
+
+    additional_sources = response.get("additional_sources")
+    if additional_sources is not None:
+        if not isinstance(additional_sources, list) or any(
+            not isinstance(entry, dict)
+            or not isinstance(entry.get("file_path"), str)
+            or not entry["file_path"]
+            or not isinstance(entry.get("source_code"), str)
+            for entry in additional_sources
+        ):
+            raise ExplorerError(f"Invalid Blockscout additional_sources for {contract}")
+
+    if response.get("compiler_settings") is not None and not isinstance(
+        response["compiler_settings"], dict
+    ):
+        raise ExplorerError(f"Invalid Blockscout compiler_settings for {contract}")
 
     source_files = _build_source_files(
         response["file_path"],
@@ -318,6 +339,16 @@ def _get_contract_from_blockscout(explorer_hostname: str, contract: str) -> dict
     optimization_runs = response.get(
         "optimization_runs", response.get("optimizations_runs", 0)
     )
+    if isinstance(optimization_runs, bool) or (
+        optimization_runs is not None and not isinstance(optimization_runs, (int, str))
+    ):
+        raise ExplorerError(f"Invalid Blockscout optimization_runs for {contract}")
+    try:
+        optimization_runs = int(optimization_runs or 0)
+    except ValueError:
+        raise ExplorerError(
+            f"Invalid Blockscout optimization_runs for {contract}"
+        ) from None
     solc_input = _build_solc_input(
         source_files,
         optimizer_enabled=response.get("optimization_enabled", False),

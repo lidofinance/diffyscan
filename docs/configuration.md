@@ -81,7 +81,7 @@ does not use them during verification.
 
 `explorer_hostname` selects the explorer API by pattern:
 
-| Hostname | API | Token |
+| Hostname | API | Token sent by adapter |
 | --- | --- | --- |
 | Starts with `zksync` | zkSync contract verification API | Not used |
 | Ends with `mantle.xyz` | Mantle Etherscan-style API | Not used |
@@ -107,6 +107,30 @@ with missing-GitHub-source or compilation errors. Extend
 `_get_explorer_fetcher` in
 [`diffyscan/utils/explorer.py`](../diffyscan/utils/explorer.py) to add a
 domain.
+
+## HTTP requests and explorer failures
+
+GET requests send a same-origin Referer without URL userinfo, paths or queries.
+Requests are paced independently per host, initially at three per second.
+HTTP 429, 502, 503 and 504 retry the current GET up to five times; HTTP 500
+also retries when the response identifies Blockscout with `bypass-429-option`.
+`Retry-After` accepts decimal integer seconds or an HTTP-date, interpreted in
+UTC. Blockscout's `x-ratelimit-reset` is milliseconds until reset and is used
+only on a 429 that carries that identifying header; GitHub's epoch reset is not read
+as a Blockscout cooldown. Without a valid cooldown, exponential backoff applies
+to this request only, up to 60 seconds per delay.
+
+The total pacing and retry wait budget is 300 seconds per GET. A cooldown above
+the budget fails explicitly; Diffyscan does not retry before the requested time.
+Retry warnings show the delay and attempt. This limits waits, not network request
+duration: the existing HTTP client has no explicit request timeout. RPC POST
+requests are not retried.
+
+Malformed Blockscout JSON or source fields raise `ExplorerError`. The existing
+per-contract error policy still applies: by default the run aborts. With bytecode
+comparison enabled and `fail_on_bytecode_comparison_error: false`, it records the
+error and continues. Check the [JSON report](json-output.md)'s `status` and errors
+even when the exit code is zero.
 
 ## GitHub sources
 

@@ -68,7 +68,7 @@ Entry point: `diffyscan/diffyscan.py:main` — parses CLI args, loads config (JS
 - **calldata.py** — resolves constructor calldata from config or explorer metadata
 - **node_handler.py** — RPC calls: `eth_getCode`, `eth_chainId`, `eth_call`
 - **common.py** — config loading (with YAML hex address validation), caching with SHA256 validation
-- **http_client.py** — shared HTTP requests, User-Agent and error handling
+- **http_client.py** — shared HTTP requests, headers, per-host pacing, bounded transient GET retries and error handling
 - **custom_types.py** — TypedDict definitions: `Config`, `BinaryConfig`, `ExplorerContract`, `GithubRepo`
 - **custom_exceptions.py** — exception hierarchy; `ExceptionHandler` controls fail-or-log behavior
 
