@@ -81,7 +81,7 @@ does not use them during verification.
 
 `explorer_hostname` selects the explorer API by pattern:
 
-| Hostname | API | Token |
+| Hostname | API | Token sent by adapter |
 | --- | --- | --- |
 | Starts with `zksync` | zkSync contract verification API | Not used |
 | Ends with `mantle.xyz` | Mantle Etherscan-style API | Not used |
@@ -107,6 +107,21 @@ with missing-GitHub-source or compilation errors. Extend
 `_get_explorer_fetcher` in
 [`diffyscan/utils/explorer.py`](../diffyscan/utils/explorer.py) to add a
 domain.
+
+## HTTP requests and explorer failures
+
+GET requests send a same-origin Referer without URL userinfo, paths or queries.
+Requests are paced independently per host, initially at three per second.
+HTTP 429 retries the current GET up to five times. Numeric and HTTP-date
+`Retry-After` cooldowns are honored, including waits longer than a minute;
+otherwise the interval doubles up to 60 seconds. Bare rate-limit counts do not
+establish a time window. RPC POST requests are not retried.
+
+Malformed Blockscout JSON or source fields raise `ExplorerError`. The existing
+per-contract error policy still applies: by default the run aborts. With bytecode
+comparison enabled and `fail_on_bytecode_comparison_error: false`, it records the
+error and continues. Check the [JSON report](json-output.md)'s `status` and errors
+even when the exit code is zero.
 
 ## GitHub sources
 

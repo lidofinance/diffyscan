@@ -24,7 +24,7 @@ Read [response mapping](references/response-mapping.md) when implementing a fetc
 
 Inspect `get_contract_from_explorer`, the selected fetcher and helpers in `diffyscan/utils/explorer.py`. Dispatch returns `(fetcher, requires_token)`; the caller chooses arguments from that flag. Runtime token loading happens before dispatch, even when an adapter does not send a token.
 
-Use `fetch` from `diffyscan/utils/http_client.py` to retain shared User-Agent and error handling. Normalize through existing helpers where applicable:
+Use `fetch` from `diffyscan/utils/http_client.py` for shared headers, per-host pacing, bounded HTTP 429 GET retries and error handling. Validate response objects and consumed field types before indexing them; malformed or unverified responses must raise `ExplorerError`. Normalize through existing helpers where applicable:
 
 - `_build_source_files`: primary and additional sources;
 - `_build_solc_input`: sources and compiler settings;

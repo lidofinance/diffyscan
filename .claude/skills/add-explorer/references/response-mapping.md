@@ -28,7 +28,9 @@ The adapter requests `/api/v2/smart-contracts/{address}`. Map primary `file_path
 
 Preserve `compiler_settings`; handle both `optimization_runs` and the fallback spelling `optimizations_runs`. Other inputs are `optimization_enabled`, `constructor_args`, `evm_version` and `external_libraries`.
 
-Test absent name, absent primary source fields, multiple source files and relevant metadata. `constructor_args` being absent and being empty are different cases.
+Invalid JSON and non-object responses raise `ExplorerError`. Required `name`, `file_path`, `source_code` and `compiler_version` must be nonempty strings. Additional sources must be a list of objects with a nonempty string path and string content; compiler settings must be an object when present. Invalid optimizer runs also raise `ExplorerError`.
+
+Test null/non-object payloads, missing or invalid required fields, malformed additional sources/settings, multiple source files and relevant metadata. `constructor_args` being absent and being empty are different cases.
 
 ## Mantle and zkSync
 
