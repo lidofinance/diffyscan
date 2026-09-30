@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/lidofinance/diffyscan/actions/workflows/regression.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/lidofinance/diffyscan/regression.yml?branch=main&style=flat-square&label=CI" /></a>
+  <a href="https://github.com/lidofinance/diffyscan/actions/workflows/regression.yml?query=branch%3Amain"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/lidofinance/diffyscan/regression.yml?branch=main&style=flat-square&label=CI" /></a>
   <a href="https://github.com/lidofinance/diffyscan/blob/main/pyproject.toml"><img alt="Python 3.11 to 3.x" src="https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white" /></a>
   <a href="https://github.com/lidofinance/diffyscan/blob/main/pyproject.toml"><img alt="uv managed" src="https://img.shields.io/badge/uv-managed-DE5FE9?style=flat-square" /></a>
   <a href="https://github.com/lidofinance/diffyscan/blob/main/LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/lidofinance/diffyscan?style=flat-square" /></a>
