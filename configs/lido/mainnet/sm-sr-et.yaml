@@ -11,6 +11,10 @@ contracts:
   # SRv3 factories
   "0x29e23B1EF0c9fffAc8330F9abaCebDDD827E4b5C": AllowConsolidationPair
   "0xde3e46E3129fA4e4e3f66c9024B0A3Ad509b27a1": UpdateStakingModuleShareLimits
+  # CSM0x02 factories
+  "0x8D74020d8EACCdFf0366dAAFfb96e6c98CDFc112": ReportWithdrawalsForSlashedValidators
+  "0x0B676AdEABcf4A696187cfAb90290Aa3ac51aFA2": SettleGeneralDelayedPenalty
+  "0x5b0De22E65C068430f6e769754D51133775408cc": UpdateStakingModuleShareLimits
 
 network: mainnet
 explorer_hostname: api.etherscan.io
@@ -91,6 +95,24 @@ allowed_diffs:
       - file: contracts/EVMScriptFactories/UpdateStakingModuleShareLimits.sol
         github: { start: 6, count: 4 }
         explorer: { start: 6, count: 4 }
+    "0x8D74020d8EACCdFf0366dAAFfb96e6c98CDFc112":
+    - reason: Etherscan sources use root-relative imports, GitHub uses relative ones. Same files.
+      line_ranges:
+      - file: contracts/EVMScriptFactories/ReportWithdrawalsForSlashedValidators.sol
+        github: { start: 6, count: 4 }
+        explorer: { start: 6, count: 4 }
+    "0x0B676AdEABcf4A696187cfAb90290Aa3ac51aFA2":
+    - reason: Etherscan sources use root-relative imports, GitHub uses relative ones. Same files.
+      line_ranges:
+      - file: contracts/EVMScriptFactories/SettleGeneralDelayedPenalty.sol
+        github: { start: 6, count: 5 }
+        explorer: { start: 6, count: 5 }
+    "0x5b0De22E65C068430f6e769754D51133775408cc":
+    - reason: Etherscan sources use root-relative imports, GitHub uses relative ones. Same files.
+      line_ranges:
+      - file: contracts/EVMScriptFactories/UpdateStakingModuleShareLimits.sol
+        github: { start: 6, count: 4 }
+        explorer: { start: 6, count: 4 }
   bytecode:
     "0xf3ec30B86c3dC1b8a1C754D885F9bE3160e15B4c":
     - reason: Metadata hash differs due to the rewritten imports, runtime code matches byte-for-byte.
@@ -117,5 +139,14 @@ allowed_diffs:
     - reason: Metadata hash differs due to the rewritten imports, runtime code matches byte-for-byte.
       cbor_metadata: true
     "0xde3e46E3129fA4e4e3f66c9024B0A3Ad509b27a1":
+    - reason: Metadata hash differs due to the rewritten imports, runtime code matches byte-for-byte.
+      cbor_metadata: true
+    "0x8D74020d8EACCdFf0366dAAFfb96e6c98CDFc112":
+    - reason: Metadata hash differs due to the rewritten imports, runtime code matches byte-for-byte.
+      cbor_metadata: true
+    "0x0B676AdEABcf4A696187cfAb90290Aa3ac51aFA2":
+    - reason: Metadata hash differs due to the rewritten imports, runtime code matches byte-for-byte.
+      cbor_metadata: true
+    "0x5b0De22E65C068430f6e769754D51133775408cc":
     - reason: Metadata hash differs due to the rewritten imports, runtime code matches byte-for-byte.
       cbor_metadata: true
