@@ -3,9 +3,9 @@
 # COPY --from below copies only the static /uv and /uvx binaries; the OS layers stay out.
 # BuildKit attaches build provenance and an SBOM as attestation manifests; verify with:
 #   gh attestation verify oci://ghcr.io/astral-sh/uv:<version> --owner astral-sh
-FROM ghcr.io/astral-sh/uv:0.12.9@sha256:8b940d3a9d65bed080436972241af2e21c84b5e8c9193f7014ed71479ee795ff AS uv
+FROM ghcr.io/astral-sh/uv:0.12.21@sha256:a7aed3216253ee804de3e2d8afa5073baa1a177335345d43845cd4165e43b711 AS uv
 
-FROM mcr.microsoft.com/devcontainers/python:3.14@sha256:97152d71a6e42cc2f4f39d68fe72a94fc10baeb203700296dd3b2db4cfaaa686
+FROM mcr.microsoft.com/devcontainers/python:3.14@sha256:3b3c45535947751e9dfcd513ef5bee858d221844f55e278e92d1cd8f5b1f2972
 
 COPY --from=uv /uv /uvx /bin/
 
