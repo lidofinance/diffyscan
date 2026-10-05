@@ -1,24 +1,38 @@
 contracts:
-  '0x107d287f178cd54792614d7d63c47d8242240bed': ParametersRegistry
-  '0xe768572cc5ae5c698345c59288d871a949ea8bd3': Accounting
-  '0x66adb8b3f58d3dfdf6badb595e41f19e947e5c14': VettedGate
-  '0xc0f110af6ea9119037a71c84d14506a22ae43dde': MerkleGateFactory
-  '0xece6e0cde61078f76b66ef0c338a6875e5d01f79': FeeOracle
-  '0x936da7cdb7eed1084d294e23ea1d7ad72dccfe0e': FeeDistributor
-  '0x63992a86f009fcc796a8369feefb68880aef4e3a': CSModule
-  '0xd25e7c3923d2e68c325980b0e15ed20d62b2691f': ValidatorStrikes
-  '0xa5b9e96e951089e629ab0834aeaf242a81394ea0': ExitPenalties
-  '0x610b517d380f287c239c93f8ef6ffbd567aa4ba5': Ejector
-  '0xb8cd8f059ad7a5db8cafde34aab007317f7156c8': PermissionlessGate
-  '0x711985e069f4d702e0457c0dacade3d3894ce4e3': OneShotCurveSetup
-  '0xfce7ab839e55de77730716d05b3553e45ab3a5ba': Verifier
+  "0x107d287f178cd54792614d7d63c47d8242240bed": ParametersRegistry
+  "0xe768572cc5ae5c698345c59288d871a949ea8bd3": Accounting
+  "0x66adb8b3f58d3dfdf6badb595e41f19e947e5c14": VettedGate
+  "0xc0f110af6ea9119037a71c84d14506a22ae43dde": MerkleGateFactory
+  "0xece6e0cde61078f76b66ef0c338a6875e5d01f79": FeeOracle
+  "0x936da7cdb7eed1084d294e23ea1d7ad72dccfe0e": FeeDistributor
+  "0x63992a86f009fcc796a8369feefb68880aef4e3a": CSModule
+  "0xd25e7c3923d2e68c325980b0e15ed20d62b2691f": ValidatorStrikes
+  "0xa5b9e96e951089e629ab0834aeaf242a81394ea0": ExitPenalties
+  "0x610b517d380f287c239c93f8ef6ffbd567aa4ba5": Ejector
+  "0xb8cd8f059ad7a5db8cafde34aab007317f7156c8": PermissionlessGate
+  "0x711985e069f4d702e0457c0dacade3d3894ce4e3": OneShotCurveSetup
+  "0xfce7ab839e55de77730716d05b3553e45ab3a5ba": Verifier
+  # External libraries
+  "0x37ada408ae3c3992953688e2ccb9ee7a3dfda902": AssetRecovererLib # library
+  "0xc4511d09639e5e174506083443da230d39196323": BondCurvesLib # library
+  "0xb430aa6c70a352c2aac9813ae049a210db11ab41": DepositQueueOps # library
+  "0xf05545ed71c60bbba6e73b6b70b15d4f5f22c0f4": GeneralPenalty # library
+  "0x9d9c8799189c797f6e2da74f71adf84492ada7d3": NOAddresses # library
+  "0xdd42ee5d54a1822021782f3f455bb99fbc19499a": NodeOperatorOps # library
+  "0xbb6e4db18182d45038f91b9f1195291c206fd8d2": StakeTracker # library
+  "0xda104f5f2a18405fc7ccd6e0a7feb5b824843606": TopUpQueueOps # library
+  "0x3bf9674f062af9ba94fdae9fcdf2d0001fff0a3a": WithdrawnValidatorLib # library
+
+network: mainnet
 explorer_hostname: api.etherscan.io
 explorer_chain_id: 1
 explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+
 github_repo:
   url: https://github.com/lidofinance/staking-modules
   commit: 4d3de6658499e1c1774951780a97d7ae25ca18b8
-  relative_root: ''
+  relative_root: ""
+
 dependencies:
   node_modules/@openzeppelin/contracts:
     url: https://github.com/OpenZeppelin/openzeppelin-contracts
@@ -28,4 +42,53 @@ dependencies:
     url: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable
     commit: e725abd
     relative_root: contracts
+
 fail_on_bytecode_comparison_error: true
+
+allowed_diffs:
+  bytecode:
+    "0x37ada408ae3c3992953688e2ccb9ee7a3dfda902":
+      - reason: Library self-address (delegatecall guard)
+        byte_ranges:
+          - offset: 1
+            length: 20
+    "0x3bf9674f062af9ba94fdae9fcdf2d0001fff0a3a":
+      - reason: Library self-address (delegatecall guard)
+        byte_ranges:
+          - offset: 1
+            length: 20
+    "0xda104f5f2a18405fc7ccd6e0a7feb5b824843606":
+      - reason: Library self-address (delegatecall guard)
+        byte_ranges:
+          - offset: 1
+            length: 20
+    "0xbb6e4db18182d45038f91b9f1195291c206fd8d2":
+      - reason: Library self-address (delegatecall guard)
+        byte_ranges:
+          - offset: 1
+            length: 20
+    "0xdd42ee5d54a1822021782f3f455bb99fbc19499a":
+      - reason: Library self-address (delegatecall guard)
+        byte_ranges:
+          - offset: 1
+            length: 20
+    "0x9d9c8799189c797f6e2da74f71adf84492ada7d3":
+      - reason: Library self-address (delegatecall guard)
+        byte_ranges:
+          - offset: 1
+            length: 20
+    "0xf05545ed71c60bbba6e73b6b70b15d4f5f22c0f4":
+      - reason: Library self-address (delegatecall guard)
+        byte_ranges:
+          - offset: 1
+            length: 20
+    "0xb430aa6c70a352c2aac9813ae049a210db11ab41":
+      - reason: Library self-address (delegatecall guard)
+        byte_ranges:
+          - offset: 1
+            length: 20
+    "0xc4511d09639e5e174506083443da230d39196323":
+      - reason: Library self-address (delegatecall guard)
+        byte_ranges:
+          - offset: 1
+            length: 20

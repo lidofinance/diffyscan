@@ -5,7 +5,6 @@ contracts:
   "0xfF419BbBC5f44d46547079922a88d691886d192a": ParametersRegistry
   "0xA64b339eebD3dC3De848298B6a140955932901d8": OssifiableProxy # MetaRegistry proxy
   "0x6d852907463496622bb5FE5bc55cc30C4682E10e": MetaRegistry
-  "0xa4fCD4dDa0e4a847142E3592C97c77d8B9B3Cf5F": CuratedDepositAllocator # library
   "0x2F91e3A8C5d6593bf4F8403fCfeCcd62dF59f6F6": OssifiableProxy # Accounting proxy
   "0xB41F5d2721906b3BE4fC7ae08261266C801076C2": Accounting
   "0x367d23c756599c20DCc8D6943F4976E8F88D60d7": OssifiableProxy # FeeDistributor proxy
@@ -23,6 +22,15 @@ contracts:
   "0xDdE99d63b352A665d04339D4792E6852Ce89d1B7": MerkleGateFactory
   "0x422f0d117615949E0620E998E1FE455eB6215E30": Dummy
   "0x7A4C579e6Ed4017A03B4d43687f09b851F68d391": Dummy
+  # External libraries
+  "0x37ada408ae3c3992953688e2ccb9ee7a3dfda902": AssetRecovererLib # library
+  "0xc4511d09639e5e174506083443da230d39196323": BondCurvesLib # library
+  "0xa4fCD4dDa0e4a847142E3592C97c77d8B9B3Cf5F": CuratedDepositAllocator # library
+  "0xf05545ed71c60bbba6e73b6b70b15d4f5f22c0f4": GeneralPenalty # library
+  "0x9d9c8799189c797f6e2da74f71adf84492ada7d3": NOAddresses # library
+  "0xdd42ee5d54a1822021782f3f455bb99fbc19499a": NodeOperatorOps # library
+  "0xbb6e4db18182d45038f91b9f1195291c206fd8d2": StakeTracker # library
+  "0x3bf9674f062af9ba94fdae9fcdf2d0001fff0a3a": WithdrawnValidatorLib # library
 
 network: mainnet
 explorer_hostname: api.etherscan.io
@@ -64,10 +72,42 @@ allowed_diffs:
         explorer: { start: 201, count: 3 }
   bytecode:
     "0xa4fCD4dDa0e4a847142E3592C97c77d8B9B3Cf5F":
-    - reason: >-
-        CuratedDepositAllocator is a library. solc embeds the deploy address in
-        runtime bytes 1-20 as a delegatecall guard, and the eth_call simulation
-        deploys to a different address. The rest of the bytecode matches.
+    - reason: Library self-address (delegatecall guard)
+      byte_ranges:
+      - offset: 1
+        length: 20
+    "0x37ada408ae3c3992953688e2ccb9ee7a3dfda902":
+    - reason: Library self-address (delegatecall guard)
+      byte_ranges:
+      - offset: 1
+        length: 20
+    "0xc4511d09639e5e174506083443da230d39196323":
+    - reason: Library self-address (delegatecall guard)
+      byte_ranges:
+      - offset: 1
+        length: 20
+    "0xf05545ed71c60bbba6e73b6b70b15d4f5f22c0f4":
+    - reason: Library self-address (delegatecall guard)
+      byte_ranges:
+      - offset: 1
+        length: 20
+    "0x9d9c8799189c797f6e2da74f71adf84492ada7d3":
+    - reason: Library self-address (delegatecall guard)
+      byte_ranges:
+      - offset: 1
+        length: 20
+    "0xdd42ee5d54a1822021782f3f455bb99fbc19499a":
+    - reason: Library self-address (delegatecall guard)
+      byte_ranges:
+      - offset: 1
+        length: 20
+    "0xbb6e4db18182d45038f91b9f1195291c206fd8d2":
+    - reason: Library self-address (delegatecall guard)
+      byte_ranges:
+      - offset: 1
+        length: 20
+    "0x3bf9674f062af9ba94fdae9fcdf2d0001fff0a3a":
+    - reason: Library self-address (delegatecall guard)
       byte_ranges:
       - offset: 1
         length: 20
