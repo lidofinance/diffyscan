@@ -1,35 +1,33 @@
 contracts:
-  "0xDa5F930cE326EB5205085D66c72A4E79d60cB8C1": OssifiableProxy # CuratedModule proxy
-  "0x959fC67FE53c8A6C7a1AEd73430Aa07a36eD9337": CuratedModule
-  "0xffC1C5d59CeAC6F6c27E701F04a70cb50474607C": OssifiableProxy # ParametersRegistry proxy
-  "0xfF419BbBC5f44d46547079922a88d691886d192a": ParametersRegistry
-  "0xA64b339eebD3dC3De848298B6a140955932901d8": OssifiableProxy # MetaRegistry proxy
-  "0x6d852907463496622bb5FE5bc55cc30C4682E10e": MetaRegistry
-  "0x2F91e3A8C5d6593bf4F8403fCfeCcd62dF59f6F6": OssifiableProxy # Accounting proxy
-  "0xB41F5d2721906b3BE4fC7ae08261266C801076C2": Accounting
-  "0x367d23c756599c20DCc8D6943F4976E8F88D60d7": OssifiableProxy # FeeDistributor proxy
-  "0x7C8FEE1dcC95Df60fC9b5BE7603c28Eb3af16753": FeeDistributor
-  "0x8EeFCdbD984c30E472BcbF545783D051CB5114e5": OssifiableProxy # FeeOracle proxy
-  "0x16804084408B6Caad10046F49aD421cBA56C0b5e": FeeOracle
-  "0x902D64c93F6595339aA46105627a085591051aFb": HashConsensus
-  "0xf4618370a1fBf46905B16C10817c8CFaD924D6db": OssifiableProxy # ValidatorStrikes proxy
-  "0x239Ee6ab18fB06370ad53Ce05097B32208fB0a30": ValidatorStrikes
-  "0x004aFb7DAA7dEA20EbAaB75c9F4892C879FaCCe0": OssifiableProxy # ExitPenalties proxy
-  "0x3766ABbA4635EE0fC3E6A7EB3EF169fe930df9c2": ExitPenalties
-  "0xe181A377A2d2BDE9A83f1474BC3DB7A412de091E": Ejector
-  "0xC392F457960f1B13Ebaf1aa6C065479dD507E1E3": Verifier
-  "0x3cb948FD454ad6b20DE67633f25DcbDbEaa0e849": CuratedGate
-  "0xDdE99d63b352A665d04339D4792E6852Ce89d1B7": MerkleGateFactory
-  "0x422f0d117615949E0620E998E1FE455eB6215E30": Dummy
-  "0x7A4C579e6Ed4017A03B4d43687f09b851F68d391": Dummy
+  "0x792cd25e4ae3578375031fb55e048e163a804f7b": OssifiableProxy # CSModule proxy
+  "0xf66826cefdd4f163f1e8bfb6c0b6808744264d46": CSModule
+  "0x5352b3d8274933c72dc774dcccd12b7301edbfd7": OssifiableProxy # ParametersRegistry proxy
+  "0x122e385434eb5dd0a2a1edf7b3b13e369c730e6e": ParametersRegistry
+  "0x3696ddd942a9e156f5d4728505d1b9a32dcef900": OssifiableProxy # Accounting proxy
+  "0x1e262530c7d142b2d1c113c11778294cc662874c": Accounting
+  "0x122cdedd0da630b555050976052c262ea25f8335": OssifiableProxy # FeeDistributor proxy
+  "0x4e939b8c69e53900b2330a8c68e29953118ca1c7": FeeDistributor
+  "0x0fb5ec09cc975d8e1af43063e51882798814f311": OssifiableProxy # FeeOracle proxy
+  "0x607cbd562f83736bb258fc50b6d0ceb323471ff9": FeeOracle
+  "0xd5a965faab2d02d3cc2286a9da42d09f0f2ae210": HashConsensus
+  "0x89bd84481f7679732eaddf7d99d02abd8309df65": OssifiableProxy # ValidatorStrikes proxy
+  "0x855ead6778b1162bdb728e4613af852cb2eb73c4": ValidatorStrikes
+  "0xa96021eff64e8fe927424c77902c56c4f17d10a5": OssifiableProxy # ExitPenalties proxy
+  "0x5131f7f71c69b25ae320457d5543ae0a26e4a7c2": ExitPenalties
+  "0x2ee500885870b020e84e86a09a5d26d1eeec3e5e": Ejector
+  "0x69b4c32a43565e768794d41b4a265f86de61b861": Verifier
+  "0x78e36353fe904c3685585d9f3204d4aacb3ad506": PermissionlessGate
+  "0x3c57f1b5381f02f182006bc520ab9183039c0185": Dummy
+  "0x27d9ba23cb75ddf684fcaa9786282e3ab42f7445": Dummy
   # External libraries
   "0x37ada408ae3c3992953688e2ccb9ee7a3dfda902": AssetRecovererLib # library
   "0xc4511d09639e5e174506083443da230d39196323": BondCurvesLib # library
-  "0xa4fCD4dDa0e4a847142E3592C97c77d8B9B3Cf5F": CuratedDepositAllocator # library
+  "0xb430aa6c70a352c2aac9813ae049a210db11ab41": DepositQueueOps # library
   "0xf05545ed71c60bbba6e73b6b70b15d4f5f22c0f4": GeneralPenalty # library
   "0x9d9c8799189c797f6e2da74f71adf84492ada7d3": NOAddresses # library
   "0xdd42ee5d54a1822021782f3f455bb99fbc19499a": NodeOperatorOps # library
   "0xbb6e4db18182d45038f91b9f1195291c206fd8d2": StakeTracker # library
+  "0xda104f5f2a18405fc7ccd6e0a7feb5b824843606": TopUpQueueOps # library
   "0x3bf9674f062af9ba94fdae9fcdf2d0001fff0a3a": WithdrawnValidatorLib # library
 
 network: mainnet
@@ -39,7 +37,7 @@ explorer_chain_id: 1
 
 github_repo:
   url: https://github.com/lidofinance/staking-modules
-  commit: 3b0c016c77590c208f2b71ca51410cb55ea2dcc2
+  commit: 4d3de6658499e1c1774951780a97d7ae25ca18b8
   relative_root: ""
 
 dependencies:
@@ -56,7 +54,7 @@ fail_on_bytecode_comparison_error: true
 
 allowed_diffs:
   source:
-    "0xe181A377A2d2BDE9A83f1474BC3DB7A412de091E":
+    "0x2ee500885870b020e84e86a09a5d26d1eeec3e5e":
     - reason: >-
         Newer IStakingRouter interface (test-only, stale at the pinned commit);
         no effect on bytecode.
@@ -71,17 +69,17 @@ allowed_diffs:
         github: { start: 196, count: 0 }
         explorer: { start: 201, count: 3 }
   bytecode:
-    "0xa4fCD4dDa0e4a847142E3592C97c77d8B9B3Cf5F":
-    - reason: Library self-address (delegatecall guard)
-      byte_ranges:
-      - offset: 1
-        length: 20
     "0x37ada408ae3c3992953688e2ccb9ee7a3dfda902":
     - reason: Library self-address (delegatecall guard)
       byte_ranges:
       - offset: 1
         length: 20
     "0xc4511d09639e5e174506083443da230d39196323":
+    - reason: Library self-address (delegatecall guard)
+      byte_ranges:
+      - offset: 1
+        length: 20
+    "0xb430aa6c70a352c2aac9813ae049a210db11ab41":
     - reason: Library self-address (delegatecall guard)
       byte_ranges:
       - offset: 1
@@ -102,6 +100,11 @@ allowed_diffs:
       - offset: 1
         length: 20
     "0xbb6e4db18182d45038f91b9f1195291c206fd8d2":
+    - reason: Library self-address (delegatecall guard)
+      byte_ranges:
+      - offset: 1
+        length: 20
+    "0xda104f5f2a18405fc7ccd6e0a7feb5b824843606":
     - reason: Library self-address (delegatecall guard)
       byte_ranges:
       - offset: 1
