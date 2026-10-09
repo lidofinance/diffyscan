@@ -178,3 +178,104 @@ def test_blockscout_reports_invalid_json(monkeypatch):
     monkeypatch.setattr("diffyscan.utils.explorer.fetch", lambda url: InvalidJSON())
     with pytest.raises(ExplorerError, match="Invalid Blockscout JSON"):
         _get_contract_from_blockscout("eth.blockscout.com", "0xabc")
+
+
+ETHERSCAN_RESULT = {
+    "ContractName": "Demo",
+    "CompilerVersion": "v0.8.25+commit.b61c2a91",
+    "SourceCode": "contract Demo {}",
+    "OptimizationUsed": "1",
+    "Runs": "200",
+}
+
+
+def _get_etherscan_contract(monkeypatch, tmp_path, fetch):
+    monkeypatch.setattr("diffyscan.utils.explorer.CACHE_DIR", str(tmp_path))
+    monkeypatch.setattr("diffyscan.utils.explorer.fetch", fetch)
+    return get_contract_from_explorer(
+        None,
+        "api.etherscan.io",
+        "0x0000000000000000000000000000000000000001",
+        "Demo",
+        use_cache=True,
+    )
+
+
+@pytest.mark.parametrize(
+    "payload,match",
+    [
+        (None, "response object"),
+        ([], "response object"),
+        ("error", "response object"),
+        ({"result": [ETHERSCAN_RESULT]}, "message"),
+        ({"message": None, "result": [ETHERSCAN_RESULT]}, "message"),
+        ({"message": "OK", "result": "unexpected"}, "result"),
+        ({"message": "OK", "result": [None]}, "result"),
+        (
+            {"message": "OK", "result": [{**ETHERSCAN_RESULT, "SourceCode": "{{"}]},
+            "SourceCode",
+        ),
+        (
+            {
+                "message": "OK",
+                "result": [{**ETHERSCAN_RESULT, "SourceCode": "{{not json}}"}],
+            },
+            "SourceCode",
+        ),
+        (
+            {
+                "message": "OK",
+                "result": [
+                    {
+                        k: v
+                        for k, v in ETHERSCAN_RESULT.items()
+                        if k != "CompilerVersion"
+                    }
+                ],
+            },
+            "CompilerVersion",
+        ),
+        (
+            {"message": "OK", "result": [{**ETHERSCAN_RESULT, "CompilerVersion": ""}]},
+            "CompilerVersion",
+        ),
+        (
+            {"message": "OK", "result": [{**ETHERSCAN_RESULT, "CompilerVersion": 8}]},
+            "CompilerVersion",
+        ),
+    ],
+)
+def test_etherscan_rejects_malformed_responses(monkeypatch, tmp_path, payload, match):
+    with pytest.raises(ExplorerError, match=match):
+        _get_etherscan_contract(
+            monkeypatch, tmp_path, lambda url: DummyResponse(payload)
+        )
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_etherscan_reports_invalid_json(monkeypatch, tmp_path):
+    class InvalidJSON:
+        def json(self):
+            raise ValueError("invalid JSON")
+
+    with pytest.raises(ExplorerError, match="Invalid Etherscan JSON"):
+        _get_etherscan_contract(monkeypatch, tmp_path, lambda url: InvalidJSON())
+
+
+def test_etherscan_parses_double_braced_standard_json(monkeypatch, tmp_path):
+    standard_json = {
+        "language": "Solidity",
+        "sources": {"Demo.sol": {"content": "contract Demo {}"}},
+        "settings": {},
+    }
+    payload = {
+        "message": "OK",
+        "result": [
+            {**ETHERSCAN_RESULT, "SourceCode": "{" + json.dumps(standard_json) + "}"}
+        ],
+    }
+    contract = _get_etherscan_contract(
+        monkeypatch, tmp_path, lambda url: DummyResponse(payload)
+    )
+    assert contract["name"] == "Demo"
+    assert contract["solcInput"]["sources"] == standard_json["sources"]
