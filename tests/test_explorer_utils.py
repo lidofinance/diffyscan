@@ -211,6 +211,19 @@ def _get_etherscan_contract(monkeypatch, tmp_path, fetch):
         ({"message": None, "result": [ETHERSCAN_RESULT]}, "message"),
         ({"message": "OK", "result": "unexpected"}, "result"),
         ({"message": "OK", "result": [None]}, "result"),
+        ({"message": "OK", "result": None}, "Invalid Etherscan result"),
+        ({"message": "OK", "result": {}}, "Invalid Etherscan result"),
+        ({"message": "OK", "result": [ETHERSCAN_RESULT, None]}, "result"),
+        ({"message": "OK", "result": []}, "Empty result"),
+        (
+            {
+                "message": "OK",
+                "result": [
+                    {k: v for k, v in ETHERSCAN_RESULT.items() if k != "SourceCode"}
+                ],
+            },
+            "SourceCode",
+        ),
         (
             {"message": "OK", "result": [{**ETHERSCAN_RESULT, "SourceCode": "{{"}]},
             "SourceCode",
@@ -279,3 +292,44 @@ def test_etherscan_parses_double_braced_standard_json(monkeypatch, tmp_path):
     )
     assert contract["name"] == "Demo"
     assert contract["solcInput"]["sources"] == standard_json["sources"]
+
+
+VALID_STANDARD_JSON = {
+    "language": "Solidity",
+    "sources": {"Demo.sol": {"content": "contract Demo {}"}},
+    "settings": {},
+}
+
+
+@pytest.mark.parametrize(
+    "source_code,match",
+    [
+        ("{" + json.dumps(VALID_STANDARD_JSON) + "x", "SourceCode"),
+        ("{" + json.dumps({**VALID_STANDARD_JSON, "settings": None}) + "}", "settings"),
+        ("{" + json.dumps({**VALID_STANDARD_JSON, "sources": []}) + "}", "SourceCode"),
+        ("{" + json.dumps({**VALID_STANDARD_JSON, "sources": {}}) + "}", "SourceCode"),
+        ("{" + json.dumps({"language": "Solidity"}) + "}", "SourceCode"),
+        (
+            "{" + json.dumps({**VALID_STANDARD_JSON, "sources": {"A.sol": None}}) + "}",
+            "invalid source A.sol",
+        ),
+        (
+            "{"
+            + json.dumps({**VALID_STANDARD_JSON, "sources": {"A.sol": {"urls": []}}})
+            + "}",
+            "invalid source A.sol",
+        ),
+    ],
+)
+def test_etherscan_rejects_malformed_standard_json(
+    monkeypatch, tmp_path, source_code, match
+):
+    payload = {
+        "message": "OK",
+        "result": [{**ETHERSCAN_RESULT, "SourceCode": source_code}],
+    }
+    with pytest.raises(ExplorerError, match=match):
+        _get_etherscan_contract(
+            monkeypatch, tmp_path, lambda url: DummyResponse(payload)
+        )
+    assert list(tmp_path.iterdir()) == []

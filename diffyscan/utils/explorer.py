@@ -185,6 +185,27 @@ def _fetch_etherscan_response(etherscan_link: str, contract: str) -> dict:
     raise AssertionError("unreachable")
 
 
+def _parse_etherscan_standard_json(source_code: str, contract: str) -> dict:
+    """Parse Etherscan's double-braced ``{{...}}`` standard JSON input."""
+    error = f"Invalid Etherscan standard JSON SourceCode for {contract}"
+    if not source_code.endswith("}}"):
+        raise ExplorerError(error)
+    try:
+        parsed: dict = json.loads(source_code[1:-1])
+    except ValueError:
+        raise ExplorerError(error) from None
+
+    sources = parsed.get("sources")
+    if not isinstance(sources, dict) or not sources:
+        raise ExplorerError(error)
+    for path, source in sources.items():
+        if not isinstance(source, dict) or not isinstance(source.get("content"), str):
+            raise ExplorerError(f"{error}: invalid source {path}")
+    if "settings" in parsed and not isinstance(parsed["settings"], dict):
+        raise ExplorerError(f"{error}: settings must be an object")
+    return parsed
+
+
 def _get_contract_from_etherscan(
     token: str | None,
     etherscan_hostname: str,
@@ -207,10 +228,12 @@ def _get_contract_from_etherscan(
         raise ExplorerError(f'Received bad response: {response.get("result")}')
 
     results = response.get("result")
+    if not isinstance(results, list) or not all(
+        isinstance(entry, dict) for entry in results
+    ):
+        raise ExplorerError(f"Invalid Etherscan result for {contract}")
     if not results:
         raise ExplorerError(f"Empty result from explorer API for contract {contract}")
-    if not isinstance(results, list) or not isinstance(results[0], dict):
-        raise ExplorerError(f"Invalid Etherscan result for {contract}")
     result = results[0]
     if "ContractName" not in result:
         _error_no_source_code_and_exit(contract)
@@ -219,18 +242,13 @@ def _get_contract_from_etherscan(
     if not isinstance(compiler_version, str) or not compiler_version:
         raise ExplorerError(f"Invalid Etherscan CompilerVersion for {contract}")
 
-    solc_input = result["SourceCode"]
+    solc_input = result.get("SourceCode")
     if not isinstance(solc_input, str):
         raise ExplorerError(
             f"Unexpected SourceCode type for {contract}: {type(solc_input).__name__}"
         )
     if solc_input.startswith("{{"):
-        try:
-            parsed_solc_input = json.loads(solc_input[1:-1])
-        except ValueError:
-            raise ExplorerError(
-                f"Invalid Etherscan standard JSON SourceCode for {contract}"
-            ) from None
+        parsed_solc_input = _parse_etherscan_standard_json(solc_input, contract)
     else:
         source_files = _build_source_files(
             result["ContractName"],
