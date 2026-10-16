@@ -12,6 +12,34 @@ UNVERIFIED = "0x0000000000000000000000000000000000000001"
 VERIFIED = "0x0000000000000000000000000000000000000002"
 
 
+def _config(*, unverified=True, fail_on=None, source=False):
+    contracts = {UNVERIFIED: "BeaconProxy"} if unverified else {}
+    config = {
+        "contracts": {**contracts, VERIFIED: "Vault"},
+        "explorer_hostname": "api.etherscan.io",
+        "source_comparison": source,
+    }
+    if fail_on is not None:
+        config["fail_on_bytecode_comparison_error"] = fail_on
+    return config
+
+
+def _exact_source(address, *args):
+    return {
+        "contract_address": address,
+        "contract_name": "Vault",
+        "status": "exact",
+        "files_count": 1,
+        "files_found": 1,
+        "identical_files": 1,
+        "files_with_diffs": 0,
+        "files": [],
+        "matched_rule": None,
+        "matched_facets": [],
+        "suggestion_entry": None,
+    }
+
+
 @pytest.fixture(autouse=True)
 def _restore_logger_stdout():
     yield
@@ -20,17 +48,13 @@ def _restore_logger_stdout():
 
 @pytest.fixture
 def run(monkeypatch):
-    config = {
-        "contracts": {UNVERIFIED: "BeaconProxy", VERIFIED: "Vault"},
-        "explorer_hostname": "api.etherscan.io",
-        "source_comparison": False,
-    }
-    monkeypatch.setattr(runner, "load_config", lambda path: config)
+    configs = {"config.yaml": _config()}
+    monkeypatch.setattr(runner, "load_config", lambda path: configs[path])
+    monkeypatch.setattr(runner, "_collect_config_paths", lambda path: list(configs))
     monkeypatch.setattr(runner, "_load_explorer_token", lambda cfg: "explorer-token")
-    monkeypatch.setattr(runner, "load_env", lambda *args, **kwargs: "github-token")
-    # Keeps the handler in its default fail-on-error mode, as in a config with
-    # fail_on_bytecode_comparison_error: true.
-    monkeypatch.setattr(runner, "_setup_binary_comparison", lambda cfg: "rpc-url")
+    # Also answers the RPC variable, so the real _setup_binary_comparison applies
+    # each config's fail_on_bytecode_comparison_error.
+    monkeypatch.setattr(runner, "load_env", lambda *args, **kwargs: "env-value")
     monkeypatch.setattr(runner, "get_chain_id", lambda rpc_url: 1)
 
     def explorer_source(token, hostname, address, name, *args):
@@ -41,6 +65,7 @@ def run(monkeypatch):
         return {"name": name, "solcInput": {"sources": {}}}
 
     monkeypatch.setattr(runner, "get_contract_from_explorer", explorer_source)
+    monkeypatch.setattr(runner, "run_source_diff", _exact_source)
     monkeypatch.setattr(
         runner,
         "run_bytecode_diff",
@@ -49,10 +74,12 @@ def run(monkeypatch):
         ),
     )
     monkeypatch.setattr(runner, "load_dotenv", lambda: None)
-    monkeypatch.setattr(runner.os.path, "isfile", lambda path: path == "config.yaml")
 
-    def main(*args):
-        monkeypatch.setattr(runner.sys, "argv", ["diffyscan", "config.yaml", *args])
+    def main(*args, use=None):
+        if use is not None:
+            configs.clear()
+            configs.update(use)
+        monkeypatch.setattr(runner.sys, "argv", ["diffyscan", "configs", *args])
         with pytest.raises(SystemExit) as exc_info:
             runner.main()
         return exc_info.value.code
@@ -90,6 +117,33 @@ def test_the_json_report_keeps_both_contracts(run, capsys):
     assert by_address[VERIFIED]["bytecode"]["status"] == "exact"
 
 
+def test_opting_out_keeps_exit_status_zero_and_reports_the_error(run, capsys):
+    code = run("--json", use={"config.yaml": _config(fail_on=False)})
+
+    report = json.loads(capsys.readouterr().out)
+    assert code == 0
+    assert report["status"] == "error"
+
+
+def test_without_bytecode_comparison_a_contract_error_fails_the_run(run):
+    use = {"config.yaml": _config(fail_on=False, source=True)}
+
+    assert run("--skip-binary-comparison", use=use) == 1
+
+
+@pytest.mark.parametrize(
+    "use, expected",
+    [
+        ({"strict": _config(), "lenient": _config(unverified=False, fail_on=False)}, 1),
+        ({"lenient": _config(unverified=False, fail_on=False), "strict": _config()}, 1),
+        ({"strict": _config(unverified=False), "lenient": _config(fail_on=False)}, 0),
+        ({"lenient": _config(fail_on=False), "strict": _config(unverified=False)}, 0),
+    ],
+)
+def test_each_config_applies_its_own_policy(run, use, expected):
+    assert run(use=use) == expected
+
+
 def test_an_empty_explorer_answer_reads_as_unverified_source(monkeypatch):
     monkeypatch.setattr(
         explorer,
@@ -97,7 +151,14 @@ def test_an_empty_explorer_answer_reads_as_unverified_source(monkeypatch):
         lambda link, contract: {
             "status": "1",
             "message": "OK",
-            "result": [{"ContractName": "", "SourceCode": "", "Proxy": "1"}],
+            "result": [
+                {
+                    "ContractName": "",
+                    "SourceCode": "",
+                    "CompilerVersion": "",
+                    "Proxy": "1",
+                }
+            ],
         },
     )
 
