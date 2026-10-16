@@ -57,8 +57,8 @@ used for it:
 
 | Key | Present when | Meaning |
 | --- | --- | --- |
-| `remote_chain_id` | bytecode comparison ran | Chain ID that the RPC in `rpc_url_env_var` answered. Compare it with the chain the config targets: a report read from another chain proves nothing about the deployment. |
-| `explorer_chain_id` | the config sets `explorer_chain_id` | Chain ID passed to the explorer API. |
+| `remote_chain_id` | bytecode comparison is enabled and the RPC answered `eth_chainId` | Chain ID that the RPC in `rpc_url_env_var` answered. It names the chain, not a comparison: the verdicts are in `contracts[]`. Compare it with the chain the config targets: a report read from another chain proves nothing about the deployment. |
+| `explorer_chain_id` | the config sets `explorer_chain_id` | Value of the config's `explorer_chain_id`. The Etherscan v2 API receives it as `chainid`; other explorers select the chain by hostname. |
 
 ## `contracts[]`
 
@@ -137,6 +137,13 @@ explorer side. `count: 0` marks the insertion point on the side without lines.
           "immutables": [{ "offset": 1234, "value": "0x00..01" }]
         }
       }
+    }
+  ],
+  "configs": [
+    {
+      "config": "configs/example/mainnet/config.yaml",
+      "remote_chain_id": 1,
+      "explorer_chain_id": 1
     }
   ]
 }

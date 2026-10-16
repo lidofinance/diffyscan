@@ -366,14 +366,15 @@ def test_human_mode_reraises_error_returned_by_process_config(monkeypatch):
 
 
 def test_report_names_the_chain_each_config_read():
-    checked = {**_result([], []), "remote_chain_id": 42161, "explorer_chain_id": 42161}
-    source_only = _result([], [], path="other.yaml")
+    # Different values, so the report cannot pass with one key copied into the other.
+    checked = {**_result([], []), "remote_chain_id": 42161, "explorer_chain_id": 10}
+    without_ids = _result([], [], path="other.yaml")
 
     report = runner.build_json_report(
-        [checked, source_only], exit_code=0, error=None, duration_seconds=0
+        [checked, without_ids], exit_code=0, error=None, duration_seconds=0
     )
 
     assert report["configs"] == [
-        {"config": "config.yaml", "remote_chain_id": 42161, "explorer_chain_id": 42161},
+        {"config": "config.yaml", "remote_chain_id": 42161, "explorer_chain_id": 10},
         {"config": "other.yaml"},
     ]
