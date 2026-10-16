@@ -202,7 +202,8 @@ def _get_contract_from_etherscan(
     if not results:
         raise ExplorerError(f"Empty result from explorer API for contract {contract}")
     result = results[0]
-    if "ContractName" not in result:
+    # An unverified contract comes back with an empty name and source.
+    if not result.get("ContractName") or not result.get("SourceCode"):
         _error_no_source_code_and_exit(contract)
 
     solc_input = result["SourceCode"]

@@ -742,8 +742,11 @@ def process_config(
                                 )
                             )
             except BaseCustomException as custom_exc:
-                ExceptionHandler.raise_exception_or_log(custom_exc)
-                traceback.print_exc()
+                # A contract that cannot be checked must not hide the results of
+                # the others: record it and go on. main() decides the exit code.
+                logger.error(
+                    f"{contract_name} ({contract_address}) not checked", str(custom_exc)
+                )
                 contract_errors.append(
                     {
                         "contract_address": contract_address,
@@ -763,6 +766,7 @@ def process_config(
         "source_stats": source_stats,
         "bytecode_stats": bytecode_stats,
         "contract_errors": contract_errors,
+        "fail_on_contract_errors": ExceptionHandler.raise_exception,
         "config_path": path,
         "matched_count": matched_count,
         "interrupted": interrupted,
@@ -859,6 +863,7 @@ def print_final_summary(
     if enable_binary_comparison:
         _print_bytecode_summary(all_results)
 
+    _print_contract_errors(all_results)
     _print_allowlist_suggestions(all_results)
 
     logger.divider()
@@ -1118,13 +1123,20 @@ def main() -> None:
 
     logger.okay(f"Done in {round(execution_time, 3)}s ✨" + " " * 100)
 
+    not_checked = sum(
+        len(result["contract_errors"])
+        for result in all_results
+        if result.get("fail_on_contract_errors", True)
+    )
+
     exit_code = 0
     if error is not None or nothing_checked:
         exit_code = 1
-    elif source_failures + bytecode_failures > 0:
+    elif source_failures + bytecode_failures + not_checked > 0:
         logger.error(
-            "Exiting with non-zero code due to unallowed diffs",
-            f"source={source_failures}, bytecode={bytecode_failures}",
+            "Exiting with non-zero code due to unallowed diffs or contracts not checked",
+            f"source={source_failures}, bytecode={bytecode_failures}, "
+            f"not_checked={not_checked}",
         )
         exit_code = 1
 
@@ -1252,6 +1264,19 @@ def _print_bytecode_summary(all_results: list[dict]) -> None:
         logger.warn("Contracts with uncovered bytecode differences:")
         for stat in failed_diffs:
             logger.warn(f"  • {stat['contract_name']} ({stat['contract_address']})")
+
+
+def _print_contract_errors(all_results: list[dict]) -> None:
+    errors = [error for result in all_results for error in result["contract_errors"]]
+    if not errors:
+        return
+    logger.divider()
+    logger.error("CONTRACTS NOT CHECKED:", len(errors))
+    for error in errors:
+        logger.error(
+            f"  • {error['contract_name']} ({error['contract_address']})",
+            error["error"],
+        )
 
 
 def _print_allowlist_suggestions(all_results: list[dict]) -> None:
