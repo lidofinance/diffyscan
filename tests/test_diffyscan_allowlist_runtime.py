@@ -356,3 +356,25 @@ def test_process_config_returns_the_chain_ids_it_read(monkeypatch):
     )
 
     assert (result["remote_chain_id"], result["explorer_chain_id"]) == (1, 10)
+
+
+def test_process_config_keeps_the_explorer_chain_id_when_the_rpc_fails(monkeypatch):
+    config = {**_config_with_any_rule(), "explorer_chain_id": 10}
+    _stub_process_config_dependencies(monkeypatch, config)
+
+    def rpc_down(rpc_url):
+        raise RuntimeError("rpc down")
+
+    monkeypatch.setattr(runner, "get_chain_id", rpc_down)
+
+    result = runner.process_config(
+        "config.json",
+        recursive_parsing=False,
+        enable_binary_comparison=True,
+        cache_explorer=False,
+        cache_github=False,
+        skip_user_input=True,
+    )
+
+    assert isinstance(result["error"], RuntimeError)
+    assert (result["remote_chain_id"], result["explorer_chain_id"]) == (None, 10)

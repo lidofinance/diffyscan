@@ -639,6 +639,8 @@ def process_config(
     explorer_chain_id: int | None = None
 
     try:
+        # Read the configured chain first, so a failed RPC call keeps it in the report.
+        explorer_chain_id = get_explorer_chain_id(config)
         if enable_binary_comparison:
             assert remote_rpc_url is not None
             logger.info("Getting remote chain ID...")
@@ -654,7 +656,6 @@ def process_config(
         if explorer_hostname is None:
             logger.warn('Failed to find "explorer_hostname" in the config')
         assert explorer_hostname is not None, "explorer_hostname is required"
-        explorer_chain_id = get_explorer_chain_id(config)
 
         # Apply contract filter if specified
         filter_set = (
