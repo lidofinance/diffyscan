@@ -635,6 +635,8 @@ def process_config(
     matched_count = 0
     interrupted = False
     error: Exception | None = None
+    remote_chain_id: int | None = None
+    explorer_chain_id: int | None = None
 
     try:
         if enable_binary_comparison:
@@ -763,6 +765,8 @@ def process_config(
         "source_stats": source_stats,
         "bytecode_stats": bytecode_stats,
         "contract_errors": contract_errors,
+        "remote_chain_id": remote_chain_id,
+        "explorer_chain_id": explorer_chain_id,
         "config_path": path,
         "matched_count": matched_count,
         "interrupted": interrupted,
@@ -1028,6 +1032,16 @@ def build_json_report(
             }
         ),
         "contracts": contracts,
+        "configs": [
+            _compact(
+                {
+                    "config": result["config_path"],
+                    "remote_chain_id": result.get("remote_chain_id"),
+                    "explorer_chain_id": result.get("explorer_chain_id"),
+                }
+            )
+            for result in all_results
+        ],
     }
 
 

@@ -333,3 +333,26 @@ def test_missing_extra_source_is_reported(monkeypatch):
     )
 
     assert missing == ["C.sol"]
+
+
+def test_process_config_returns_the_chain_ids_it_read(monkeypatch):
+    config = {**_config_with_any_rule(), "explorer_chain_id": 10}
+    _stub_process_config_dependencies(monkeypatch, config)
+    monkeypatch.setattr(
+        runner,
+        "run_bytecode_diff",
+        lambda address, name, *args: runner._bytecode_result(
+            address, name, status="exact", match=True, has_diff=False
+        ),
+    )
+
+    result = runner.process_config(
+        "config.json",
+        recursive_parsing=False,
+        enable_binary_comparison=True,
+        cache_explorer=False,
+        cache_github=False,
+        skip_user_input=True,
+    )
+
+    assert (result["remote_chain_id"], result["explorer_chain_id"]) == (1, 10)

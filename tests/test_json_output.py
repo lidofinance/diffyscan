@@ -363,3 +363,17 @@ def test_human_mode_reraises_error_returned_by_process_config(monkeypatch):
     monkeypatch.setattr(runner.os.path, "isfile", lambda path: path == "config.yaml")
     with pytest.raises(RuntimeError, match="explorer is down"):
         runner.main()
+
+
+def test_report_names_the_chain_each_config_read():
+    checked = {**_result([], []), "remote_chain_id": 42161, "explorer_chain_id": 42161}
+    source_only = _result([], [], path="other.yaml")
+
+    report = runner.build_json_report(
+        [checked, source_only], exit_code=0, error=None, duration_seconds=0
+    )
+
+    assert report["configs"] == [
+        {"config": "config.yaml", "remote_chain_id": 42161, "explorer_chain_id": 42161},
+        {"config": "other.yaml"},
+    ]

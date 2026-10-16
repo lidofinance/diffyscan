@@ -16,7 +16,7 @@ diffyscan path/to/config.yaml --json -E -G
 ## Rules for parsers
 
 - Keys with a `null` or empty-list value are omitted. A missing key means
-  nothing to report. `summary` and `contracts` are present in every report.
+  nothing to report. `summary`, `contracts` and `configs` are present in every report.
 - Read `status` before the exit code. With
   `fail_on_bytecode_comparison_error: false` a contract skipped because of an
   error leaves the exit code at 0, while `status` becomes `error`.
@@ -35,6 +35,7 @@ diffyscan path/to/config.yaml --json -E -G
 | `log_file` | string | Path to the human-readable log of this run. |
 | `summary` | object | Counters, described below. |
 | `contracts` | array | One entry per checked contract, described below. |
+| `configs` | array | One entry per config the run read, described below. |
 
 ### `summary`
 
@@ -48,6 +49,16 @@ diffyscan path/to/config.yaml --json -E -G
 
 `source` or `bytecode` is absent when that comparison ran for no contract.
 `contract_errors` is absent when zero.
+
+## `configs[]`
+
+Each entry has `config` (path of the config file) and the chain IDs the run
+used for it:
+
+| Key | Present when | Meaning |
+| --- | --- | --- |
+| `remote_chain_id` | bytecode comparison ran | Chain ID that the RPC in `rpc_url_env_var` answered. Compare it with the chain the config targets: a report read from another chain proves nothing about the deployment. |
+| `explorer_chain_id` | the config sets `explorer_chain_id` | Chain ID passed to the explorer API. |
 
 ## `contracts[]`
 
