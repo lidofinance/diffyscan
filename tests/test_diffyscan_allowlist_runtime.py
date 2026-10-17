@@ -105,7 +105,7 @@ def test_process_config_keeps_results_when_a_later_contract_fails(monkeypatch):
 
     def explorer(token, hostname, address, *args, **kwargs):
         if address == second:
-            raise RuntimeError("explorer returned 401")
+            raise RuntimeError("unexpected explorer failure")
         return {"name": "Test", "solcInput": {"sources": {}}}
 
     monkeypatch.setattr(runner, "get_contract_from_explorer", explorer)
@@ -129,7 +129,7 @@ def test_process_config_keeps_results_when_a_later_contract_fails(monkeypatch):
     )
 
     assert [stat["contract_address"] for stat in result["bytecode_stats"]] == [ADDR]
-    assert str(result["error"]) == "explorer returned 401"
+    assert str(result["error"]) == "unexpected explorer failure"
 
 
 def test_process_config_normalizes_explorer_chain_id(monkeypatch):

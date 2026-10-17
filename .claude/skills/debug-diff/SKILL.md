@@ -16,7 +16,7 @@ When a rerun is needed:
 uv run diffyscan path/to/config.yaml --json -E -G --contract 0xADDRESS
 ```
 
-Omit the filter for the full config. `--json` implies `--yes`; stdout is the report and tracebacks go to stderr. Read `status`, top-level and contract errors, comparison results and coverage. Exit code 0 alone is insufficient. Missing entries after an abort are not verified contracts. Distinguish an unmatched filter, an empty config and both comparisons disabled from success.
+Omit the filter for the full config. `--json` implies `--yes`; stdout is the report, fatal-error tracebacks go to stderr, and handled-error tracebacks stay in the log file. Read `status`, top-level and contract errors, comparison results and coverage. Exit code 0 alone is insufficient. Missing entries after an abort are not verified contracts. Distinguish an unmatched filter, an empty config and both comparisons disabled from success.
 
 Caches accelerate diagnosis. Omit `-E` if explorer metadata may be stale; do not delete shared caches indiscriminately. Keep tokens and credential-bearing URLs out of shared output.
 
