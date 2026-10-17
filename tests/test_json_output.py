@@ -378,3 +378,72 @@ def test_report_names_the_chain_each_config_read():
         {"config": "config.yaml", "remote_chain_id": 42161, "explorer_chain_id": 10},
         {"config": "other.yaml"},
     ]
+
+
+@pytest.mark.parametrize(
+    "missing, earlier_config",
+    [
+        ("TEST_EXPLORER_TOKEN", False),
+        ("GITHUB_API_TOKEN", False),
+        ("TEST_RPC_URL", False),
+        ("TEST_EXPLORER_TOKEN", True),
+        ("TEST_RPC_URL", True),
+    ],
+)
+@pytest.mark.parametrize("json_mode", [False, True])
+def test_setup_failure_keeps_loaded_config(
+    monkeypatch, capsys, tmp_path, missing, earlier_config, json_mode
+):
+    config = {
+        "contracts": {ADDR: "Test"},
+        "explorer_hostname": "api.etherscan.io",
+        "explorer_chain_id": 10,
+        "explorer_token_env_var": "TEST_EXPLORER_TOKEN",
+        "rpc_url_env_var": "TEST_RPC_URL",
+        "source_comparison": False,
+    }
+    for name in ("TEST_EXPLORER_TOKEN", "GITHUB_API_TOKEN", "TEST_RPC_URL"):
+        monkeypatch.setenv(name, "dummy")
+    monkeypatch.delenv(missing)
+    monkeypatch.setenv("WORKING_EXPLORER_TOKEN", "dummy")
+    monkeypatch.setenv("WORKING_RPC_URL", "dummy")
+    monkeypatch.setattr(runner, "load_dotenv", lambda: None)
+    monkeypatch.setattr(runner, "get_chain_id", lambda url: 1)
+    monkeypatch.setattr(runner, "get_contract_from_explorer", lambda *args: {})
+    monkeypatch.setattr(runner, "run_bytecode_diff", lambda *args: _bytecode_stat())
+
+    expected = []
+    if earlier_config:
+        # An earlier config completes without the credential missing from the next one.
+        first = tmp_path / "01.json"
+        first.write_text(
+            json.dumps(
+                {
+                    **config,
+                    "explorer_token_env_var": "WORKING_EXPLORER_TOKEN",
+                    "rpc_url_env_var": "WORKING_RPC_URL",
+                }
+            )
+        )
+        expected.append(
+            {"config": str(first), "remote_chain_id": 1, "explorer_chain_id": 10}
+        )
+    failing = tmp_path / "02.json"
+    failing.write_text(json.dumps(config))
+    expected.append({"config": str(failing), "explorer_chain_id": 10})
+    argv = ["diffyscan", str(tmp_path if earlier_config else failing)]
+    monkeypatch.setattr(runner.sys, "argv", [*argv, "--json"] if json_mode else argv)
+
+    if not json_mode:
+        with pytest.raises(ValueError, match=missing):
+            runner.main()
+        return
+
+    with pytest.raises(SystemExit) as exc_info:
+        runner.main()
+    report = json.loads(capsys.readouterr().out)
+    assert exc_info.value.code == 1
+    assert report["status"] == "error"
+    assert missing in report["error"]
+    assert report["configs"] == expected
+    assert len(report["contracts"]) == len(expected) - 1

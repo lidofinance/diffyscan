@@ -608,27 +608,6 @@ def process_config(
 
     logger.info(f"Loading config {path}...")
     config: dict = load_config(path)  # type: ignore[assignment]
-    effective_allowed_diffs = build_effective_allowed_diffs(config)
-
-    enable_source_comparison = config.get("source_comparison", True)
-    if not enable_source_comparison and not enable_binary_comparison:
-        raise ValueError(
-            f"Both source and bytecode comparisons are disabled in {path}. "
-            "Enable source_comparison or remove --skip-binary-comparison."
-        )
-
-    explorer_token = _load_explorer_token(config)
-    github_api_token = load_env("GITHUB_API_TOKEN", masked=True, required=True)
-
-    remote_rpc_url = None
-    if enable_binary_comparison:
-        remote_rpc_url = _setup_binary_comparison(config)
-
-    if not enable_source_comparison:
-        logger.warn(
-            f'Source code comparison is disabled in {path}. To enable, set "source_comparison": true in the config'
-        )
-
     source_stats = []
     bytecode_stats = []
     contract_errors = []
@@ -639,8 +618,29 @@ def process_config(
     explorer_chain_id: int | None = None
 
     try:
-        # Read the configured chain first, so a failed RPC call keeps it in the report.
+        # Keep the configured chain even when credentials or RPC setup fail.
         explorer_chain_id = get_explorer_chain_id(config)
+        effective_allowed_diffs = build_effective_allowed_diffs(config)
+
+        enable_source_comparison = config.get("source_comparison", True)
+        if not enable_source_comparison and not enable_binary_comparison:
+            raise ValueError(
+                f"Both source and bytecode comparisons are disabled in {path}. "
+                "Enable source_comparison or remove --skip-binary-comparison."
+            )
+
+        explorer_token = _load_explorer_token(config)
+        github_api_token = load_env("GITHUB_API_TOKEN", masked=True, required=True)
+
+        remote_rpc_url = None
+        if enable_binary_comparison:
+            remote_rpc_url = _setup_binary_comparison(config)
+
+        if not enable_source_comparison:
+            logger.warn(
+                f'Source code comparison is disabled in {path}. To enable, set "source_comparison": true in the config'
+            )
+
         if enable_binary_comparison:
             assert remote_rpc_url is not None
             logger.info("Getting remote chain ID...")

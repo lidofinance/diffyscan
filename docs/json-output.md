@@ -35,7 +35,7 @@ diffyscan path/to/config.yaml --json -E -G
 | `log_file` | string | Path to the human-readable log of this run. |
 | `summary` | object | Counters, described below. |
 | `contracts` | array | One entry per checked contract, described below. |
-| `configs` | array | One entry per config the run read, described below. |
+| `configs` | array | One entry per successfully loaded config, including setup failures, described below. |
 
 ### `summary`
 
@@ -53,7 +53,9 @@ diffyscan path/to/config.yaml --json -E -G
 ## `configs[]`
 
 Each entry has `config` (path of the config file) and the chain IDs the run
-used for it:
+used for it. A config remains listed if credential or RPC setup fails after loading;
+configs that could not be loaded and configs not reached after an abort are absent.
+An unavailable chain ID is omitted:
 
 | Key | Present when | Meaning |
 | --- | --- | --- |
