@@ -34,7 +34,7 @@ Read [bytecode comparison](../../../docs/bytecode-comparison.md). Cross-check pe
 
 `load_config` validates `allowed_diffs` through `diffyscan/utils/allowed_diffs.py`. Schema validity does not justify a rule: inspect reason and scope. Use [allowed-diffs](../allowed-diffs/SKILL.md) when tightening or adding exceptions.
 
-A handled per-contract error (a diffyscan `BaseCustomException`, such as an explorer or source error) does not stop the run: the other contracts are still checked and the error is listed under `CONTRACTS NOT CHECKED`. An unexpected error, for example an explorer response that is not JSON, still stops it. By default a handled error fails the run with exit status 1; with bytecode comparison enabled, `fail_on_bytecode_comparison_error: false` keeps the exit status at 0. With `--skip-binary-comparison`, that config flag is not applied. Caught bytecode errors produce failed results, except that a bytecode `any: true` rule marks `DeploymentSimulationError` as allowed.
+A handled per-contract error (a diffyscan `BaseCustomException`, such as an explorer or source error) does not stop the run: the other contracts are still checked and the error is listed under `CONTRACTS NOT CHECKED`. An unexpected error still stops it; malformed JSON is handled for Blockscout but can abort other explorer adapters. By default a handled error fails the run with exit status 1; with bytecode comparison enabled, `fail_on_bytecode_comparison_error: false` keeps the exit status at 0. With `--skip-binary-comparison`, that config flag is not applied. Caught bytecode errors produce failed results, except that a bytecode `any: true` rule marks `DeploymentSimulationError` as allowed.
 
 For changes under `configs/`, run:
 

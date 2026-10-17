@@ -31,7 +31,6 @@ from .utils.custom_exceptions import (
     CalldataError,
     CompileError,
     DeploymentSimulationError,
-    ExceptionHandler,
 )
 from .utils.explorer import (
     compile_contract_from_explorer,
@@ -517,11 +516,10 @@ def _load_explorer_token(config: dict) -> str:
 
 
 def _setup_binary_comparison(config: dict) -> str:
-    """Load RPC URL and configure exception handling for bytecode comparison."""
+    """Load RPC URL for bytecode comparison."""
     rpc_env_var = config.get("rpc_url_env_var", "REMOTE_RPC_URL")
     remote_rpc_url = load_env(rpc_env_var, masked=True, required=True)
     assert remote_rpc_url is not None  # guaranteed by required=True
-    ExceptionHandler.initialize(config.get("fail_on_bytecode_comparison_error", True))
     return remote_rpc_url
 
 
@@ -604,13 +602,14 @@ def process_config(
     skip_user_input: bool = False,
     contract_filter: list[str] | None = None,
 ):
-    ExceptionHandler.initialize(True)
-
     logger.info(f"Loading config {path}...")
     config: dict = load_config(path)  # type: ignore[assignment]
     effective_allowed_diffs = build_effective_allowed_diffs(config)
 
     enable_source_comparison = config.get("source_comparison", True)
+    fail_on_contract_errors = not enable_binary_comparison or config.get(
+        "fail_on_bytecode_comparison_error", True
+    )
     if not enable_source_comparison and not enable_binary_comparison:
         raise ValueError(
             f"Both source and bytecode comparisons are disabled in {path}. "
@@ -747,6 +746,7 @@ def process_config(
                 logger.error(
                     f"{contract_name} ({contract_address}) not checked", str(custom_exc)
                 )
+                logger.log(traceback.format_exc())
                 contract_errors.append(
                     {
                         "contract_address": contract_address,
@@ -766,7 +766,7 @@ def process_config(
         "source_stats": source_stats,
         "bytecode_stats": bytecode_stats,
         "contract_errors": contract_errors,
-        "fail_on_contract_errors": ExceptionHandler.raise_exception,
+        "fail_on_contract_errors": fail_on_contract_errors,
         "config_path": path,
         "matched_count": matched_count,
         "interrupted": interrupted,
@@ -1271,7 +1271,7 @@ def _print_contract_errors(all_results: list[dict]) -> None:
     if not errors:
         return
     logger.divider()
-    logger.error("CONTRACTS NOT CHECKED:", len(errors))
+    logger.error("CONTRACTS NOT CHECKED", len(errors))
     for error in errors:
         logger.error(
             f"  • {error['contract_name']} ({error['contract_address']})",

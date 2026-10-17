@@ -166,3 +166,32 @@ def test_an_empty_explorer_answer_reads_as_unverified_source(monkeypatch):
         explorer._get_contract_from_etherscan(
             None, "api.etherscan.io", UNVERIFIED, 42161
         )
+
+
+@pytest.mark.parametrize(
+    "result", ["Contract source code not verified", ["bad"], [None]]
+)
+def test_malformed_explorer_result_is_a_handled_error(monkeypatch, result):
+    monkeypatch.setattr(
+        explorer,
+        "_fetch_etherscan_response",
+        lambda *args: {"status": "0", "message": "Error", "result": result},
+    )
+    with pytest.raises(ExplorerError, match="Unexpected.*result"):
+        explorer._get_contract_from_etherscan(None, "api.etherscan.io", UNVERIFIED, 1)
+
+
+def test_handled_error_keeps_traceback_in_log_only(run, monkeypatch, capsys):
+    logs: list[str] = []
+    monkeypatch.setattr(runner.logger, "log", logs.append)
+
+    assert run() == 1
+
+    captured = capsys.readouterr()
+    from diffyscan.utils.logger import _ANSI_ESCAPE
+
+    output = _ANSI_ESCAPE.sub("", captured.out)
+    assert "CONTRACTS NOT CHECKED: 1" in output
+    assert "CONTRACTS NOT CHECKED::" not in output
+    assert "Traceback" not in captured.out + captured.err
+    assert any("Traceback" in entry and "ExplorerError" in entry for entry in logs)
