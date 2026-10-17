@@ -57,7 +57,7 @@ The same fields are accepted in JSON:
 | `github_repo` | Repository URL, pinned commit, and source root expected to match the deployment |
 | `dependencies` | Imported source trees pinned to their repositories and commits |
 | `source_comparison` | Enables source comparison; defaults to `true` |
-| `fail_on_bytecode_comparison_error` | Controls whether the outer per-contract handler re-raises caught errors; defaults to `true` |
+| `fail_on_bytecode_comparison_error` | Whether a contract that could not be checked fails the run with exit status 1; defaults to `true`. The run checks the other contracts either way |
 | `deployment_gas_limit` | Optional gas limit for constructor simulation |
 | `bytecode_comparison` | Manual constructor, library, caller, and source overrides |
 | `allowed_diffs` | Expected source or bytecode differences, scoped by contract |
@@ -126,11 +126,14 @@ Retry warnings show the delay and attempt. This limits waits, not network reques
 duration: the existing HTTP client has no explicit request timeout. RPC POST
 requests are not retried.
 
-Malformed Blockscout JSON or source fields raise `ExplorerError`. The existing
-per-contract error policy still applies: by default the run aborts. With bytecode
-comparison enabled and `fail_on_bytecode_comparison_error: false`, it records the
-error and continues. Check the [JSON report](json-output.md)'s `status` and errors
-even when the exit code is zero.
+Malformed Blockscout JSON or source fields raise `ExplorerError`, and an
+explorer that has no verified source for an address reports it as not verified.
+Diffyscan records the error for that contract, checks the other contracts and
+lists it under `CONTRACTS NOT CHECKED` in the final summary. By default the run
+then exits with status 1. With bytecode comparison enabled and
+`fail_on_bytecode_comparison_error: false`, it exits with status 0. Check the
+[JSON report](json-output.md)'s `status` and errors even when the exit code is
+zero.
 
 ## GitHub sources
 

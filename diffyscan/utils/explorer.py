@@ -107,10 +107,9 @@ def _build_contract_payload(
     return contract
 
 
-def _error_no_source_code_and_exit(address: str) -> None:
+def _raise_unverified_source(address: str) -> None:
     """Report that source code is not available and raise an exception."""
     error_msg = f"Source code is not verified or an EOA address: {address}"
-    logger.error(error_msg)
     raise ExplorerError(error_msg)
 
 
@@ -201,9 +200,12 @@ def _get_contract_from_etherscan(
     results = response["result"]
     if not results:
         raise ExplorerError(f"Empty result from explorer API for contract {contract}")
+    if not isinstance(results, list) or not isinstance(results[0], dict):
+        raise ExplorerError(f"Unexpected explorer result shape for contract {contract}")
     result = results[0]
-    if "ContractName" not in result:
-        _error_no_source_code_and_exit(contract)
+    # An unverified contract comes back with an empty name and source.
+    if not result.get("ContractName") or not result.get("SourceCode"):
+        _raise_unverified_source(contract)
 
     solc_input = result["SourceCode"]
     if not isinstance(solc_input, str):
@@ -243,12 +245,11 @@ def _get_contract_from_zksync(zksync_explorer_hostname: str, contract: str) -> d
 
     if not response.get("verifiedAt"):
         error_msg = f"Contract not verified. Status: {response.get('status_code')}"
-        logger.error(error_msg)
         raise ExplorerError(error_msg)
 
     data = response["request"]
     if "contractName" not in data:
-        _error_no_source_code_and_exit(contract)
+        _raise_unverified_source(contract)
 
     result = {
         "name": data["ContractName"],
@@ -269,7 +270,7 @@ def _get_contract_from_mantle(mantle_explorer_hostname: str, contract: str) -> d
         )
     data = results[0]
     if "ContractName" not in data:
-        _error_no_source_code_and_exit(contract)
+        _raise_unverified_source(contract)
 
     # Build source files dictionary from the primary file and additional sources
     source_files = _build_source_files(
@@ -305,7 +306,7 @@ def _get_contract_from_blockscout(explorer_hostname: str, contract: str) -> dict
         raise ExplorerError(f"Expected a Blockscout response object for {contract}")
 
     if not response.get("name"):
-        _error_no_source_code_and_exit(contract)
+        _raise_unverified_source(contract)
 
     for field in ("name", "file_path", "source_code", "compiler_version"):
         if not isinstance(response.get(field), str) or not response[field]:

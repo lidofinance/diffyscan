@@ -70,7 +70,7 @@ Entry point: `diffyscan/diffyscan.py:main` — parses CLI args, loads config (JS
 - **common.py** — config loading (with YAML hex address validation), caching with SHA256 validation
 - **http_client.py** — shared HTTP requests, headers, per-host pacing, bounded transient GET retries and error handling
 - **custom_types.py** — TypedDict definitions: `Config`, `BinaryConfig`, `ExplorerContract`, `GithubRepo`
-- **custom_exceptions.py** — exception hierarchy; `ExceptionHandler` controls fail-or-log behavior
+- **custom_exceptions.py** — exception hierarchy for handled contract errors
 
 ### Config schema
 
