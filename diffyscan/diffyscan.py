@@ -604,29 +604,9 @@ def process_config(
 ):
     logger.info(f"Loading config {path}...")
     config: dict = load_config(path)  # type: ignore[assignment]
-    effective_allowed_diffs = build_effective_allowed_diffs(config)
-
-    enable_source_comparison = config.get("source_comparison", True)
     fail_on_contract_errors = not enable_binary_comparison or config.get(
         "fail_on_bytecode_comparison_error", True
     )
-    if not enable_source_comparison and not enable_binary_comparison:
-        raise ValueError(
-            f"Both source and bytecode comparisons are disabled in {path}. "
-            "Enable source_comparison or remove --skip-binary-comparison."
-        )
-
-    explorer_token = _load_explorer_token(config)
-    github_api_token = load_env("GITHUB_API_TOKEN", masked=True, required=True)
-
-    remote_rpc_url = None
-    if enable_binary_comparison:
-        remote_rpc_url = _setup_binary_comparison(config)
-
-    if not enable_source_comparison:
-        logger.warn(
-            f'Source code comparison is disabled in {path}. To enable, set "source_comparison": true in the config'
-        )
 
     source_stats = []
     bytecode_stats = []
@@ -634,8 +614,33 @@ def process_config(
     matched_count = 0
     interrupted = False
     error: Exception | None = None
+    remote_chain_id: int | None = None
+    explorer_chain_id: int | None = None
 
     try:
+        # Keep the configured chain even when credentials or RPC setup fail.
+        explorer_chain_id = get_explorer_chain_id(config)
+        effective_allowed_diffs = build_effective_allowed_diffs(config)
+
+        enable_source_comparison = config.get("source_comparison", True)
+        if not enable_source_comparison and not enable_binary_comparison:
+            raise ValueError(
+                f"Both source and bytecode comparisons are disabled in {path}. "
+                "Enable source_comparison or remove --skip-binary-comparison."
+            )
+
+        explorer_token = _load_explorer_token(config)
+        github_api_token = load_env("GITHUB_API_TOKEN", masked=True, required=True)
+
+        remote_rpc_url = None
+        if enable_binary_comparison:
+            remote_rpc_url = _setup_binary_comparison(config)
+
+        if not enable_source_comparison:
+            logger.warn(
+                f'Source code comparison is disabled in {path}. To enable, set "source_comparison": true in the config'
+            )
+
         if enable_binary_comparison:
             assert remote_rpc_url is not None
             logger.info("Getting remote chain ID...")
@@ -651,7 +656,6 @@ def process_config(
         if explorer_hostname is None:
             logger.warn('Failed to find "explorer_hostname" in the config')
         assert explorer_hostname is not None, "explorer_hostname is required"
-        explorer_chain_id = get_explorer_chain_id(config)
 
         # Apply contract filter if specified
         filter_set = (
@@ -766,6 +770,8 @@ def process_config(
         "source_stats": source_stats,
         "bytecode_stats": bytecode_stats,
         "contract_errors": contract_errors,
+        "remote_chain_id": remote_chain_id,
+        "explorer_chain_id": explorer_chain_id,
         "fail_on_contract_errors": fail_on_contract_errors,
         "config_path": path,
         "matched_count": matched_count,
@@ -1033,6 +1039,16 @@ def build_json_report(
             }
         ),
         "contracts": contracts,
+        "configs": [
+            _compact(
+                {
+                    "config": result["config_path"],
+                    "remote_chain_id": result.get("remote_chain_id"),
+                    "explorer_chain_id": result.get("explorer_chain_id"),
+                }
+            )
+            for result in all_results
+        ],
     }
 
 

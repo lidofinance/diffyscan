@@ -17,7 +17,7 @@ diffyscan path/to/config.yaml --json -E -G
 ## Rules for parsers
 
 - Keys with a `null` or empty-list value are omitted. A missing key means
-  nothing to report. `summary` and `contracts` are present in every report.
+  nothing to report. `summary`, `contracts` and `configs` are present in every report.
 - Read `status` before the exit code. With
   `fail_on_bytecode_comparison_error: false` a contract skipped because of an
   error leaves the exit code at 0, while `status` becomes `error`.
@@ -36,6 +36,7 @@ diffyscan path/to/config.yaml --json -E -G
 | `log_file` | string | Path to the human-readable log of this run. |
 | `summary` | object | Counters, described below. |
 | `contracts` | array | One entry per checked contract, described below. |
+| `configs` | array | One entry per loaded config, even if setup fails. See below. |
 
 ### `summary`
 
@@ -49,6 +50,17 @@ diffyscan path/to/config.yaml --json -E -G
 
 `source` or `bytecode` is absent when that comparison ran for no contract.
 `contract_errors` is absent when zero.
+
+## `configs[]`
+
+Each entry contains the config file path in `config` and any available chain IDs.
+Loaded configs remain listed if credential or RPC setup fails. Unloaded configs
+and configs not reached after an abort are absent. Unavailable chain IDs are omitted:
+
+| Key | Present when | Meaning |
+| --- | --- | --- |
+| `remote_chain_id` | bytecode comparison is enabled and the RPC answered `eth_chainId` | Chain ID returned by the RPC endpoint in `rpc_url_env_var`. Compare it with the config's target chain before using the report as deployment evidence. Comparison results are in `contracts[]`. |
+| `explorer_chain_id` | the config sets `explorer_chain_id` | Value of the config's `explorer_chain_id`. The Etherscan v2 API receives it as `chainid`; other explorers select the chain by hostname. |
 
 ## `contracts[]`
 
@@ -127,6 +139,13 @@ explorer side. `count: 0` marks the insertion point on the side without lines.
           "immutables": [{ "offset": 1234, "value": "0x00..01" }]
         }
       }
+    }
+  ],
+  "configs": [
+    {
+      "config": "configs/example/mainnet/config.yaml",
+      "remote_chain_id": 1,
+      "explorer_chain_id": 1
     }
   ]
 }
