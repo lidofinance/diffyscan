@@ -36,7 +36,7 @@ diffyscan path/to/config.yaml --json -E -G
 | `log_file` | string | Path to the human-readable log of this run. |
 | `summary` | object | Counters, described below. |
 | `contracts` | array | One entry per checked contract, described below. |
-| `configs` | array | One entry per successfully loaded config, including setup failures, described below. |
+| `configs` | array | One entry per loaded config, even if setup fails. See below. |
 
 ### `summary`
 
@@ -53,14 +53,13 @@ diffyscan path/to/config.yaml --json -E -G
 
 ## `configs[]`
 
-Each entry has `config` (path of the config file) and the chain IDs the run
-used for it. A config remains listed if credential or RPC setup fails after loading;
-configs that could not be loaded and configs not reached after an abort are absent.
-An unavailable chain ID is omitted:
+Each entry contains the config file path in `config` and any available chain IDs.
+Loaded configs remain listed if credential or RPC setup fails. Unloaded configs
+and configs not reached after an abort are absent. Unavailable chain IDs are omitted:
 
 | Key | Present when | Meaning |
 | --- | --- | --- |
-| `remote_chain_id` | bytecode comparison is enabled and the RPC answered `eth_chainId` | Chain ID that the RPC in `rpc_url_env_var` answered. It names the chain, not a comparison: the verdicts are in `contracts[]`. Compare it with the chain the config targets: a report read from another chain proves nothing about the deployment. |
+| `remote_chain_id` | bytecode comparison is enabled and the RPC answered `eth_chainId` | Chain ID returned by the RPC endpoint in `rpc_url_env_var`. Compare it with the config's target chain before using the report as deployment evidence. Comparison results are in `contracts[]`. |
 | `explorer_chain_id` | the config sets `explorer_chain_id` | Value of the config's `explorer_chain_id`. The Etherscan v2 API receives it as `chainid`; other explorers select the chain by hostname. |
 
 ## `contracts[]`
