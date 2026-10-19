@@ -1,0 +1,63 @@
+contracts:
+  "0x34eFB78e7e4241269D6fe96042Eaa0c5715C7Ba4": ValidatorExitDelayVerifier
+  "0x0718B7DE68ee5A82ebb17a86cF99371881154E51": ConsolidationGateway
+  "0x972A2a03011D629cded15b5b7e70e60b3E17a142": PredepositGuarantee
+  "0x18Ed6Ba7EBaecEd415b71dbB3795362070b227C5": TopUpGateway
+  "0x95a435Bbae97685d4a9B77d77E23e2a827a717a5": ConsolidationBus
+  "0xdfC1E89ceb393C15e2d864F453c7991230367708": WithdrawalVault
+  "0x101430e537EFfA1385CC74838EbD43a91D58a722": LidoLocator
+
+network: hoodi
+explorer_hostname: api.etherscan.io
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+explorer_chain_id: 560048
+
+github_repo:
+  url: https://github.com/lidofinance/core
+  commit: 12df22e45c3df93a1076f307ae490f9adb31fc7a
+  relative_root: ""
+
+dependencies:
+  "@openzeppelin/contracts-v4.4":
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: 6bd6b76d1156e20e45d1016f355d154141c7e5b9 # v4.4.1
+    relative_root: contracts
+  "@openzeppelin/contracts-v5.2":
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: acd4ff74de833399287ed6b31b4debf6b2b35527 # v5.2.0
+    relative_root: contracts
+
+fail_on_bytecode_comparison_error: true
+
+bytecode_comparison:
+  extra_sources:
+    "0x95a435Bbae97685d4a9B77d77E23e2a827a717a5":
+      - contracts/common/interfaces/ICLProofVerifier.sol
+
+allowed_diffs:
+  source:
+    "0x95a435Bbae97685d4a9B77d77E23e2a827a717a5":
+      - reason: >-
+          Etherscan shows the previous ConsolidationBus source for this address
+          (ValidatorWitness declared in IPredepositGuarantee). The pinned commit
+          12df22e4 moves the struct to ICLProofVerifier and imports it there; no
+          logic change. The deployed bytecode, including the CBOR metadata hash,
+          equals the build of the pinned commit. ICLProofVerifier.sol is absent
+          from the explorer source set and is fetched via
+          bytecode_comparison.extra_sources.
+        line_ranges:
+          - file: contracts/0.8.25/consolidation/ConsolidationBus.sol
+            github: { start: 11, count: 1 }
+            explorer: { start: 11, count: 1 }
+          - file: contracts/0.8.25/consolidation/ConsolidationBus.sol
+            github: { start: 16, count: 1 }
+            explorer: { start: 16, count: 1 }
+          - file: contracts/0.8.25/vaults/interfaces/IPredepositGuarantee.sol
+            github: { start: 9, count: 1 }
+            explorer: { start: 9, count: 0 }
+          - file: contracts/0.8.25/vaults/interfaces/IPredepositGuarantee.sol
+            github: { start: 16, count: 1 }
+            explorer: { start: 15, count: 1 }
+          - file: contracts/0.8.25/vaults/interfaces/IPredepositGuarantee.sol
+            github: { start: 44, count: 0 }
+            explorer: { start: 43, count: 18 }
