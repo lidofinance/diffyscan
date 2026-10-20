@@ -28,36 +28,3 @@ dependencies:
     relative_root: contracts
 
 fail_on_bytecode_comparison_error: true
-
-bytecode_comparison:
-  extra_sources:
-    "0x95a435Bbae97685d4a9B77d77E23e2a827a717a5":
-      - contracts/common/interfaces/ICLProofVerifier.sol
-
-allowed_diffs:
-  source:
-    "0x95a435Bbae97685d4a9B77d77E23e2a827a717a5":
-      - reason: >-
-          Etherscan shows the previous ConsolidationBus source for this address
-          (ValidatorWitness declared in IPredepositGuarantee). The pinned commit
-          12df22e4 moves the struct to ICLProofVerifier and imports it there; no
-          logic change. The deployed bytecode, including the CBOR metadata hash,
-          equals the build of the pinned commit. ICLProofVerifier.sol is absent
-          from the explorer source set and is fetched via
-          bytecode_comparison.extra_sources.
-        line_ranges:
-          - file: contracts/0.8.25/consolidation/ConsolidationBus.sol
-            github: { start: 11, count: 1 }
-            explorer: { start: 11, count: 1 }
-          - file: contracts/0.8.25/consolidation/ConsolidationBus.sol
-            github: { start: 16, count: 1 }
-            explorer: { start: 16, count: 1 }
-          - file: contracts/0.8.25/vaults/interfaces/IPredepositGuarantee.sol
-            github: { start: 9, count: 1 }
-            explorer: { start: 9, count: 0 }
-          - file: contracts/0.8.25/vaults/interfaces/IPredepositGuarantee.sol
-            github: { start: 16, count: 1 }
-            explorer: { start: 15, count: 1 }
-          - file: contracts/0.8.25/vaults/interfaces/IPredepositGuarantee.sol
-            github: { start: 44, count: 0 }
-            explorer: { start: 43, count: 18 }
