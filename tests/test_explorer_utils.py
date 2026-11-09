@@ -4,6 +4,9 @@ import pytest
 
 from diffyscan.utils.custom_exceptions import ExplorerError
 from diffyscan.utils.explorer import _get_contract_from_blockscout
+from diffyscan.utils.explorer import _get_contract_from_etherscan
+from diffyscan.utils.explorer import _get_contract_from_mantle
+from diffyscan.utils.explorer import _get_explorer_fetcher
 
 from diffyscan.utils.explorer import get_contract_from_explorer
 
@@ -178,3 +181,20 @@ def test_blockscout_reports_invalid_json(monkeypatch):
     monkeypatch.setattr("diffyscan.utils.explorer.fetch", lambda url: InvalidJSON())
     with pytest.raises(ExplorerError, match="Invalid Blockscout JSON"):
         _get_contract_from_blockscout("eth.blockscout.com", "0xabc")
+
+
+@pytest.mark.parametrize(
+    ("hostname", "fetcher"),
+    [
+        ("api.xlayerscan.com", _get_contract_from_blockscout),
+        ("eth.blockscout.com", _get_contract_from_blockscout),
+        ("explorer.mantle.xyz", _get_contract_from_mantle),
+        ("evilblockscout.com", _get_contract_from_etherscan),
+        ("evilxlayerscan.com", _get_contract_from_etherscan),
+        ("api.xlayerscan.com.evil.io", _get_contract_from_etherscan),
+        ("evilmantle.xyz", _get_contract_from_etherscan),
+        ("evillineascan.build", _get_contract_from_etherscan),
+    ],
+)
+def test_explorer_domains_match_on_a_dot_boundary(hostname, fetcher):
+    assert _get_explorer_fetcher(hostname)[0] is fetcher
