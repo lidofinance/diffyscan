@@ -84,10 +84,9 @@ does not use them during verification.
 | Hostname | API | Token sent by adapter |
 | --- | --- | --- |
 | Starts with `zksync` | zkSync contract verification API | Not used |
-| Ends with `mantle.xyz` | Mantle Etherscan-style API | Not used |
-| Ends with `lineascan.build` | Etherscan-style API | Not used |
-| Ends with `blockscout.com`, `mode.network`, `swellnetwork.io`, `lisk.com`, `inkonchain.com`, `routescan.io`, or `monadvision.com` | Blockscout API v2 | Not used |
-| Equals `api.xlayerscan.com` (X Layer) | Blockscout API v2 | Not used |
+| `mantle.xyz` or its subdomain | Mantle Etherscan-style API | Not used |
+| `lineascan.build` or its subdomain | Etherscan-style API | Not used |
+| `blockscout.com`, `mode.network`, `swellnetwork.io`, `lisk.com`, `inkonchain.com`, `routescan.io`, `monadvision.com`, `xlayerscan.com`, or a subdomain of one | Blockscout API v2 | Not used |
 | Anything else | Etherscan API | Required |
 
 The Etherscan path reads the token from the variable named by
@@ -99,7 +98,8 @@ before selecting the explorer, so the variable named by
 `explorer_token_env_var` (or the `ETHERSCAN_EXPLORER_TOKEN` fallback) must
 hold a value even for explorers that do not use it.
 
-The Blockscout domains are matched literally. A Blockscout instance on any
+A domain matches itself and its subdomains, not a longer name such as
+`evilblockscout.com`. A Blockscout instance on any
 other domain falls into the Etherscan path instead of the Blockscout v2 path.
 Depending on the host and `explorer_chain_id`, the request may fail or an
 Etherscan-compatible endpoint may return only the primary source under the

@@ -615,6 +615,10 @@ def merge_libraries(
     return merged or None
 
 
+def _in_domain(explorer_hostname: str, domain: str) -> bool:
+    return explorer_hostname == domain or explorer_hostname.endswith("." + domain)
+
+
 def _get_explorer_fetcher(explorer_hostname: str) -> tuple:
     """
     Determine which fetcher function to use based on the explorer hostname.
@@ -623,9 +627,9 @@ def _get_explorer_fetcher(explorer_hostname: str) -> tuple:
     """
     if explorer_hostname.startswith("zksync"):
         return _get_contract_from_zksync, False
-    elif explorer_hostname.endswith("mantle.xyz"):
+    elif _in_domain(explorer_hostname, "mantle.xyz"):
         return _get_contract_from_mantle, False
-    elif explorer_hostname.endswith("lineascan.build"):
+    elif _in_domain(explorer_hostname, "lineascan.build"):
         return (
             lambda hostname, address, token=None, chain_id=None: _get_contract_from_etherscan(
                 None, hostname, address, chain_id
@@ -633,7 +637,7 @@ def _get_explorer_fetcher(explorer_hostname: str) -> tuple:
             False,
         )
     elif any(
-        explorer_hostname.endswith(domain)
+        _in_domain(explorer_hostname, domain)
         for domain in [
             "mode.network",
             "blockscout.com",
@@ -642,10 +646,9 @@ def _get_explorer_fetcher(explorer_hostname: str) -> tuple:
             "inkonchain.com",
             "routescan.io",
             "monadvision.com",
+            "xlayerscan.com",
         ]
     ):
-        return _get_contract_from_blockscout, False
-    elif explorer_hostname == "api.xlayerscan.com":
         return _get_contract_from_blockscout, False
     else:
         # Default to Etherscan-compatible
