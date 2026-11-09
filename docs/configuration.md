@@ -87,6 +87,7 @@ does not use them during verification.
 | Ends with `mantle.xyz` | Mantle Etherscan-style API | Not used |
 | Ends with `lineascan.build` | Etherscan-style API | Not used |
 | Ends with `blockscout.com`, `mode.network`, `swellnetwork.io`, `lisk.com`, `inkonchain.com`, `routescan.io`, or `monadvision.com` | Blockscout API v2 | Not used |
+| Equals `api.xlayerscan.com` (X Layer) | Blockscout API v2 | Not used |
 | Anything else | Etherscan API | Required |
 
 The Etherscan path reads the token from the variable named by

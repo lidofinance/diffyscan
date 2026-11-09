@@ -645,6 +645,8 @@ def _get_explorer_fetcher(explorer_hostname: str) -> tuple:
         ]
     ):
         return _get_contract_from_blockscout, False
+    elif explorer_hostname == "api.xlayerscan.com":
+        return _get_contract_from_blockscout, False
     else:
         # Default to Etherscan-compatible
         return _get_contract_from_etherscan, True
