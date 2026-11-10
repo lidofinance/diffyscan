@@ -1,6 +1,6 @@
 contracts:
   "0xDa5F930cE326EB5205085D66c72A4E79d60cB8C1": OssifiableProxy # CuratedModule proxy
-  "0x959fC67FE53c8A6C7a1AEd73430Aa07a36eD9337": CuratedModule
+  "0x02bEFd784c6C382a021774472563671Ae23980C0": CuratedModule
   "0xffC1C5d59CeAC6F6c27E701F04a70cb50474607C": OssifiableProxy # ParametersRegistry proxy
   "0xfF419BbBC5f44d46547079922a88d691886d192a": ParametersRegistry
   "0xA64b339eebD3dC3De848298B6a140955932901d8": OssifiableProxy # MetaRegistry proxy
@@ -25,7 +25,7 @@ contracts:
   # External libraries
   "0x37ada408ae3c3992953688e2ccb9ee7a3dfda902": AssetRecovererLib # library
   "0xc4511d09639e5e174506083443da230d39196323": BondCurvesLib # library
-  "0xa4fCD4dDa0e4a847142E3592C97c77d8B9B3Cf5F": CuratedDepositAllocator # library
+  "0x691e8BA3DBf3E2E33a8C5641B15d4d24F3837F37": CuratedDepositAllocator # library
   "0xf05545ed71c60bbba6e73b6b70b15d4f5f22c0f4": GeneralPenalty # library
   "0x9d9c8799189c797f6e2da74f71adf84492ada7d3": NOAddresses # library
   "0xdd42ee5d54a1822021782f3f455bb99fbc19499a": NodeOperatorOps # library
@@ -39,7 +39,7 @@ explorer_chain_id: 1
 
 github_repo:
   url: https://github.com/lidofinance/staking-modules
-  commit: 3b0c016c77590c208f2b71ca51410cb55ea2dcc2
+  commit: 7bdcfb631b13d24e8fae3b5ba0e11d4be07b84f9
   relative_root: ""
 
 dependencies:
@@ -67,22 +67,53 @@ bytecode_comparison:
 
 allowed_diffs:
   source:
-    "0xe181A377A2d2BDE9A83f1474BC3DB7A412de091E":
+    "0x6d852907463496622bb5FE5bc55cc30C4682E10e":
     - reason: >-
-        Newer IStakingRouter interface (test-only, stale at the pinned commit);
+        Deployed before the top-up allocation upgrade: ICuratedModule at the
+        pinned commit adds top-up events, functions and docs, and IStakingRouter
+        (test-only) is newer. Interfaces only, no effect on bytecode.
+      line_ranges:
+      - file: src/interfaces/ICuratedModule.sol
+        github: { start: 11, count: 3 }
+        explorer: { start: 11, count: 0 }
+      - file: src/interfaces/ICuratedModule.sol
+        github: { start: 16, count: 3 }
+        explorer: { start: 13, count: 0 }
+      - file: src/interfaces/ICuratedModule.sol
+        github: { start: 23, count: 19 }
+        explorer: { start: 17, count: 0 }
+      - file: src/interfaces/ICuratedModule.sol
+        github: { start: 81, count: 2 }
+        explorer: { start: 56, count: 2 }
+      - file: src/interfaces/IStakingRouter.sol
+        github: { start: 118, count: 10 }
+        explorer: { start: 118, count: 0 }
+      - file: src/interfaces/IStakingRouter.sol
+        github: { start: 175, count: 1 }
+        explorer: { start: 165, count: 6 }
+      - file: src/interfaces/IStakingRouter.sol
+        github: { start: 201, count: 3 }
+        explorer: { start: 196, count: 0 }
+    "0x3cb948FD454ad6b20DE67633f25DcbDbEaa0e849":
+    - reason: >-
+        Deployed before the top-up allocation upgrade: ICuratedModule at the
+        pinned commit adds top-up events, functions and docs. Interface only,
         no effect on bytecode.
       line_ranges:
-      - file: src/interfaces/IStakingRouter.sol
-        github: { start: 118, count: 0 }
-        explorer: { start: 118, count: 10 }
-      - file: src/interfaces/IStakingRouter.sol
-        github: { start: 165, count: 6 }
-        explorer: { start: 175, count: 1 }
-      - file: src/interfaces/IStakingRouter.sol
-        github: { start: 196, count: 0 }
-        explorer: { start: 201, count: 3 }
+      - file: src/interfaces/ICuratedModule.sol
+        github: { start: 11, count: 3 }
+        explorer: { start: 11, count: 0 }
+      - file: src/interfaces/ICuratedModule.sol
+        github: { start: 16, count: 3 }
+        explorer: { start: 13, count: 0 }
+      - file: src/interfaces/ICuratedModule.sol
+        github: { start: 23, count: 19 }
+        explorer: { start: 17, count: 0 }
+      - file: src/interfaces/ICuratedModule.sol
+        github: { start: 81, count: 2 }
+        explorer: { start: 56, count: 2 }
   bytecode:
-    "0xa4fCD4dDa0e4a847142E3592C97c77d8B9B3Cf5F":
+    "0x691e8BA3DBf3E2E33a8C5641B15d4d24F3837F37":
     - reason: Library self-address (delegatecall guard)
       byte_ranges:
       - offset: 1
