@@ -4,6 +4,7 @@ import pytest
 
 from diffyscan.utils.custom_exceptions import ExplorerError
 from diffyscan.utils.explorer import _get_contract_from_blockscout
+from diffyscan.utils.explorer import _get_contract_from_blockscout_pro
 from diffyscan.utils.explorer import _get_contract_from_etherscan
 from diffyscan.utils.explorer import _get_contract_from_mantle
 from diffyscan.utils.explorer import _get_explorer_fetcher
@@ -187,6 +188,7 @@ def test_blockscout_reports_invalid_json(monkeypatch):
     ("hostname", "fetcher"),
     [
         ("api.xlayerscan.com", _get_contract_from_blockscout),
+        ("api.blockscout.com", _get_contract_from_blockscout_pro),
         ("eth.blockscout.com", _get_contract_from_blockscout),
         ("explorer.mantle.xyz", _get_contract_from_mantle),
         ("evilblockscout.com", _get_contract_from_etherscan),
@@ -198,3 +200,27 @@ def test_blockscout_reports_invalid_json(monkeypatch):
 )
 def test_explorer_domains_match_on_a_dot_boundary(hostname, fetcher):
     assert _get_explorer_fetcher(hostname)[0] is fetcher
+
+
+def test_blockscout_pro_puts_chain_id_in_path_and_sends_api_key(monkeypatch):
+    urls = []
+
+    class InvalidJSON:
+        def json(self):
+            raise ValueError("invalid JSON")
+
+    def fake_fetch(url):
+        urls.append(url)
+        return InvalidJSON()
+
+    monkeypatch.setattr("diffyscan.utils.explorer.fetch", fake_fetch)
+    with pytest.raises(ExplorerError, match="Invalid Blockscout JSON"):
+        _get_contract_from_blockscout_pro("key", "api.blockscout.com", "0xabc", 5042)
+    assert urls == [
+        "https://api.blockscout.com/5042/api/v2/smart-contracts/0xabc?apikey=key"
+    ]
+
+
+def test_blockscout_pro_requires_chain_id():
+    with pytest.raises(ExplorerError, match="needs explorer_chain_id"):
+        _get_contract_from_blockscout_pro("key", "api.blockscout.com", "0xabc", None)

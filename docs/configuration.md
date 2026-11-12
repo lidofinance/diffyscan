@@ -86,6 +86,7 @@ does not use them during verification.
 | Starts with `zksync` | zkSync contract verification API | Not used |
 | `mantle.xyz` or its subdomain | Mantle Etherscan-style API | Not used |
 | `lineascan.build` or its subdomain | Etherscan-style API | Not used |
+| `api.blockscout.com` | Blockscout PRO API v2, chain id from `explorer_chain_id` | Required |
 | `blockscout.com`, `mode.network`, `swellnetwork.io`, `lisk.com`, `inkonchain.com`, `routescan.io`, `monadvision.com`, `xlayerscan.com`, or a subdomain of one | Blockscout API v2 | Not used |
 | Anything else | Etherscan API | Required |
 
