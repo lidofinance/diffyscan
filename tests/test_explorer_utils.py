@@ -4,7 +4,6 @@ import pytest
 
 from diffyscan.utils.custom_exceptions import ExplorerError
 from diffyscan.utils.explorer import _get_contract_from_blockscout
-from diffyscan.utils.explorer import _get_contract_from_blockscout_pro
 from diffyscan.utils.explorer import _get_contract_from_etherscan
 from diffyscan.utils.explorer import _get_contract_from_mantle
 from diffyscan.utils.explorer import _get_explorer_fetcher
@@ -187,13 +186,10 @@ def test_blockscout_reports_invalid_json(monkeypatch):
 @pytest.mark.parametrize(
     ("hostname", "fetcher"),
     [
-        ("api.xlayerscan.com", _get_contract_from_blockscout),
-        ("api.blockscout.com", _get_contract_from_blockscout_pro),
         ("eth.blockscout.com", _get_contract_from_blockscout),
+        ("eth.blockscout.com.evil.io", _get_contract_from_etherscan),
         ("explorer.mantle.xyz", _get_contract_from_mantle),
         ("evilblockscout.com", _get_contract_from_etherscan),
-        ("evilxlayerscan.com", _get_contract_from_etherscan),
-        ("api.xlayerscan.com.evil.io", _get_contract_from_etherscan),
         ("evilmantle.xyz", _get_contract_from_etherscan),
         ("evillineascan.build", _get_contract_from_etherscan),
     ],
@@ -214,13 +210,10 @@ def test_blockscout_pro_puts_chain_id_in_path_and_sends_api_key(monkeypatch):
         return InvalidJSON()
 
     monkeypatch.setattr("diffyscan.utils.explorer.fetch", fake_fetch)
+    fetcher, requires_token = _get_explorer_fetcher("api.blockscout.com")
+    assert requires_token
     with pytest.raises(ExplorerError, match="Invalid Blockscout JSON"):
-        _get_contract_from_blockscout_pro("key", "api.blockscout.com", "0xabc", 5042)
+        fetcher("key", "api.blockscout.com", "0xabc", 5042)
     assert urls == [
         "https://api.blockscout.com/5042/api/v2/smart-contracts/0xabc?apikey=key"
     ]
-
-
-def test_blockscout_pro_requires_chain_id():
-    with pytest.raises(ExplorerError, match="needs explorer_chain_id"):
-        _get_contract_from_blockscout_pro("key", "api.blockscout.com", "0xabc", None)
