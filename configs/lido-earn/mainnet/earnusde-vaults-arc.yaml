@@ -1,0 +1,105 @@
+# earnUSDe - Experimental earnUSD (earnUSDe) Arc
+# Deployed on 2026-11-11 by 0xE98Be1E5538FCbD716C506052eB1Fd5d6fC495A3.
+# TimelockController creation: 0xe1c315a83c1d0c054a57ec0e39d0f41ad9bba96720903ac6c430b468a2f7a7e2
+
+contracts:
+  # Vault
+  "0x9d4e274F6fc64482e3D86f8eaCB8aA19229b8908": TransparentUpgradeableProxy
+  "0x0000000070f44289ec5ea3E5972f058f75B29801": Vault
+
+  # Subvault
+  "0x9C56E5F458896C5dD8B74d3E851B5c7f5ea30739": TransparentUpgradeableProxy # 0
+  "0x00000000CA30010B8417f791250AE221FdaD5920": Subvault
+
+  # Verifier
+  "0x1b82740cd90B1861857FD38a6A8258fcE9281893": TransparentUpgradeableProxy # 0
+  "0x000000007e86a96e279662108cc19bA4c32EdE3C": Verifier
+
+  # Oracle
+  "0xFd21b2606b1290412B71A1FC4C857c2b2aC0d04A": TransparentUpgradeableProxy
+  "0x000000009adE4dAE1f868775A3f087945983f062": Oracle
+
+  # ShareManager
+  "0x4317Ec3515BB673a87232Ee6d975Bd7abbdfD01C": TransparentUpgradeableProxy
+  "0x00000000861e8B90B81f35C18cA14858Cc91d1Df": TokenizedShareManager
+
+  # FeeManager
+  "0x4FD8e72bEA84dc3B947672E49734e457a196bbdb": TransparentUpgradeableProxy
+  "0x00000000C18039E1F415fe07C33A316232238648": FeeManager
+
+  # RiskManager
+  "0x6B2EaDFD25947b6eD2657f9DCb5bf4413113cc9E": TransparentUpgradeableProxy
+  "0x00000000CC26BC741E75B181738Ac2B16156179b": RiskManager
+
+  # Governance
+  "0xcE1Aa572Fa8E929d5981FC49319012cEC9Cfb034": TimelockController
+
+  # OracleSubmitter
+  "0x345c509005bF56490a7550731aD85a412854A19b": OracleSubmitter
+
+rpc_url_env_var: ARC_RPC_URL
+explorer_hostname: api.etherscan.io
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+explorer_chain_id: 5042
+
+github_repo:
+  url: https://github.com/mellow-finance/flexible-vaults
+  # Audit coverage for the configured implementations:
+  # - Core vaults, final audited commit 72f689f965e4ac1a4c2bcfb645a8b5416cf740c7:
+  #   https://github.com/lidofinance/audits/blob/main/earn/2025-09-03_Nethermind_Mellow-Core-Vaults.pdf
+  # - Delta to c9c71818f0a8bead183f9860db3b8bbceb7b8f37:
+  #   https://github.com/mellow-finance/flexible-vaults/compare/72f689f965e4ac1a4c2bcfb645a8b5416cf740c7...c9c71818f0a8bead183f9860db3b8bbceb7b8f37
+  #   The implementations covered by the core review are unchanged. The one
+  #   added implementation is unchanged from its scoped review commit:
+  #   OracleSubmitter (d3bf393):
+  #   https://github.com/lidofinance/audits/blob/main/earn/2025-11-17_Nethermind_NM-0703_Mellow.pdf
+  commit: c9c71818f0a8bead183f9860db3b8bbceb7b8f37
+  relative_root: ""
+
+dependencies:
+  lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts:
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: e4f70216d759d8e6a64144a9e1f7bbeed78e7079 # v5.3.0
+    relative_root: contracts
+  lib/openzeppelin-contracts-upgradeable/contracts:
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable
+    commit: 60b305a8f3ff0c7688f02ac470417b6bbf1c4d27 # v5.3.0
+    relative_root: contracts
+
+allowed_diffs:
+  bytecode:
+    "0x9C56E5F458896C5dD8B74d3E851B5c7f5ea30739":
+      - reason: ProxyAdmin is created in the proxy constructor
+        immutables:
+          - offset: 16
+            value: "0x00000000000000000000000089eeca9d09d85f09510d556794ecb16817fc5aa5"
+    "0x1b82740cd90B1861857FD38a6A8258fcE9281893":
+      - reason: ProxyAdmin is created in the proxy constructor
+        immutables:
+          - offset: 16
+            value: "0x0000000000000000000000009b0c773b0eedcee63a8c183464f841aa5c41fa0d"
+    "0x9d4e274F6fc64482e3D86f8eaCB8aA19229b8908":
+      - reason: ProxyAdmin is created in the proxy constructor
+        immutables:
+          - offset: 16
+            value: "0x000000000000000000000000cc3d2720fb7b70d02a631ff8bd236c739b8f3efb"
+    "0xFd21b2606b1290412B71A1FC4C857c2b2aC0d04A":
+      - reason: ProxyAdmin is created in the proxy constructor
+        immutables:
+          - offset: 16
+            value: "0x000000000000000000000000f25f0437157b7fb491baf6b6d7d13d4d300c2838"
+    "0x4317Ec3515BB673a87232Ee6d975Bd7abbdfD01C":
+      - reason: ProxyAdmin is created in the proxy constructor
+        immutables:
+          - offset: 16
+            value: "0x000000000000000000000000385172775aad5522c26f469f5822d9781502a090"
+    "0x4FD8e72bEA84dc3B947672E49734e457a196bbdb":
+      - reason: ProxyAdmin is created in the proxy constructor
+        immutables:
+          - offset: 16
+            value: "0x0000000000000000000000006a21beb45cb3d3a7265c97ebaa0adc9f39fa4724"
+    "0x6B2EaDFD25947b6eD2657f9DCb5bf4413113cc9E":
+      - reason: ProxyAdmin is created in the proxy constructor
+        immutables:
+          - offset: 16
+            value: "0x0000000000000000000000006bc2b37cbd611bc27223e4dbd01f245f6f46d4c1"
