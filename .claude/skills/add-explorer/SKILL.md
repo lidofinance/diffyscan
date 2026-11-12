@@ -13,7 +13,7 @@ Read the supported-explorer section of [configuration](../../../docs/configurati
 
 1. Existing Etherscan-compatible API: use its supported endpoint configuration. Etherscan v2 uses `api.etherscan.io` plus `explorer_chain_id`.
 2. Existing Blockscout host match: config-only. Unrecognized domains fall through to Etherscan, which may return incomplete sources rather than an immediate error.
-3. New Blockscout host: add its domain to the Blockscout list. A list entry matches the domain and its subdomains on a dot boundary. Test the host and a near-miss such as `evil<domain>`.
+3. Blockscout host outside `blockscout.com`: config-only. Set `explorer_hostname: api.blockscout.com`, `explorer_chain_id`, and `explorer_token_env_var` with a Blockscout PRO API key.
 4. Different response format: add an adapter and dispatch rule, with token behavior based on the API requirements.
 
 For config-only work use [new-config](../new-config/SKILL.md). Avoid adding a fetcher for a chain already served by an existing one.

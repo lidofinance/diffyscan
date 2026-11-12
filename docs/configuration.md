@@ -86,7 +86,8 @@ does not use them during verification.
 | Starts with `zksync` | zkSync contract verification API | Not used |
 | `mantle.xyz` or its subdomain | Mantle Etherscan-style API | Not used |
 | `lineascan.build` or its subdomain | Etherscan-style API | Not used |
-| `blockscout.com`, `mode.network`, `swellnetwork.io`, `lisk.com`, `inkonchain.com`, `routescan.io`, `monadvision.com`, `xlayerscan.com`, or a subdomain of one | Blockscout API v2 | Not used |
+| `api.blockscout.com` | Blockscout PRO API v2 | Required |
+| `blockscout.com` or its subdomain | Blockscout API v2 | Not used |
 | Anything else | Etherscan API | Required |
 
 The Etherscan path reads the token from the variable named by
@@ -104,10 +105,8 @@ other domain falls into the Etherscan path instead of the Blockscout v2 path.
 Depending on the host and `explorer_chain_id`, the request may fail or an
 Etherscan-compatible endpoint may return only the primary source under the
 contract name while omitting additional sources. The latter case fails later
-with missing-GitHub-source or compilation errors. Extend
-`_get_explorer_fetcher` in
-[`diffyscan/utils/explorer.py`](../diffyscan/utils/explorer.py) to add a
-domain.
+with missing-GitHub-source or compilation errors. For such a chain, use
+`api.blockscout.com` with `explorer_chain_id`.
 
 ## HTTP requests and explorer failures
 

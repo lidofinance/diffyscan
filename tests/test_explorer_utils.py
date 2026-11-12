@@ -186,15 +186,34 @@ def test_blockscout_reports_invalid_json(monkeypatch):
 @pytest.mark.parametrize(
     ("hostname", "fetcher"),
     [
-        ("api.xlayerscan.com", _get_contract_from_blockscout),
         ("eth.blockscout.com", _get_contract_from_blockscout),
+        ("eth.blockscout.com.evil.io", _get_contract_from_etherscan),
         ("explorer.mantle.xyz", _get_contract_from_mantle),
         ("evilblockscout.com", _get_contract_from_etherscan),
-        ("evilxlayerscan.com", _get_contract_from_etherscan),
-        ("api.xlayerscan.com.evil.io", _get_contract_from_etherscan),
         ("evilmantle.xyz", _get_contract_from_etherscan),
         ("evillineascan.build", _get_contract_from_etherscan),
     ],
 )
 def test_explorer_domains_match_on_a_dot_boundary(hostname, fetcher):
     assert _get_explorer_fetcher(hostname)[0] is fetcher
+
+
+def test_blockscout_pro_puts_chain_id_in_path_and_sends_api_key(monkeypatch):
+    urls = []
+
+    class InvalidJSON:
+        def json(self):
+            raise ValueError("invalid JSON")
+
+    def fake_fetch(url):
+        urls.append(url)
+        return InvalidJSON()
+
+    monkeypatch.setattr("diffyscan.utils.explorer.fetch", fake_fetch)
+    fetcher, requires_token = _get_explorer_fetcher("api.blockscout.com")
+    assert requires_token
+    with pytest.raises(ExplorerError, match="Invalid Blockscout JSON"):
+        fetcher("key", "api.blockscout.com", "0xabc", 5042)
+    assert urls == [
+        "https://api.blockscout.com/5042/api/v2/smart-contracts/0xabc?apikey=key"
+    ]
