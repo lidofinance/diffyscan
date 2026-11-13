@@ -38,8 +38,8 @@ contracts:
   "0x345c509005bF56490a7550731aD85a412854A19b": OracleSubmitter
 
 rpc_url_env_var: ARC_RPC_URL
-explorer_hostname: api.etherscan.io
-explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+explorer_hostname: api.blockscout.com
+explorer_token_env_var: BLOCKSCOUT_TOKEN
 explorer_chain_id: 5042
 
 github_repo:
