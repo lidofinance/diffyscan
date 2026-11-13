@@ -75,8 +75,8 @@ contracts:
   "0x00000000860913f37fab81ce8ce4E5BD1f664482": MellowAccountV1
 
 rpc_url_env_var: ARC_RPC_URL
-explorer_hostname: api.etherscan.io
-explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+explorer_hostname: api.blockscout.com
+explorer_token_env_var: BLOCKSCOUT_TOKEN
 explorer_chain_id: 5042
 
 github_repo:
@@ -90,9 +90,9 @@ github_repo:
   #   reviewed at 685be83:
   #   https://github.com/lidofinance/audits/blob/main/earn/2026-01-21_Nethermind_NM-0812_Mellow.pdf
   #   Added configured implementations are unchanged from scoped reviews:
-  #   SwapModule on Arc (0x00000000039794cF6904021a8c5cd92aE73066De) has other
-  #   bytecode than the SwapModule of Base and Arbitrum (688382e). Its source
-  #   commit is not established: the explorer has no verified source.
+  #   SwapModule (688382e):
+  #   https://github.com/lidofinance/audits/blob/main/earn/2025-11-19_Nethermind_NM-0735_Mellow.pdf
+  #   On Arc its constructor sets the WETH and CoW addresses to zero.
   #   BurnableTokenizedShareManager (09d8155):
   #   https://github.com/lidofinance/audits/blob/main/earn/2026-01-07_Nethermind_NM-0798_Mellow.pdf
   #   MellowAccountV1 (6ca2926):
