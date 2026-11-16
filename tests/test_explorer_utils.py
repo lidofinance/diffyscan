@@ -217,3 +217,13 @@ def test_blockscout_pro_puts_chain_id_in_path_and_sends_api_key(monkeypatch):
     assert urls == [
         "https://api.blockscout.com/5042/api/v2/smart-contracts/0xabc?apikey=key"
     ]
+
+
+def test_blockscout_pro_requires_chain_id(monkeypatch):
+    monkeypatch.setattr(
+        "diffyscan.utils.explorer.fetch",
+        lambda url: pytest.fail(f"unexpected request {url}"),
+    )
+    fetcher, _ = _get_explorer_fetcher("api.blockscout.com")
+    with pytest.raises(ExplorerError, match="needs explorer_chain_id"):
+        fetcher("key", "api.blockscout.com", "0xabc", None)

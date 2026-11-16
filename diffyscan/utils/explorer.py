@@ -623,6 +623,16 @@ def _in_domain(explorer_hostname: str, domain: str) -> bool:
     return explorer_hostname == domain or explorer_hostname.endswith("." + domain)
 
 
+def _get_contract_from_blockscout_pro(
+    token: str | None, explorer_hostname: str, contract: str, chain_id: int | None
+) -> dict:
+    if chain_id is None:
+        raise ExplorerError(f"{explorer_hostname} needs explorer_chain_id")
+    return _get_contract_from_blockscout(
+        f"{explorer_hostname}/{chain_id}", contract, token
+    )
+
+
 def _get_explorer_fetcher(explorer_hostname: str) -> tuple:
     """
     Determine which fetcher function to use based on the explorer hostname.
@@ -630,12 +640,7 @@ def _get_explorer_fetcher(explorer_hostname: str) -> tuple:
     Returns a tuple of (fetcher_function, requires_token)
     """
     if explorer_hostname == "api.blockscout.com":
-        return (
-            lambda token, hostname, address, chain_id: _get_contract_from_blockscout(
-                f"{hostname}/{chain_id}", address, token
-            ),
-            True,
-        )
+        return _get_contract_from_blockscout_pro, True
     elif explorer_hostname.startswith("zksync"):
         return _get_contract_from_zksync, False
     elif _in_domain(explorer_hostname, "mantle.xyz"):

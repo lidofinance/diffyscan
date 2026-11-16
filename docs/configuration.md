@@ -108,6 +108,15 @@ contract name while omitting additional sources. The latter case fails later
 with missing-GitHub-source or compilation errors. For such a chain, use
 `api.blockscout.com` with `explorer_chain_id`.
 
+A config with `explorer_hostname: api.blockscout.com` must set
+`explorer_chain_id` and `explorer_token_env_var`; Diffyscan does not send the
+Etherscan key to it. The PRO API does not serve each chain. On 2026-11-16 it
+answered `Network not supported` for X Layer (196), Monad (143) and Swell
+(1923), and HTTP 402 (paid plan) for Base (8453). For such a chain, extend
+`_get_explorer_fetcher` in
+[`diffyscan/utils/explorer.py`](../diffyscan/utils/explorer.py) with the
+domain of its Blockscout instance or with another adapter.
+
 ## HTTP requests and explorer failures
 
 GET requests send a same-origin Referer without URL userinfo, paths or queries.
