@@ -1,7 +1,6 @@
 # earnUSDe - Experimental earnUSD (earnUSDe) Arbitrum
 # https://docs.mellow.finance/lido-earn/deployments.md
 # Deployed on 2026-11-09 by 0xE98Be1E5538FCbD716C506052eB1Fd5d6fC495A3.
-# Vault creation: 0xe684db4c0814385222b28a832127ab44486e530ce05ec81769d5f481bf1ea097
 
 contracts:
   # Vault
