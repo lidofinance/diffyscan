@@ -1,3 +1,5 @@
+from collections.abc import Callable
+
 from .logger import logger
 from .encoder import encode_constructor_arguments
 from .custom_exceptions import CalldataError
@@ -8,8 +10,9 @@ def get_calldata(
     target_compiled_contract: dict,
     binary_config: dict | None = None,
     explorer_constructor_arguments: str | None = None,
+    creation_constructor_arguments: Callable[[], str] | None = None,
 ) -> str | None:
-    """Get constructor calldata from config, explorer metadata, or ABI encoding."""
+    """Get constructor calldata from config, explorer metadata, or the creation."""
     constructor_abi = _get_constructor_abi(target_compiled_contract)
     if constructor_abi is None:
         logger.info("No constructor in ABI, calldata calculation skipped")
@@ -54,6 +57,15 @@ def get_calldata(
         if not normalized:
             raise CalldataError(
                 f"Explorer metadata has empty constructor calldata for {contract_address}"
+            )
+        return normalized
+
+    if creation_constructor_arguments is not None:
+        logger.info("Using constructor calldata from the creation trace")
+        normalized = normalize_calldata(creation_constructor_arguments())
+        if not normalized:
+            raise CalldataError(
+                f"Creation trace has empty constructor calldata for {contract_address}"
             )
         return normalized
 

@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What is Diffyscan
 
 Diffyscan verifies deployed EVM smart contracts match their GitHub source by:
-1. Fetching verified source from blockchain explorers (Etherscan, Blockscout, zkSync, Mantle)
+1. Fetching verified source from blockchain explorers (Etherscan, Blockscout, zkSync, Mantle, OKLink)
 2. Diffing against GitHub repo sources (HTML diff reports saved under `digest/<timestamp>/diffs/`)
 3. Optionally recompiling from GitHub and comparing bytecode against on-chain bytecode, handling constructor args, libraries, and immutable references
 
@@ -65,7 +65,7 @@ Entry point: `diffyscan/diffyscan.py:main` — parses CLI args, loads config (JS
 - **binary_verifier.py** — EVM bytecode parsing into instructions, metadata separation, and difference analysis with immutable region annotations
 - **compiler.py** — solc binary download (platform-aware), SHA256 verification, compilation via standard JSON
 - **encoder.py** — ABI encoding for constructor arguments (address, bool, int/uint, bytes, tuples, arrays)
-- **calldata.py** — resolves constructor calldata from config or explorer metadata
+- **calldata.py** — resolves constructor calldata from config, explorer metadata, or the creation trace
 - **node_handler.py** — RPC calls: `eth_getCode`, `eth_chainId`, `eth_call`
 - **common.py** — config loading (with YAML hex address validation), caching with SHA256 validation
 - **http_client.py** — shared HTTP requests, headers, per-host pacing, bounded transient GET retries and error handling

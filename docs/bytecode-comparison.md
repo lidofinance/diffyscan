@@ -77,6 +77,13 @@ bytecode_comparison:
 `constructor_args` and `constructor_calldata` describe the same input. Configure
 one of them for a contract.
 
+Without either entry, Diffyscan uses the constructor arguments of the explorer
+metadata. If the explorer has none, Diffyscan reads them from the creation of
+the contract: it finds the creation block with `eth_getCode`, reads the init
+code of the contract from `debug_traceBlockByNumber` with the `callTracer`,
+and takes the bytes after the compiled creation code. This needs an RPC with
+archive state and the debug namespace.
+
 ## Linked libraries
 
 Diffyscan reads linked-library addresses from explorer metadata. A manual entry
