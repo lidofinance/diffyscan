@@ -1,5 +1,7 @@
 # Core implementations and factories — X Layer deployment
-# https://github.com/mellow-finance/flexible-vaults/blob/eff0782431d58db4f4fc1377b5a378c2939d5ab1/scripts/xlayer/Constants.sol
+# https://docs.mellow.finance/core-vaults/core-deployments#x-layer-implementations-and-factories
+# scripts/xlayer/Constants.sol of flexible-vaults (eff0782) names another SwapModule
+# (0x0000000022B540Fe06d7a9c32d81163971b583D6, no code on X Layer) and no SyncRedeemQueue.
 
 contracts:
   # Factory
@@ -76,6 +78,7 @@ contracts:
 rpc_url_env_var: XLAYER_RPC_URL
 explorer_hostname: www.oklink.com
 explorer_chain_id: 196
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
 
 github_repo:
   url: https://github.com/mellow-finance/flexible-vaults
