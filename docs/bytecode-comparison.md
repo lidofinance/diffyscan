@@ -78,11 +78,13 @@ bytecode_comparison:
 one of them for a contract.
 
 Without either entry, Diffyscan uses the constructor arguments of the explorer
-metadata. If the explorer has none, Diffyscan reads them from the creation of
-the contract: it finds the creation block with `eth_getCode`, reads the init
-code of the contract from `debug_traceBlockByNumber` with the `callTracer`,
-and takes the bytes after the compiled creation code. This needs an RPC with
-archive state and the debug namespace.
+metadata. If the explorer returns no constructor-arguments field, Diffyscan
+reads them from the creation of the contract: it finds the creation block with
+`eth_getCode`, reads the init code of the contract from
+`debug_traceBlockByNumber` with the `callTracer` (reverted frames are skipped),
+checks that the init code starts with the compiled creation code, and takes the
+rest. This needs an RPC with archive state and the debug namespace. An empty
+explorer value (`""` or `"0x"`) is an error, as before.
 
 ## Linked libraries
 

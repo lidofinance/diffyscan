@@ -66,7 +66,7 @@ Entry point: `diffyscan/diffyscan.py:main` — parses CLI args, loads config (JS
 - **compiler.py** — solc binary download (platform-aware), SHA256 verification, compilation via standard JSON
 - **encoder.py** — ABI encoding for constructor arguments (address, bool, int/uint, bytes, tuples, arrays)
 - **calldata.py** — resolves constructor calldata from config, explorer metadata, or the creation trace
-- **node_handler.py** — RPC calls: `eth_getCode`, `eth_chainId`, `eth_call`
+- **node_handler.py** — RPC calls: `eth_getCode`, `eth_chainId`, `eth_call`, and for the creation-trace fallback `eth_blockNumber`, historical `eth_getCode`, `debug_traceBlockByNumber`
 - **common.py** — config loading (with YAML hex address validation), caching with SHA256 validation
 - **http_client.py** — shared HTTP requests, headers, per-host pacing, bounded transient GET retries and error handling
 - **custom_types.py** — TypedDict definitions: `Config`, `BinaryConfig`, `ExplorerContract`, `GithubRepo`

@@ -93,7 +93,12 @@ def _has_code(contract_address: str, block: int, rpc_url: str) -> bool:
 
 
 def find_creation_block(contract_address: str, rpc_url: str) -> int:
-    """Find the first block with code at the address. Needs an archive RPC."""
+    """Find the first block with code at the address. Needs an archive RPC.
+
+    The search assumes that the address has had code since one creation. An RPC
+    without archive state answers "0x" for old blocks, and the search then
+    returns a later block.
+    """
     high = int(_rpc_call(rpc_url, "eth_blockNumber", []), 16)
     if not _has_code(contract_address, high, rpc_url):
         raise NodeError(f"Empty bytecode for contract {contract_address}")
@@ -108,6 +113,8 @@ def find_creation_block(contract_address: str, rpc_url: str) -> int:
 
 
 def _find_creation_frame(frame: dict, contract_address: str) -> dict | None:
+    if frame.get("error"):
+        return None  # a reverted frame and its subtree created nothing
     if frame.get("type") in ("CREATE", "CREATE2") and (
         str(frame.get("to", "")).lower() == contract_address.lower()
     ):
@@ -132,18 +139,34 @@ def get_creation_init_code(contract_address: str, rpc_url: str) -> str:
     for trace in traces if isinstance(traces, list) else []:
         frame = _find_creation_frame(trace.get("result") or {}, contract_address)
         if frame is not None and isinstance(frame.get("input"), str):
-            logger.okay("Creation init code received", f"block {block}")
+            logger.okay(
+                "Creation init code received",
+                f"block {block}, tx {trace.get('txHash')}",
+            )
             return str(frame["input"])
-    raise NodeError(f"No creation of {contract_address} in the trace of block {block}")
+    raise NodeError(
+        f"No creation of {contract_address} in the trace of block {block}; "
+        "the RPC may lack archive state"
+    )
 
 
 def get_constructor_arguments_from_creation(
     contract_address: str, creation_code: str, rpc_url: str
 ) -> str:
-    """Return the init code of the creation after the compiled creation code."""
+    """Return the init code of the creation after the compiled creation code.
+
+    The init code must start with the compiled creation code; otherwise the
+    boundary of the arguments is unknown.
+    """
     init_code = get_creation_init_code(contract_address, rpc_url)
-    if len(init_code) < len(creation_code):
+    if not init_code.lower().startswith(creation_code.lower()):
         raise NodeError(
-            f"Creation init code of {contract_address} is shorter than the compiled creation code"
+            f"Creation init code of {contract_address} does not start with the "
+            "compiled creation code"
         )
-    return "0x" + init_code[len(creation_code) :]
+    arguments = "0x" + init_code[len(creation_code) :]
+    logger.okay(
+        "Constructor calldata from the creation trace",
+        f"{(len(arguments) - 2) // 2} bytes",
+    )
+    return arguments

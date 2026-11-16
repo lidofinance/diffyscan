@@ -2,7 +2,7 @@ from collections.abc import Callable
 
 from .logger import logger
 from .encoder import encode_constructor_arguments
-from .custom_exceptions import CalldataError
+from .custom_exceptions import CalldataError, NodeError
 
 
 def get_calldata(
@@ -62,7 +62,16 @@ def get_calldata(
 
     if creation_constructor_arguments is not None:
         logger.info("Using constructor calldata from the creation trace")
-        normalized = normalize_calldata(creation_constructor_arguments())
+        try:
+            traced = creation_constructor_arguments()
+        except NodeError as exc:
+            raise CalldataError(
+                f"No constructor calldata for {contract_address} in config or "
+                f"explorer metadata, and the creation trace failed: {exc}. Set "
+                "constructor_args, or use an RPC with archive state and "
+                "debug_traceBlockByNumber"
+            ) from exc
+        normalized = normalize_calldata(traced)
         if not normalized:
             raise CalldataError(
                 f"Creation trace has empty constructor calldata for {contract_address}"

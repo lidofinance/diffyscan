@@ -293,3 +293,24 @@ def test_oklink_dispatch_passes_the_chain_id(monkeypatch):
     assert requires_token is True
     assert calls == [("www.oklink.com", "0xabc", 196)]
     assert _get_explorer_fetcher("eviloklink.com")[0] is _get_contract_from_etherscan
+
+
+def test_get_contract_from_oklink_keeps_submitted_settings(monkeypatch):
+    source = json.dumps(
+        {
+            "language": "Solidity",
+            "sources": {"src/Demo.sol": {"content": "contract Demo {}"}},
+            "settings": {"viaIR": True, "optimizer": {"enabled": True, "runs": 1}},
+        }
+    )
+    monkeypatch.setattr(
+        "diffyscan.utils.explorer.fetch", lambda url: _oklink_response(source)
+    )
+
+    settings = _get_contract_from_oklink("www.oklink.com", "0xabc", 196)["solcInput"][
+        "settings"
+    ]
+
+    assert settings["viaIR"] is True
+    assert settings["optimizer"] == {"enabled": True, "runs": 1}
+    assert settings["remappings"] == ["forge-std/=lib/forge-std/src/"]

@@ -159,6 +159,69 @@ def test_get_constructor_arguments_from_creation_needs_a_creation_frame(monkeypa
         get_constructor_arguments_from_creation(address, "0x6080", "rpc")
 
 
+def test_get_constructor_arguments_from_creation_skips_reverted_frames(monkeypatch):
+    address = "0x00000000000000000000000000000000000000Aa"
+    trace = [
+        {
+            "txHash": "0x1",
+            "result": {
+                "type": "CALL",
+                "calls": [
+                    {
+                        "type": "CREATE",
+                        "to": address,
+                        "input": "0x6080dead",
+                        "error": "execution reverted",
+                    }
+                ],
+            },
+        },
+        {
+            "txHash": "0x2",
+            "result": {"type": "CREATE", "to": address, "input": "0x6080beef"},
+        },
+    ]
+    _, fake_rpc_call = _fake_creation_rpc(address, 7, trace)
+    monkeypatch.setattr("diffyscan.utils.node_handler._rpc_call", fake_rpc_call)
+
+    assert get_constructor_arguments_from_creation(address, "0x6080", "rpc") == "0xbeef"
+
+
+def test_get_constructor_arguments_from_creation_needs_the_creation_code_prefix(
+    monkeypatch,
+):
+    address = "0x00000000000000000000000000000000000000Aa"
+    trace = [
+        {
+            "txHash": "0x1",
+            "result": {"type": "CREATE2", "to": address, "input": "0x6081beef"},
+        }
+    ]
+    _, fake_rpc_call = _fake_creation_rpc(address, 3, trace)
+    monkeypatch.setattr("diffyscan.utils.node_handler._rpc_call", fake_rpc_call)
+
+    with pytest.raises(NodeError, match="does not start with"):
+        get_constructor_arguments_from_creation(address, "0x6080", "rpc")
+
+
+def test_get_calldata_names_the_options_when_the_creation_trace_fails():
+    compiled_contract = {
+        "abi": [{"type": "constructor", "inputs": [{"name": "a", "type": "address"}]}]
+    }
+
+    def failing_trace():
+        raise NodeError("the method debug_traceBlockByNumber does not exist")
+
+    with pytest.raises(CalldataError, match="Set constructor_args"):
+        get_calldata(
+            "0x0000000000000000000000000000000000000001",
+            compiled_contract,
+            None,
+            None,
+            failing_trace,
+        )
+
+
 def test_simulate_deployment_uses_eth_call(monkeypatch):
     captured = {}
 

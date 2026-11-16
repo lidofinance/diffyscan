@@ -419,9 +419,16 @@ def _get_contract_from_oklink(
     source_code = data["sourceCode"]
     if source_code.startswith("{"):
         try:
-            source_files = json.loads(source_code).get("sources")
+            standard_json = json.loads(source_code)
+            source_files = standard_json.get("sources")
         except (ValueError, AttributeError):
             raise ExplorerError(f"Invalid OKLink sourceCode for {contract}") from None
+        submitted_settings = standard_json.get("settings")
+        if submitted_settings is not None:
+            if not isinstance(submitted_settings, dict):
+                raise ExplorerError(f"Invalid OKLink settings for {contract}")
+            # The submitted settings win; the top-level fields are defaults.
+            settings = {**settings, **copy.deepcopy(submitted_settings)}
         if (
             not isinstance(source_files, dict)
             or not source_files
