@@ -1,7 +1,6 @@
 # earnUSDe - Experimental earnUSD (earnUSDe) Arc
 # https://docs.mellow.finance/lido-earn/deployments.md
 # Deployed on 2026-11-11 by 0xE98Be1E5538FCbD716C506052eB1Fd5d6fC495A3.
-# TimelockController creation: 0xe1c315a83c1d0c054a57ec0e39d0f41ad9bba96720903ac6c430b468a2f7a7e2
 
 contracts:
   # Vault
