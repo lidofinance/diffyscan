@@ -1,7 +1,7 @@
 # SyncRedeemQueue implementation — Ink deployment
-# https://github.com/mellow-finance/flexible-vaults/blob/eff0782431d58db4f4fc1377b5a378c2939d5ab1/scripts/ink/Constants.sol
-# A RedeemQueueFactory implementation. It has its own config because its source
-# is not in the commit of earn-core-ink.yaml.
+# https://docs.mellow.finance/core-vaults/core-deployments#ink-implementations-and-factories
+# Implementation 2 of the RedeemQueueFactory 0xe08dc488bD6756323F8bf478869529D03db627ef.
+# It has its own config because its source is not in the commit of earn-core-ink.yaml.
 
 contracts:
   "0x0000000038801C7281284f8F68B80B679F64a074": SyncRedeemQueue

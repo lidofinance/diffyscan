@@ -1,4 +1,5 @@
 # Core implementations and factories — Ink deployment
+# https://docs.mellow.finance/core-vaults/core-deployments#ink-implementations-and-factories
 # https://github.com/mellow-finance/flexible-vaults/blob/eff0782431d58db4f4fc1377b5a378c2939d5ab1/scripts/ink/Constants.sol
 
 contracts:
