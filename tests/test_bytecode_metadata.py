@@ -13,6 +13,7 @@ from diffyscan.utils.explorer import (
 )
 from diffyscan.utils.node_handler import (
     DEFAULT_DEPLOYMENT_GAS_LIMIT,
+    get_constructor_arguments_from_creation,
     simulate_deployment,
 )
 
@@ -86,6 +87,139 @@ def test_get_calldata_raises_when_constructor_args_are_missing_everywhere():
             compiled_contract,
             None,
             None,
+        )
+
+
+@pytest.mark.parametrize("explorer_constructor_arguments", [None, "", "0x"])
+def test_get_calldata_falls_back_to_the_creation_trace(explorer_constructor_arguments):
+    compiled_contract = {
+        "abi": [
+            {
+                "type": "constructor",
+                "inputs": [{"name": "owner", "type": "address"}],
+            }
+        ]
+    }
+
+    result = get_calldata(
+        "0x0000000000000000000000000000000000000001",
+        compiled_contract,
+        None,
+        explorer_constructor_arguments,
+        lambda: "0xdeadbeef",
+    )
+
+    assert result == "deadbeef"
+
+
+def _fake_creation_rpc(address, created_at, trace):
+    calls = []
+
+    def fake_rpc_call(rpc_url, method, params):
+        calls.append((method, params))
+        if method == "eth_blockNumber":
+            return hex(100)
+        if method == "eth_getCode":
+            return "0x6001" if int(params[1], 16) >= created_at else "0x"
+        if method == "debug_traceBlockByNumber":
+            return trace
+        raise AssertionError(method)
+
+    return calls, fake_rpc_call
+
+
+def test_get_constructor_arguments_from_creation_reads_the_trace(monkeypatch):
+    address = "0x00000000000000000000000000000000000000Aa"
+    trace = [
+        {"txHash": "0x1", "result": {"type": "CALL", "to": "0xbb"}},
+        {
+            "txHash": "0x2",
+            "result": {
+                "type": "CALL",
+                "calls": [
+                    {"type": "CREATE2", "to": address.lower(), "input": "0x6080beef"}
+                ],
+            },
+        },
+    ]
+    calls, fake_rpc_call = _fake_creation_rpc(address, 42, trace)
+    monkeypatch.setattr("diffyscan.utils.node_handler._rpc_call", fake_rpc_call)
+
+    result = get_constructor_arguments_from_creation(address, "0x6080", "rpc")
+
+    assert result == "0xbeef"
+    assert ("debug_traceBlockByNumber", [hex(42), {"tracer": "callTracer"}]) in calls
+
+
+def test_get_constructor_arguments_from_creation_needs_a_creation_frame(monkeypatch):
+    address = "0x00000000000000000000000000000000000000Aa"
+    _, fake_rpc_call = _fake_creation_rpc(address, 0, [])
+    monkeypatch.setattr("diffyscan.utils.node_handler._rpc_call", fake_rpc_call)
+
+    with pytest.raises(NodeError, match="No creation"):
+        get_constructor_arguments_from_creation(address, "0x6080", "rpc")
+
+
+def test_get_constructor_arguments_from_creation_skips_reverted_frames(monkeypatch):
+    address = "0x00000000000000000000000000000000000000Aa"
+    trace = [
+        {
+            "txHash": "0x1",
+            "result": {
+                "type": "CALL",
+                "calls": [
+                    {
+                        "type": "CREATE",
+                        "to": address,
+                        "input": "0x6080dead",
+                        "error": "execution reverted",
+                    }
+                ],
+            },
+        },
+        {
+            "txHash": "0x2",
+            "result": {"type": "CREATE", "to": address, "input": "0x6080beef"},
+        },
+    ]
+    _, fake_rpc_call = _fake_creation_rpc(address, 7, trace)
+    monkeypatch.setattr("diffyscan.utils.node_handler._rpc_call", fake_rpc_call)
+
+    assert get_constructor_arguments_from_creation(address, "0x6080", "rpc") == "0xbeef"
+
+
+def test_get_constructor_arguments_from_creation_needs_the_creation_code_prefix(
+    monkeypatch,
+):
+    address = "0x00000000000000000000000000000000000000Aa"
+    trace = [
+        {
+            "txHash": "0x1",
+            "result": {"type": "CREATE2", "to": address, "input": "0x6081beef"},
+        }
+    ]
+    _, fake_rpc_call = _fake_creation_rpc(address, 3, trace)
+    monkeypatch.setattr("diffyscan.utils.node_handler._rpc_call", fake_rpc_call)
+
+    with pytest.raises(NodeError, match="does not start with"):
+        get_constructor_arguments_from_creation(address, "0x6080", "rpc")
+
+
+def test_get_calldata_names_the_options_when_the_creation_trace_fails():
+    compiled_contract = {
+        "abi": [{"type": "constructor", "inputs": [{"name": "a", "type": "address"}]}]
+    }
+
+    def failing_trace():
+        raise NodeError("the method debug_traceBlockByNumber does not exist")
+
+    with pytest.raises(CalldataError, match="Set constructor_args"):
+        get_calldata(
+            "0x0000000000000000000000000000000000000001",
+            compiled_contract,
+            None,
+            None,
+            failing_trace,
         )
 
 

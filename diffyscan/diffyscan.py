@@ -49,6 +49,7 @@ from .utils.logger import logger
 from .utils.node_handler import (
     get_bytecode_from_node,
     get_chain_id,
+    get_constructor_arguments_from_creation,
     simulate_deployment,
 )
 
@@ -236,6 +237,9 @@ def run_bytecode_diff(
         target_compiled_contract,
         config.get("bytecode_comparison"),
         explorer_constructor_arguments,
+        lambda: get_constructor_arguments_from_creation(
+            contract_address_from_config, contract_creation_code, remote_rpc_url
+        ),
     )
     deployment_call_data = _append_calldata(contract_creation_code, calldata)
     deployment_from = _get_deployment_from(
@@ -479,6 +483,14 @@ def _load_canonical_etherscan_token() -> str | None:
 def _load_explorer_token(config: dict) -> str:
     """Load explorer token from config env var name with legacy Etherscan fallback."""
     env_var = config.get("explorer_token_env_var")
+    if not env_var and config.get("explorer_hostname") == "api.blockscout.com":
+        # The PRO API puts the key in the URL; do not send the Etherscan key there.
+        error_msg = (
+            'Config with explorer_hostname "api.blockscout.com" needs '
+            '"explorer_token_env_var" with a Blockscout PRO API key.'
+        )
+        logger.error(error_msg)
+        raise ValueError(error_msg)
     if not env_var:
         logger.warn(
             'Config missing "explorer_token_env_var"; falling back to ETHERSCAN_EXPLORER_TOKEN'

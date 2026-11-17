@@ -295,8 +295,12 @@ def _get_contract_from_mantle(mantle_explorer_hostname: str, contract: str) -> d
     )
 
 
-def _get_contract_from_blockscout(explorer_hostname: str, contract: str) -> dict:
+def _get_contract_from_blockscout(
+    explorer_hostname: str, contract: str, api_key: str | None = None
+) -> dict:
     explorer_link = f"https://{explorer_hostname}/api/v2/smart-contracts/{contract}"
+    if api_key:
+        explorer_link = f"{explorer_link}?apikey={api_key}"
     try:
         response = fetch(explorer_link).json()
     except ValueError:
@@ -363,6 +367,104 @@ def _get_contract_from_blockscout(explorer_hostname: str, contract: str) -> dict
         constructor_arguments=response.get("constructor_args"),
         evm_version=response.get("evm_version"),
         libraries=response.get("external_libraries"),
+    )
+
+
+#: OKLink names a chain by its short name, not by its chain id.
+OKLINK_CHAIN_SHORT_NAMES = {196: "XLAYER"}
+
+
+def _undo_latin1_decoding(text: str) -> str:
+    """OKLink returns UTF-8 source decoded as Latin-1 ("—" comes back as "â\x80\x94")."""
+    try:
+        return text.encode("latin-1").decode("utf-8")
+    except UnicodeError:
+        return text
+
+
+def _get_contract_from_oklink(
+    explorer_hostname: str, contract: str, chain_id: int | None
+) -> dict:
+    chain_short_name = (
+        OKLINK_CHAIN_SHORT_NAMES.get(chain_id) if chain_id is not None else None
+    )
+    if chain_short_name is None:
+        raise ExplorerError(
+            f"OKLink needs explorer_chain_id with a known short name, got {chain_id}"
+        )
+    explorer_link = (
+        f"https://{explorer_hostname}/api/v5/explorer/contract/verify-contract-info"
+        f"?chainShortName={chain_short_name}&contractAddress={contract}"
+    )
+    try:
+        response = fetch(explorer_link).json()
+    except ValueError:
+        raise ExplorerError(f"Invalid OKLink JSON for {contract}") from None
+
+    if not isinstance(response, dict) or not isinstance(response.get("data"), list):
+        raise ExplorerError(f"Unexpected OKLink response for {contract}")
+    if response.get("code") != "0":
+        raise ExplorerError(f'Received bad response: {response.get("msg")}')
+    if not response["data"]:
+        _raise_unverified_source(contract)
+
+    data = response["data"][0]
+    for field in ("contractName", "sourceCode", "compilerVersion"):
+        if not isinstance(data.get(field), str) or not data[field]:
+            raise ExplorerError(f"Invalid OKLink {field} for {contract}")
+
+    settings: dict = {}
+    remappings = data.get("remappings")
+    if remappings:
+        if not isinstance(remappings, list):
+            raise ExplorerError(f"Invalid OKLink remappings for {contract}")
+        settings["remappings"] = remappings
+
+    source_code = data["sourceCode"]
+    if source_code.startswith("{"):
+        try:
+            standard_json = json.loads(source_code)
+            source_files = standard_json.get("sources")
+        except (ValueError, AttributeError):
+            raise ExplorerError(f"Invalid OKLink sourceCode for {contract}") from None
+        submitted_settings = standard_json.get("settings")
+        if submitted_settings is not None:
+            if not isinstance(submitted_settings, dict):
+                raise ExplorerError(f"Invalid OKLink settings for {contract}")
+            # The submitted settings win; the top-level fields are defaults.
+            settings = {**settings, **copy.deepcopy(submitted_settings)}
+        if (
+            not isinstance(source_files, dict)
+            or not source_files
+            or any(
+                not isinstance(entry, dict) or not isinstance(entry.get("content"), str)
+                for entry in source_files.values()
+            )
+        ):
+            raise ExplorerError(f"Invalid OKLink sources for {contract}")
+        source_files = {
+            path: {"content": _undo_latin1_decoding(entry["content"])}
+            for path, entry in source_files.items()
+        }
+    else:
+        source_files = {
+            data["contractName"]: {"content": _undo_latin1_decoding(source_code)}
+        }
+
+    solc_input = _build_solc_input(
+        source_files,
+        optimizer_enabled=data.get("optimization") == "1",
+        optimizer_runs=data.get("optimizationRuns", 0),
+        settings=settings,
+    )
+    # OKLink has no constructor arguments; the bytecode step reads them from the
+    # creation of the contract.
+    return _build_contract_payload(
+        data["contractName"],
+        data["compilerVersion"],
+        solc_input,
+        evm_version=data.get("evmVersion"),
+        libraries=data.get("libraryInfo"),
     )
 
 
@@ -619,16 +721,35 @@ def _in_domain(explorer_hostname: str, domain: str) -> bool:
     return explorer_hostname == domain or explorer_hostname.endswith("." + domain)
 
 
+def _get_contract_from_blockscout_pro(
+    token: str | None, explorer_hostname: str, contract: str, chain_id: int | None
+) -> dict:
+    if chain_id is None:
+        raise ExplorerError(f"{explorer_hostname} needs explorer_chain_id")
+    return _get_contract_from_blockscout(
+        f"{explorer_hostname}/{chain_id}", contract, token
+    )
+
+
 def _get_explorer_fetcher(explorer_hostname: str) -> tuple:
     """
     Determine which fetcher function to use based on the explorer hostname.
 
     Returns a tuple of (fetcher_function, requires_token)
     """
-    if explorer_hostname.startswith("zksync"):
+    if explorer_hostname == "api.blockscout.com":
+        return _get_contract_from_blockscout_pro, True
+    elif explorer_hostname.startswith("zksync"):
         return _get_contract_from_zksync, False
     elif _in_domain(explorer_hostname, "mantle.xyz"):
         return _get_contract_from_mantle, False
+    elif _in_domain(explorer_hostname, "oklink.com"):
+        return (
+            lambda token, hostname, address, chain_id=None: _get_contract_from_oklink(
+                hostname, address, chain_id
+            ),
+            True,
+        )
     elif _in_domain(explorer_hostname, "lineascan.build"):
         return (
             lambda hostname, address, token=None, chain_id=None: _get_contract_from_etherscan(
@@ -636,19 +757,7 @@ def _get_explorer_fetcher(explorer_hostname: str) -> tuple:
             ),
             False,
         )
-    elif any(
-        _in_domain(explorer_hostname, domain)
-        for domain in [
-            "mode.network",
-            "blockscout.com",
-            "swellnetwork.io",
-            "lisk.com",
-            "inkonchain.com",
-            "routescan.io",
-            "monadvision.com",
-            "xlayerscan.com",
-        ]
-    ):
+    elif _in_domain(explorer_hostname, "blockscout.com"):
         return _get_contract_from_blockscout, False
     else:
         # Default to Etherscan-compatible
