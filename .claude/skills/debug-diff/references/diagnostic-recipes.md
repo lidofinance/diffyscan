@@ -15,9 +15,9 @@ Compare candidate logs with the requested command, config and contract. A newer 
 
 ## Missing or empty constructor calldata
 
-1. Inspect the constructor ABI and saved explorer metadata. `get_calldata` skips argument handling when the ABI has no constructor inputs. With inputs, an absent metadata value and an empty hex value lead to different diagnostics.
+1. Inspect the constructor ABI and saved explorer metadata. `get_calldata` skips argument handling when the ABI has no constructor inputs.
 2. Check manual `constructor_args` and `constructor_calldata` for the exact address spelling used in `contracts`. They are mutually exclusive and override explorer calldata.
-3. With no explorer field and no manual entry, `get_calldata` already tries the creation trace: it binary-searches the creation block with `eth_getCode`, traces it with `debug_traceBlockByNumber`, checks that the init code starts with the compiled creation code, and takes the rest. Its error names the cause (no archive state, no `debug_*`, or a different creation code). Do the steps below when it fails.
+3. With no manual entry and an absent or empty explorer field, `get_calldata` already tries the creation trace: it binary-searches the creation block with `eth_getCode`, traces it with `debug_traceBlockByNumber`, checks that the init code starts with the compiled creation code, and takes the rest. Its error names the cause (no archive state, no `debug_*`, or a different creation code). Do the steps below when it fails.
 4. If metadata is insufficient, identify the creation transaction for this chain/address from deployment records or the explorer's creation API. Obtain a creation trace when the RPC supports it; with `callTracer`, locate the relevant CREATE/CREATE2 frame, including internal factory calls.
 5. Match the frame to the target deployment. Separate its input into exact linked creation bytecode and ABI-encoded arguments using the matching build artifact. Do not treat a matching address substring as the boundary.
 6. Decode and re-encode the arguments against the constructor ABI; verify they account for the complete argument suffix. Compare deployer/caller and deployment records. Same-address deployments on other chains are corroborating evidence only after their creation inputs are established.

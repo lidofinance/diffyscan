@@ -90,7 +90,8 @@ def test_get_calldata_raises_when_constructor_args_are_missing_everywhere():
         )
 
 
-def test_get_calldata_falls_back_to_the_creation_trace():
+@pytest.mark.parametrize("explorer_constructor_arguments", [None, "", "0x"])
+def test_get_calldata_falls_back_to_the_creation_trace(explorer_constructor_arguments):
     compiled_contract = {
         "abi": [
             {
@@ -104,7 +105,7 @@ def test_get_calldata_falls_back_to_the_creation_trace():
         "0x0000000000000000000000000000000000000001",
         compiled_contract,
         None,
-        None,
+        explorer_constructor_arguments,
         lambda: "0xdeadbeef",
     )
 

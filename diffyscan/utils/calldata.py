@@ -52,13 +52,10 @@ def get_calldata(
         return calldata
 
     if explorer_constructor_arguments is not None:
-        logger.info("Using constructor calldata from explorer metadata")
         normalized = normalize_calldata(explorer_constructor_arguments)
-        if not normalized:
-            raise CalldataError(
-                f"Explorer metadata has empty constructor calldata for {contract_address}"
-            )
-        return normalized
+        if normalized:
+            logger.info("Using constructor calldata from explorer metadata")
+            return normalized
 
     if creation_constructor_arguments is not None:
         logger.info("Using constructor calldata from the creation trace")
