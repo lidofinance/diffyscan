@@ -49,3 +49,13 @@ def test_etherscan_v2_configs_accept_canonical_token():
             "ETHERSCAN_TOKEN",
             "ETHERSCAN_EXPLORER_TOKEN",
         ), f"{path} prevents use of ETHERSCAN_EXPLORER_TOKEN"
+
+
+def test_blockscout_pro_configs_name_chain_and_token():
+    for path in config_paths():
+        cfg = load_config(str(path))
+        if cfg.get("explorer_hostname") != "api.blockscout.com":
+            continue
+
+        assert "explorer_chain_id" in cfg, f"{path} needs explorer_chain_id"
+        assert cfg.get("explorer_token_env_var"), f"{path} needs explorer_token_env_var"

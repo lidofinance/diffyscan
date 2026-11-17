@@ -479,6 +479,14 @@ def _load_canonical_etherscan_token() -> str | None:
 def _load_explorer_token(config: dict) -> str:
     """Load explorer token from config env var name with legacy Etherscan fallback."""
     env_var = config.get("explorer_token_env_var")
+    if not env_var and config.get("explorer_hostname") == "api.blockscout.com":
+        # The PRO API puts the key in the URL; do not send the Etherscan key there.
+        error_msg = (
+            'Config with explorer_hostname "api.blockscout.com" needs '
+            '"explorer_token_env_var" with a Blockscout PRO API key.'
+        )
+        logger.error(error_msg)
+        raise ValueError(error_msg)
     if not env_var:
         logger.warn(
             'Config missing "explorer_token_env_var"; falling back to ETHERSCAN_EXPLORER_TOKEN'
