@@ -1,0 +1,56 @@
+# CMv2 internal ConsolidationMigrator: source and target module = Curated Module v2 (module id 4).
+# Deployed on 2026-11-11 from lidofinance/core PR #2028 (c2cdfb52d); the deployed sources are identical at the pinned commit.
+contracts:
+  "0xc8a7F4917cA03FDCD24a5E11A48Ab448318976e7": OssifiableProxy # ConsolidationMigrator proxy
+  "0x5D2DDD6817180c2135b4652503bD555c2d3Bb392": ConsolidationMigrator
+
+network: mainnet
+explorer_hostname: api.etherscan.io
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+explorer_chain_id: 1
+
+github_repo:
+  url: https://github.com/lidofinance/core
+  commit: af095e48bbc1c3841c2c9936219c8461af01056b # same as srv3.yaml; these sources are unchanged up to v4.1.0
+  relative_root: ""
+
+dependencies:
+  "@openzeppelin/contracts-v4.4":
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: 6bd6b76d1156e20e45d1016f355d154141c7e5b9 # v4.4.1
+    relative_root: contracts
+  "@openzeppelin/contracts-v5.2":
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: acd4ff74de833399287ed6b31b4debf6b2b35527 # v5.2.0
+    relative_root: contracts
+
+fail_on_bytecode_comparison_error: true
+
+bytecode_comparison:
+  constructor_args:
+    # Etherscan returns empty constructor arguments for this implementation.
+    # Decoded from creation tx 0x8ca2fc82a3ecda5e72654ee8cc3b25c84632687a72b4d1f42bde558342dc170c:
+    # the last 128 bytes after the 7431-byte creation bytecode of the deploy build (core c2cdfb52d).
+    "0x5D2DDD6817180c2135b4652503bD555c2d3Bb392":
+      - "0xFdDf38947aFB03C621C71b06C9C70bce73f12999" # StakingRouter
+      - "0xd907CE33B4Be423823d1CFFe80BD147E8b8554C8" # ConsolidationBus
+      - 4 # sourceModuleId: Curated Module v2
+      - 4 # targetModuleId: Curated Module v2
+
+allowed_diffs:
+  source:
+    "0x5D2DDD6817180c2135b4652503bD555c2d3Bb392":
+    - reason: >-
+        Etherscan verification artifact: the per-contract verified source of
+        ConsolidationMigrator carries a 1-space indentation on the closing brace of
+        struct StakingModule in SRTypes.sol that is absent at the GitHub commit.
+        Same hunk as the CMv1 -> CMv2 migrator 0x6Fb4c152... in srv3.yaml.
+        Formatting only; runtime bytecode matches the GitHub commit exactly.
+      line_ranges:
+      - file: contracts/0.8.25/sr/SRTypes.sol
+        github:
+          start: 115
+          count: 1
+        explorer:
+          start: 115
+          count: 1
