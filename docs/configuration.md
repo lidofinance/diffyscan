@@ -86,13 +86,20 @@ does not use them during verification.
 | Starts with `zksync` | zkSync contract verification API | Not used |
 | `mantle.xyz` or its subdomain | Mantle Etherscan-style API | Not used |
 | `lineascan.build` or its subdomain | Etherscan-style API | Not used |
+| `blockscout.com`, `mode.network`, `swellnetwork.io`, `lisk.com`, `inkonchain.com`, `routescan.io`, `monadvision.com`, `xlayerscan.com`, or a subdomain of one | Blockscout API v2 | Not used |
+| `oklink.com` or its subdomain | OKLink contract verification info, chain by `explorer_chain_id` | Not used |
 | `api.blockscout.com` | Blockscout PRO API v2 | Required |
-| `blockscout.com` or its subdomain | Blockscout API v2 | Not used |
 | Anything else | Etherscan API | Required |
 
 The Etherscan path reads the token from the variable named by
 `explorer_token_env_var`. With `explorer_chain_id` set, requests go to the
 multi-chain `/v2/api` endpoint; without it, to the legacy `/api` endpoint.
+
+OKLink names a chain by its short name: `OKLINK_CHAIN_SHORT_NAMES` in
+[`diffyscan/utils/explorer.py`](../diffyscan/utils/explorer.py) maps
+`explorer_chain_id` to it. OKLink returns no constructor arguments, so the
+bytecode comparison reads them from the creation of the contract (see
+[Bytecode Comparison](bytecode-comparison.md)).
 
 The Token column describes what the request sends. Diffyscan resolves a token
 before selecting the explorer, so the variable named by

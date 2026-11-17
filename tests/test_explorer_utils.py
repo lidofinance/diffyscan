@@ -6,6 +6,7 @@ from diffyscan.utils.custom_exceptions import ExplorerError
 from diffyscan.utils.explorer import _get_contract_from_blockscout
 from diffyscan.utils.explorer import _get_contract_from_etherscan
 from diffyscan.utils.explorer import _get_contract_from_mantle
+from diffyscan.utils.explorer import _get_contract_from_oklink
 from diffyscan.utils.explorer import _get_explorer_fetcher
 
 from diffyscan.utils.explorer import get_contract_from_explorer
@@ -196,6 +197,121 @@ def test_blockscout_reports_invalid_json(monkeypatch):
 )
 def test_explorer_domains_match_on_a_dot_boundary(hostname, fetcher):
     assert _get_explorer_fetcher(hostname)[0] is fetcher
+
+
+def _oklink_response(source_code, **fields):
+    data = {
+        "contractName": "Demo",
+        "sourceCode": source_code,
+        "compilerVersion": "v0.8.25+commit.b61c2a91",
+        "optimization": "1",
+        "optimizationRuns": "200",
+        "evmVersion": "default",
+        "libraryInfo": "",
+        "remappings": ["forge-std/=lib/forge-std/src/"],
+    }
+    data.update(fields)
+    return DummyResponse({"code": "0", "msg": "", "data": [data]})
+
+
+def test_get_contract_from_oklink_builds_solc_input(monkeypatch):
+    urls = []
+    # OKLink returns UTF-8 source decoded as Latin-1.
+    garbled = "// a \u2014 b".encode("utf-8").decode("latin-1")
+    source = json.dumps(
+        {"language": "Solidity", "sources": {"src/Demo.sol": {"content": garbled}}}
+    )
+
+    def fake_fetch(url):
+        urls.append(url)
+        return _oklink_response(source)
+
+    monkeypatch.setattr("diffyscan.utils.explorer.fetch", fake_fetch)
+
+    contract = _get_contract_from_oklink("www.oklink.com", "0xabc", 196)
+
+    assert urls == [
+        "https://www.oklink.com/api/v5/explorer/contract/verify-contract-info"
+        "?chainShortName=XLAYER&contractAddress=0xabc"
+    ]
+    assert contract["name"] == "Demo"
+    assert contract["compiler"] == "v0.8.25+commit.b61c2a91"
+    assert contract["solcInput"]["sources"] == {
+        "src/Demo.sol": {"content": "// a \u2014 b"}
+    }
+    settings = contract["solcInput"]["settings"]
+    assert settings["optimizer"] == {"enabled": True, "runs": 200}
+    assert settings["remappings"] == ["forge-std/=lib/forge-std/src/"]
+    assert "evm_version" not in contract
+    assert "constructor_arguments" not in contract
+
+
+def test_get_contract_from_oklink_reads_a_single_file(monkeypatch):
+    monkeypatch.setattr(
+        "diffyscan.utils.explorer.fetch",
+        lambda url: _oklink_response("contract Demo {}", evmVersion="cancun"),
+    )
+
+    contract = _get_contract_from_oklink("www.oklink.com", "0xabc", 196)
+
+    assert contract["solcInput"]["sources"] == {"Demo": {"content": "contract Demo {}"}}
+    assert contract["evm_version"] == "cancun"
+
+
+@pytest.mark.parametrize(
+    ("payload", "chain_id", "message"),
+    [
+        ({"code": "0", "msg": "", "data": []}, 196, "not verified"),
+        ({"code": "50038", "msg": "No chain", "data": []}, 196, "No chain"),
+        ({"code": "0", "msg": "", "data": []}, 1, "short name"),
+        ({"code": "0", "msg": "", "data": [{"contractName": "Demo"}]}, 196, "Invalid"),
+    ],
+)
+def test_get_contract_from_oklink_rejects_bad_responses(
+    monkeypatch, payload, chain_id, message
+):
+    monkeypatch.setattr(
+        "diffyscan.utils.explorer.fetch", lambda url: DummyResponse(payload)
+    )
+
+    with pytest.raises(ExplorerError, match=message):
+        _get_contract_from_oklink("www.oklink.com", "0xabc", chain_id)
+
+
+def test_oklink_dispatch_passes_the_chain_id(monkeypatch):
+    calls = []
+    monkeypatch.setattr(
+        "diffyscan.utils.explorer._get_contract_from_oklink",
+        lambda hostname, address, chain_id: calls.append((hostname, address, chain_id)),
+    )
+
+    fetcher, requires_token = _get_explorer_fetcher("www.oklink.com")
+    fetcher("token", "www.oklink.com", "0xabc", 196)
+
+    assert requires_token is True
+    assert calls == [("www.oklink.com", "0xabc", 196)]
+    assert _get_explorer_fetcher("eviloklink.com")[0] is _get_contract_from_etherscan
+
+
+def test_get_contract_from_oklink_keeps_submitted_settings(monkeypatch):
+    source = json.dumps(
+        {
+            "language": "Solidity",
+            "sources": {"src/Demo.sol": {"content": "contract Demo {}"}},
+            "settings": {"viaIR": True, "optimizer": {"enabled": True, "runs": 1}},
+        }
+    )
+    monkeypatch.setattr(
+        "diffyscan.utils.explorer.fetch", lambda url: _oklink_response(source)
+    )
+
+    settings = _get_contract_from_oklink("www.oklink.com", "0xabc", 196)["solcInput"][
+        "settings"
+    ]
+
+    assert settings["viaIR"] is True
+    assert settings["optimizer"] == {"enabled": True, "runs": 1}
+    assert settings["remappings"] == ["forge-std/=lib/forge-std/src/"]
 
 
 def test_blockscout_pro_puts_chain_id_in_path_and_sends_api_key(monkeypatch):

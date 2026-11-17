@@ -32,6 +32,10 @@ Invalid JSON and non-object responses raise `ExplorerError`. Required `name`, `f
 
 Test null/non-object payloads, missing or invalid required fields, malformed additional sources/settings, multiple source files and relevant metadata. `constructor_args` being absent and being empty are different cases.
 
+## OKLink
+
+`verify-contract-info?chainShortName=<name>&contractAddress=<addr>` needs no key; `OKLINK_CHAIN_SHORT_NAMES` maps `explorer_chain_id` to the short name. `data` is empty for an unverified address. `sourceCode` is standard JSON (`language`, `sources`, sometimes `settings`) or one file. The text comes back as UTF-8 decoded as Latin-1; the adapter decodes it back. Compiler settings come from `optimization`, `optimizationRuns`, `evmVersion` (`default` means the compiler default), `remappings` and `libraryInfo`; submitted `settings` win over them. There is no constructor-arguments field, so the bytecode step uses the creation trace. Fast requests get HTTP 429 (code 50011), which `fetch` retries.
+
 ## Mantle and zkSync
 
 Mantle reads Etherscan-style `result[0]`, but the primary source path is `FileName`; `AdditionalSources` entries use `Filename` and `SourceCode`. Preserve this capitalization distinction in fixtures.

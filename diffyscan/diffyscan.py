@@ -49,6 +49,7 @@ from .utils.logger import logger
 from .utils.node_handler import (
     get_bytecode_from_node,
     get_chain_id,
+    get_constructor_arguments_from_creation,
     simulate_deployment,
 )
 
@@ -236,6 +237,9 @@ def run_bytecode_diff(
         target_compiled_contract,
         config.get("bytecode_comparison"),
         explorer_constructor_arguments,
+        lambda: get_constructor_arguments_from_creation(
+            contract_address_from_config, contract_creation_code, remote_rpc_url
+        ),
     )
     deployment_call_data = _append_calldata(contract_creation_code, calldata)
     deployment_from = _get_deployment_from(
