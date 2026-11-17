@@ -29,7 +29,7 @@ Read [bytecode comparison](../../../docs/bytecode-comparison.md) before adding m
 
 For proxies, distinguish proxy and implementation addresses and confirm requested scope from deployment records and on-chain state. Obtain missing calldata from the creation trace and exact creation-bytecode boundary, then ABI-decode it. An address substring is not a reliable boundary; matching addresses across chains alone do not establish identical calldata.
 
-If constructor metadata is missing, follow [calldata recovery](../debug-diff/references/diagnostic-recipes.md#missing-or-empty-constructor-calldata) before writing an override.
+If the explorer returns no constructor-arguments field, `get_calldata` reads the arguments from the creation trace; the RPC needs archive state and `debug_traceBlockByNumber`. If that fails, or the explorer returns an empty value, follow [calldata recovery](../debug-diff/references/diagnostic-recipes.md#missing-or-empty-constructor-calldata) before writing an override.
 
 ## 3. Verify and hand off
 

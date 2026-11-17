@@ -1,6 +1,8 @@
+from collections.abc import Callable
+
 from .logger import logger
 from .encoder import encode_constructor_arguments
-from .custom_exceptions import CalldataError
+from .custom_exceptions import CalldataError, NodeError
 
 
 def get_calldata(
@@ -8,8 +10,9 @@ def get_calldata(
     target_compiled_contract: dict,
     binary_config: dict | None = None,
     explorer_constructor_arguments: str | None = None,
+    creation_constructor_arguments: Callable[[], str] | None = None,
 ) -> str | None:
-    """Get constructor calldata from config, explorer metadata, or ABI encoding."""
+    """Get constructor calldata from config, explorer metadata, or the creation."""
     constructor_abi = _get_constructor_abi(target_compiled_contract)
     if constructor_abi is None:
         logger.info("No constructor in ABI, calldata calculation skipped")
@@ -49,11 +52,26 @@ def get_calldata(
         return calldata
 
     if explorer_constructor_arguments is not None:
-        logger.info("Using constructor calldata from explorer metadata")
         normalized = normalize_calldata(explorer_constructor_arguments)
+        if normalized:
+            logger.info("Using constructor calldata from explorer metadata")
+            return normalized
+
+    if creation_constructor_arguments is not None:
+        logger.info("Using constructor calldata from the creation trace")
+        try:
+            traced = creation_constructor_arguments()
+        except NodeError as exc:
+            raise CalldataError(
+                f"No constructor calldata for {contract_address} in config or "
+                f"explorer metadata, and the creation trace failed: {exc}. Set "
+                "constructor_args, or use an RPC with archive state and "
+                "debug_traceBlockByNumber"
+            ) from exc
+        normalized = normalize_calldata(traced)
         if not normalized:
             raise CalldataError(
-                f"Explorer metadata has empty constructor calldata for {contract_address}"
+                f"Creation trace has empty constructor calldata for {contract_address}"
             )
         return normalized
 
