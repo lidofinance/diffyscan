@@ -1,0 +1,31 @@
+# SyncRedeemQueue implementation — X Layer deployment
+# https://docs.mellow.finance/core-vaults/core-deployments#x-layer-implementations-and-factories
+# Implementation 2 of the RedeemQueueFactory 0xe08dc488bD6756323F8bf478869529D03db627ef.
+# It has its own config because its source is not in the commit of earn-core-xlayer.yaml.
+
+contracts:
+  "0x0000000038801C7281284f8F68B80B679F64a074": SyncRedeemQueue
+
+rpc_url_env_var: XLAYER_RPC_URL
+explorer_hostname: www.oklink.com
+explorer_chain_id: 196
+explorer_token_env_var: ETHERSCAN_EXPLORER_TOKEN
+
+github_repo:
+  url: https://github.com/mellow-finance/flexible-vaults
+  # Audit, scope src/queues/SyncRedeemQueue.sol at 69bbaf17:
+  # https://github.com/lidofinance/audits/blob/main/earn/2026-07-15_MixBytes_Mellow-SyncRedeemQueue.pdf
+  commit: 69bbaf17530dc5127ecf9049cceaab141f516a1e
+  relative_root: ""
+
+dependencies:
+  lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts:
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts
+    commit: e4f70216d759d8e6a64144a9e1f7bbeed78e7079
+    relative_root: contracts
+    # version 5.3.0
+  lib/openzeppelin-contracts-upgradeable/contracts:
+    url: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable
+    commit: 60b305a8f3ff0c7688f02ac470417b6bbf1c4d27
+    relative_root: contracts
+    # version 5.3.0
