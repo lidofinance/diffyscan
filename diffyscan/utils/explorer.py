@@ -295,8 +295,12 @@ def _get_contract_from_mantle(mantle_explorer_hostname: str, contract: str) -> d
     )
 
 
-def _get_contract_from_blockscout(explorer_hostname: str, contract: str) -> dict:
+def _get_contract_from_blockscout(
+    explorer_hostname: str, contract: str, api_key: str | None = None
+) -> dict:
     explorer_link = f"https://{explorer_hostname}/api/v2/smart-contracts/{contract}"
+    if api_key:
+        explorer_link = f"{explorer_link}?apikey={api_key}"
     try:
         response = fetch(explorer_link).json()
     except ValueError:
@@ -717,13 +721,25 @@ def _in_domain(explorer_hostname: str, domain: str) -> bool:
     return explorer_hostname == domain or explorer_hostname.endswith("." + domain)
 
 
+def _get_contract_from_blockscout_pro(
+    token: str | None, explorer_hostname: str, contract: str, chain_id: int | None
+) -> dict:
+    if chain_id is None:
+        raise ExplorerError(f"{explorer_hostname} needs explorer_chain_id")
+    return _get_contract_from_blockscout(
+        f"{explorer_hostname}/{chain_id}", contract, token
+    )
+
+
 def _get_explorer_fetcher(explorer_hostname: str) -> tuple:
     """
     Determine which fetcher function to use based on the explorer hostname.
 
     Returns a tuple of (fetcher_function, requires_token)
     """
-    if explorer_hostname.startswith("zksync"):
+    if explorer_hostname == "api.blockscout.com":
+        return _get_contract_from_blockscout_pro, True
+    elif explorer_hostname.startswith("zksync"):
         return _get_contract_from_zksync, False
     elif _in_domain(explorer_hostname, "mantle.xyz"):
         return _get_contract_from_mantle, False
@@ -741,19 +757,7 @@ def _get_explorer_fetcher(explorer_hostname: str) -> tuple:
             ),
             False,
         )
-    elif any(
-        _in_domain(explorer_hostname, domain)
-        for domain in [
-            "mode.network",
-            "blockscout.com",
-            "swellnetwork.io",
-            "lisk.com",
-            "inkonchain.com",
-            "routescan.io",
-            "monadvision.com",
-            "xlayerscan.com",
-        ]
-    ):
+    elif _in_domain(explorer_hostname, "blockscout.com"):
         return _get_contract_from_blockscout, False
     else:
         # Default to Etherscan-compatible

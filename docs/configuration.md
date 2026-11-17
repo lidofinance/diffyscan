@@ -88,6 +88,7 @@ does not use them during verification.
 | `lineascan.build` or its subdomain | Etherscan-style API | Not used |
 | `blockscout.com`, `mode.network`, `swellnetwork.io`, `lisk.com`, `inkonchain.com`, `routescan.io`, `monadvision.com`, `xlayerscan.com`, or a subdomain of one | Blockscout API v2 | Not used |
 | `oklink.com` or its subdomain | OKLink contract verification info, chain by `explorer_chain_id` | Not used |
+| `api.blockscout.com` | Blockscout PRO API v2 | Required |
 | Anything else | Etherscan API | Required |
 
 The Etherscan path reads the token from the variable named by
@@ -111,10 +112,17 @@ other domain falls into the Etherscan path instead of the Blockscout v2 path.
 Depending on the host and `explorer_chain_id`, the request may fail or an
 Etherscan-compatible endpoint may return only the primary source under the
 contract name while omitting additional sources. The latter case fails later
-with missing-GitHub-source or compilation errors. Extend
+with missing-GitHub-source or compilation errors. For such a chain, use
+`api.blockscout.com` with `explorer_chain_id`.
+
+A config with `explorer_hostname: api.blockscout.com` must set
+`explorer_chain_id` and `explorer_token_env_var`; Diffyscan does not send the
+Etherscan key to it. The PRO API does not serve each chain. On 2026-11-16 it
+answered `Network not supported` for X Layer (196), Monad (143) and Swell
+(1923), and HTTP 402 (paid plan) for Base (8453). For such a chain, extend
 `_get_explorer_fetcher` in
-[`diffyscan/utils/explorer.py`](../diffyscan/utils/explorer.py) to add a
-domain.
+[`diffyscan/utils/explorer.py`](../diffyscan/utils/explorer.py) with the
+domain of its Blockscout instance or with another adapter.
 
 ## HTTP requests and explorer failures
 

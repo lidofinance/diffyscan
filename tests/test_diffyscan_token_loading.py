@@ -94,3 +94,14 @@ def test_load_explorer_token_uses_canonical_fallback_when_config_omits_env_var(
         'Config missing "explorer_token_env_var"; falling back to ETHERSCAN_EXPLORER_TOKEN',
     ) in warnings
     assert errors == []
+
+
+def test_load_explorer_token_does_not_send_etherscan_key_to_blockscout_pro(
+    monkeypatch,
+):
+    monkeypatch.setenv("ETHERSCAN_EXPLORER_TOKEN", "etherscan-token")
+
+    with pytest.raises(ValueError, match="explorer_token_env_var"):
+        diffyscan_module._load_explorer_token(
+            {"explorer_hostname": "api.blockscout.com"}
+        )
