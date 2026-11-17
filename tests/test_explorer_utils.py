@@ -312,8 +312,8 @@ def test_get_contract_from_oklink_keeps_submitted_settings(monkeypatch):
     assert settings["viaIR"] is True
     assert settings["optimizer"] == {"enabled": True, "runs": 1}
     assert settings["remappings"] == ["forge-std/=lib/forge-std/src/"]
-    
-    
+
+
 def test_blockscout_pro_puts_chain_id_in_path_and_sends_api_key(monkeypatch):
     urls = []
 
