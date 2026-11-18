@@ -56,7 +56,29 @@ jobs:
           rm -rf "${DEVCONTAINER_BUILD_CACHE_DIR}"
           mv "${DEVCONTAINER_BUILD_CACHE_DIR}-new" "${DEVCONTAINER_BUILD_CACHE_DIR}"
 
-      - name: Run regression in devcontainer
+      - name: Run tests and lint in devcontainer
+        run: |
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            --volume "${GITHUB_WORKSPACE}:/workspaces/diffyscan" \
+            --workdir /workspaces/diffyscan \
+            --env HOME=/tmp/diffyscan-home \
+            --env UV_LINK_MODE=copy \
+            --env XDG_CACHE_HOME=/tmp/diffyscan-home/.cache \
+            "${DEVCONTAINER_IMAGE}" \
+            bash -lc '
+              set -euo pipefail
+              mkdir -p "$HOME" "$XDG_CACHE_HOME"
+              uv sync --locked --group dev
+              uv run pytest -q
+              uv run mypy
+              uv run pre-commit run --all-files
+            '
+
+      # Dependabot pushes cannot access the Actions secrets needed by live checks.
+      # Ordinary pushes and workflow_dispatch still run the full regression.
+      - name: Run live regression in devcontainer
+        if: github.actor != 'dependabot[bot]'
         env:
           DIFFYSCAN_CONFIG: ${{ matrix.config }}
         run: |
@@ -76,8 +98,5 @@ jobs:
               set -euo pipefail
               mkdir -p "$HOME" "$XDG_CACHE_HOME"
               uv sync --locked --group dev
-              uv run pytest -q
-              uv run mypy
-              uv run pre-commit run --all-files
               uv run diffyscan -Y -E -G "$DIFFYSCAN_CONFIG"
             '
