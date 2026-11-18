@@ -159,6 +159,17 @@ def test_cloudflare_challenge_error_gives_hint_instead_of_html(monkeypatch):
     assert "Just a moment" not in message
 
 
+def test_fetch_returns_an_expected_error_status_to_the_caller(monkeypatch):
+    not_found = FailingResponse({}, '{"match": null}', status_code=404)
+    monkeypatch.setattr(
+        f"{HTTP_CLIENT_MODULE}.requests.get", lambda url, headers=None: not_found
+    )
+
+    assert fetch("https://example.com/api", expected_statuses=(404,)) is not_found
+    with pytest.raises(Exception, match="HTTP error"):
+        fetch("https://example.com/api", expected_statuses=(400,))
+
+
 def test_plain_http_error_still_includes_response_body(monkeypatch):
     message = _fetch_error_message(monkeypatch, FailingResponse({}, "rate limited"))
 

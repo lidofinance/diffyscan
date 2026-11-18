@@ -144,7 +144,9 @@ def _handle_request_errors(error_class: type[BaseException]):
         def wrapper(url: str, *args, **kwargs) -> requests.Response:
             try:
                 response: requests.Response = func(url, *args, **kwargs)
-                response.raise_for_status()
+                expected = kwargs.get("expected_statuses")
+                if not expected or response.status_code not in expected:
+                    response.raise_for_status()
                 return response
             except requests.exceptions.HTTPError as exc:
                 body = ""
@@ -175,8 +177,17 @@ def _handle_request_errors(error_class: type[BaseException]):
 
 
 @_handle_request_errors(ExplorerError)
-def fetch(url: str, headers: dict | None = None) -> requests.Response:
-    """Fetch data from a URL with error handling."""
+def fetch(
+    url: str,
+    headers: dict | None = None,
+    *,
+    expected_statuses: tuple[int, ...] = (),
+) -> requests.Response:
+    """Fetch data from a URL with error handling.
+
+    An answer with one of `expected_statuses` goes back to the caller, also when
+    the status is an error: some services put a meaningful body into a 404.
+    """
     logger.log(f"Fetch: {mask_text(url)}")
     waited = 0.0
     for attempt in range(MAX_RATE_LIMIT_RETRIES + 1):

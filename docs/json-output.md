@@ -60,7 +60,7 @@ and configs not reached after an abort are absent. Unavailable chain IDs are omi
 | Key | Present when | Meaning |
 | --- | --- | --- |
 | `remote_chain_id` | bytecode comparison is enabled and the RPC answered `eth_chainId` | Chain ID returned by the RPC endpoint in `rpc_url_env_var`. Compare it with the config's target chain before using the report as deployment evidence. Comparison results are in `contracts[]`. |
-| `explorer_chain_id` | the config sets `explorer_chain_id` | Value of the config's `explorer_chain_id`. The Etherscan v2 API receives it as `chainid`; other explorers select the chain by hostname. |
+| `explorer_chain_id` | the config sets `explorer_chain_id` | Value of the config's `explorer_chain_id`. Etherscan v2, Blockscout PRO, OKLink and Sourcify select the chain by it; other explorers select the chain by hostname. |
 
 ## `contracts[]`
 
