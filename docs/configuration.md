@@ -88,6 +88,7 @@ does not use them during verification.
 | `lineascan.build` or its subdomain | Etherscan-style API | Not used |
 | `blockscout.com`, `mode.network`, `swellnetwork.io`, `lisk.com`, `inkonchain.com`, `routescan.io`, `monadvision.com`, `xlayerscan.com`, or a subdomain of one | Blockscout API v2 | Not used |
 | `oklink.com` or its subdomain | OKLink contract verification info, chain by `explorer_chain_id` | Not used |
+| `sourcify.dev` or its subdomain | Sourcify API v2, chain by `explorer_chain_id` | Not used |
 | `api.blockscout.com` | Blockscout PRO API v2 | Required |
 | Anything else | Etherscan API | Required |
 
@@ -100,6 +101,13 @@ OKLink names a chain by its short name: `OKLINK_CHAIN_SHORT_NAMES` in
 `explorer_chain_id` to it. OKLink returns no constructor arguments, so the
 bytecode comparison reads them from the creation of the contract (see
 [Bytecode Comparison](bytecode-comparison.md)).
+
+Sourcify needs `explorer_chain_id`. Use it for a chain that Etherscan does not
+serve; the [Sourcify chain list](https://sourcify.dev/server/chains) names the
+chains. The adapter reads the standard JSON input of the verified contract with
+its settings. Sourcify gives the constructor arguments only when it matched the
+creation bytecode; without them the bytecode comparison reads them from the
+creation of the contract.
 
 The Token column describes what the request sends. Diffyscan resolves a token
 before selecting the explorer, so the variable named by

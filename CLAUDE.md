@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What is Diffyscan
 
 Diffyscan verifies deployed EVM smart contracts match their GitHub source by:
-1. Fetching verified source from blockchain explorers (Etherscan, Blockscout, zkSync, Mantle, OKLink)
+1. Fetching verified source from blockchain explorers (Etherscan, Blockscout, zkSync, Mantle, OKLink, Sourcify)
 2. Diffing against GitHub repo sources (HTML diff reports saved under `digest/<timestamp>/diffs/`)
 3. Optionally recompiling from GitHub and comparing bytecode against on-chain bytecode, handling constructor args, libraries, and immutable references
 

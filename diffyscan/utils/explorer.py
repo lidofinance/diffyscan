@@ -468,6 +468,72 @@ def _get_contract_from_oklink(
     )
 
 
+# The fields that the Sourcify adapter reads; the full record also holds the bytecode.
+SOURCIFY_FIELDS = "compilation,stdJsonInput,creationBytecode.transformationValues"
+
+
+def _get_contract_from_sourcify(
+    explorer_hostname: str, contract: str, chain_id: int | None
+) -> dict:
+    if chain_id is None:
+        raise ExplorerError("Sourcify needs explorer_chain_id")
+    explorer_link = (
+        f"https://{explorer_hostname}/server/v2/contract/{chain_id}/{contract}"
+        f"?fields={SOURCIFY_FIELDS}"
+    )
+    try:
+        response = fetch(explorer_link).json()
+    except ValueError:
+        raise ExplorerError(f"Invalid Sourcify JSON for {contract}") from None
+
+    if not isinstance(response, dict):
+        raise ExplorerError(f"Unexpected Sourcify response for {contract}")
+    if "match" not in response:
+        raise ExplorerError(f'Received bad response: {response.get("message")}')
+    # Sourcify answers `match: null` for an address without verified source.
+    if not response["match"]:
+        _raise_unverified_source(contract)
+
+    compilation = response.get("compilation")
+    standard_json = response.get("stdJsonInput")
+    if not isinstance(compilation, dict) or not isinstance(standard_json, dict):
+        raise ExplorerError(f"Unexpected Sourcify response for {contract}")
+    for field in ("name", "compilerVersion"):
+        if not isinstance(compilation.get(field), str) or not compilation[field]:
+            raise ExplorerError(f"Invalid Sourcify {field} for {contract}")
+    if compilation.get("language") != "Solidity":
+        raise ExplorerError(
+            f'Sourcify source of {contract} is {compilation.get("language")}, not Solidity'
+        )
+
+    source_files = standard_json.get("sources")
+    settings = standard_json.get("settings") or {}
+    if (
+        not isinstance(source_files, dict)
+        or not source_files
+        or not isinstance(settings, dict)
+    ):
+        raise ExplorerError(f"Invalid Sourcify stdJsonInput for {contract}")
+
+    # Present only when Sourcify also matched the creation bytecode.
+    creation = response.get("creationBytecode") or {}
+    values = (
+        creation.get("transformationValues") if isinstance(creation, dict) else None
+    )
+    constructor_arguments = (
+        values.get("constructorArguments") if isinstance(values, dict) else None
+    )
+    return _build_contract_payload(
+        compilation["name"],
+        # The other explorers give the version with a leading "v".
+        "v" + compilation["compilerVersion"].removeprefix("v"),
+        _build_solc_input(
+            source_files, optimizer_enabled=False, optimizer_runs=0, settings=settings
+        ),
+        constructor_arguments=constructor_arguments,
+    )
+
+
 def _attach_contract_metadata(
     contract: dict,
     source_files: dict,
@@ -746,6 +812,13 @@ def _get_explorer_fetcher(explorer_hostname: str) -> tuple:
     elif _in_domain(explorer_hostname, "oklink.com"):
         return (
             lambda token, hostname, address, chain_id=None: _get_contract_from_oklink(
+                hostname, address, chain_id
+            ),
+            True,
+        )
+    elif _in_domain(explorer_hostname, "sourcify.dev"):
+        return (
+            lambda token, hostname, address, chain_id=None: _get_contract_from_sourcify(
                 hostname, address, chain_id
             ),
             True,
