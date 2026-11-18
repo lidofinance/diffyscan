@@ -7,6 +7,7 @@ from diffyscan.utils.explorer import _get_contract_from_blockscout
 from diffyscan.utils.explorer import _get_contract_from_etherscan
 from diffyscan.utils.explorer import _get_contract_from_mantle
 from diffyscan.utils.explorer import _get_contract_from_oklink
+from diffyscan.utils.explorer import _get_contract_from_sourcify
 from diffyscan.utils.explorer import _get_explorer_fetcher
 
 from diffyscan.utils.explorer import get_contract_from_explorer
@@ -343,3 +344,146 @@ def test_blockscout_pro_requires_chain_id(monkeypatch):
     fetcher, _ = _get_explorer_fetcher("api.blockscout.com")
     with pytest.raises(ExplorerError, match="needs explorer_chain_id"):
         fetcher("key", "api.blockscout.com", "0xabc", None)
+
+
+def _sourcify_response(**fields):
+    payload = {
+        "match": "exact_match",
+        "creationMatch": "exact_match",
+        "runtimeMatch": "exact_match",
+        "chainId": "1672",
+        "address": "0xabc",
+        "compilation": {
+            "language": "Solidity",
+            "compiler": "solc",
+            "compilerVersion": "0.8.33+commit.64118f21",
+            "name": "Demo",
+            "fullyQualifiedName": "src/Demo.sol:Demo",
+        },
+        "stdJsonInput": {
+            "language": "Solidity",
+            "sources": {"src/Demo.sol": {"content": "contract Demo {}"}},
+            "settings": {
+                "viaIR": True,
+                "optimizer": {"enabled": True, "runs": 200},
+                "evmVersion": "prague",
+                "remappings": ["forge-std/=lib/forge-std/src/"],
+            },
+        },
+        "creationBytecode": {
+            "transformationValues": {"constructorArguments": "0x" + "00" * 31 + "2a"}
+        },
+    }
+    payload.update(fields)
+    return DummyResponse(payload)
+
+
+def test_get_contract_from_sourcify_builds_solc_input(monkeypatch):
+    urls = []
+
+    def fake_fetch(url):
+        urls.append(url)
+        return _sourcify_response()
+
+    monkeypatch.setattr("diffyscan.utils.explorer.fetch", fake_fetch)
+
+    contract = _get_contract_from_sourcify("sourcify.dev", "0xabc", 1672)
+
+    assert urls == [
+        "https://sourcify.dev/server/v2/contract/1672/0xabc"
+        "?fields=compilation,stdJsonInput,creationBytecode.transformationValues"
+    ]
+    assert contract["name"] == "Demo"
+    assert contract["compiler"] == "v0.8.33+commit.64118f21"
+    assert contract["solcInput"]["sources"] == {
+        "src/Demo.sol": {"content": "contract Demo {}"}
+    }
+    settings = contract["solcInput"]["settings"]
+    assert settings["viaIR"] is True
+    assert settings["optimizer"] == {"enabled": True, "runs": 200}
+    assert settings["remappings"] == ["forge-std/=lib/forge-std/src/"]
+    assert "evm.deployedBytecode" in settings["outputSelection"]["*"]["*"]
+    assert contract["evm_version"] == "prague"
+    assert contract["constructor_arguments"] == "00" * 31 + "2a"
+
+
+def test_get_contract_from_sourcify_reads_a_runtime_only_match(monkeypatch):
+    monkeypatch.setattr(
+        "diffyscan.utils.explorer.fetch",
+        lambda url: _sourcify_response(
+            match="match", creationMatch=None, creationBytecode=None
+        ),
+    )
+
+    contract = _get_contract_from_sourcify("sourcify.dev", "0xabc", 1672)
+
+    assert contract["name"] == "Demo"
+    assert "constructor_arguments" not in contract
+
+
+@pytest.mark.parametrize(
+    ("payload", "chain_id", "message"),
+    [
+        ({"match": None, "chainId": "1672", "address": "0xabc"}, 1672, "not verified"),
+        (
+            {"customCode": "unsupported_chain", "message": "Chain 5 not found"},
+            5,
+            "Chain 5 not found",
+        ),
+        ({"match": "exact_match"}, None, "explorer_chain_id"),
+        (["not", "an", "object"], 1672, "Unexpected Sourcify response"),
+        ({"match": "exact_match", "compilation": {}}, 1672, "Unexpected Sourcify"),
+    ],
+)
+def test_get_contract_from_sourcify_rejects_bad_responses(
+    monkeypatch, payload, chain_id, message
+):
+    monkeypatch.setattr(
+        "diffyscan.utils.explorer.fetch", lambda url: DummyResponse(payload)
+    )
+
+    with pytest.raises(ExplorerError, match=message):
+        _get_contract_from_sourcify("sourcify.dev", "0xabc", chain_id)
+
+
+@pytest.mark.parametrize(
+    ("fields", "message"),
+    [
+        ({"compilation": {"language": "Solidity", "name": "Demo"}}, "compilerVersion"),
+        (
+            {
+                "compilation": {
+                    "language": "Vyper",
+                    "name": "Demo",
+                    "compilerVersion": "0.4.3+commit.bff19ea2",
+                }
+            },
+            "not Solidity",
+        ),
+        ({"stdJsonInput": {"language": "Solidity", "sources": {}}}, "stdJsonInput"),
+    ],
+)
+def test_get_contract_from_sourcify_rejects_invalid_fields(
+    monkeypatch, fields, message
+):
+    monkeypatch.setattr(
+        "diffyscan.utils.explorer.fetch", lambda url: _sourcify_response(**fields)
+    )
+
+    with pytest.raises(ExplorerError, match=message):
+        _get_contract_from_sourcify("sourcify.dev", "0xabc", 1672)
+
+
+def test_sourcify_dispatch_passes_the_chain_id(monkeypatch):
+    calls = []
+    monkeypatch.setattr(
+        "diffyscan.utils.explorer._get_contract_from_sourcify",
+        lambda hostname, address, chain_id: calls.append((hostname, address, chain_id)),
+    )
+
+    fetcher, requires_token = _get_explorer_fetcher("sourcify.dev")
+    fetcher("token", "sourcify.dev", "0xabc", 1672)
+
+    assert requires_token is True
+    assert calls == [("sourcify.dev", "0xabc", 1672)]
+    assert _get_explorer_fetcher("evilsourcify.dev")[0] is _get_contract_from_etherscan
