@@ -63,18 +63,20 @@ def _build_source_files(
 def _build_solc_input(
     source_files: dict[str, dict[str, str]],
     *,
-    optimizer_enabled: bool,
-    optimizer_runs: int | str,
+    optimizer_enabled: bool | None,
+    optimizer_runs: int | str = 0,
     settings: dict | None = None,
 ) -> dict:
+    """`optimizer_enabled=None`: the settings are complete, add no optimizer block."""
     solc_settings = copy.deepcopy(settings or {})
-    solc_settings.setdefault(
-        "optimizer",
-        {
-            "enabled": optimizer_enabled,
-            "runs": int(optimizer_runs or 0),
-        },
-    )
+    if optimizer_enabled is not None:
+        solc_settings.setdefault(
+            "optimizer",
+            {
+                "enabled": optimizer_enabled,
+                "runs": int(optimizer_runs or 0),
+            },
+        )
     solc_settings["outputSelection"] = _default_output_selection()
     return {
         "language": "Solidity",
@@ -470,6 +472,8 @@ def _get_contract_from_oklink(
 
 # The fields that the Sourcify adapter reads; the full record also holds the bytecode.
 SOURCIFY_FIELDS = "compilation,stdJsonInput,creationBytecode.transformationValues"
+# `match`: the bytecode is equal except the metadata hash. `exact_match`: also the hash.
+SOURCIFY_MATCHES = ("match", "exact_match")
 
 
 def _get_contract_from_sourcify(
@@ -482,7 +486,9 @@ def _get_contract_from_sourcify(
         f"?fields={SOURCIFY_FIELDS}"
     )
     try:
-        response = fetch(explorer_link).json()
+        # Sourcify answers 404 for an address without verified source and 400 for
+        # a chain that it does not have; the body says which.
+        response = fetch(explorer_link, expected_statuses=(400, 404)).json()
     except ValueError:
         raise ExplorerError(f"Invalid Sourcify JSON for {contract}") from None
 
@@ -490,9 +496,17 @@ def _get_contract_from_sourcify(
         raise ExplorerError(f"Unexpected Sourcify response for {contract}")
     if "match" not in response:
         raise ExplorerError(f'Received bad response: {response.get("message")}')
-    # Sourcify answers `match: null` for an address without verified source.
-    if not response["match"]:
+    if response["match"] is None:
         _raise_unverified_source(contract)
+    if response["match"] not in SOURCIFY_MATCHES:
+        raise ExplorerError(
+            f'Unexpected Sourcify match {response["match"]!r} for {contract}'
+        )
+    logger.info(
+        "Sourcify match",
+        f'{response["match"]} (creation: {response.get("creationMatch")}, '
+        f'runtime: {response.get("runtimeMatch")})',
+    )
 
     compilation = response.get("compilation")
     standard_json = response.get("stdJsonInput")
@@ -507,13 +521,18 @@ def _get_contract_from_sourcify(
         )
 
     source_files = standard_json.get("sources")
-    settings = standard_json.get("settings") or {}
     if (
         not isinstance(source_files, dict)
         or not source_files
-        or not isinstance(settings, dict)
+        or any(
+            not isinstance(entry, dict) or not isinstance(entry.get("content"), str)
+            for entry in source_files.values()
+        )
     ):
-        raise ExplorerError(f"Invalid Sourcify stdJsonInput for {contract}")
+        raise ExplorerError(f"Invalid Sourcify sources for {contract}")
+    settings = standard_json.get("settings")
+    if settings is not None and not isinstance(settings, dict):
+        raise ExplorerError(f"Invalid Sourcify settings for {contract}")
 
     # Present only when Sourcify also matched the creation bytecode.
     creation = response.get("creationBytecode") or {}
@@ -527,9 +546,9 @@ def _get_contract_from_sourcify(
         compilation["name"],
         # The other explorers give the version with a leading "v".
         "v" + compilation["compilerVersion"].removeprefix("v"),
-        _build_solc_input(
-            source_files, optimizer_enabled=False, optimizer_runs=0, settings=settings
-        ),
+        # The submitted settings are complete: an added optimizer block changes
+        # the metadata hash of the compiled bytecode.
+        _build_solc_input(source_files, optimizer_enabled=None, settings=settings),
         constructor_arguments=constructor_arguments,
     )
 

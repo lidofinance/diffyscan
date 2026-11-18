@@ -110,6 +110,10 @@ If deployment simulation fails with `Invalid params`, or Diffyscan reports
 `unlinked libraries`, check that every library address is present and keyed by
 the file that defines the library.
 
+If deployment simulation fails with `eth_call returned empty runtime bytecode`,
+the RPC answered `0x` to a contract-creation `eth_call`. Pharos (1672) does so,
+and the comparison of a contract with immutables cannot run there.
+
 ## Allowed differences
 
 `allowed_diffs` records expected differences without accepting unrelated drift.

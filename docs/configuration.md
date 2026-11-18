@@ -86,7 +86,7 @@ does not use them during verification.
 | Starts with `zksync` | zkSync contract verification API | Not used |
 | `mantle.xyz` or its subdomain | Mantle Etherscan-style API | Not used |
 | `lineascan.build` or its subdomain | Etherscan-style API | Not used |
-| `blockscout.com`, `mode.network`, `swellnetwork.io`, `lisk.com`, `inkonchain.com`, `routescan.io`, `monadvision.com`, `xlayerscan.com`, or a subdomain of one | Blockscout API v2 | Not used |
+| `blockscout.com` or its subdomain | Blockscout API v2 | Not used |
 | `oklink.com` or its subdomain | OKLink contract verification info, chain by `explorer_chain_id` | Not used |
 | `sourcify.dev` or its subdomain | Sourcify API v2, chain by `explorer_chain_id` | Not used |
 | `api.blockscout.com` | Blockscout PRO API v2 | Required |
@@ -103,11 +103,24 @@ bytecode comparison reads them from the creation of the contract (see
 [Bytecode Comparison](bytecode-comparison.md)).
 
 Sourcify needs `explorer_chain_id`. Use it for a chain that Etherscan does not
-serve; the [Sourcify chain list](https://sourcify.dev/server/chains) names the
-chains. The adapter reads the standard JSON input of the verified contract with
-its settings. Sourcify gives the constructor arguments only when it matched the
-creation bytecode; without them the bytecode comparison reads them from the
-creation of the contract.
+serve; the [Sourcify chain list](https://sourcify.dev/server/chains) marks the
+chains that it serves with `supported: true`. The adapter reads the standard
+JSON input of the verified contract with its settings, for Solidity contracts
+only. It accepts an exact match and a partial match, in which the bytecode is
+equal except the metadata hash, and logs the match level. Sourcify gives the
+constructor arguments only when it matched the creation bytecode; without them
+the bytecode comparison reads them from the creation of the contract (see
+[Bytecode Comparison](bytecode-comparison.md)). The adapter reads library
+addresses from the submitted settings only: a contract whose libraries were
+linked after the compilation needs `bytecode_comparison.libraries`. A subdomain
+such as `staging.sourcify.dev` is a separate Sourcify instance with its own
+data.
+
+A source from Sourcify does not make the bytecode comparison possible on each
+chain. For a contract with immutables the comparison simulates the deployment
+with `eth_call`. Pharos (1672) answers `0x` to a contract-creation `eth_call`
+(`rpc.pharos.xyz` and `pharos.drpc.org`, November 2026), and the comparison
+ends with `eth_call returned empty runtime bytecode`.
 
 The Token column describes what the request sends. Diffyscan resolves a token
 before selecting the explorer, so the variable named by

@@ -1,6 +1,7 @@
 import json
 
 import pytest
+import requests
 
 from diffyscan.utils.custom_exceptions import ExplorerError
 from diffyscan.utils.explorer import _get_contract_from_blockscout
@@ -346,7 +347,44 @@ def test_blockscout_pro_requires_chain_id(monkeypatch):
         fetcher("key", "api.blockscout.com", "0xabc", None)
 
 
-def _sourcify_response(**fields):
+class SourcifyHTTPResponse:
+    """An answer as `requests.get` gives it: Sourcify sends 404 and 400 with a JSON body."""
+
+    def __init__(self, payload, status_code=200):
+        self.payload = payload
+        self.status_code = status_code
+        self.headers: dict = {}
+        self.text = payload if isinstance(payload, str) else json.dumps(payload)
+
+    def json(self):
+        if isinstance(self.payload, str):
+            raise ValueError("not JSON")
+        return self.payload
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise requests.exceptions.HTTPError(
+                f"{self.status_code} Client Error", response=self  # type: ignore[arg-type]
+            )
+
+
+def _serve_sourcify(monkeypatch, payload, status_code=200):
+    """Answer each GET of the real `fetch` with one Sourcify answer; return the URLs."""
+    from diffyscan.utils.http_client import reset_pacing
+
+    urls = []
+
+    def fake_get(url, headers=None):
+        urls.append(url)
+        return SourcifyHTTPResponse(payload, status_code)
+
+    reset_pacing()
+    monkeypatch.setattr("diffyscan.utils.http_client.requests.get", fake_get)
+    monkeypatch.setattr("diffyscan.utils.http_client.time.sleep", lambda delay: None)
+    return urls
+
+
+def _sourcify_payload(**fields):
     payload = {
         "match": "exact_match",
         "creationMatch": "exact_match",
@@ -375,17 +413,16 @@ def _sourcify_response(**fields):
         },
     }
     payload.update(fields)
-    return DummyResponse(payload)
+    return payload
 
 
 def test_get_contract_from_sourcify_builds_solc_input(monkeypatch):
-    urls = []
-
-    def fake_fetch(url):
-        urls.append(url)
-        return _sourcify_response()
-
-    monkeypatch.setattr("diffyscan.utils.explorer.fetch", fake_fetch)
+    urls = _serve_sourcify(monkeypatch, _sourcify_payload())
+    logged = []
+    monkeypatch.setattr(
+        "diffyscan.utils.explorer.logger.info",
+        lambda text, value=None: logged.append((text, value)),
+    )
 
     contract = _get_contract_from_sourcify("sourcify.dev", "0xabc", 1672)
 
@@ -405,15 +442,29 @@ def test_get_contract_from_sourcify_builds_solc_input(monkeypatch):
     assert "evm.deployedBytecode" in settings["outputSelection"]["*"]["*"]
     assert contract["evm_version"] == "prague"
     assert contract["constructor_arguments"] == "00" * 31 + "2a"
+    assert logged == [
+        ("Sourcify match", "exact_match (creation: exact_match, runtime: exact_match)")
+    ]
 
 
-def test_get_contract_from_sourcify_reads_a_runtime_only_match(monkeypatch):
-    monkeypatch.setattr(
-        "diffyscan.utils.explorer.fetch",
-        lambda url: _sourcify_response(
-            match="match", creationMatch=None, creationBytecode=None
-        ),
-    )
+@pytest.mark.parametrize(
+    "fields",
+    [
+        # A runtime-only match: Sourcify did not match the creation bytecode.
+        {
+            "match": "match",
+            "creationMatch": None,
+            "runtimeMatch": "match",
+            "creationBytecode": {"transformationValues": None},
+        },
+        # A creation match of a contract without constructor arguments.
+        {"creationBytecode": {"transformationValues": {}}},
+    ],
+)
+def test_get_contract_from_sourcify_reads_a_match_without_constructor_arguments(
+    monkeypatch, fields
+):
+    _serve_sourcify(monkeypatch, _sourcify_payload(**fields))
 
     contract = _get_contract_from_sourcify("sourcify.dev", "0xabc", 1672)
 
@@ -421,29 +472,65 @@ def test_get_contract_from_sourcify_reads_a_runtime_only_match(monkeypatch):
     assert "constructor_arguments" not in contract
 
 
+def test_get_contract_from_sourcify_keeps_settings_without_an_optimizer(monkeypatch):
+    standard_json = _sourcify_payload()["stdJsonInput"]
+    del standard_json["settings"]["optimizer"]
+    _serve_sourcify(monkeypatch, _sourcify_payload(stdJsonInput=standard_json))
+
+    contract = _get_contract_from_sourcify("sourcify.dev", "0xabc", 1672)
+
+    # An added optimizer block changes the metadata hash of the compiled bytecode.
+    assert "optimizer" not in contract["solcInput"]["settings"]
+
+
 @pytest.mark.parametrize(
-    ("payload", "chain_id", "message"),
+    ("payload", "status_code", "chain_id", "message"),
     [
-        ({"match": None, "chainId": "1672", "address": "0xabc"}, 1672, "not verified"),
+        # Captured answers of sourcify.dev: status and body.
         (
-            {"customCode": "unsupported_chain", "message": "Chain 5 not found"},
-            5,
-            "Chain 5 not found",
+            {"match": None, "creationMatch": None, "runtimeMatch": None},
+            404,
+            1672,
+            "not verified",
         ),
-        ({"match": "exact_match"}, None, "explorer_chain_id"),
-        (["not", "an", "object"], 1672, "Unexpected Sourcify response"),
-        ({"match": "exact_match", "compilation": {}}, 1672, "Unexpected Sourcify"),
+        (
+            {
+                "customCode": "unsupported_chain",
+                "message": "Chain 123456789 not found",
+                "errorId": "09e212c3",
+            },
+            400,
+            123456789,
+            "Chain 123456789 not found",
+        ),
+        ("<html>Not Found</html>", 404, 1672, "Invalid Sourcify JSON"),
+        (["not", "an", "object"], 200, 1672, "Unexpected Sourcify response"),
+        ({"match": "exact_match", "compilation": {}}, 200, 1672, "Unexpected Sourcify"),
+        (_sourcify_payload(match="no_match"), 200, 1672, "Unexpected Sourcify match"),
     ],
 )
 def test_get_contract_from_sourcify_rejects_bad_responses(
-    monkeypatch, payload, chain_id, message
+    monkeypatch, payload, status_code, chain_id, message
 ):
-    monkeypatch.setattr(
-        "diffyscan.utils.explorer.fetch", lambda url: DummyResponse(payload)
-    )
+    _serve_sourcify(monkeypatch, payload, status_code)
 
     with pytest.raises(ExplorerError, match=message):
         _get_contract_from_sourcify("sourcify.dev", "0xabc", chain_id)
+
+
+def test_get_contract_from_sourcify_needs_a_chain_id(monkeypatch):
+    urls = _serve_sourcify(monkeypatch, _sourcify_payload())
+
+    with pytest.raises(ExplorerError, match="explorer_chain_id"):
+        _get_contract_from_sourcify("sourcify.dev", "0xabc", None)
+
+    assert urls == []
+
+
+def _standard_json(**fields):
+    standard_json = _sourcify_payload()["stdJsonInput"]
+    standard_json.update(fields)
+    return {"stdJsonInput": standard_json}
 
 
 @pytest.mark.parametrize(
@@ -460,15 +547,26 @@ def test_get_contract_from_sourcify_rejects_bad_responses(
             },
             "not Solidity",
         ),
-        ({"stdJsonInput": {"language": "Solidity", "sources": {}}}, "stdJsonInput"),
+        (_standard_json(sources={}), "Invalid Sourcify sources"),
+        (
+            _standard_json(sources={"a.sol": "contract Demo {}"}),
+            "Invalid Sourcify sources",
+        ),
+        (
+            _standard_json(sources={"a.sol": {"urls": ["ipfs://x"]}}),
+            "Invalid Sourcify sources",
+        ),
+        (
+            _standard_json(sources={"a.sol": {"content": None}}),
+            "Invalid Sourcify sources",
+        ),
+        (_standard_json(settings=[]), "Invalid Sourcify settings"),
     ],
 )
 def test_get_contract_from_sourcify_rejects_invalid_fields(
     monkeypatch, fields, message
 ):
-    monkeypatch.setattr(
-        "diffyscan.utils.explorer.fetch", lambda url: _sourcify_response(**fields)
-    )
+    _serve_sourcify(monkeypatch, _sourcify_payload(**fields))
 
     with pytest.raises(ExplorerError, match=message):
         _get_contract_from_sourcify("sourcify.dev", "0xabc", 1672)
@@ -487,3 +585,23 @@ def test_sourcify_dispatch_passes_the_chain_id(monkeypatch):
     assert requires_token is True
     assert calls == [("sourcify.dev", "0xabc", 1672)]
     assert _get_explorer_fetcher("evilsourcify.dev")[0] is _get_contract_from_etherscan
+
+
+def test_get_contract_from_explorer_reads_sourcify_and_caches_the_answer(
+    monkeypatch, tmp_path
+):
+    urls = _serve_sourcify(monkeypatch, _sourcify_payload())
+    monkeypatch.setattr("diffyscan.utils.explorer.CACHE_DIR", str(tmp_path))
+
+    first = get_contract_from_explorer(
+        None, "sourcify.dev", "0xabc", "Demo", 1672, use_cache=True
+    )
+    second = get_contract_from_explorer(
+        None, "sourcify.dev", "0xabc", "Demo", 1672, use_cache=True
+    )
+
+    assert first == second
+    assert first["compiler"] == "v0.8.33+commit.64118f21"
+    assert len(urls) == 1
+    with pytest.raises(ExplorerError, match="does not match"):
+        get_contract_from_explorer(None, "sourcify.dev", "0xabc", "Other", 1672)
