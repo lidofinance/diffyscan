@@ -58,7 +58,7 @@ def encode_fixed_bytes(value: str, length: int) -> str:
 
 def encode_bytes(data: str) -> str:
     """Encode dynamic `bytes` as [32-byte length, padded data]."""
-    raw = data.lower().lstrip("0x")
+    raw = data.lower().removeprefix("0x")
     if not raw:
         return to_hex_with_alignment(0)
 
