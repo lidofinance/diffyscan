@@ -77,6 +77,22 @@ class TestEncoder:
         result = encode_bytes("0xaabb")
         assert result.startswith(to_hex_with_alignment(2))
 
+    @pytest.mark.parametrize(
+        "data",
+        [
+            "0x00",
+            "0x0001",
+            "0x00aabb",
+            to_hex_with_alignment(0x20) + to_hex_with_alignment(1),  # abi.encode(...)
+        ],
+    )
+    def test_encode_bytes_keeps_leading_zeros(self, data):
+        raw = data.removeprefix("0x")
+        padding = "0" * (-len(raw) % 64)
+        assert encode_bytes(data) == (
+            to_hex_with_alignment(len(raw) // 2) + raw + padding
+        )
+
     def test_encode_static_value_bool(self):
         assert _encode_static_value("bool", True) == to_hex_with_alignment(1)
         assert _encode_static_value("bool", False) == to_hex_with_alignment(0)
